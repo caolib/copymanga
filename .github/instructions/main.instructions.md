@@ -1,0 +1,12 @@
+---
+applyTo: '**'
+---
+- 这个项目是一个基于拷贝漫画官方API的前端项目
+- 前端使用vue框架,使用vite构建
+- 使用axios发送请求 api文件夹
+- 使用pinia存储信息并持久化 stores文件夹
+- 界面使用ant design vue组件设计
+- 使用pnpm包管理器
+- 根据项目结构决定文件应该放在哪个文件夹
+- 尽量使用fun().then(...).catch(...)的形式而不是try catch
+- 你可以使用mcp服务查看浏览器状态
