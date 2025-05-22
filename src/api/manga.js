@@ -23,6 +23,20 @@ export function getMyCollection(limit = 20, offset = 0, freeType = 1) {
 }
 
 /**
+ * 获取漫画详情信息
+ * @param {string} pathWord 漫画路径标识
+ * @returns {Promise} 漫画详情数据
+ */
+export function getMangaDetail(pathWord) {
+    return request.get(`/api/v3/comic/${pathWord}`, {
+        headers: {
+            'Accept': 'application/json, text/plain, */*',
+            'Cache-Control': 'no-cache'
+        }
+    })
+}
+
+/**
  * 获取漫画章节列表
  * @param {string} pathWord 漫画路径标识
  * @returns {Promise} 漫画章节数据

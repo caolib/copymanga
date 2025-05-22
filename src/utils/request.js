@@ -15,28 +15,19 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
     (config) => {
-        // 添加通用请求头
-        config.headers = {
-            ...config.headers,
-            'Accept': 'application/json, text/plain, */*',
-            'Cache-Control': 'no-cache',
-            'Pragma': 'no-cache'
-        }
-
         // 添加认证令牌
         const token = getToken()
         if (token) {
             config.headers['Authorization'] = `Token ${token}`
         }
 
-        // 移除浏览器不允许设置的不安全头，由代理服务器处理
-        const unsafeHeaders = ['Referer', 'Origin', 'User-Agent']
-        unsafeHeaders.forEach(header => {
-            if (config.headers[header]) {
-                console.warn(`尝试设置不安全头部 ${header}，已自动移除`)
-                delete config.headers[header]
-            }
-        })
+        // 添加通用请求头
+        config.headers['Accept'] = 'application/json, text/plain, */*'
+        config.headers['Cache-Control'] = 'no-cache'
+        config.headers['Pragma'] = 'no-cache'
+
+        // 注意：不要直接设置Cookie头，浏览器会自动处理
+        // Cookie将由浏览器自动添加，或由Vite代理服务器处理
 
         return config
     },

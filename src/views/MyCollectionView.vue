@@ -67,12 +67,13 @@ const formatUpdateTime = (timeString) => {
 }
 
 const goToManga = (item) => {
-    // 将复杂对象序列化并传递给详情页
-    const encodedManga = encodeURIComponent(JSON.stringify(item.comic))
+    // 将漫画基本信息保存到Pinia
+    collectionStore.setCurrentManga(item.comic)
+    
+    // 直接跳转到详情页，不再通过URL传递数据
     router.push({
         name: 'MangaDetail',
-        params: { pathWord: item.comic.path_word },
-        query: { mangaData: encodedManga }
+        params: { pathWord: item.comic.path_word }
     })
 }
 

@@ -32,6 +32,10 @@ export default defineConfig({
         headers: {
           'Referer': 'https://www.copy20.com/',
           'Pragma': 'no-cache',
+          'Cookie': 'webp=1; name=%E7%8B%AC%EF%BD%9E; user_id=85ea57c7-fe01-11ed-83ce-0678401a7187; avatar="user/cover/85ea57c7fe0111ed83ce0678401a7187/1704125272.jpg"; create="2023-05-29 09:16:41.364225+00:00"; comic_vip=1; cartoon_vip=1; email=""; token=e328b2200b64dba2335cc9bb2aa555e13a21e5b9; csrftoken=bnqhVqCqujIniwh29ewyYcwrl5NCN11T; sessionid=fzslho8lfai9wcmuerbjmltikdgm17yv'
+        },
+        cookieDomainRewrite: {
+          '*': ''
         }
       }
     }

@@ -67,11 +67,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMangaChapters } from '../api/manga'
+import { getMangaChapters, getMangaDetail } from '../api/manga'
 import { decryptMangaData, processChapterData } from '../utils/crypto'
+import { useMangaStore } from '../stores/manga' // 导入漫画存储
 
 const route = useRoute()
 const router = useRouter()
+const mangaStore = useMangaStore() // 使用漫画存储
 const manga = ref({})
 const chapters = ref([])
 const loading = ref(true)
@@ -98,20 +100,20 @@ const toggleSortOrder = () => {
 }
 
 const goToChapter = (chapter) => {
-    // 将所有章节数据序列化以便在阅读页面使用
-    const encodedChapters = encodeURIComponent(JSON.stringify(chapters.value))
+    // 将漫画基本信息、章节列表和当前章节索引保存到pinia中
+    mangaStore.setCurrentManga(manga.value)
+    mangaStore.setChapters(chapters.value, route.params.pathWord)
+
     // 找出当前章节在数组中的索引
     const chapterIndex = chapters.value.findIndex(c => c.id === chapter.id)
+    mangaStore.setCurrentChapterIndex(chapterIndex)
 
+    // 跳转到阅读页面，只传递必要的参数
     router.push({
         name: 'ChapterReader',
         params: {
             pathWord: route.params.pathWord,
             chapterId: chapter.id
-        },
-        query: {
-            chapters: encodedChapters,
-            index: chapterIndex
         }
     })
 }
@@ -129,32 +131,50 @@ const fetchMangaData = () => {
     loading.value = true
     error.value = ''
 
-    // 从查询参数中解码漫画数据
-    if (route.query.mangaData) {
-        try {
-            const mangaData = JSON.parse(decodeURIComponent(route.query.mangaData))
-            manga.value = mangaData
-        } catch (err) {
-            console.error('解析漫画数据失败', err)
-            // 即使解析失败，也尝试加载章节，但记录错误
-            error.value = '解析漫画元数据失败，尝试加载章节列表...'
-            // 不在这里 return，继续加载章节
+    // 首先检查Pinia中是否已有漫画数据
+    if (mangaStore.currentManga && mangaStore.pathWord === route.params.pathWord) {
+        // 使用Pinia中的数据
+        manga.value = mangaStore.currentManga
+        
+        // 如果Pinia中也有章节数据，则一并使用
+        if (mangaStore.currentChapters.length > 0) {
+            chapters.value = mangaStore.currentChapters
+            loading.value = false
+            return // 直接返回，不再请求数据
         }
-    } else {
-        // 如果 mangaData 不存在，记录一个警告，并尝试使用 pathWord 作为基本信息
-        console.warn('MangaDetailView: mangaData not found in query params. Fetching chapters only.')
-        manga.value = { name: `漫画详情 (${route.params.pathWord})`, cover: '' }; // 提供一个默认值
-        // 不在这里 return，继续加载章节
     }
 
-    // 获取章节列表
-    getMangaChapters(route.params.pathWord)
+    // 同时请求漫画详情和章节列表
+    const pathWord = route.params.pathWord
+
+    // 请求1: 获取漫画详情
+    getMangaDetail(pathWord)
+        .then(detailResult => {
+            if (detailResult && detailResult.code === 200 && detailResult.results) {
+                manga.value = detailResult.results
+                
+                // 将获取的漫画数据保存到Pinia
+                mangaStore.setCurrentManga(detailResult.results)
+            } else {
+                throw new Error('获取漫画详情失败')
+            }
+        })
+        .catch(err => {
+            console.error('获取漫画详情失败', err)
+            error.value = '获取漫画详情失败，请稍后重试'
+        })
+
+    // 请求2: 获取章节列表
+    getMangaChapters(pathWord)
         .then(chaptersResult => {
             if (chaptersResult && chaptersResult.code === 200 && chaptersResult.results) {
                 // 解密章节数据
                 const decryptedData = decryptMangaData(chaptersResult.results)
                 // 处理章节数据
                 chapters.value = processChapterData(decryptedData)
+                
+                // 将章节数据保存到Pinia
+                mangaStore.setChapters(chapters.value, pathWord)
             } else {
                 throw new Error('获取章节列表失败')
             }

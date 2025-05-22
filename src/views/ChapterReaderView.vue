@@ -78,9 +78,11 @@
 import { ref, computed, onMounted, watch, nextTick } from 'vue' // 增加导入 nextTick
 import { useRoute, useRouter } from 'vue-router'
 import { getChapterImages, getChapterComments } from '../api/manga'
+import { useMangaStore } from '../stores/manga' // 导入漫画存储
 
 const route = useRoute()
 const router = useRouter()
+const mangaStore = useMangaStore() // 使用漫画存储
 const chapterInfo = ref({})
 const images = ref([])
 const allChapters = ref([])
@@ -106,17 +108,23 @@ const imageChunks = computed(() => {
 
 // 计算属性：是否有上一章
 const hasPrevChapter = computed(() => {
-    return currentPrevChapterId.value !== null || currentChapterIndex.value > 0
+    // 首先检查API返回的上一章ID
+    if (currentPrevChapterId.value !== null) return true;
+    // 然后检查pinia中的章节信息
+    return mangaStore.hasPrevChapter;
 })
 
 // 计算属性：是否有下一章
 const hasNextChapter = computed(() => {
-    return currentNextChapterId.value !== null || currentChapterIndex.value < allChapters.value.length - 1
+    // 首先检查API返回的下一章ID
+    if (currentNextChapterId.value !== null) return true;
+    // 然后检查pinia中的章节信息
+    return mangaStore.hasNextChapter;
 })
 
 // 返回漫画详情页
 const goBack = () => {
-    router.push(`/manga/${route.params.pathWord}`)
+    router.push(`/manga/${mangaStore.pathWord || route.params.pathWord}`);
 }
 
 // 跳转到上一章
@@ -124,31 +132,35 @@ const prevChapter = () => {
     if (hasPrevChapter.value) {
         // 如果有API返回的上一章ID，优先使用
         if (currentPrevChapterId.value) {
+            const prevChapterId = currentPrevChapterId.value;
+
+            // 在Pinia中查找索引并更新
+            const prevIndex = mangaStore.findChapterIndex(prevChapterId);
+            if (prevIndex !== -1) {
+                mangaStore.setCurrentChapterIndex(prevIndex);
+            }
+
+            // 跳转到上一章
             router.push({
                 name: 'ChapterReader',
                 params: {
-                    pathWord: route.params.pathWord,
-                    chapterId: currentPrevChapterId.value
-                },
-                query: {
-                    chapters: route.query.chapters,
-                    index: currentChapterIndex.value - 1
+                    pathWord: mangaStore.pathWord || route.params.pathWord,
+                    chapterId: prevChapterId
                 }
-            })
-        } else if (currentChapterIndex.value > 0) {
-            // 否则使用章节列表导航
-            const prevChapter = allChapters.value[currentChapterIndex.value - 1]
+            });
+        } else if (mangaStore.hasPrevChapter) {
+            // 使用pinia中的章节信息
+            const prevIndex = mangaStore.currentChapterIndex - 1;
+            const prevChapter = mangaStore.currentChapters[prevIndex];
+
+            mangaStore.setCurrentChapterIndex(prevIndex);
             router.push({
                 name: 'ChapterReader',
                 params: {
-                    pathWord: route.params.pathWord,
+                    pathWord: mangaStore.pathWord,
                     chapterId: prevChapter.id
-                },
-                query: {
-                    chapters: route.query.chapters,
-                    index: currentChapterIndex.value - 1
                 }
-            })
+            });
         }
     }
 }
@@ -158,31 +170,35 @@ const nextChapter = () => {
     if (hasNextChapter.value) {
         // 如果有API返回的下一章ID，优先使用
         if (currentNextChapterId.value) {
+            const nextChapterId = currentNextChapterId.value;
+
+            // 在Pinia中查找索引并更新
+            const nextIndex = mangaStore.findChapterIndex(nextChapterId);
+            if (nextIndex !== -1) {
+                mangaStore.setCurrentChapterIndex(nextIndex);
+            }
+
+            // 跳转到下一章
             router.push({
                 name: 'ChapterReader',
                 params: {
-                    pathWord: route.params.pathWord,
-                    chapterId: currentNextChapterId.value
-                },
-                query: {
-                    chapters: route.query.chapters,
-                    index: currentChapterIndex.value + 1
+                    pathWord: mangaStore.pathWord || route.params.pathWord,
+                    chapterId: nextChapterId
                 }
-            })
-        } else if (currentChapterIndex.value < allChapters.value.length - 1) {
-            // 否则使用章节列表导航
-            const nextChapter = allChapters.value[currentChapterIndex.value + 1]
+            });
+        } else if (mangaStore.hasNextChapter) {
+            // 使用pinia中的章节信息
+            const nextIndex = mangaStore.currentChapterIndex + 1;
+            const nextChapter = mangaStore.currentChapters[nextIndex];
+
+            mangaStore.setCurrentChapterIndex(nextIndex);
             router.push({
                 name: 'ChapterReader',
                 params: {
-                    pathWord: route.params.pathWord,
+                    pathWord: mangaStore.pathWord,
                     chapterId: nextChapter.id
-                },
-                query: {
-                    chapters: route.query.chapters,
-                    index: currentChapterIndex.value + 1
                 }
-            })
+            });
         }
     }
 }
@@ -192,13 +208,20 @@ const fetchChapterImages = () => {
     loading.value = true
     error.value = ''
 
-    // 从URL参数获取章节列表
-    if (route.query.chapters) {
-        try {
-            allChapters.value = JSON.parse(decodeURIComponent(route.query.chapters))
-            currentChapterIndex.value = route.query.index ? parseInt(route.query.index) : -1
-        } catch (err) {
-            console.error('解析章节数据失败', err)
+    // 从Pinia中获取章节信息，并更新本地状态
+    if (mangaStore.currentChapters.length > 0) {
+        allChapters.value = mangaStore.currentChapters
+
+        // 根据当前章节ID查找索引
+        if (route.params.chapterId) {
+            const index = mangaStore.findChapterIndex(route.params.chapterId)
+            if (index !== -1) {
+                currentChapterIndex.value = index
+                // 同步更新Pinia中的当前章节索引
+                mangaStore.setCurrentChapterIndex(index)
+            }
+        } else {
+            currentChapterIndex.value = mangaStore.currentChapterIndex
         }
     }
 
@@ -206,9 +229,7 @@ const fetchChapterImages = () => {
         .then(response => {
             if (response && response.code === 200 && response.results) {
                 const chapterData = response.results.chapter
-                const comicData = response.results.comic
-
-                // 保存章节相关信息
+                const comicData = response.results.comic                // 保存章节相关信息
                 chapterInfo.value = {
                     comic_name: comicData.name,
                     name: chapterData.name,
@@ -219,6 +240,23 @@ const fetchChapterImages = () => {
                 // 保存导航相关ID
                 currentPrevChapterId.value = chapterData.prev
                 currentNextChapterId.value = chapterData.next
+
+                // 如果pinia中的漫画名称为空，则更新
+                if (mangaStore.currentManga === null || !mangaStore.currentManga.name) {
+                    mangaStore.setCurrentManga({
+                        name: comicData.name,
+                        pathWord: route.params.pathWord
+                    })
+                }
+
+                // 将当前章节ID对应的索引更新到pinia
+                const chapterId = route.params.chapterId
+                if (chapterId) {
+                    const index = mangaStore.findChapterIndex(chapterId)
+                    if (index !== -1 && index !== mangaStore.currentChapterIndex) {
+                        mangaStore.setCurrentChapterIndex(index)
+                    }
+                }
 
                 // 保存图片数据
                 images.value = chapterData.contents.map(image => {
@@ -283,6 +321,14 @@ const fetchComments = () => {
 }
 
 onMounted(() => {
+    // 检查是否有有效的章节数据
+    if (!route.params.chapterId || (!mangaStore.currentChapters.length && !mangaStore.pathWord)) {
+        // 数据不完整，返回首页
+        console.error('缺少必要的章节数据')
+        router.push('/')
+        return
+    }
+
     // 并行发起两个独立的请求，但互不影响
     fetchChapterImages()
 
