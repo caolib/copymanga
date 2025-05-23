@@ -1,35 +1,28 @@
-# copymanga
+# 拷贝漫画网页
 
-This template should help get you started developing with Vue 3 in Vite.
+## 介绍
+这是一个基于拷贝漫画的网页端
 
-## Recommended IDE Setup
+> ⚠️项目更新中,主要由AI生成
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## 使用方法
 
-## Customize configuration
+1. clone 到本地
 
-See [Vite Configuration Reference](https://vite.dev/config/).
-
-## Project Setup
-
-```sh
-pnpm install
+2. 安装依赖
+```bash
+pnpm i
 ```
 
-### Compile and Hot-Reload for Development
-
-```sh
+3. 启动前端
+```bash
 pnpm dev
 ```
 
-### Compile and Minify for Production
-
-```sh
-pnpm build
+4. 启动转发服务
+```bash
+pnpm server:node
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+打开浏览器访问 http://localhost:5173/ 即可
 
-```sh
-pnpm lint
-```
