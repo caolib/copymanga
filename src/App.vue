@@ -17,7 +17,7 @@ const handleLogout = () => {
   <div class="app-container">
     <header class="header">
       <div class="header-content">
-        <h1 class="logo">漫画阅读器</h1>
+        <h1 class="logo">拷贝漫画</h1>
         <nav class="nav">
           <router-link to="/" class="nav-link">首页</router-link>
           <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">我的书架</router-link>

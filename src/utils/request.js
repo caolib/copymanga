@@ -2,12 +2,13 @@ import axios from 'axios'
 import { getToken } from './auth'
 import { message } from 'ant-design-vue'
 
-const defaultBaseURL = 'http://localhost:5000'
-
+// 根据环境变量选择后端服务器
+const defaultBaseURL = 'http://localhost:5001/proxy'
 
 const request = axios.create({
     baseURL: defaultBaseURL,
-    timeout: 60000 // 设置超时时间为 60000 毫秒 (60秒)
+    timeout: 30000,
+    withCredentials: true
 })
 
 // 请求拦截器
@@ -20,13 +21,7 @@ request.interceptors.request.use(
         }
 
         // 添加通用请求头
-        config.headers['Accept'] = 'application/json, text/plain, */*'
-        config.headers['Cache-Control'] = 'no-cache'
-        config.headers['Pragma'] = 'no-cache'
-        config.headers['Referer'] = 'http://localhost:5000'
-
-        // 注意：不要直接设置Cookie头，浏览器会自动处理
-        // Cookie将由浏览器自动添加，或由Vite代理服务器处理
+        config.headers['Accept'] = '*/*'
 
         return config
     },

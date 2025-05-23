@@ -108,6 +108,13 @@ export const useMangaStore = defineStore('manga', {
             this.currentChapters = []
             this.currentChapterIndex = -1
             this.pathWord = ''
+        },
+
+        /**
+         * 清空缓存（兼容详情页刷新）
+         */
+        clearMangaCache() {
+            this.clear()
         }
     },
 

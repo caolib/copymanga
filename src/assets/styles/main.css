@@ -1,6 +1,19 @@
+textarea,
 div,
 span,
+ul,
+ol,
+a,
+text,
+input,
+pre,
 code,
-a {
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+body {
     font-family: 'cascadia code', '喵字果汁体', 'Courier New', Courier, monospace;
 }

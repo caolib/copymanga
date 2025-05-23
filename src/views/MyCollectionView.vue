@@ -3,31 +3,38 @@
         <a-page-header title="我的书架" class="collection-header">
             <template #extra>
                 <div class="header-actions">
+                    <a-select v-model:value="ordering" style="width: 180px; margin-right: 12px;"
+                        @change="onOrderingChange">
+                        <a-select-option value="-datetime_updated">按漫画更新时间排序</a-select-option>
+                        <a-select-option value="-datetime_modifier">按加入书架时间排序</a-select-option>
+                        <a-select-option value="-datetime_browse">按阅读时间排序</a-select-option>
+                    </a-select>
                     <a-button type="primary" @click="refreshCollection">
-                        {{ collectionStore.loading ? '加载中...' : '刷新' }}
+                        {{ loading ? '加载中...' : '刷新' }}
                     </a-button>
-                    <a-typography-text type="secondary" v-if="collectionStore.lastUpdateTime">
-                        上次更新: {{ formatUpdateTime(collectionStore.lastUpdateTime) }}
+                    <a-typography-text type="secondary" v-if="lastUpdateTime">
+                        上次更新: {{ formatUpdateTime(lastUpdateTime) }}
                     </a-typography-text>
                 </div>
             </template>
         </a-page-header>
 
 
-        <a-alert v-if="collectionStore.error" type="error" :message="collectionStore.error" show-icon banner
-            style="margin-bottom: 20px" />
+        <a-alert v-if="error" type="error" :message="error" show-icon banner style="margin-bottom: 20px" />
 
-        <a-empty v-if="!collectionStore.loading && !collectionStore.error && collectionStore.mangaList.length === 0"
-            description="您的书架还是空的，快去收藏喜欢的漫画吧！" />
+        <a-empty v-if="!loading && !error && mangaList.length === 0" description="您的书架还是空的，快去收藏喜欢的漫画吧！" />
 
         <div v-else class="manga-grid">
-            <a-card v-for="item in collectionStore.mangaList" :key="item.uuid" hoverable class="manga-card"
-                @click="goToManga(item)">
+            <a-card v-for="item in mangaList" :key="item.uuid" hoverable class="manga-card" @click="goToManga(item)">
                 <div class="manga-cover">
                     <img :src="item.comic.cover" :alt="item.comic.name" />
                     <div class="last-read" v-if="item.last_browse">
                         上次阅读: {{ item.last_browse.last_browse_name }}
                     </div>
+                    <a-badge
+                        v-if="item.last_browse && item.comic.last_chapter_name && item.last_browse.last_browse_name !== item.comic.last_chapter_name"
+                        count="有更新"
+                        style="position: absolute; top: 8px; right: 8px; z-index: 2; background: #ff4d4f; color: #fff; font-size: 12px; border-radius: 8px; padding: 0 8px;" />
                 </div>
                 <a-card-meta :title="item.comic.name">
                     <template #description>
@@ -46,14 +53,21 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '../stores/collection'
 import { isLoggedIn } from '../utils/auth'
 import { message } from 'ant-design-vue'
+import { getMyCollectionRaw } from '../api/manga'
 
 const router = useRouter()
 const collectionStore = useCollectionStore()
+
+const ordering = ref('-datetime_updated')
+const mangaList = ref([])
+const loading = ref(false)
+const error = ref('')
+const lastUpdateTime = ref(null)
 
 const formatUpdateTime = (timeString) => {
     const date = new Date(timeString)
@@ -69,7 +83,7 @@ const formatUpdateTime = (timeString) => {
 const goToManga = (item) => {
     // 将漫画基本信息保存到Pinia
     collectionStore.setCurrentManga(item.comic)
-    
+
     // 直接跳转到详情页，不再通过URL传递数据
     router.push({
         name: 'MangaDetail',
@@ -77,13 +91,42 @@ const goToManga = (item) => {
     })
 }
 
+const fetchCollection = () => {
+    loading.value = true
+    error.value = ''
+    mangaList.value = []
+    return getMyCollectionRaw({
+        limit: 20,
+        offset: 0,
+        free_type: 1,
+        ordering: ordering.value
+    })
+        .then(res => {
+            if (res && res.results && res.results.list) {
+                mangaList.value = res.results.list
+                lastUpdateTime.value = new Date().toISOString()
+            } else {
+                error.value = '获取数据格式错误'
+            }
+        })
+        .catch((err) => {
+            error.value = err.message || '获取书架失败'
+        })
+        .finally(() => {
+            loading.value = false
+        })
+}
+
+const onOrderingChange = () => {
+    fetchCollection()
+}
+
 const refreshCollection = () => {
-    collectionStore.fetchCollection()
+    fetchCollection()
         .then(() => {
             message.success('书架更新成功')
         })
-        .catch((error) => {
-            console.error('获取书架失败', error)
+        .catch(() => {
             message.error('书架更新失败，请稍后重试')
         })
 }
@@ -94,12 +137,7 @@ onMounted(() => {
         router.push('/login')
         return
     }
-
-    collectionStore.fetchCollection()
-        .catch((error) => {
-            console.error('获取书架失败', error)
-            message.error('获取书架失败，请稍后重试')
-        })
+    fetchCollection()
 })
 </script>
 

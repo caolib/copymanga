@@ -277,3 +277,102 @@
         gap: 20px;
     }
 }
+
+.manga-image.placeholder {
+    background: #f5f5f5;
+    min-height: 300px;
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+}
+
+.image-container {
+    margin-bottom: 24px;
+}
+
+.manga-row {
+    margin-bottom: 16px;
+}
+
+.reader-header {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 16px 24px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.reader-title h1 {
+    font-size: 22px;
+    margin: 0 0 4px 0;
+}
+
+.reader-title h2 {
+    font-size: 16px;
+    color: #888;
+    margin: 0;
+}
+
+.reader-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.control-button {
+    background: #1677ff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 18px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.control-button:disabled {
+    background: #d9d9d9;
+    color: #888;
+    cursor: not-allowed;
+}
+
+.reader-footer {
+    margin-top: 24px;
+    text-align: center;
+}
+
+.comments-section {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    padding: 24px;
+    margin-top: 32px;
+}
+
+.compact-comments-container {
+    margin-top: 16px;
+}
+
+.retry-comments-button {
+    margin-top: 12px;
+}
+
+:deep(.compact-comment-item .ant-comment-inner) {
+    padding: 6px 0;
+}
+
+:deep(.compact-comment-item .ant-comment-content-author) {
+    margin-bottom: 6px;
+}
+
+:deep(.compact-comment-item .ant-comment-content-detail) {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+:deep(.compact-comment-item .ant-comment-avatar img) {
+    width: 32px;
+    height: 32px;
+}

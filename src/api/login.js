@@ -13,9 +13,5 @@ export function login(username, password, salt = '123123') {
     params.append('password', btoa(`${password}-${salt}`));
     params.append('salt', salt);
 
-    return request.post('/login', {
-        username,
-        password: btoa(`${password}-${salt}`),
-        salt
-    });
+    return request.post('/api/kb/web/login', params);
 }

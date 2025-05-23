@@ -1,96 +1,89 @@
 <template>
-    <div class="manga-detail-container">
-
-        <div class="manga-detail">
-            <div class="manga-header">
-                <div class="manga-cover">
-                    <img :src="manga.cover" :alt="manga.name" />
+    <a-card class="manga-detail-container" :bordered="false">
+        <a-row :gutter="32">
+            <a-col :xs="24" :sm="8">
+                <a-image :src="manga.cover" :alt="manga.name" width="100%" height="350px"
+                    style="border-radius: 8px; object-fit: cover;"
+                    fallback="https://via.placeholder.com/250x350?text=No+Image" />
+            </a-col>
+            <a-col :xs="24" :sm="16">
+                <a-typography-title :level="2">{{ manga.name || '漫画详情' }}</a-typography-title>
+                <a-descriptions :column="1" size="small" bordered>
+                    <a-descriptions-item label="作者" v-if="manga.author && manga.author.length">
+                        <a-tag v-for="a in manga.author" :key="a.name">{{ a.name }}</a-tag>
+                    </a-descriptions-item>
+                    <a-descriptions-item label="题材" v-if="manga.theme && manga.theme.length">
+                        <a-tag v-for="t in manga.theme" :key="t.name" color="blue">{{ t.name }}</a-tag>
+                    </a-descriptions-item>
+                    <a-descriptions-item label="状态" v-if="manga.status">
+                        <a-tag color="green">{{ manga.status.display }}</a-tag>
+                    </a-descriptions-item>
+                    <a-descriptions-item label="人气" v-if="manga.popular">
+                        {{ manga.popular }}
+                    </a-descriptions-item>
+                    <a-descriptions-item label="最新章节" v-if="manga.last_chapter && manga.last_chapter.name">
+                        {{ manga.last_chapter.name }}
+                    </a-descriptions-item>
+                    <a-descriptions-item label="更新时间" v-if="manga.datetime_updated">
+                        {{ formatDate(manga.datetime_updated) }}
+                    </a-descriptions-item>
+                </a-descriptions>
+                <div style="margin: 24px 0 0 0;">
+                    <a-button type="primary" @click="startReading" :disabled="!chapters.length"
+                        style="margin-right: 10px">
+                        开始阅读
+                    </a-button>
+                    <a-button @click="handleCollect" :loading="collectLoading"
+                        style="margin-right: 10px">加入书架</a-button>
+                    <a-button danger @click="handleCollect(false)" :loading="collectLoading"
+                        style="margin-right: 10px">取消收藏</a-button>
+                    <a-button @click="fetchMangaData" :loading="loading">刷新数据</a-button>
                 </div>
-                <div class="manga-info">
-                    <h1 class="manga-title">{{ manga.name || '漫画详情' }}</h1>
-                    <div class="manga-metadata">
-                        <div class="metadata-item" v-if="manga.author && manga.author.length">
-                            <span class="label">作者:</span>
-                            <span class="value">{{manga.author.map(a => a.name).join(', ')}}</span>
-                        </div>
-                        <div class="metadata-item" v-if="manga.theme && manga.theme.length">
-                            <span class="label">题材:</span>
-                            <span class="value">{{manga.theme.map(t => t.name).join(', ')}}</span>
-                        </div>
-                        <div class="metadata-item" v-if="manga.status">
-                            <span class="label">状态:</span>
-                            <span class="value">{{ manga.status.name }}</span>
-                        </div>
-                        <div class="metadata-item" v-if="manga.last_chapter_name">
-                            <span class="label">最新章节:</span>
-                            <span class="value">{{ manga.last_chapter_name }}</span>
-                        </div>
-                        <div class="metadata-item" v-if="manga.datetime_updated">
-                            <span class="label">更新时间:</span>
-                            <span class="value">{{ formatDate(manga.datetime_updated) }}</span>
-                        </div>
-                    </div>
-                    <div class="manga-actions">
-                        <button class="action-button primary" @click="startReading"
-                            :disabled="!chapters.length">开始阅读</button>
-                        <button class="action-button">加入书架</button>
-                        <button class="action-button" @click="refreshMangaData" :disabled="loading">
-                            {{ loading ? '加载中...' : '刷新数据' }}
-                        </button>
-                    </div>
+                <div style="margin-top: 20px;">
+                    <a-typography-title :level="4">简介</a-typography-title>
+                    <a-typography-paragraph>{{ manga.brief || '暂无简介' }}</a-typography-paragraph>
                 </div>
-            </div>
-
-            <div class="manga-description" v-if="manga.brief">
-                <h2>作品简介</h2>
-                <p>{{ manga.brief }}</p>
-            </div>
-
-            <div class="manga-chapters" v-if="chapters.length">
-                <h2>章节列表</h2>
-                <div class="chapters-header">
-                    <span>共 {{ chapters.length }} 章</span>
-                    <div class="chapters-sort">
-                        <button @click="toggleSortOrder" class="sort-button">
-                            {{ isAscending ? '正序' : '倒序' }}
-                        </button>
-                    </div>
-                </div>
-                <div class="chapters-grid">
-                    <div v-for="chapter in sortedChapters" :key="chapter.uuid" class="chapter-item"
-                        @click="goToChapter(chapter)">
-                        {{ chapter.name }}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+            </a-col>
+        </a-row>
+        <a-divider />
+        <a-row justify="space-between" align="middle" style="margin-bottom: 12px;">
+            <a-col>
+                <a-button @click="toggleSortOrder" size="small">
+                    {{ isAscending ? '正序' : '倒序' }}
+                </a-button>
+            </a-col>
+        </a-row>
+        <a-skeleton :loading="loading" active>
+            <a-row :gutter="[12, 12]">
+                <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in sortedChapters" :key="chapter.id">
+                    <a-card :hoverable="true" @click="goToChapter(chapter)"
+                        style="cursor:pointer; text-align:center; padding:0;" size="small"
+                        :body-style="{ padding: '12px 6px' }">
+                        <span style="font-size:14px;">{{ chapter.name }}</span>
+                    </a-card>
+                </a-col>
+            </a-row>
+        </a-skeleton>
+    </a-card>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMangaChapters } from '../api/manga'
+import { getMangaDetail, collectManga } from '../api/manga'
 import { decryptMangaData, processChapterData } from '../utils/crypto'
-import { useMangaStore } from '../stores/manga' // 导入漫画存储
+import { message } from 'ant-design-vue'
 
 const route = useRoute()
 const router = useRouter()
-const mangaStore = useMangaStore() // 使用漫画存储
 const manga = ref({})
 const chapters = ref([])
 const loading = ref(true)
-const error = ref('')
+const collectLoading = ref(false)
 const isAscending = ref(false)
 
 const sortedChapters = computed(() => {
-    return [...chapters.value].sort((a, b) => {
-        if (isAscending.value) {
-            return a.index - b.index
-        } else {
-            return b.index - a.index
-        }
-    })
+    return [...chapters.value].sort((a, b) => isAscending.value ? a.index - b.index : b.index - a.index)
 })
 
 const formatDate = (dateString) => {
@@ -103,82 +96,46 @@ const toggleSortOrder = () => {
 }
 
 const goToChapter = (chapter) => {
-    // 将漫画基本信息、章节列表和当前章节索引保存到pinia中
-    mangaStore.setCurrentManga(manga.value)
-    mangaStore.setChapters(chapters.value, route.params.pathWord)
-
-    // 找出当前章节在数组中的索引
-    const chapterIndex = chapters.value.findIndex(c => c.id === chapter.id)
-    mangaStore.setCurrentChapterIndex(chapterIndex)
-
-    // 跳转到阅读页面，只传递必要的参数
     router.push({
         name: 'ChapterReader',
         params: {
-            pathWord: route.params.pathWord,
+            pathWord: manga.value.path_word,
             chapterId: chapter.id
         }
     })
 }
 
-// 开始阅读功能 - 从第一章开始
 const startReading = () => {
     if (chapters.value.length > 0) {
-        // 根据排序方式决定从哪个章节开始
         const firstChapter = isAscending.value ? chapters.value[0] : chapters.value[chapters.value.length - 1]
         goToChapter(firstChapter)
     }
 }
 
-const refreshMangaData = () => {
-    // 强制刷新，忽略缓存
-    mangaStore.clearMangaCache(route.params.pathWord)
-    fetchMangaData(true)
+const fetchMangaData = () => {
+    loading.value = true
+    const pathWord = route.params.pathWord
+    getMangaDetail(pathWord)
+        .then(res => {
+            manga.value = res.results.comic
+        })
+        .then(chaptersResult => {
+            const decryptedData = decryptMangaData(chaptersResult.results)
+            chapters.value = processChapterData(decryptedData)
+        }).catch(() => {
+            message.error('获取漫画详情或章节失败')
+        }).finally(() => {
+            loading.value = false
+        })
 }
 
-const fetchMangaData = (forceRefresh = false) => {
-    loading.value = true
-    error.value = ''
-
-    // 首先检查Pinia中是否已有漫画数据（除非强制刷新）
-    if (!forceRefresh && mangaStore.currentManga && mangaStore.pathWord === route.params.pathWord) {
-        // 使用Pinia中的数据
-        manga.value = mangaStore.currentManga
-
-        // 如果Pinia中也有章节数据，则一并使用
-        if (mangaStore.currentChapters.length > 0) {
-            chapters.value = mangaStore.currentChapters
-            loading.value = false
-            return // 直接返回，不再请求数据
-        }
-    }
-
-    // 同时请求漫画详情和章节列表
-    const pathWord = route.params.pathWord
-
-
-    // 请求2: 获取章节列表
-    getMangaChapters(pathWord)
-        .then(chaptersResult => {
-            if (chaptersResult && chaptersResult.code === 200 && chaptersResult.results) {
-                // 解密章节数据
-                const decryptedData = decryptMangaData(chaptersResult.results)
-                // 处理章节数据
-                chapters.value = processChapterData(decryptedData)
-
-                // 将章节数据保存到Pinia
-                mangaStore.setChapters(chapters.value, pathWord)
-            } else {
-                throw new Error('获取章节列表失败')
-            }
-        })
-        .catch(err => {
-            console.error('获取漫画章节失败', err)
-            error.value = '获取漫画章节失败，请稍后重试'
-        })
-        .finally(() => {
-            loading.value = false
-        })
+// 收藏或取消收藏漫画
+const handleCollect = (isCollect = true) => {
+    collectManga(manga.value.uuid, isCollect).then(res => {
+        message.success('success')
+    }).catch(err => {
+        message.error('error')
+    })
 }
 
 onMounted(() => {

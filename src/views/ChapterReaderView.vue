@@ -32,16 +32,19 @@
                 </div>
                 <div class="image-container">
                     <!-- 两列图片布局，从右到左的日漫格式 -->
-                    <div class="manga-row" v-for="(chunk, rowIndex) in imageChunks" :key="rowIndex">
-                        <div class="manga-column right" v-if="chunk[1]">
-                            <img :src="chunk[1].url" :alt="`第${rowIndex * 2 + 2}页`" class="manga-image"
-                                loading="lazy" />
-                        </div>
-                        <div class="manga-column left">
-                            <img :src="chunk[0].url" :alt="`第${rowIndex * 2 + 1}页`" class="manga-image"
-                                loading="lazy" />
-                        </div>
-                    </div>
+                    <a-row v-for="(chunk, rowIndex) in imageChunks" :key="rowIndex" :gutter="16" class="manga-row"
+                        justify="center" align="middle">
+                        <a-col :span="12" class="manga-column right" v-if="chunk[1]">
+                            <img v-if="!chunk[1].isPlaceholder" :src="chunk[1].url" :alt="`第${rowIndex * 2 + 2}页`"
+                                class="manga-image" loading="lazy" />
+                            <div v-else class="manga-image placeholder"></div>
+                        </a-col>
+                        <a-col :span="12" class="manga-column left">
+                            <img v-if="!chunk[0].isPlaceholder" :src="chunk[0].url" :alt="`第${rowIndex * 2 + 1}页`"
+                                class="manga-image" loading="lazy" />
+                            <div v-else class="manga-image placeholder"></div>
+                        </a-col>
+                    </a-row>
                 </div>
                 <div class="reader-footer">
                     <div class="reader-controls">
@@ -77,7 +80,8 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue' // 增加导入 nextTick
 import { useRoute, useRouter } from 'vue-router'
-import { getChapterImages, getChapterComments } from '../api/manga'
+import { getChapterImages } from '../api/manga'
+import { getChapterComments } from '../api/comment'
 import { useMangaStore } from '../stores/manga' // 导入漫画存储
 
 const route = useRoute()
@@ -97,11 +101,15 @@ const comments = ref([])
 const loadingComments = ref(false)
 const commentsError = ref('') // 评论独立的错误状态
 
-// 计算属性：将图片分成两张一组
+// 计算属性：将图片分成两张一组，若为奇数则补空白
 const imageChunks = computed(() => {
+    const arr = [...images.value]
+    if (arr.length % 2 === 1) {
+        arr.push({ url: '', isPlaceholder: true }) // 补空白
+    }
     const chunks = []
-    for (let i = 0; i < images.value.length; i += 2) {
-        chunks.push(images.value.slice(i, i + 2))
+    for (let i = 0; i < arr.length; i += 2) {
+        chunks.push(arr.slice(i, i + 2))
     }
     return chunks
 })
@@ -363,23 +371,4 @@ watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
 
 <style scoped>
 @import '../assets/styles/chapterReader.css';
-
-/* 深度选择器，确保能修改Ant Design组件内部样式 */
-:deep(.compact-comment-item .ant-comment-inner) {
-    padding: 6px 0;
-}
-
-:deep(.compact-comment-item .ant-comment-content-author) {
-    margin-bottom: 6px;
-}
-
-:deep(.compact-comment-item .ant-comment-content-detail) {
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-:deep(.compact-comment-item .ant-comment-avatar img) {
-    width: 32px;
-    height: 32px;
-}
 </style>
