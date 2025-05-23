@@ -34,6 +34,9 @@
                         <button class="action-button primary" @click="startReading"
                             :disabled="!chapters.length">开始阅读</button>
                         <button class="action-button">加入书架</button>
+                        <button class="action-button" @click="refreshMangaData" :disabled="loading">
+                            {{ loading ? '加载中...' : '刷新数据' }}
+                        </button>
                     </div>
                 </div>
             </div>
@@ -67,7 +70,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMangaChapters, getMangaDetail } from '../api/manga'
+import { getMangaChapters } from '../api/manga'
 import { decryptMangaData, processChapterData } from '../utils/crypto'
 import { useMangaStore } from '../stores/manga' // 导入漫画存储
 
@@ -127,15 +130,21 @@ const startReading = () => {
     }
 }
 
-const fetchMangaData = () => {
+const refreshMangaData = () => {
+    // 强制刷新，忽略缓存
+    mangaStore.clearMangaCache(route.params.pathWord)
+    fetchMangaData(true)
+}
+
+const fetchMangaData = (forceRefresh = false) => {
     loading.value = true
     error.value = ''
 
-    // 首先检查Pinia中是否已有漫画数据
-    if (mangaStore.currentManga && mangaStore.pathWord === route.params.pathWord) {
+    // 首先检查Pinia中是否已有漫画数据（除非强制刷新）
+    if (!forceRefresh && mangaStore.currentManga && mangaStore.pathWord === route.params.pathWord) {
         // 使用Pinia中的数据
         manga.value = mangaStore.currentManga
-        
+
         // 如果Pinia中也有章节数据，则一并使用
         if (mangaStore.currentChapters.length > 0) {
             chapters.value = mangaStore.currentChapters
@@ -147,22 +156,6 @@ const fetchMangaData = () => {
     // 同时请求漫画详情和章节列表
     const pathWord = route.params.pathWord
 
-    // 请求1: 获取漫画详情
-    getMangaDetail(pathWord)
-        .then(detailResult => {
-            if (detailResult && detailResult.code === 200 && detailResult.results) {
-                manga.value = detailResult.results
-                
-                // 将获取的漫画数据保存到Pinia
-                mangaStore.setCurrentManga(detailResult.results)
-            } else {
-                throw new Error('获取漫画详情失败')
-            }
-        })
-        .catch(err => {
-            console.error('获取漫画详情失败', err)
-            error.value = '获取漫画详情失败，请稍后重试'
-        })
 
     // 请求2: 获取章节列表
     getMangaChapters(pathWord)
@@ -172,7 +165,7 @@ const fetchMangaData = () => {
                 const decryptedData = decryptMangaData(chaptersResult.results)
                 // 处理章节数据
                 chapters.value = processChapterData(decryptedData)
-                
+
                 // 将章节数据保存到Pinia
                 mangaStore.setChapters(chapters.value, pathWord)
             } else {

@@ -8,7 +8,7 @@ import request from '../utils/request'
  * @returns {Promise} 书架数据
  */
 export function getMyCollection(limit = 20, offset = 0, freeType = 1) {
-    return request.get('/api/v3/member/collect/comics', {
+    return request.get('/proxy/api/v3/member/collect/comics', {
         params: {
             limit,
             offset,
@@ -22,19 +22,6 @@ export function getMyCollection(limit = 20, offset = 0, freeType = 1) {
     })
 }
 
-/**
- * 获取漫画详情信息
- * @param {string} pathWord 漫画路径标识
- * @returns {Promise} 漫画详情数据
- */
-export function getMangaDetail(pathWord) {
-    return request.get(`/api/v3/comic/${pathWord}`, {
-        headers: {
-            'Accept': 'application/json, text/plain, */*',
-            'Cache-Control': 'no-cache'
-        }
-    })
-}
 
 /**
  * 获取漫画章节列表
@@ -42,7 +29,7 @@ export function getMangaDetail(pathWord) {
  * @returns {Promise} 漫画章节数据
  */
 export function getMangaChapters(pathWord) {
-    return request.get(`/comicdetail/${pathWord}/chapters`, {
+    return request.get(`/proxy/comicdetail/${pathWord}/chapters`, {
         headers: {
             'Cache-Control': 'no-cache',
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
@@ -57,7 +44,7 @@ export function getMangaChapters(pathWord) {
  * @returns {Promise} 章节图片数据
  */
 export function getChapterImages(pathWord, chapterId) {
-    return request.get(`/api/v3/comic/${pathWord}/chapter/${chapterId}`, {
+    return request.get(`/proxy/api/v3/comic/${pathWord}/chapter/${chapterId}`, {
         headers: {
             'Accept': '*/*'
         }
@@ -72,7 +59,7 @@ export function getChapterImages(pathWord, chapterId) {
  * @returns {Promise} 评论数据
  */
 export function getChapterComments(chapterId, limit = 100, offset = 0) {
-    return request.get('/api/v3/roasts', {
+    return request.get('/proxy/api/v3/roasts', {
         params: {
             chapter_id: chapterId,
             limit,

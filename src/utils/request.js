@@ -2,10 +2,8 @@ import axios from 'axios'
 import { getToken } from './auth'
 import { message } from 'ant-design-vue'
 
-// const isDev = import.meta.env.DEV
-// const defaultBaseURL = isDev ? '' : 'https://www.copy20.com'
-const defaultBaseURL = '/dev'
-// const defaultBaseURL = 'https://www.copy20.com'
+const defaultBaseURL = 'http://localhost:5000'
+
 
 const request = axios.create({
     baseURL: defaultBaseURL,
@@ -25,6 +23,7 @@ request.interceptors.request.use(
         config.headers['Accept'] = 'application/json, text/plain, */*'
         config.headers['Cache-Control'] = 'no-cache'
         config.headers['Pragma'] = 'no-cache'
+        config.headers['Referer'] = 'http://localhost:5000'
 
         // 注意：不要直接设置Cookie头，浏览器会自动处理
         // Cookie将由浏览器自动添加，或由Vite代理服务器处理
