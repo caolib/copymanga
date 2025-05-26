@@ -1,8 +1,8 @@
 [package]
-name = "tauri-app"
-version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+name = "copymanga"
+version = "0.1.1"
+description = "一个拷贝漫画第三方客户端"
+authors = ["caolib"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -29,4 +29,15 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tower = "0.4"
+
+[[bin]]
+name = "tauri-app"
+path = "src/main.rs"
+required-features = []
+
+[profile.release]
+# ...
+
+[package.metadata.tauri.windows]
+windows_subsystem = "windows"
 

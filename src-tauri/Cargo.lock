@@ -598,6 +598,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "copymanga"
+version = "0.1.1"
+dependencies = [
+ "axum",
+ "futures-util",
+ "http 0.2.12",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-opener",
+ "tokio",
+ "tower 0.4.13",
+ "tower-service",
+]
+
+[[package]]
 name = "core-foundation"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3952,24 +3970,6 @@ dependencies = [
  "webview2-com",
  "window-vibrancy",
  "windows",
-]
-
-[[package]]
-name = "tauri-app"
-version = "0.1.0"
-dependencies = [
- "axum",
- "futures-util",
- "http 0.2.12",
- "reqwest",
- "serde",
- "serde_json",
- "tauri",
- "tauri-build",
- "tauri-plugin-opener",
- "tokio",
- "tower 0.4.13",
- "tower-service",
 ]
 
 [[package]]

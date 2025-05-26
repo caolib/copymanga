@@ -6,14 +6,13 @@
   "scripts": {
     "dev": "vite",
     "start": "tauri dev",
+    "build:cli": "tauri build",
     "build": "vite build",
     "preview": "vite preview",
     "lint:oxlint": "oxlint . --fix -D correctness --ignore-path .gitignore",
     "lint:eslint": "eslint . --fix",
     "lint": "run-s lint:*",
-    "format": "prettier --write src/",
-    "server:node": "node backend/server.js",
-    "server:node:dev": "nodemon backend/server.js"
+    "format": "prettier --write src/"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.2.0",

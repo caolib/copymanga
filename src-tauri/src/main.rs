@@ -1,3 +1,4 @@
+#![cfg_attr(windows, windows_subsystem = "windows")]
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -9,7 +10,6 @@ use axum::{
 use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tauri::Manager;
 
 fn main() {
     tauri::Builder::default()
