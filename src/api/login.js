@@ -45,4 +45,18 @@ export function register(username, password) {
     });
 }
 
+/**
+ * 获取用户信息
+ * @returns {Promise} 用户信息
+ */
+export function getUserProfile() {
+    return request.get('/api/v2/web/user/info', {
+        headers: {
+            'Content-Encoding': 'gzip, compress, br',
+            'platform': '2'
+        },
+        timeout: 60000
+    });
+}
+
 
