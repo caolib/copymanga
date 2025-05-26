@@ -4,7 +4,7 @@
             <template #extra>
                 <div class="header-actions">
                     <a-select v-model:value="ordering" style="width: 180px; margin-right: 12px;"
-                        @change="onOrderingChange">
+                        @change="fetchCollection">
                         <a-select-option value="-datetime_updated">按漫画更新时间排序</a-select-option>
                         <a-select-option value="-datetime_modifier">按加入书架时间排序</a-select-option>
                         <a-select-option value="-datetime_browse">按阅读时间排序</a-select-option>
@@ -91,44 +91,30 @@ const goToManga = (item) => {
     })
 }
 
-const fetchCollection = () => {
+const fetchCollection = async () => {
     loading.value = true
     error.value = ''
     mangaList.value = []
-    return getMyCollectionRaw({
+    await getMyCollectionRaw({
         limit: 20,
         offset: 0,
         free_type: 1,
         ordering: ordering.value
+    }).then(res => {
+        mangaList.value = res.results.list
+        lastUpdateTime.value = new Date().toISOString()
+    }).catch((err) => {
+        error.value = err.message || '获取书架失败'
+    }).finally(() => {
+        loading.value = false
     })
-        .then(res => {
-            if (res && res.results && res.results.list) {
-                mangaList.value = res.results.list
-                lastUpdateTime.value = new Date().toISOString()
-            } else {
-                error.value = '获取数据格式错误'
-            }
-        })
-        .catch((err) => {
-            error.value = err.message || '获取书架失败'
-        })
-        .finally(() => {
-            loading.value = false
-        })
 }
 
-const onOrderingChange = () => {
-    fetchCollection()
-}
 
 const refreshCollection = () => {
-    fetchCollection()
-        .then(() => {
-            message.success('书架更新成功')
-        })
-        .catch(() => {
-            message.error('书架更新失败，请稍后重试')
-        })
+    fetchCollection().catch(() => {
+        message.error('书架更新失败，请稍后重试')
+    })
 }
 
 onMounted(() => {
