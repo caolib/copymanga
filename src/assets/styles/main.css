@@ -14,7 +14,7 @@
 
 
 :root {
-    --font-family: 'cascadia code', '落霞孤鹜文楷', '喵字果汁体', '微软雅黑', 'Courier New', Courier, monospace;
+    --font-family: 'cascadia code', '霞鹜文楷', '喵字果汁体', '微软雅黑', 'Courier New', Courier, monospace;
 }
 
 textarea,
@@ -32,7 +32,6 @@ label,
 h1,
 h2,
 h3,
-h4,
-h5 {
+.ant-input {
     font-family: var(--font-family);
 }

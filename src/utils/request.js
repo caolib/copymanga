@@ -41,6 +41,18 @@ request.interceptors.response.use(
         return response.data
     },
     (error) => {
+        // 统一处理后端和网络异常
+        let msg = '请求失败，请稍后重试'
+        if (error.response && error.response.data) {
+            if (error.response.data.detail) {
+                msg = error.response.data.detail
+            } else if (error.response.data.message) {
+                msg = error.response.data.message
+            }
+        } else if (error.message) {
+            msg = error.message
+        }
+        message.error(msg)
         return Promise.reject(error)
     }
 )
