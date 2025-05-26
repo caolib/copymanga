@@ -57,13 +57,64 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
+      - name: 生成发布说明
+        id: generate_release_notes
+        shell: bash
+        run: |
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          CURRENT_TAG=${GITHUB_REF##*/}
+
+          if [ -z "$PREVIOUS_TAG" ]; then
+            ALL_COMMITS=$(git log --pretty=format:"%s|%h" --reverse HEAD)
+          else
+            ALL_COMMITS=$(git log ${PREVIOUS_TAG}..HEAD --pretty=format:"%s|%h" --reverse)
+          fi
+
+          FILTERED_COMMITS=$(echo "$ALL_COMMITS" | grep -v -E "Merge branch|docs:|README")
+
+          declare -A commit_hashes
+          while IFS="|" read -r message hash; do
+            commit_hashes["$message"]="$hash"
+          done <<< "$FILTERED_COMMITS"
+
+          declare -a ordered_messages=()
+          declare -A seen_messages=()
+          while IFS="|" read -r message hash; do
+            if [[ -z "${seen_messages[$message]}" ]]; then
+              ordered_messages+=("$message")
+              seen_messages["$message"]=1
+            fi
+          done <<< "$FILTERED_COMMITS"
+
+          FINAL_COMMITS=""
+          for message in "${ordered_messages[@]}"; do
+            hash="${commit_hashes[$message]}"
+            FINAL_COMMITS+="- [${hash:0:7}] ${message}"$'\n'
+          done
+
+          echo "$FINAL_COMMITS" > release_notes.txt
+
+          echo "### Commits" > complete_notes.txt
+          echo "" >> complete_notes.txt
+          cat release_notes.txt >> complete_notes.txt
+          echo "" >> complete_notes.txt
+          echo "[Full Changelog](https://github.com/${{ github.repository }}/commits/${{ github.ref }})" >> complete_notes.txt
+
+          # 输出到环境变量
+          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+          cat complete_notes.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          # 输出到 Job Summary
+          cat complete_notes.txt >> $GITHUB_STEP_SUMMARY
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: app-v__VERSION__
           releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseBody: ${{ env.RELEASE_NOTES }}
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }} 
