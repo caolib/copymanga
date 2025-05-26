@@ -1,6 +1,6 @@
 [package]
 name = "copymanga"
-version = "0.1.2"
+version = "0.1.3"
 description = "一个拷贝漫画第三方客户端"
 authors = ["caolib"]
 edition = "2021"
@@ -15,18 +15,18 @@ name = "tauri_app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "0.1.2", features = [] }
+tauri-build = { version = "0.1.3", features = [] }
 
 [dependencies]
-tokio = { version = "0.1.2", features = ["full"] }
+tokio = { version = "0.1.3", features = ["full"] }
 tower-service = "0.3"
 http = "0.2"
-reqwest = { version = "0.1.2", features = ["cookies", "json", "multipart"] }
+reqwest = { version = "0.1.3", features = ["cookies", "json", "multipart"] }
 axum = "0.7"
 futures-util = "0.3"
-tauri = { version = "0.1.2", features = [] }
+tauri = { version = "0.1.3", features = [] }
 tauri-plugin-opener = "2"
-serde = { version = "0.1.2", features = ["derive"] }
+serde = { version = "0.1.3", features = ["derive"] }
 serde_json = "1"
 tower = "0.4"
 
