@@ -150,7 +150,17 @@ const handleLogin = () => {
         userStore.setUser({
             username: result.results.username,
             token: result.results.token,
-            userInfo: result.results,
+            email: result.results.email || '',
+            avatar: result.results.avatar || '',
+            description: result.results.description || '',
+            createdAt: result.results.created_at || new Date().toISOString(),
+            lastLoginAt: new Date().toISOString(),
+            stats: {
+                totalRead: result.results.stats?.total_read || 0,
+                totalChapters: result.results.stats?.total_chapters || 0,
+                totalTime: result.results.stats?.total_time || 0,
+                favorites: result.results.stats?.favorites || 0
+            },
             password: loginForm.rememberPassword ? loginForm.password : ''
         })
 

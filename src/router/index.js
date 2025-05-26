@@ -19,6 +19,12 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
+        path: '/profile',
+        name: 'UserProfile',
+        component: () => import('../views/UserProfileView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
         path: '/manga/:pathWord',
         name: 'MangaDetail',
         component: () => import('../views/MangaDetailView.vue'),
