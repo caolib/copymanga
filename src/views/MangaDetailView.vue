@@ -70,7 +70,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMangaDetail, collectManga } from '../api/manga'
+import { getMangaDetail, collectManga, getMangaChapters } from '../api/manga'
 import { decryptMangaData, processChapterData } from '../utils/crypto'
 import { message } from 'ant-design-vue'
 
@@ -112,21 +112,24 @@ const startReading = () => {
     }
 }
 
-const fetchMangaData = () => {
-    loading.value = true
+const fetchMangaData = async () => {
+    // 获取漫画详情信息
     const pathWord = route.params.pathWord
-    getMangaDetail(pathWord)
-        .then(res => {
-            manga.value = res.results.comic
-        })
-        .then(chaptersResult => {
-            const decryptedData = decryptMangaData(chaptersResult.results)
-            chapters.value = processChapterData(decryptedData)
-        }).catch(() => {
-            message.error('获取漫画详情或章节失败')
-        }).finally(() => {
-            loading.value = false
-        })
+    await getMangaDetail(pathWord).then(res => {
+        manga.value = res.results.comic
+    })
+
+    // 获取漫画章节
+    loading.value = true
+    await getMangaChapters(pathWord).then(res => {
+        const decryptedData = decryptMangaData(res.results)
+        chapters.value = processChapterData(decryptedData)
+    }).catch((error) => {
+        console.error('获取漫画详情或章节失败', error)
+        message.error('获取漫画详情或章节失败')
+    }).finally(() => {
+        loading.value = false
+    })
 }
 
 // 收藏或取消收藏漫画
@@ -134,7 +137,7 @@ const handleCollect = (isCollect = true) => {
     collectManga(manga.value.uuid, isCollect).then(res => {
         message.success('success')
     }).catch(err => {
-        message.error('error')
+        message.error(err.message)
     })
 }
 

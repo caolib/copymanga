@@ -1,11 +1,9 @@
 ---
-description: 
-globs: 
-alwaysApply: true
+applyTo: '**'
 ---
 - 这个项目是一个基于拷贝漫画官方API的前端项目
 - 前端使用vue框架,使用vite构建,使用tauri2构建桌面端
-- 使用axios发送请求,目前使用node服务器转发请求（解决跨域请求问题），node不处理错误，仅转发，计划使用rust发送请求
+- 使用axios发送请求,使用node服务器转发请求，node不处理错误，仅转发
 - 使用pinia存储信息并持久化
 - 界面使用ant design vue组件设计
 - 使用pnpm包管理器
@@ -14,5 +12,3 @@ alwaysApply: true
 - 不要使用jsx
 - 不要生成readme文件
 - 尽量保持代码简洁
-
-- 自动修改代码
