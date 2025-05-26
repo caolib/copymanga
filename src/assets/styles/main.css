@@ -1,3 +1,22 @@
+@font-face {
+    font-family: 'Cascadia Code';
+    src: url('../fonts/CascadiaCode.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: '喵字果汁体';
+    src: url('../fonts/MiaoZi-GuoZhiTi.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+
+:root {
+    --font-family: 'cascadia code', '落霞孤鹜文楷', '喵字果汁体', '微软雅黑', 'Courier New', Courier, monospace;
+}
+
 textarea,
 div,
 span,
@@ -9,11 +28,11 @@ input,
 pre,
 code,
 p,
+label,
 h1,
 h2,
 h3,
 h4,
-h5,
-body {
-    font-family: 'cascadia code', '喵字果汁体', 'Courier New', Courier, monospace;
+h5 {
+    font-family: var(--font-family);
 }

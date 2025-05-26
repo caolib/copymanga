@@ -38,7 +38,8 @@
           "English",
           "TradChinese"
         ],
-        "displayLanguageSelector": true
+        "displayLanguageSelector": true,
+        "installerIcon": "icons/icon.ico"
       },
       "wix": {
         "language": [

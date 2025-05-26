@@ -6,7 +6,6 @@
   <img src="https://img.shields.io/github/license/caolib/copymanga" alt="License">
   <img src="https://img.shields.io/github/stars/caolib/copymanga" alt="Stars">
   <img src="https://img.shields.io/github/issues/caolib/copymanga?label=Issues" alt="Issues">
-  <img src="https://img.shields.io/github/last-commit/caolib/copymanga?label=%E4%B8%8A%E6%AC%A1%E6%8F%90%E4%BA%A4" alt="Last Commit">
   <img src="https://img.shields.io/github/downloads/caolib/copymanga/latest/total">
   <img src="https://github.com/caolib/copymanga/actions/workflows/publish.yml/badge.svg" alt="ci">
 </p>

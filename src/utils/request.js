@@ -11,7 +11,7 @@ const request = axios.create({
     withCredentials: true
 })
 
-// 请求拦截器
+// 请求拦截器 TODO 区分那些请求不需要token
 request.interceptors.request.use(
     (config) => {
         // 添加认证令牌
@@ -30,7 +30,7 @@ request.interceptors.request.use(
     }
 )
 
-// 响应拦截器
+// 响应拦截器 TODO 处理4xx等状态
 request.interceptors.response.use(
     (response) => {
         // 处理响应数据
