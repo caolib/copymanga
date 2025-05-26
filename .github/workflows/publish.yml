@@ -39,8 +39,10 @@ jobs:
           node-version: lts/*
           cache: 'pnpm'
 
-      - name: install pnpm
-        run: npm install -g pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
