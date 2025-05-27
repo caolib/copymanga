@@ -1,10 +1,10 @@
 <script setup>
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { isLoggedIn, logout, getUserInfo } from './utils/auth'
+import { isLoggedIn, logout } from './utils/auth'
 import { useUserStore } from './stores/user'
 import { useAppStore } from './stores/app'
-
+import { relaunch } from '@tauri-apps/plugin-process';
 
 const router = useRouter()
 const showUserMenu = ref(false)
@@ -17,11 +17,9 @@ const userInfo = computed(() => userStore.userInfo)
 // 组件挂载时获取用户信息
 onMounted(async () => {
   if (isLoggedInComputed.value) {
-    try {
-      await userStore.fetchUserInfo();
-    } catch (error) {
-      console.error('获取用户信息失败', error);
-    }
+    await userStore.fetchUserInfo().catch(error => {
+      console.error('获取用户信息失败:', error)
+    });
   }
 })
 
@@ -36,13 +34,17 @@ const goToProfile = () => {
   showUserMenu.value = false
 }
 
-const toggleUserMenu = () => {
-  showUserMenu.value = !showUserMenu.value
-}
 
 // 点击外部关闭菜单
 const closeUserMenu = () => {
   showUserMenu.value = false
+}
+
+// 重启应用
+const handleRestart = async () => {
+  await relaunch().then(() => {
+    appStore.setNeedsRestart(false)
+  })
 }
 </script>
 
@@ -50,8 +52,19 @@ const closeUserMenu = () => {
   <div class="app-container" @click="closeUserMenu">
     <!-- 重启提示横幅 -->
     <div v-if="appStore.needsRestart" class="restart-banner">
-      <a-alert message="配置已更改" description="服务器配置已更新，请重启应用以使更改生效。" type="warning" show-icon closable
-        @close="appStore.setNeedsRestart(false)" />
+      <a-alert type="warning" show-icon closable @close="appStore.setNeedsRestart(false)">
+        <template #message>
+          <span>配置已更改</span>
+        </template>
+        <template #description>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span>服务器配置已更新，请重启应用以使更改生效。</span>
+            <a-button type="primary" size="small" @click="handleRestart" style="margin-left: 12px;">
+              立即重启
+            </a-button>
+          </div>
+        </template>
+      </a-alert>
     </div>
 
     <header class="header">

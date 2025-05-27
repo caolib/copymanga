@@ -49,9 +49,7 @@
                         </a-space>
                     </a-form-item>
                 </a-form>
-            </a-card>
-
-            <a-card title="当前状态" class="setting-card">
+            </a-card> <a-card title="当前状态" class="setting-card">
                 <a-descriptions :column="1">
                     <a-descriptions-item label="转发服务器">
                         http://localhost:{{ currentServerPort }}
@@ -63,6 +61,22 @@
                         应用配置目录/server.json, copymanga.json
                     </a-descriptions-item>
                 </a-descriptions>
+
+                <a-divider />
+
+                <div class="restart-section">
+                    <a-alert v-if="appStore.needsRestart" type="warning" message="配置已更改，需要重启应用以生效" show-icon
+                        style="margin-bottom: 16px" />
+                    <a-space>
+                        <a-button type="primary" @click="handleRestart" :loading="restarting" size="large" danger>
+                            <template #icon>
+                                <reload-outlined />
+                            </template>
+                            立即重启应用
+                        </a-button>
+                        <span class="restart-help">重启应用以应用所有配置更改</span>
+                    </a-space>
+                </div>
             </a-card>
         </div>
     </div>
@@ -71,6 +85,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 import {
     getServerConfig,
     saveServerConfig,
@@ -93,6 +108,7 @@ const currentServerPort = ref('5001')
 const currentApiDomain = ref('https://copy20.com')
 const savingServer = ref(false)
 const savingApp = ref(false)
+const restarting = ref(false)
 const appStore = useAppStore()
 
 // 验证端口格式
@@ -179,6 +195,19 @@ const resetAppToDefault = () => {
     appForm.value.apiDomain = 'https://copy20.com'
 }
 
+// 处理重启应用
+const handleRestart = async () => {
+    restarting.value = true
+    try {
+        await appStore.restartApp()
+    } catch (error) {
+        console.error('重启失败:', error)
+        message.error('重启应用失败，请手动重启')
+    } finally {
+        restarting.value = false
+    }
+}
+
 onMounted(() => {
     loadConfig()
 })
@@ -209,5 +238,15 @@ onMounted(() => {
 h1 {
     margin-bottom: 24px;
     color: #333;
+}
+
+.restart-section {
+    text-align: center;
+}
+
+.restart-help {
+    color: #666;
+    font-size: 14px;
+    margin-left: 8px;
 }
 </style>
