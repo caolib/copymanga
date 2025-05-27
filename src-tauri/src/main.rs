@@ -14,6 +14,11 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tauri::{AppHandle, Manager};
 
+#[tauri::command]
+fn open_browser(url: String) {
+    tauri_plugin_opener::open_url(&url, None::<&str>).unwrap();
+}
+
 #[derive(Serialize, Deserialize)]
 struct ServerConfig {
     #[serde(rename = "serverPort")]
@@ -115,6 +120,8 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
         .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_opener::init())
+        .invoke_handler(tauri::generate_handler![open_browser])
         .setup(|app| {
             let app_handle = app.handle().clone();
             // 启动代理服务（tokio后台任务）

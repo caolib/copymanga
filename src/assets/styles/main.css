@@ -17,21 +17,6 @@
     --font-family: 'cascadia code', '霞鹜文楷', '喵字果汁体', '微软雅黑', 'Courier New', Courier, monospace;
 }
 
-textarea,
-div,
-span,
-ul,
-ol,
-a,
-text,
-input,
-pre,
-code,
-p,
-label,
-h1,
-h2,
-h3,
-.ant-input {
+* {
     font-family: var(--font-family);
 }

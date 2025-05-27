@@ -20,6 +20,12 @@ const updateBaseURL = async () => {
     })
 }
 
+// 前往登录
+const goToLogin = () => {
+    message.error('请先登录')
+    router.push('/login')
+}
+
 // 请求拦截器 TODO 区分那些请求不需要token
 request.interceptors.request.use(
     async (config) => {
@@ -45,6 +51,10 @@ request.interceptors.request.use(
 // 响应拦截器 TODO 处理4xx等状态
 request.interceptors.response.use(
     (response) => {
+        if (response.status === 401) {
+            goToLogin()
+            return Promise.reject(new Error('未授权，请登录'))
+        }
         // 处理响应数据
         if (response.status === 500) {
             message.error('服务器错误，请稍后再试')
@@ -58,9 +68,8 @@ request.interceptors.response.use(
 
         // 处理401未授权错误，跳转到登录页面
         if (error.response && error.response.status === 401) {
-            message.error('登录已过期，请重新登录')
-            router.push('/login')
-            return Promise.reject(error)
+            goToLogin()
+            return Promise.reject(new Error('未授权，请登录'))
         }
 
         if (error.response && error.response.data) {
