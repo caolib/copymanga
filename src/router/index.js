@@ -13,6 +13,11 @@ const routes = [
         component: () => import('../views/LoginView.vue')
     },
     {
+        path: '/settings',
+        name: 'Settings',
+        component: () => import('../views/SettingsView.vue')
+    },
+    {
         path: '/my-collection',
         name: 'MyCollection',
         component: () => import('../views/MyCollectionView.vue'),
@@ -52,4 +57,4 @@ router.beforeEach((to, from, next) => {
     }
 })
 
-export default router 
+export default router

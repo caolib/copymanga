@@ -1,19 +1,31 @@
 import axios from 'axios'
 import { getToken } from './auth'
 import { message } from 'ant-design-vue'
+import { getServerConfig } from './serverConfig'
+import router from '@/router'
 
-// 根据环境变量选择后端服务器
-const defaultBaseURL = 'http://localhost:5001/proxy'
-
+// 创建 axios 实例
 const request = axios.create({
-    baseURL: defaultBaseURL,
     timeout: 30000,
     withCredentials: true
 })
 
+// 从配置文件读取baseURL
+const updateBaseURL = async () => {
+    await getServerConfig().then(config => {
+        request.defaults.baseURL = `http://localhost:${config.serverPort}/proxy`
+    }).catch(error => {
+        console.error('获取服务器配置失败:', error)
+        message.error('获取配置失败')
+    })
+}
+
 // 请求拦截器 TODO 区分那些请求不需要token
 request.interceptors.request.use(
-    (config) => {
+    async (config) => {
+        // 确保 baseURL 已更新
+        await updateBaseURL()
+
         // 添加认证令牌
         const token = getToken()
         if (token) {
@@ -43,6 +55,14 @@ request.interceptors.response.use(
     (error) => {
         // 统一处理后端和网络异常
         let msg = '请求失败，请稍后重试'
+
+        // 处理401未授权错误，跳转到登录页面
+        if (error.response && error.response.status === 401) {
+            message.error('登录已过期，请重新登录')
+            router.push('/login')
+            return Promise.reject(error)
+        }
+
         if (error.response && error.response.data) {
             if (error.response.data.detail) {
                 msg = error.response.data.detail
