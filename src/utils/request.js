@@ -1,19 +1,50 @@
 import axios from 'axios'
 import { getToken } from './auth'
 import { message } from 'ant-design-vue'
+import { getServerConfig } from './serverConfig'
 
 // 根据环境变量选择后端服务器
 const defaultBaseURL = 'http://localhost:5001/proxy'
 
+// 创建 axios 实例
 const request = axios.create({
     baseURL: defaultBaseURL,
     timeout: 30000,
     withCredentials: true
 })
 
+// 动态更新 baseURL
+let configLoaded = false
+let configLoadTime = 0
+const CONFIG_CACHE_TIME = 5000 // 5秒缓存时间
+
+const updateBaseURL = async () => {
+    const now = Date.now()
+    if (!configLoaded || (now - configLoadTime) > CONFIG_CACHE_TIME) {
+        try {
+            const config = await getServerConfig()
+            request.defaults.baseURL = `${config.serverUrl}/proxy`
+            configLoaded = true
+            configLoadTime = now
+        } catch (error) {
+            console.warn('无法加载服务器配置，使用默认值:', error)
+        }
+    }
+}
+
+// 强制重新加载配置
+export const reloadConfig = async () => {
+    configLoaded = false
+    configLoadTime = 0
+    await updateBaseURL()
+}
+
 // 请求拦截器 TODO 区分那些请求不需要token
 request.interceptors.request.use(
-    (config) => {
+    async (config) => {
+        // 确保 baseURL 已更新
+        await updateBaseURL()
+
         // 添加认证令牌
         const token = getToken()
         if (token) {

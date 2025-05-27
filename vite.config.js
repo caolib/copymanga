@@ -40,5 +40,10 @@ export default defineConfig(async () => ({
       ignored: ["**/src-tauri/**"],
     },
   },
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
+  }
 }));
 

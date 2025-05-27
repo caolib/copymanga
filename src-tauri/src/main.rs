@@ -13,6 +13,7 @@ use std::sync::Arc;
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_fs::init())
         .setup(|_app| {
             // 启动代理服务（tokio后台任务）
             tauri::async_runtime::spawn(async {

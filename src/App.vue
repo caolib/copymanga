@@ -3,11 +3,13 @@ import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { isLoggedIn, logout, getUserInfo } from './utils/auth'
 import { useUserStore } from './stores/user'
+import { useAppStore } from './stores/app'
 
 
 const router = useRouter()
 const showUserMenu = ref(false)
 const userStore = useUserStore()
+const appStore = useAppStore()
 
 const isLoggedInComputed = computed(() => isLoggedIn())
 const userInfo = computed(() => userStore.userInfo)
@@ -46,11 +48,18 @@ const closeUserMenu = () => {
 
 <template>
   <div class="app-container" @click="closeUserMenu">
+    <!-- 重启提示横幅 -->
+    <div v-if="appStore.needsRestart" class="restart-banner">
+      <a-alert message="配置已更改" description="服务器配置已更新，请重启应用以使更改生效。" type="warning" show-icon closable
+        @close="appStore.setNeedsRestart(false)" />
+    </div>
+
     <header class="header">
       <div class="header-content">
         <nav class="nav">
           <router-link to="/" class="nav-link">首页</router-link>
           <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">我的书架</router-link>
+          <router-link to="/settings" class="nav-link">设置</router-link>
         </nav>
 
         <div class="user-section">
@@ -292,6 +301,21 @@ body {
 .router-link-active {
   color: #4caf50;
   font-weight: 500;
+}
+
+/* 重启提示横幅样式 */
+.restart-banner {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  margin-bottom: 0;
+}
+
+.restart-banner .ant-alert {
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  margin-bottom: 0;
 }
 
 .main-content {
