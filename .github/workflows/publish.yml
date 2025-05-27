@@ -57,13 +57,26 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
+      - name: Read release notes
+        id: release_notes
+        run: |
+          if [ -f "./docs/release.txt" ]; then
+            {
+              echo 'release_body<<EOF'
+              cat "./docs/release.txt"
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "release_body=See the assets to download this version and install." >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: app-v__VERSION__
           releaseName: 'App v__VERSION__'
-          releaseBody: 'See the assets to download this version and install.'
+          releaseBody: ${{ steps.release_notes.outputs.release_body }}
           releaseDraft: false
           prerelease: false
           args: ${{ matrix.args }} 
