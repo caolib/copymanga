@@ -3,8 +3,7 @@
         <a-row :gutter="32">
             <a-col :xs="24" :sm="8">
                 <a-image :src="manga.cover" :alt="manga.name" width="100%" height="350px"
-                    style="border-radius: 8px; object-fit: cover;"
-                    fallback="https://via.placeholder.com/250x350?text=No+Image" />
+                    style="border-radius: 8px; object-fit: cover;" />
             </a-col>
             <a-col :xs="24" :sm="16">
                 <a-typography-title :level="2">{{ manga.name || '漫画详情' }}</a-typography-title>

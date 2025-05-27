@@ -1,18 +1,47 @@
 <script setup>
-import { computed, ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, ref, onMounted, watchEffect } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { isLoggedIn, logout } from './utils/auth'
 import { useUserStore } from './stores/user'
 import { useAppStore } from './stores/app'
 import { relaunch } from '@tauri-apps/plugin-process';
 
 const router = useRouter()
+const route = useRoute()
 const showUserMenu = ref(false)
 const userStore = useUserStore()
 const appStore = useAppStore()
+const showHeader = ref(true)
 
 const isLoggedInComputed = computed(() => isLoggedIn())
 const userInfo = computed(() => userStore.userInfo)
+
+// 检测当前是否在漫画阅读页面
+const isChapterReaderRoute = computed(() => {
+  return route.name === 'ChapterReader'
+})
+
+// 处理鼠标移动事件
+const handleMouseMove = (event) => {
+  // 只在漫画阅读页面处理该逻辑
+  if (!isChapterReaderRoute.value) return;
+
+  // 当鼠标在页面顶部 50px 范围内时显示导航栏
+  if (event.clientY <= 50) {
+    showHeader.value = true;
+  } else {
+    showHeader.value = false;
+  }
+}
+
+// 监听路由变化，在漫画阅读页面隐藏顶部栏
+watchEffect(() => {
+  if (isChapterReaderRoute.value) {
+    showHeader.value = false
+  } else {
+    showHeader.value = true
+  }
+})
 
 // 组件挂载时获取用户信息
 onMounted(async () => {
@@ -49,7 +78,7 @@ const handleRestart = async () => {
 </script>
 
 <template>
-  <div class="app-container" @click="closeUserMenu">
+  <div class="app-container" @click="closeUserMenu" @mousemove="handleMouseMove">
     <!-- 重启提示横幅 -->
     <div v-if="appStore.needsRestart" class="restart-banner">
       <a-alert type="warning" show-icon closable @close="appStore.setNeedsRestart(false)">
@@ -67,7 +96,7 @@ const handleRestart = async () => {
       </a-alert>
     </div>
 
-    <header class="header">
+    <header class="header" :class="{ 'header-hidden': isChapterReaderRoute && !showHeader }">
       <div class="header-content">
         <nav class="nav">
           <router-link to="/" class="nav-link">首页</router-link>
@@ -130,9 +159,22 @@ body {
 .header {
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
+  position: relative;
+  /* 改为相对定位，不固定在页面顶部 */
   z-index: 100;
+  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
+  overflow: hidden;
+  max-height: 60px;
+  /* 足够显示内容的高度 */
+}
+
+.header-hidden {
+  max-height: 0;
+  opacity: 0;
+  padding: 0;
+  margin: 0;
+  border: none;
+  box-shadow: none;
 }
 
 .header-content {

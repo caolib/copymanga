@@ -63,6 +63,10 @@
     margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 10px;
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .reader-title h1 {
@@ -113,37 +117,51 @@
 }
 
 
-/* TODO 设置面板调整图片间距 */
+/* 图片容器样式 - 支持动态间距配置 */
 .image-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
 }
 
-/* TODO 设置面板调整图片间距 */
-.manga-column {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    padding-left: 4px !important;
-    padding-right: 4px !important;
-}
-
+/* 漫画行样式 - 支持 RTL/LTR 布局 */
 .manga-row {
     display: flex;
     width: 100%;
-    flex-direction: row-reverse;
-    /* 从右到左的格式 */
+    justify-content: center;
+    align-items: flex-start;
 }
 
+.manga-row.row-rtl {
+    flex-direction: row-reverse;
+    /* 从右到左（日漫风格） */
+}
 
+.manga-row.row-ltr {
+    flex-direction: row;
+    /* 从左到右 */
+}
 
+/* 漫画列样式 - 支持动态列数 */
+.manga-column {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* 漫画图片样式 - 支持动态大小配置 */
 .manga-image {
     max-width: 100%;
     height: auto;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
     object-fit: contain;
+    border-radius: 4px;
+}
+
+/* 占位符样式 */
+.manga-image.placeholder {
+    visibility: hidden;
+    height: 0;
 }
 
 .reader-footer {
@@ -281,6 +299,28 @@
         /* 在移动端改为纵向排列 */
         gap: 20px;
     }
+
+    .reader-container {
+        padding: 10px;
+    }
+
+    .manga-row {
+        flex-direction: column !important;
+    }
+
+    .manga-column {
+        width: 100% !important;
+        margin-bottom: 8px;
+    }
+
+    .reader-controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .control-button {
+        width: 100%;
+    }
 }
 
 .manga-image.placeholder {
@@ -378,4 +418,64 @@
 :deep(.compact-comment-item .ant-comment-avatar img) {
     width: 32px;
     height: 32px;
+}
+
+/* 设置按钮样式 */
+.settings-button {
+    background-color: #52c41a;
+    position: relative;
+}
+
+.settings-button:hover:not(:disabled) {
+    background-color: #389e0d;
+}
+
+.settings-button span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 设置抽屉内容样式 */
+.ant-drawer-body .ant-form-item {
+    margin-bottom: 24px;
+}
+
+.ant-drawer-body .ant-slider {
+    margin: 12px 0;
+}
+
+/* 回到顶部按钮样式 */
+.back-to-top-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: rgba(74, 137, 220, 0.9);
+    color: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    backdrop-filter: blur(10px);
+}
+
+.back-to-top-button:hover {
+    background-color: rgba(58, 112, 193, 0.9);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.back-to-top-button .arrow-up {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 2px;
+}
+
+.back-to-top-button span:last-child {
+    font-size: 10px;
 }

@@ -145,28 +145,78 @@
                     <!-- 关于 -->
                     <div v-if="selectedMenu[0] === 'about'">
                         <h2 class="settings-section-title">关于应用</h2>
-                        <a-card class="setting-card">
+
+                        <!-- 应用信息 -->
+                        <a-card title="应用信息" class="setting-card">
                             <div class="about-container">
                                 <div class="about-logo">
                                     <img src="/logo.png" alt="CopyManga" class="app-logo" />
                                 </div>
-                                <h3>拷贝漫画</h3>
-                                <p class="version">版本 {{ appVersion }}</p>
+                                <h3>CopyManga</h3>
+                                <div class="version">当前版本: {{ appVersion }}</div>
+                                <div class="repo-link">
+                                    <a @click="openRepository">
+                                        项目仓库: https://github.com/caolib/copymanga
+                                    </a>
+                                </div>
+                                <div class="repo-link">
+                                    <a @click="openFeedback">
+                                        问题反馈
+                                    </a>
+                                </div>
 
                                 <a-divider />
 
                                 <p>拷贝漫画是基于官方API的第三方客户端，旨在提供更好的漫画阅读体验。</p>
                                 <p>本应用仅供学习交流使用，所有内容版权归原作者所有。</p>
-                                <p class="repo-link">
-                                    <span>仓库地址：</span>
-                                    <a @click="openRepository"
-                                        class="repo-link-text">https://github.com/caolib/copymanga</a>
-                                </p>
+                            </div>
+                        </a-card>
 
-                                <a-space style="margin-top: 16px">
-                                    <a-button type="primary">检查更新</a-button>
-                                    <a-button @click="openFeedback">贡献反馈</a-button>
-                                </a-space>
+                        <!-- 版本更新 -->
+                        <a-card title="版本更新" class="setting-card">
+                            <div class="update-section">
+                                <a-descriptions :column="1" bordered>
+                                    <a-descriptions-item label="当前版本">
+                                        {{ appVersion }}
+                                    </a-descriptions-item>
+                                    <a-descriptions-item label="最新版本" v-if="updateInfo.latestVersion">
+                                        {{ updateInfo.latestVersion }}
+                                        <a-tag v-if="updateInfo.hasUpdate" color="red" style="margin-left: 8px">
+                                            有新版本
+                                        </a-tag>
+                                        <a-tag v-else color="green" style="margin-left: 8px">
+                                            已是最新
+                                        </a-tag>
+                                    </a-descriptions-item>
+                                    <a-descriptions-item label="检查时间" v-if="lastCheckTime">
+                                        {{ lastCheckTime }}
+                                    </a-descriptions-item>
+                                </a-descriptions>
+
+                                <div style="margin-top: 16px;">
+                                    <a-space>
+                                        <a-button type="primary" @click="checkUpdate" :loading="checkingUpdate">
+                                            检查更新
+                                        </a-button>
+                                        <a-button v-if="updateInfo.hasUpdate" @click="openDownloadPage" type="default">
+                                            前往下载
+                                        </a-button>
+                                    </a-space>
+                                </div>
+
+                                <!-- 更新详情 -->
+                                <div v-if="updateInfo.hasUpdate && updateInfo.release" style="margin-top: 16px;">
+                                    <a-divider>更新详情</a-divider>
+                                    <h4>{{ updateInfo.release.name }}</h4>
+                                    <div class="release-notes" v-if="updateInfo.release.body">
+                                        <pre>{{ updateInfo.release.body }}</pre>
+                                    </div>
+                                    <div style="margin-top: 12px;">
+                                        <a-tag color="blue">
+                                            发布时间: {{ formatReleaseDate(updateInfo.release.published_at) }}
+                                        </a-tag>
+                                    </div>
+                                </div>
                             </div>
                         </a-card>
                     </div>
@@ -195,10 +245,11 @@ import {
     getAppConfig,
     saveAppConfig,
     validateApiDomain
-} from '@/utils/serverConfig'
+} from '@/utils/server-config'
 import { useAppStore } from '@/stores/app'
 import { getVersion } from '@tauri-apps/api/app'
 import { invoke } from '@tauri-apps/api/core'
+import { checkForUpdates } from '@/api/github'
 
 const serverForm = ref({
     serverPort: 5001
@@ -224,6 +275,16 @@ const readDirection = ref('rtl')
 
 // 关于页面信息
 const appVersion = ref('')
+
+// 版本更新相关
+const updateInfo = ref({
+    hasUpdate: false,
+    currentVersion: '',
+    latestVersion: '',
+    release: null
+})
+const checkingUpdate = ref(false)
+const lastCheckTime = ref('')
 
 // 验证端口格式
 const validatePort = (rule, value) => {
@@ -355,6 +416,48 @@ const fetchAppVersion = () => {
     })
 }
 
+// 检查更新
+const checkUpdate = async () => {
+    if (!appVersion.value || appVersion.value === 'error🥲') {
+        message.error('无法获取当前版本信息')
+        return
+    }
+
+    checkingUpdate.value = true
+
+    try {
+        const result = await checkForUpdates(appVersion.value)
+        updateInfo.value = result
+        lastCheckTime.value = new Date().toLocaleString('zh-CN')
+
+        if (result.hasUpdate) {
+            message.success(`发现新版本 ${result.latestVersion}！`)
+        } else {
+            message.info('当前已是最新版本')
+        }
+    } catch (error) {
+        console.error('检查更新失败:', error)
+        message.error('检查更新失败，请稍后重试')
+    } finally {
+        checkingUpdate.value = false
+    }
+}
+
+// 打开下载页面
+const openDownloadPage = () => {
+    if (updateInfo.value.release && updateInfo.value.release.html_url) {
+        openExternalUrl(updateInfo.value.release.html_url, '打开下载页面失败')
+    } else {
+        openRepository()
+    }
+}
+
+// 格式化发布日期
+const formatReleaseDate = (dateString) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleString('zh-CN')
+}
+
 onMounted(() => {
     loadConfig()
     fetchAppVersion()
@@ -464,5 +567,22 @@ h1 {
     color: #666;
     font-size: 14px;
     margin-left: 8px;
+}
+
+.update-section {
+    padding: 16px 0;
+}
+
+.release-notes {
+    background: #f5f5f5;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 12px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 </style>

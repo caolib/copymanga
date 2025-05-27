@@ -82,7 +82,7 @@
                                 <div class="browse-list-container">
                                     <a-row :gutter="[16, 16]">
                                         <a-col :span="8" v-for="(item, index) in browseList" :key="index">
-                                            <a-card hoverable class="browse-card">
+                                            <a-card hoverable class="browse-card" @click="goToManga(item)">
                                                 <div class="browse-card-content">
                                                     <div class="browse-card-cover">
                                                         <img :src="item.comic.cover" alt="cover" />
@@ -90,11 +90,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                            }}
+                                                        }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                            }}</div>
+                                                        }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
@@ -123,12 +123,16 @@
 
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
+import { useMangaStore } from '../stores/manga'
 import { message } from 'ant-design-vue'
 import { getUserBrowseList } from '../api/browse'
 import { UserOutlined, HistoryOutlined } from '@ant-design/icons-vue'
 
+const router = useRouter()
 const userStore = useUserStore()
+const mangaStore = useMangaStore()
 const userInfo = computed(() => userStore.userInfo)
 
 // 菜单选择相关
@@ -172,6 +176,18 @@ function handleBrowsePageChange(page, pageSize) {
     loadBrowseList()
 }
 
+// 跳转到漫画详情页
+const goToManga = (item) => {
+    // 将漫画基本信息保存到Pinia
+    mangaStore.setCurrentManga(item.comic)
+
+    // 跳转到详情页
+    router.push({
+        name: 'MangaDetail',
+        params: { pathWord: item.comic.path_word }
+    })
+}
+
 // 组件挂载时获取最新的用户信息
 onMounted(() => {
     userStore.fetchUserInfo().catch(() => { })
@@ -204,6 +220,7 @@ const formatDate = (dateString) => {
 
 .browse-card {
     height: 100%;
+    cursor: pointer;
     transition: all 0.3s;
 }
 

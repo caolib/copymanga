@@ -1,6 +1,6 @@
 <template>
     <div class="reader-container">
-        <!-- 顶部章节导航栏 - 始终显示 -->
+        <!-- 顶部章节导航栏 - 根据内容条件显示 -->
         <div class="reader-header" v-if="chapterInfo.comic_name">
             <div class="reader-title">
                 <h1>{{ chapterInfo.comic_name }}</h1>
@@ -10,8 +10,44 @@
                 <button @click="goBack" class="control-button">返回</button>
                 <button @click="prevChapter" class="control-button" :disabled="!hasPrevChapter">上一话</button>
                 <button @click="nextChapter" class="control-button" :disabled="!hasNextChapter">下一话</button>
+                <button @click="showSettingsDrawer = true" class="control-button settings-button">
+                    <span>设置</span>
+                </button>
             </div>
         </div>
+
+        <!-- 阅读器设置抽屉 -->
+        <a-drawer title="阅读设置" :width="300" :visible="showSettingsDrawer" @close="showSettingsDrawer = false"
+            :footer-style="{ textAlign: 'right' }">
+            <a-form layout="vertical">
+                <a-form-item label="漫画布局">
+                    <a-radio-group v-model:value="readerConfig.layout">
+                        <a-radio value="rtl">从右到左（日漫风格）</a-radio>
+                        <a-radio value="ltr">从左到右</a-radio>
+                    </a-radio-group>
+                </a-form-item>
+
+                <a-form-item label="每行列数">
+                    <a-slider v-model:value="readerConfig.columnsPerRow" :min="1" :max="4" :step="1"
+                        :marks="{ 1: '1列', 2: '2列', 3: '3列', 4: '4列' }" />
+                </a-form-item>
+
+                <a-form-item label="图片大小">
+                    <a-slider v-model:value="readerConfig.imageSize" :min="50" :max="150" :step="10"
+                        :marks="{ 50: '50%', 100: '100%', 150: '150%' }" />
+                </a-form-item>
+
+                <a-form-item label="图片间距">
+                    <a-slider v-model:value="readerConfig.imageGap" :min="0" :max="30" :step="1"
+                        :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
+                </a-form-item>
+            </a-form>
+
+            <template #footer>
+                <a-button style="margin-right: 8px" @click="showSettingsDrawer = false">关闭</a-button>
+                <a-button type="primary" @click="saveSettings">保存设置</a-button>
+            </template>
+        </a-drawer>
 
         <!-- 漫画图片区域 -->
         <div class="image-section">
@@ -30,20 +66,33 @@
                     <span class="info-item">更新时间: {{ chapterInfo.datetime_created }}</span>
                     <span class="info-item">{{ chapterInfo.count }}页</span>
                 </div>
-                <div class="image-container">
-                    <!-- 两列图片布局，从右到左的日漫格式 -->
-                    <a-row v-for="(chunk, rowIndex) in imageChunks" :key="rowIndex" :gutter="16" class="manga-row"
+                <div class="image-container" :style="{ gap: `${readerConfig.imageGap}px` }">
+                    <!-- 动态列数和方向布局 -->
+                    <a-row v-for="(chunk, rowIndex) in imageChunks" :key="rowIndex" :gutter="16"
+                        :class="['manga-row', { 'row-rtl': readerConfig.layout === 'rtl', 'row-ltr': readerConfig.layout === 'ltr' }]"
                         justify="center" align="middle">
-                        <a-col :span="12" class="manga-column right" v-if="chunk[1]">
-                            <img v-if="!chunk[1].isPlaceholder" :src="chunk[1].url" :alt="`第${rowIndex * 2 + 2}页`"
-                                class="manga-image" loading="lazy" />
-                            <div v-else class="manga-image placeholder"></div>
-                        </a-col>
-                        <a-col :span="12" class="manga-column left">
-                            <img v-if="!chunk[0].isPlaceholder" :src="chunk[0].url" :alt="`第${rowIndex * 2 + 1}页`"
-                                class="manga-image" loading="lazy" />
-                            <div v-else class="manga-image placeholder"></div>
-                        </a-col>
+                        <template v-if="readerConfig.layout === 'rtl'">
+                            <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
+                                v-for="(image, colIndex) in chunk" :key="colIndex"
+                                :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
+                                <img v-if="!image.isPlaceholder" :src="image.url"
+                                    :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
+                                    class="manga-image" loading="lazy"
+                                    :style="{ width: `${readerConfig.imageSize}%` }" />
+                                <div v-else class="manga-image placeholder"></div>
+                            </a-col>
+                        </template>
+                        <template v-else>
+                            <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
+                                v-for="(image, colIndex) in [...chunk].reverse()" :key="colIndex"
+                                :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
+                                <img v-if="!image.isPlaceholder" :src="image.url"
+                                    :alt="`第${rowIndex * readerConfig.columnsPerRow + chunk.length - colIndex}页`"
+                                    class="manga-image" loading="lazy"
+                                    :style="{ width: `${readerConfig.imageSize}%` }" />
+                                <div v-else class="manga-image placeholder"></div>
+                            </a-col>
+                        </template>
                     </a-row>
                 </div>
                 <div class="reader-footer">
@@ -55,7 +104,7 @@
             </div>
         </div>
 
-        <!-- 漫画评论区 - 独立模块 -->
+        <!-- 漫画评论区 -->
         <div class="comments-section">
             <a-divider>评论区</a-divider>
             <a-typography-title :level="4">评论 ({{ comments.length }})</a-typography-title>
@@ -74,15 +123,29 @@
                 <a-empty v-else-if="!commentsError && comments.length === 0" description="暂无评论" />
             </a-spin>
         </div>
+
+        <!-- 回到顶部按钮 -->
+        <a-back-top :visibility-height="300" :style="{
+            bottom: '5px',
+            right: '5px',
+            zIndex: 1000
+        }">
+            <div class="back-to-top-button">
+                <span class="arrow-up">↑</span>
+                <span>顶部</span>
+            </div>
+        </a-back-top>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick } from 'vue' // 增加导入 nextTick
+import { ref, computed, onMounted, watch, nextTick, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getChapterImages } from '../api/manga'
 import { getChapterComments } from '../api/comment'
-import { useMangaStore } from '../stores/manga' // 导入漫画存储
+import { useMangaStore } from '../stores/manga'
+import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '../utils/ui-config'
+import { message } from 'ant-design-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -100,18 +163,29 @@ const currentNextChapterId = ref(null)
 const comments = ref([])
 const loadingComments = ref(false)
 const commentsError = ref('') // 评论独立的错误状态
+const showSettingsDrawer = ref(false); // 控制设置抽屉的显示
+const readerConfig = reactive({ ...DEFAULT_UI_CONFIG.reader }); // 阅读器配置
 
-// 计算属性：将图片分成两张一组，若为奇数则补空白
+// 计算属性：将图片分组，根据配置的每行列数
 const imageChunks = computed(() => {
-    const arr = [...images.value]
-    if (arr.length % 2 === 1) {
-        arr.push({ url: '', isPlaceholder: true }) // 补空白
+    const arr = [...images.value];
+    const columnsPerRow = readerConfig.columnsPerRow;
+
+    // 如果图片数量不能被列数整除，补充空白占位符
+    const remainder = arr.length % columnsPerRow;
+    if (remainder !== 0) {
+        const placeholdersNeeded = columnsPerRow - remainder;
+        for (let i = 0; i < placeholdersNeeded; i++) {
+            arr.push({ url: '', isPlaceholder: true });
+        }
     }
-    const chunks = []
-    for (let i = 0; i < arr.length; i += 2) {
-        chunks.push(arr.slice(i, i + 2))
+
+    // 按照列数分组
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += columnsPerRow) {
+        chunks.push(arr.slice(i, i + columnsPerRow));
     }
-    return chunks
+    return chunks;
 })
 
 // 计算属性：是否有上一章
@@ -328,6 +402,36 @@ const fetchComments = () => {
         })
 }
 
+// 配置管理方法
+const loadSettings = async () => {
+    try {
+        const config = await loadUIConfig()
+        Object.assign(readerConfig, config.reader)
+        console.log('UI配置加载成功:', config)
+    } catch (error) {
+        console.error('加载UI配置失败:', error)
+        message.error('加载配置失败')
+    }
+}
+
+const saveSettings = async () => {
+    try {
+        const success = await updateReaderConfig(readerConfig)
+        if (success) {
+            console.log('UI配置保存成功')
+            message.success('配置保存成功')
+            showSettingsDrawer.value = false // 保存成功后关闭抽屉
+        } else {
+            message.error('配置保存失败')
+        }
+        return success
+    } catch (error) {
+        console.error('保存UI配置失败:', error)
+        message.error('配置保存失败')
+        return false
+    }
+}
+
 onMounted(() => {
     // 检查是否有有效的章节数据
     if (!route.params.chapterId || (!mangaStore.currentChapters.length && !mangaStore.pathWord)) {
@@ -344,6 +448,9 @@ onMounted(() => {
     setTimeout(() => {
         fetchComments()
     }, 300)
+
+    // 加载用户配置
+    loadSettings()
 })
 
 // 监听路由参数 chapterId 的变化 - 完全独立的两个监听器
