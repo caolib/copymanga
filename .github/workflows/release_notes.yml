@@ -1,0 +1,74 @@
+name: release-notes
+
+on:
+  workflow_run:
+    workflows: ["publish"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '标签名称'
+        required: true
+        type: string
+
+jobs:
+  update-release-notes:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    if: github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch'
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          
+      - name: 获取标签
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV
+          else
+            TAG=$(git describe --tags --abbrev=0)
+            echo "TAG=${TAG}" >> $GITHUB_ENV
+          fi
+          
+      - name: 生成发布说明
+        run: |
+          PREV=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+          
+          if [ -n "$PREV" ]; then
+            COMMITS=$(git log ${PREV}..${TAG} --pretty=format:"- [\`%h\`] %s" --reverse)
+          else
+            COMMITS=$(git log --pretty=format:"- [\`%h\`] %s" --reverse HEAD)
+          fi
+          
+          # 过滤无关提交
+          FILTERED=$(echo "$COMMITS" | grep -v -E "Merge branch|docs:|README" || echo "- 🔧 优化和改进")
+          
+          # 生成发布说明
+          {
+            echo "## 🎉 本次更新"
+            echo ""
+            echo "$FILTERED"
+            echo ""
+            echo "---"
+            echo "📋 [查看完整更新日志](https://github.com/caolib/copymanga/commits/${TAG})"
+          } > release_notes.md
+          
+          # 保存到环境变量
+          {
+            echo "RELEASE_NOTES<<EOF"
+            cat release_notes.md
+            echo "EOF"
+          } >> $GITHUB_ENV
+          
+      - name: 更新发布说明
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: "📱 拷贝漫画 ${{ env.TAG }}"
+          body: ${{ env.RELEASE_NOTES }}
+          append_body: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
