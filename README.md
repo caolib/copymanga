@@ -1,4 +1,4 @@
-# 拷贝漫画网页
+# 拷贝漫画第三方客户端
 
 <p align="center">
   <img src="https://img.shields.io/github/downloads/caolib/copymanga/total?labelColor=grey&color=blue" alt="Downloads">
