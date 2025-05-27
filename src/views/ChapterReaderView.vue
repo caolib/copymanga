@@ -123,6 +123,18 @@
                 <a-empty v-else-if="!commentsError && comments.length === 0" description="暂无评论" />
             </a-spin>
         </div>
+
+        <!-- 回到顶部按钮 -->
+        <a-back-top :visibility-height="300" :style="{
+            bottom: '5px',
+            right: '5px',
+            zIndex: 1000
+        }">
+            <div class="back-to-top-button">
+                <span class="arrow-up">↑</span>
+                <span>顶部</span>
+            </div>
+        </a-back-top>
     </div>
 </template>
 

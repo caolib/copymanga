@@ -9,22 +9,34 @@
                         <a-select-option value="-datetime_modifier">按加入书架时间排序</a-select-option>
                         <a-select-option value="-datetime_browse">按阅读时间排序</a-select-option>
                     </a-select>
-                    <a-button type="primary" @click="refreshCollection">
-                        {{ loading ? '加载中...' : '刷新' }}
+                    <a-button type="primary" @click="refreshCollection" :loading="loading">
+                        刷新
                     </a-button>
-                    <a-typography-text type="secondary" v-if="lastUpdateTime">
+                    <a-typography-text type="secondary" v-if="lastUpdateTime && !loading">
                         上次更新: {{ formatUpdateTime(lastUpdateTime) }}
                     </a-typography-text>
                 </div>
             </template>
         </a-page-header>
 
-
         <a-alert v-if="error" type="error" :message="error" show-icon banner style="margin-bottom: 20px" />
 
         <a-empty v-if="!loading && !error && mangaList.length === 0" description="您的书架还是空的，快去收藏喜欢的漫画吧！" />
 
-        <div v-else class="manga-grid">
+        <!-- 骨架屏加载状态 -->
+        <div v-if="loading" class="manga-grid">
+            <a-card v-for="n in 8" :key="n" class="manga-card skeleton-card">
+                <a-skeleton :loading="true" active>
+                    <template #avatar>
+                        <div class="skeleton-cover"></div>
+                    </template>
+                    <a-skeleton-paragraph :rows="2" />
+                </a-skeleton>
+            </a-card>
+        </div>
+
+        <!-- 实际内容 -->
+        <div v-else-if="!error && mangaList.length > 0" class="manga-grid">
             <a-card v-for="item in mangaList" :key="item.uuid" hoverable class="manga-card" @click="goToManga(item)">
                 <div class="manga-cover">
                     <img :src="item.comic.cover" :alt="item.comic.name" />
@@ -48,7 +60,6 @@
                 </a-card-meta>
             </a-card>
         </div>
-
     </div>
 </template>
 
@@ -212,5 +223,69 @@ onMounted(() => {
 .manga-update {
     font-size: 12px;
     color: rgba(0, 0, 0, 0.45);
+}
+
+/* 骨架屏样式 */
+.skeleton-card {
+    pointer-events: none;
+}
+
+.skeleton-card :deep(.ant-card-body) {
+    padding: 12px;
+}
+
+.skeleton-cover {
+    width: 100%;
+    height: 200px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-cover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+    .manga-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+    }
+
+    .collection-container {
+        padding: 0 16px 16px;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .header-actions .ant-select {
+        width: 100% !important;
+        margin-right: 0 !important;
+        margin-bottom: 8px;
+    }
 }
 </style>
