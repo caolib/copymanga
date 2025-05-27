@@ -8,16 +8,117 @@ use axum::{
     Router,
 };
 use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::fs;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use tauri::{AppHandle, Manager};
+
+#[derive(Serialize, Deserialize)]
+struct ServerConfig {
+    #[serde(rename = "serverPort")]
+    server_port: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct AppConfig {
+    #[serde(rename = "apiDomain")]
+    api_domain: String,
+}
+
+fn get_config_port(app_handle: &AppHandle) -> Result<u16, String> {
+    // 使用 Tauri 的 app_config_dir 获取应用配置目录
+    let app_config_dir = app_handle.path().app_config_dir()
+        .map_err(|e| format!("无法获取应用配置目录: {}", e))?;
+    
+    let config_file = app_config_dir.join("server.json");
+    
+    // 如果配置文件不存在，创建默认配置
+    if !config_file.exists() {
+        // 确保配置目录存在
+        if let Err(e) = std::fs::create_dir_all(&app_config_dir) {
+            return Err(format!("无法创建配置目录: {}", e));
+        }
+        
+        // 创建默认配置
+        let default_config = ServerConfig {
+            server_port: "5001".to_string(),
+        };
+        
+        let default_content = serde_json::to_string_pretty(&default_config)
+            .map_err(|e| format!("无法序列化默认配置: {}", e))?;
+        
+        if let Err(e) = std::fs::write(&config_file, default_content) {
+            return Err(format!("无法创建默认配置文件: {}", e));
+        }
+        
+        println!("已创建默认配置文件: {:?}", config_file);
+        return Ok(5001);
+    }
+    
+    let content = fs::read_to_string(&config_file)
+        .map_err(|e| format!("无法读取配置文件 {:?}: {}", config_file, e))?;
+    
+    let config: ServerConfig = serde_json::from_str(&content)
+        .map_err(|e| format!("配置文件格式错误: {}", e))?;
+    
+    let port = config.server_port.parse::<u16>()
+        .map_err(|e| format!("端口号格式错误: {}", e))?;
+    
+    if port == 0 {
+        return Err("端口号不能为0".to_string());
+    }
+    
+    Ok(port)
+}
+
+fn get_config_domain(app_handle: &AppHandle) -> Result<String, String> {
+    // 使用 Tauri 的 app_config_dir 获取应用配置目录
+    let app_config_dir = app_handle.path().app_config_dir()
+        .map_err(|e| format!("无法获取应用配置目录: {}", e))?;
+    
+    let config_file = app_config_dir.join("copymanga.json");
+    
+    // 如果配置文件不存在，创建默认配置
+    if !config_file.exists() {
+        // 确保配置目录存在
+        if let Err(e) = std::fs::create_dir_all(&app_config_dir) {
+            return Err(format!("无法创建配置目录: {}", e));
+        }
+        
+        // 创建默认配置
+        let default_config = AppConfig {
+            api_domain: "https://copy20.com".to_string(),
+        };
+        
+        let default_content = serde_json::to_string_pretty(&default_config)
+            .map_err(|e| format!("无法序列化默认配置: {}", e))?;
+        
+        if let Err(e) = std::fs::write(&config_file, default_content) {
+            return Err(format!("无法创建默认配置文件: {}", e));
+        }
+        
+        println!("已创建默认应用配置文件: {:?}", config_file);
+        return Ok("https://copy20.com".to_string());
+    }
+    
+    let content = fs::read_to_string(&config_file)
+        .map_err(|e| format!("无法读取配置文件 {:?}: {}", config_file, e))?;
+    
+    let config: AppConfig = serde_json::from_str(&content)
+        .map_err(|e| format!("配置文件格式错误: {}", e))?;
+    
+    Ok(config.api_domain)
+}
 
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
-        .setup(|_app| {
+        .setup(|app| {
+            let app_handle = app.handle().clone();
             // 启动代理服务（tokio后台任务）
-            tauri::async_runtime::spawn(async {
-                start_proxy().await;
+            tauri::async_runtime::spawn(async move {
+                start_proxy(app_handle).await;
             });
             Ok(())
         })
@@ -26,14 +127,36 @@ fn main() {
 }
 
 // 代理服务逻辑单独封装
-async fn start_proxy() {
+async fn start_proxy(app_handle: AppHandle) {
     let client = Arc::new(Client::builder().cookie_store(true).build().unwrap());
+    
+    // 从配置文件读取端口，必须存在
+    let port = match get_config_port(&app_handle) {
+        Ok(port) => port,
+        Err(e) => {
+            eprintln!("配置读取失败: {}", e);
+            eprintln!("请在设置中配置服务器端口");
+            panic!("无法启动代理服务器: {}", e);
+        }
+    };
+
+    // 从配置文件读取域名，必须存在
+    let domain = match get_config_domain(&app_handle) {
+        Ok(domain) => domain,
+        Err(e) => {
+            eprintln!("域名配置读取失败: {}", e);
+            eprintln!("请在设置中配置 API 域名");
+            panic!("无法启动代理服务器: {}", e);
+        }
+    };
+
+    println!("使用 API 域名: {}", domain);
+    
     let app = Router::new()
         .route("/proxy/*path", any(proxy_handler))
-        .with_state(client);
-
-    // 端口可自定义，建议 5001，避免冲突
-    let addr = SocketAddr::from(([127, 0, 0, 1], 5001));
+        .with_state((client, domain));
+    
+    let addr = SocketAddr::from(([127, 0, 0, 1], port));
     println!("Rust 代理服务器运行在 http://{}", addr);
 
     let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
@@ -41,7 +164,7 @@ async fn start_proxy() {
 }
 
 async fn proxy_handler(
-    State(client): State<Arc<Client>>,
+    State((client, domain)): State<(Arc<Client>, String)>,
     req: Request,
 ) -> Result<Response, StatusCode> {
     // 提前获取 method、headers、uri
@@ -52,7 +175,7 @@ async fn proxy_handler(
     // 构造目标 URL
     let path = uri.path().trim_start_matches("/proxy");
     let query = uri.query().map(|q| format!("?{}", q)).unwrap_or_default();
-    let target_url = format!("https://copy20.com{}{}", path, query);
+    let target_url = format!("{}{}{}", domain, path, query);
 
     // 构造请求
     let mut builder = client.request(method.clone(), &target_url);
@@ -64,7 +187,7 @@ async fn proxy_handler(
             headers.insert(k, v.clone());
         }
     }
-    headers.insert("Referer", "https://copy20.com/".parse().unwrap());
+    headers.insert("Referer", format!("{}/", domain).parse().unwrap());
     headers.insert("Cache-Control", "no-cache".parse().unwrap());
     headers.insert("Pragma", "no-cache".parse().unwrap());
     builder = builder.headers(headers);
