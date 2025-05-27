@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { getToken } from './auth'
 import { message } from 'ant-design-vue'
-import { getServerConfig } from './serverConfig'
+import { getServerConfig } from './server-config'
 import router from '@/router'
 
 // 创建 axios 实例

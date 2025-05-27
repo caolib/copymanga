@@ -195,7 +195,7 @@ import {
     getAppConfig,
     saveAppConfig,
     validateApiDomain
-} from '@/utils/serverConfig'
+} from '@/utils/server-config'
 import { useAppStore } from '@/stores/app'
 import { getVersion } from '@tauri-apps/api/app'
 import { invoke } from '@tauri-apps/api/core'
