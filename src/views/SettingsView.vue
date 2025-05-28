@@ -9,15 +9,21 @@
                     </div>
                     <a-menu v-model:selectedKeys="selectedMenu" mode="inline" style="border-right: 0">
                         <a-menu-item key="server">
-                            <template #icon><cloud-server-outlined /></template>
+                            <template #icon>
+                                <CloudServerOutlined />
+                            </template>
                             服务设置
                         </a-menu-item>
                         <a-menu-item key="appearance">
-                            <template #icon><skin-outlined /></template>
+                            <template #icon>
+                                <SkinOutlined />
+                            </template>
                             界面设置
                         </a-menu-item>
                         <a-menu-item key="about">
-                            <template #icon><info-circle-outlined /></template>
+                            <template #icon>
+                                <InfoCircleOutlined />
+                            </template>
                             关于
                         </a-menu-item>
                     </a-menu>
@@ -97,7 +103,7 @@
                                     <a-button type="primary" @click="handleRestart" :loading="restarting" size="large"
                                         danger>
                                         <template #icon>
-                                            <reload-outlined />
+                                            <ReloadOutlined />
                                         </template>
                                         重启应用
                                     </a-button>
@@ -153,31 +159,53 @@
 
                     <!-- 关于 -->
                     <div v-if="selectedMenu[0] === 'about'">
-                        <h2 class="settings-section-title">关于应用</h2>
-
                         <!-- 应用信息 -->
                         <a-card title="应用信息" class="setting-card">
                             <div class="about-container">
-                                <div class="about-logo">
-                                    <img src="/logo.png" alt="CopyManga" class="app-logo" />
-                                </div>
-                                <h3>CopyManga</h3>
-                                <div class="version">当前版本: {{ appVersion }}</div>
-                                <div class="repo-link">
-                                    <a @click="openRepository">
-                                        项目仓库: https://github.com/caolib/copymanga
-                                    </a>
-                                </div>
-                                <div class="repo-link">
-                                    <a @click="openFeedback">
-                                        问题反馈
-                                    </a>
+                                <div class="about-header">
+                                    <div class="about-logo">
+                                        <img src="/logo.png" alt="CopyManga" class="app-logo" />
+                                    </div>
+                                    <div class="about-info">
+                                        <h3>CopyManga</h3>
+                                        <div class="description">
+                                            基于官方API的第三方漫画客户端
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <a-divider />
 
-                                <p>拷贝漫画是基于官方API的第三方客户端，旨在提供更好的漫画阅读体验。</p>
-                                <p>本应用仅供学习交流使用，所有内容版权归原作者所有。</p>
+                                <div class="links-section">
+                                    <a-space wrap>
+                                        <a-button type="primary" @click="checkUpdate" :loading="checkingUpdate">
+                                            <template #icon>
+                                                <SyncOutlined />
+                                            </template>
+                                            检查更新
+                                        </a-button>
+                                        <a-button @click="openRepository">
+                                            <template #icon>
+                                                <GithubOutlined />
+                                            </template>
+                                            项目仓库
+                                        </a-button>
+                                        <a-button @click="openFeedback">
+                                            <template #icon>
+                                                <BugOutlined />
+                                            </template>
+                                            问题反馈
+                                        </a-button>
+                                    </a-space>
+                                </div>
+
+                                <a-divider />
+
+                                <div class="disclaimer">
+                                    <a-alert message="使用声明"
+                                        description="本应用是基于拷贝漫画官方API的第三方客户端，仅供学习交流使用。所有漫画内容版权归原作者和平台所有。" type="info"
+                                        show-icon />
+                                </div>
                             </div>
                         </a-card>
 
@@ -186,10 +214,12 @@
                             <div class="update-section">
                                 <a-descriptions :column="1" bordered>
                                     <a-descriptions-item label="当前版本">
-                                        {{ appVersion }}
+                                        <a-tag color="blue">{{ appVersion }}</a-tag>
                                     </a-descriptions-item>
                                     <a-descriptions-item label="最新版本" v-if="updateInfo.latestVersion">
-                                        {{ updateInfo.latestVersion }}
+                                        <a-tag :color="updateInfo.hasUpdate ? 'orange' : 'green'">
+                                            {{ updateInfo.latestVersion }}
+                                        </a-tag>
                                         <a-tag v-if="updateInfo.hasUpdate" color="red" style="margin-left: 8px">
                                             有新版本
                                         </a-tag>
@@ -197,33 +227,35 @@
                                             已是最新
                                         </a-tag>
                                     </a-descriptions-item>
+                                    <a-descriptions-item label="发布时间" v-if="updateInfo.release?.published_at">
+                                        {{ formatReleaseDate(updateInfo.release.published_at) }}
+                                    </a-descriptions-item>
                                     <a-descriptions-item label="检查时间" v-if="lastCheckTime">
                                         {{ lastCheckTime }}
                                     </a-descriptions-item>
                                 </a-descriptions>
 
                                 <div style="margin-top: 16px;">
-                                    <a-space>
-                                        <a-button type="primary" @click="checkUpdate" :loading="checkingUpdate">
-                                            检查更新
-                                        </a-button>
+                                    <a-space wrap>
                                         <a-button v-if="updateInfo.hasUpdate" @click="openDownloadPage" type="default">
+                                            <template #icon>
+                                                <DownloadOutlined />
+                                            </template>
                                             前往下载
                                         </a-button>
                                     </a-space>
                                 </div>
 
                                 <!-- 更新详情 -->
-                                <div v-if="updateInfo.hasUpdate && updateInfo.release" style="margin-top: 16px;">
-                                    <a-divider>更新详情</a-divider>
-                                    <h4>{{ updateInfo.release.name }}</h4>
-                                    <div class="release-notes" v-if="updateInfo.release.body">
-                                        <pre>{{ updateInfo.release.body }}</pre>
+                                <div v-if="updateInfo.release && updateInfo.release.body" style="margin-top: 16px;">
+                                    <a-divider>更新内容</a-divider>
+                                    <div v-html="formatChangeLog(updateInfo.release.body)" class="changelog-content">
                                     </div>
-                                    <div style="margin-top: 12px;">
-                                        <a-tag color="blue">
-                                            发布时间: {{ formatReleaseDate(updateInfo.release.published_at) }}
-                                        </a-tag>
+                                    <div style="margin-top: 12px; text-align: right;">
+                                        <a-button type="link" size="small" @click="openChangelogUrl"
+                                            style="padding: 0; height: auto;">
+                                            查看完整更新日志 →
+                                        </a-button>
                                     </div>
                                 </div>
                             </div>
@@ -245,7 +277,12 @@ import {
     DashboardOutlined,
     SkinOutlined,
     SettingOutlined,
-    InfoCircleOutlined
+    InfoCircleOutlined,
+    GithubOutlined,
+    BugOutlined,
+    DownloadOutlined,
+    BookOutlined,
+    SyncOutlined
 } from '@ant-design/icons-vue'
 import {
     getServerConfig,
@@ -470,6 +507,7 @@ const checkUpdate = async () => {
 
     try {
         const result = await checkForUpdates(appVersion.value)
+        console.log('检查更新结果:', result) // 添加调试日志
         updateInfo.value = result
         lastCheckTime.value = new Date().toLocaleString('zh-CN')
 
@@ -495,6 +533,77 @@ const openDownloadPage = () => {
     }
 }
 
+// 打开完整更新日志
+const openChangelogUrl = () => {
+    if (updateInfo.value.release && updateInfo.value.release.html_url) {
+        openExternalUrl(updateInfo.value.release.html_url, '打开更新日志失败')
+    } else {
+        openRepository()
+    }
+}
+
+// 格式化更新日志
+const formatChangeLog = (body) => {
+    if (!body) return ''
+
+    // 处理markdown格式的更新日志
+    let formatted = body
+        .replace(/\r\n/g, '\n')
+        .trim()
+
+    // 处理标题 (## 标题)
+    formatted = formatted.replace(/^## (.+)$/gm, '<h3 style="color: #1890ff; margin: 16px 0 12px 0; font-size: 16px; font-weight: 600; border-bottom: 1px solid #e8e8e8; padding-bottom: 8px;">$1</h3>')
+
+    // 处理链接 [text](url) - 先处理链接，避免后续处理干扰
+    formatted = formatted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" style="color: #1890ff; text-decoration: none;">$1</a>')
+
+    // 拆分成行来处理列表
+    const lines = formatted.split('\n')
+    const processedLines = []
+    let inList = false
+
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim()
+
+        if (line.startsWith('- [') && line.includes(']')) {
+            // commit格式列表项
+            const match = line.match(/^- \[([^\]]+)\]\s*(.+)$/)
+            if (match) {
+                if (!inList) {
+                    processedLines.push('<ul class="changelog-list">')
+                    inList = true
+                }
+                processedLines.push(`<li class="commit-item"><span class="commit-hash">[${match[1]}]</span> <span class="commit-message">${match[2]}</span></li>`)
+            }
+        } else if (line.startsWith('- ')) {
+            // 普通列表项
+            if (!inList) {
+                processedLines.push('<ul class="changelog-list">')
+                inList = true
+            }
+            processedLines.push(`<li class="changelog-item">${line.substring(2)}</li>`)
+        } else {
+            // 非列表项
+            if (inList) {
+                processedLines.push('</ul>')
+                inList = false
+            }
+            if (line) {
+                processedLines.push(line)
+            } else {
+                processedLines.push('<br>')
+            }
+        }
+    }
+
+    // 如果最后还在列表中，关闭列表
+    if (inList) {
+        processedLines.push('</ul>')
+    }
+
+    return processedLines.join('\n')
+}
+
 // 格式化发布日期
 const formatReleaseDate = (dateString) => {
     if (!dateString) return ''
@@ -509,4 +618,73 @@ onMounted(() => {
 
 <style scoped>
 @import url('../assets/styles/settings.css');
+
+.changelog-content {
+    font-size: 14px;
+    line-height: 1.6;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 12px;
+    background-color: #fafafa;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
+}
+
+.changelog-content h3 {
+    border-bottom: 1px solid #e8e8e8;
+    padding-bottom: 8px;
+    margin-bottom: 12px !important;
+}
+
+.changelog-content :deep(.changelog-list) {
+    margin: 12px 0;
+    padding-left: 20px;
+    list-style: none;
+}
+
+.changelog-content :deep(.commit-item) {
+    padding: 6px 12px;
+    margin: 4px 0;
+    background-color: #f8f9fa;
+    border-left: 3px solid #1890ff;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.changelog-content :deep(.changelog-item) {
+    padding: 6px 12px;
+    margin: 4px 0;
+    background-color: #ffffff;
+    border-left: 2px solid #d9d9d9;
+    border-radius: 4px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.changelog-content :deep(.commit-hash) {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    color: #52c41a;
+    background-color: #e6f7ff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    font-weight: bold;
+}
+
+.changelog-content :deep(.commit-message) {
+    color: #333;
+    flex: 1;
+}
+
+.changelog-content :deep(a) {
+    color: #1890ff !important;
+    text-decoration: none;
+}
+
+.changelog-content :deep(a:hover) {
+    text-decoration: underline;
+}
 </style>

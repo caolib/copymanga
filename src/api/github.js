@@ -62,7 +62,7 @@ const checkForUpdates = async (currentVersion) => {
             hasUpdate,
             currentVersion,
             latestVersion,
-            release: hasUpdate ? release : null
+            release: release // 总是返回release信息，不管是否有更新
         };
     } catch (error) {
         console.error('检查更新失败:', error);
