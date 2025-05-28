@@ -29,6 +29,9 @@ jobs:
   publish-tauri:
     needs: release-notes
     if: always()
+    permissions:
+      contents: write
+      actions: read
     strategy:
       fail-fast: false
       matrix:
