@@ -29,3 +29,5 @@ coverage
 *.tsbuildinfo
 
 .github/instructions/
+
+get-commits.ps1
