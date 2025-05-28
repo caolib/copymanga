@@ -21,7 +21,7 @@
 
         <a-alert v-if="error" type="error" :message="error" show-icon banner style="margin-bottom: 20px" />
 
-        <a-empty v-if="!loading && !error && mangaList.length === 0" description="您的书架还是空的，快去收藏喜欢的漫画吧！" />
+        <a-empty v-if="!loading && !error && validMangaList.length === 0" description="您的书架还是空的，快去收藏喜欢的漫画吧！" />
 
         <!-- 骨架屏加载状态 -->
         <div v-if="loading" class="manga-grid">
@@ -35,17 +35,17 @@
         </div>
 
         <!-- 实际内容 -->
-        <div v-else-if="!error && mangaList.length > 0">
+        <div v-else-if="!error && validMangaList.length > 0">
             <div class="manga-grid">
-                <a-card v-for="item in mangaList" :key="item.uuid" hoverable class="manga-card"
+                <a-card v-for="item in validMangaList" :key="item.uuid || item.id" hoverable class="manga-card"
                     @click="goToManga(item)">
                     <div class="manga-cover">
                         <img :src="item.comic.cover" :alt="item.comic.name" />
-                        <div class="last-read" v-if="item.last_browse">
+                        <div class="last-read" v-if="item.last_browse && item.last_browse.last_browse_name">
                             上次阅读: {{ item.last_browse.last_browse_name }}
                         </div>
                         <a-badge
-                            v-if="item.last_browse && item.comic.last_chapter_name && item.last_browse.last_browse_name !== item.comic.last_chapter_name"
+                            v-if="item.last_browse && item.last_browse.last_browse_name && item.comic.last_chapter_name && item.last_browse.last_browse_name !== item.comic.last_chapter_name"
                             count="有更新"
                             style="position: absolute; top: 8px; right: 8px; z-index: 2; background: #ff4d4f; color: #fff; font-size: 12px; border-radius: 8px; padding: 0 8px;" />
                     </div>
@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '../stores/collection'
 import { isLoggedIn } from '../utils/auth'
@@ -97,6 +97,11 @@ const currentPage = ref(1)
 const pageSize = ref(12)
 const totalCount = ref(0)
 
+// 过滤有效的漫画数据，防止渲染错误
+const validMangaList = computed(() => {
+    return mangaList.value.filter(item => item && item.comic && item.comic.name)
+})
+
 const formatUpdateTime = (timeString) => {
     const date = new Date(timeString)
     return date.toLocaleString('zh-CN', {
@@ -109,6 +114,12 @@ const formatUpdateTime = (timeString) => {
 }
 
 const goToManga = (item) => {
+    // 安全检查：确保数据完整
+    if (!item || !item.comic || !item.comic.path_word) {
+        message.error('漫画数据异常，无法跳转')
+        return
+    }
+
     // 将漫画基本信息保存到Pinia
     collectionStore.setCurrentManga(item.comic)
 
@@ -129,8 +140,16 @@ const fetchCollection = async () => {
         free_type: 1,
         ordering: ordering.value
     }).then(res => {
-        mangaList.value = res.results.list
-        totalCount.value = res.results.total || 0
+        // 安全检查：确保返回数据结构正确
+        if (res && res.results && Array.isArray(res.results.list)) {
+            mangaList.value = res.results.list
+            totalCount.value = res.results.total || 0
+        } else {
+            // 数据结构异常，清空列表
+            mangaList.value = []
+            totalCount.value = 0
+            console.warn('API返回数据结构异常:', res)
+        }
         lastUpdateTime.value = new Date().toISOString()
     }).catch((err) => {
         error.value = err.message || '获取书架失败'

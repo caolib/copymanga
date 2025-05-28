@@ -309,14 +309,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.ant-card-body {
-    padding: 10px !important;
-}
-
 .home {
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
+}
+
+.home :deep(.ant-card .ant-card-body) {
+    padding: 10px 5px !important;
 }
 
 .search-grid {
