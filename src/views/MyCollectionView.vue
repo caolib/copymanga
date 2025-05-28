@@ -123,10 +123,14 @@ const goToManga = (item) => {
     // 将漫画基本信息保存到Pinia
     collectionStore.setCurrentManga(item.comic)
 
-    // 直接跳转到详情页，不再通过URL传递数据
+    // 跳转到详情页，携带来自书架和上次阅读信息
     router.push({
         name: 'MangaDetail',
-        params: { pathWord: item.comic.path_word }
+        params: { pathWord: item.comic.path_word },
+        query: {
+            from: 'collection',
+            lastBrowse: item.last_browse ? JSON.stringify(item.last_browse) : null
+        }
     })
 }
 
