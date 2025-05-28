@@ -109,34 +109,43 @@
 
                     <!-- 界面设置 -->
                     <div v-if="selectedMenu[0] === 'appearance'">
-                        <h2 class="settings-section-title">界面设置（待完成）</h2>
-                        <a-card title="主题设置" class="setting-card">
-                            <a-form layout="vertical">
-                                <a-form-item label="颜色主题">
-                                    <a-radio-group v-model:value="themeMode" button-style="solid">
-                                        <a-radio-button value="light">浅色</a-radio-button>
-                                        <a-radio-button value="dark">深色</a-radio-button>
-                                        <a-radio-button value="system">跟随系统</a-radio-button>
-                                    </a-radio-group>
-                                </a-form-item>
+                        <h2 class="settings-section-title">界面设置</h2>
 
-                                <a-form-item label="字体大小">
-                                    <a-slider v-model:value="fontSize" :min="12" :max="20" :step="1" />
-                                    <div class="help-text">
-                                        默认: 14px
-                                    </div>
-                                </a-form-item>
-                            </a-form>
-                        </a-card>
-
-                        <a-card title="阅读设置" class="setting-card">
+                        <!-- 阅读器设置 -->
+                        <a-card title="阅读器设置" class="setting-card">
                             <a-form layout="vertical">
-                                <a-form-item label="阅读方向">
-                                    <a-radio-group v-model:value="readDirection" button-style="solid">
-                                        <a-radio-button value="rtl">从右到左</a-radio-button>
+                                <a-form-item label="漫画布局">
+                                    <a-radio-group v-model:value="uiConfig.layout" button-style="solid">
+                                        <a-radio-button value="rtl">从右到左（日漫风格）</a-radio-button>
                                         <a-radio-button value="ltr">从左到右</a-radio-button>
-                                        <a-radio-button value="scroll">垂直滚动</a-radio-button>
                                     </a-radio-group>
+                                </a-form-item>
+
+                                <a-form-item label="每行列数">
+                                    <a-slider v-model:value="uiConfig.columnsPerRow" :min="1" :max="4" :step="1"
+                                        :marks="{ 1: '1列', 2: '2列', 3: '3列', 4: '4列' }" />
+                                </a-form-item>
+
+                                <a-form-item label="图片大小">
+                                    <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="150" :step="10"
+                                        :marks="{ 50: '50%', 100: '100%', 150: '150%' }" />
+                                </a-form-item>
+
+                                <a-form-item label="图片间距">
+                                    <a-slider v-model:value="uiConfig.imageGap" :min="0" :max="30" :step="1"
+                                        :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
+                                </a-form-item>
+
+                                <a-form-item>
+                                    <a-space>
+                                        <a-button type="primary" @click="saveUISettings" :loading="savingUI"
+                                            size="large">
+                                            保存设置
+                                        </a-button>
+                                        <a-button @click="resetUIToDefault" size="large">
+                                            恢复默认
+                                        </a-button>
+                                    </a-space>
                                 </a-form-item>
                             </a-form>
                         </a-card>
@@ -227,7 +236,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, reactive } from 'vue'
 import { message } from 'ant-design-vue'
 import {
     ReloadOutlined,
@@ -250,6 +259,7 @@ import { useAppStore } from '@/stores/app'
 import { getVersion } from '@tauri-apps/api/app'
 import { invoke } from '@tauri-apps/api/core'
 import { checkForUpdates } from '@/api/github'
+import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/utils/ui-config'
 
 const serverForm = ref({
     serverPort: 5001
@@ -267,10 +277,9 @@ const restarting = ref(false)
 const appStore = useAppStore()
 const selectedMenu = ref(['server']) // 当前选中的菜单项
 
-// 界面设置
-const themeMode = ref('light')
-const fontSize = ref(14)
-const readDirection = ref('rtl')
+// UI界面设置
+const uiConfig = reactive({ ...DEFAULT_UI_CONFIG.reader })
+const savingUI = ref(false)
 
 
 // 关于页面信息
@@ -327,6 +336,9 @@ const loadConfig = () => {
         console.error('加载应用配置失败:', error)
         message.error('加载应用配置失败')
     })
+
+    // 加载UI配置
+    loadUISettings()
 }
 
 // 保存服务器配置
@@ -367,6 +379,37 @@ const resetServerToDefault = () => {
 
 const resetAppToDefault = () => {
     appForm.value.apiDomain = 'https://copy20.com'
+}
+
+// UI配置相关方法
+const loadUISettings = () => {
+    loadUIConfig().then(config => {
+        Object.assign(uiConfig, config.reader)
+    }).catch(error => {
+        console.error('加载UI配置失败:', error)
+        message.error('加载UI配置失败')
+    })
+}
+
+const saveUISettings = () => {
+    savingUI.value = true
+
+    updateReaderConfig(uiConfig).then(success => {
+        if (success) {
+            message.success('界面设置保存成功！')
+        } else {
+            message.error('保存界面设置失败')
+        }
+    }).catch(error => {
+        console.error('保存UI配置失败:', error)
+        message.error('保存界面设置失败')
+    }).finally(() => {
+        savingUI.value = false
+    })
+}
+
+const resetUIToDefault = () => {
+    Object.assign(uiConfig, DEFAULT_UI_CONFIG.reader)
 }
 
 // 处理重启应用
@@ -465,124 +508,5 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.settings-view {
-    min-height: 100vh;
-    background-color: #f5f5f5;
-    padding: 0;
-}
-
-.settings-container {
-    width: 100%;
-}
-
-.settings-layout {
-    display: flex;
-    position: relative;
-}
-
-.settings-sidebar {
-    width: 200px;
-    background: #fff;
-    border-right: 1px solid #f0f0f0;
-    min-height: 100vh;
-    position: fixed;
-    left: 0;
-    z-index: 10;
-}
-
-.settings-title {
-    padding: 16px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.settings-content {
-    flex: 1;
-    padding: 24px;
-    margin-left: 200px;
-}
-
-.setting-card {
-    margin-bottom: 24px;
-    scroll-margin-top: 20px;
-}
-
-.settings-section-title {
-    font-size: 22px;
-    font-weight: 500;
-    margin-bottom: 24px;
-    color: #333;
-}
-
-.about-container {
-    text-align: center;
-    padding: 20px;
-}
-
-.about-logo {
-    margin-bottom: 16px;
-}
-
-.app-logo {
-    width: 80px;
-    height: 80px;
-}
-
-.version {
-    color: #999;
-    margin-top: 8px;
-}
-
-.repo-link {
-    margin-top: 12px;
-    font-size: 14px;
-}
-
-.repo-link a {
-    color: #1890ff;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.repo-link a:hover {
-    text-decoration: underline;
-}
-
-.help-text {
-    font-size: 12px;
-    color: #999;
-    margin-top: 4px;
-}
-
-h1 {
-    margin: 0;
-    color: #333;
-    font-size: 20px;
-}
-
-.restart-section {
-    text-align: center;
-}
-
-.restart-help {
-    color: #666;
-    font-size: 14px;
-    margin-left: 8px;
-}
-
-.update-section {
-    padding: 16px 0;
-}
-
-.release-notes {
-    background: #f5f5f5;
-    border-radius: 6px;
-    padding: 12px;
-    margin: 12px 0;
-    max-height: 300px;
-    overflow-y: auto;
-    font-size: 13px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-}
+@import url('../assets/styles/settings.css');
 </style>

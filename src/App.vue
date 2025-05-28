@@ -159,29 +159,23 @@ body {
 .header {
   background-color: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  /* 改为相对定位，不固定在页面顶部 */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 100;
-  transition: opacity 0.3s ease, transform 0.3s ease, max-height 0.3s ease;
-  overflow: hidden;
-  max-height: 60px;
-  /* 足够显示内容的高度 */
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .header-hidden {
-  max-height: 0;
   opacity: 0;
-  padding: 0;
-  margin: 0;
-  border: none;
-  box-shadow: none;
+  transform: translateY(-100%);
 }
 
 .header-content {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
-  height: 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -376,6 +370,8 @@ body {
 .main-content {
   flex: 1;
   padding: 20px;
+  padding-top: 80px;
+  /* 为固定头部留出空间 */
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
