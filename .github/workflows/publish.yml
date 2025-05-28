@@ -7,9 +7,26 @@ on:
       - 'v*'
 
 jobs:
+  release-notes:
+    runs-on: ubuntu-22.04
+    outputs:
+      release_body: ${{ steps.release_notes.outputs.release_body }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: release_notes
+        run: |
+          if [ -f "./docs/release.txt" ]; then
+            {
+              echo 'release_body<<EOF'
+              cat "./docs/release.txt"
+              echo 'EOF'
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "release_body=See the assets to download this version and install." >> "$GITHUB_OUTPUT"
+          fi
+
   publish-tauri:
-    permissions:
-      contents: write
+    needs: release-notes
     strategy:
       fail-fast: false
       matrix:
@@ -22,7 +39,6 @@ jobs:
             args: ''
           - platform: 'windows-latest'
             args: ''
-
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -57,26 +73,13 @@ jobs:
       - name: install frontend dependencies
         run: pnpm install
 
-      - name: Read release notes
-        id: release_notes
-        run: |
-          if [ -f "./docs/release.txt" ]; then
-            {
-              echo 'release_body<<EOF'
-              cat "./docs/release.txt"
-              echo 'EOF'
-            } >> "$GITHUB_OUTPUT"
-          else
-            echo "release_body=See the assets to download this version and install." >> "$GITHUB_OUTPUT"
-          fi
-
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tagName: app-v__VERSION__
           releaseName: 'App v__VERSION__'
-          releaseBody: ${{ steps.release_notes.outputs.release_body }}
+          releaseBody: ${{ needs.release-notes.outputs.release_body }}
           releaseDraft: false
           prerelease: false
-          args: ${{ matrix.args }} 
+          args: ${{ matrix.args }}
