@@ -83,11 +83,22 @@ function getMangaDetail(pathWord) {
     });
 }
 
+/**
+ * 获取主页漫画信息
+ * @returns {Promise} 主页漫画数据，包含话题、推荐漫画、排行榜等
+ */
+function getHomeIndex() {
+    return request.get('/api/v3/h5/homeIndex', {
+        params: { platform: 3 }
+    });
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
     getChapterImages,
     searchManga,
     collectManga,
-    getMangaDetail
+    getMangaDetail,
+    getHomeIndex
 }
