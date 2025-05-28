@@ -4,7 +4,7 @@
             <template #extra>
                 <div class="header-actions">
                     <a-select v-model:value="ordering" style="width: 180px; margin-right: 12px;"
-                        @change="fetchCollection">
+                        @change="onOrderingChange">
                         <a-select-option value="-datetime_updated">按漫画更新时间排序</a-select-option>
                         <a-select-option value="-datetime_modifier">按加入书架时间排序</a-select-option>
                         <a-select-option value="-datetime_browse">按阅读时间排序</a-select-option>
@@ -26,39 +26,50 @@
         <!-- 骨架屏加载状态 -->
         <div v-if="loading" class="manga-grid">
             <a-card v-for="n in 8" :key="n" class="manga-card skeleton-card">
-                <a-skeleton :loading="true" active>
+                <a-skeleton :loading="true" active :paragraph="{ rows: 2 }">
                     <template #avatar>
                         <div class="skeleton-cover"></div>
                     </template>
-                    <a-skeleton-paragraph :rows="2" />
                 </a-skeleton>
             </a-card>
         </div>
 
         <!-- 实际内容 -->
-        <div v-else-if="!error && mangaList.length > 0" class="manga-grid">
-            <a-card v-for="item in mangaList" :key="item.uuid" hoverable class="manga-card" @click="goToManga(item)">
-                <div class="manga-cover">
-                    <img :src="item.comic.cover" :alt="item.comic.name" />
-                    <div class="last-read" v-if="item.last_browse">
-                        上次阅读: {{ item.last_browse.last_browse_name }}
+        <div v-else-if="!error && mangaList.length > 0">
+            <div class="manga-grid">
+                <a-card v-for="item in mangaList" :key="item.uuid" hoverable class="manga-card"
+                    @click="goToManga(item)">
+                    <div class="manga-cover">
+                        <img :src="item.comic.cover" :alt="item.comic.name" />
+                        <div class="last-read" v-if="item.last_browse">
+                            上次阅读: {{ item.last_browse.last_browse_name }}
+                        </div>
+                        <a-badge
+                            v-if="item.last_browse && item.comic.last_chapter_name && item.last_browse.last_browse_name !== item.comic.last_chapter_name"
+                            count="有更新"
+                            style="position: absolute; top: 8px; right: 8px; z-index: 2; background: #ff4d4f; color: #fff; font-size: 12px; border-radius: 8px; padding: 0 8px;" />
                     </div>
-                    <a-badge
-                        v-if="item.last_browse && item.comic.last_chapter_name && item.last_browse.last_browse_name !== item.comic.last_chapter_name"
-                        count="有更新"
-                        style="position: absolute; top: 8px; right: 8px; z-index: 2; background: #ff4d4f; color: #fff; font-size: 12px; border-radius: 8px; padding: 0 8px;" />
-                </div>
-                <a-card-meta :title="item.comic.name">
-                    <template #description>
-                        <div class="manga-author" v-if="item.comic.author && item.comic.author.length">
-                            {{item.comic.author.map(a => a.name).join(', ')}}
-                        </div>
-                        <div class="manga-update">
-                            更新至: {{ item.comic.last_chapter_name }}
-                        </div>
-                    </template>
-                </a-card-meta>
-            </a-card>
+                    <a-card-meta :title="item.comic.name">
+                        <template #description>
+                            <div class="manga-author" v-if="item.comic.author && item.comic.author.length">
+                                {{item.comic.author.map(a => a.name).join(', ')}}
+                            </div>
+                            <div class="manga-update">
+                                更新至: {{ item.comic.last_chapter_name }}
+                            </div>
+                            <div class="manga-datetime-updated" v-if="item.comic.datetime_updated">
+                                更新时间: {{ formatDatetimeUpdated(item.comic.datetime_updated) }}
+                            </div>
+                        </template>
+                    </a-card-meta>
+                </a-card>
+            </div>
+
+            <!-- 分页组件 -->
+            <a-pagination v-if="totalCount > pageSize" :current="currentPage" :page-size="pageSize" :total="totalCount"
+                :show-size-changer="true" :page-size-options="['12', '24', '36', '48']" :show-quick-jumper="true"
+                :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`" @change="onPageChange"
+                @showSizeChange="onPageSizeChange" style="margin-top: 24px; text-align: center;" />
         </div>
     </div>
 </template>
@@ -70,6 +81,7 @@ import { useCollectionStore } from '../stores/collection'
 import { isLoggedIn } from '../utils/auth'
 import { message } from 'ant-design-vue'
 import { getMyCollectionRaw } from '../api/manga'
+import { formatDatetimeUpdated } from '../utils/date'
 
 const router = useRouter()
 const collectionStore = useCollectionStore()
@@ -79,6 +91,11 @@ const mangaList = ref([])
 const loading = ref(false)
 const error = ref('')
 const lastUpdateTime = ref(null)
+
+// 分页相关
+const currentPage = ref(1)
+const pageSize = ref(12)
+const totalCount = ref(0)
 
 const formatUpdateTime = (timeString) => {
     const date = new Date(timeString)
@@ -105,17 +122,20 @@ const goToManga = (item) => {
 const fetchCollection = async () => {
     loading.value = true
     error.value = ''
-    mangaList.value = []
+
     await getMyCollectionRaw({
-        limit: 20,
-        offset: 0,
+        limit: pageSize.value,
+        offset: (currentPage.value - 1) * pageSize.value,
         free_type: 1,
         ordering: ordering.value
     }).then(res => {
         mangaList.value = res.results.list
+        totalCount.value = res.results.total || 0
         lastUpdateTime.value = new Date().toISOString()
     }).catch((err) => {
         error.value = err.message || '获取书架失败'
+        mangaList.value = []
+        totalCount.value = 0
     }).finally(() => {
         loading.value = false
     })
@@ -126,6 +146,24 @@ const refreshCollection = () => {
     fetchCollection().catch(() => {
         message.error('书架更新失败，请稍后重试')
     })
+}
+
+// 分页事件处理
+const onPageChange = (page, size) => {
+    currentPage.value = page
+    pageSize.value = size
+    fetchCollection()
+}
+
+const onPageSizeChange = (current, size) => {
+    currentPage.value = 1
+    pageSize.value = size
+    fetchCollection()
+}
+
+const onOrderingChange = () => {
+    currentPage.value = 1
+    fetchCollection()
 }
 
 onMounted(() => {
@@ -223,6 +261,13 @@ onMounted(() => {
 .manga-update {
     font-size: 12px;
     color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 4px;
+}
+
+.manga-datetime-updated {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.35);
+    font-style: italic;
 }
 
 /* 骨架屏样式 */

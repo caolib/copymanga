@@ -1,14 +1,14 @@
 import request from '../utils/request'
 
 /**
- * 查询个人书架 TODO 分页
+ * 查询个人书架
  * @param {Object} params 查询参数
  * @returns {Promise}
  */
 function getMyCollectionRaw(params = {}) {
     return request.get('/api/v3/member/collect/comics', {
         params: {
-            limit: 20,
+            limit: 12,
             offset: 0,
             free_type: 1,
             ordering: '-datetime_updated',

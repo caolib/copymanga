@@ -407,7 +407,7 @@ const loadSettings = async () => {
     try {
         const config = await loadUIConfig()
         Object.assign(readerConfig, config.reader)
-        console.log('UI配置加载成功:', config)
+        // console.log('UI配置加载成功:', config)
     } catch (error) {
         console.error('加载UI配置失败:', error)
         message.error('加载配置失败')
