@@ -13,14 +13,14 @@
 ## 介绍
 这是一个拷贝漫画第三方桌面端应用
 
-![image-20250528184038200](C:/Users/12655/AppData/Roaming/Typora/typora-user-images/image-20250528184038200.png)
+![image-20250528184038200](https://s2.loli.net/2025/05/28/GtVb2fPQ7luc1pv.png)
 
-![image-20250528184227555](C:/Users/12655/AppData/Roaming/Typora/typora-user-images/image-20250528184227555.png)
+![image-20250528184227555](https://s2.loli.net/2025/05/28/j4x6v7OIMruTVaB.png)
 
-![image-20250528184332216](C:/Users/12655/AppData/Roaming/Typora/typora-user-images/image-20250528184332216.png)
+![image-20250528184332216](https://s2.loli.net/2025/05/28/NKmcO8nIVryRTwi.png)
 
-![image-20250528184440247](C:/Users/12655/AppData/Roaming/Typora/typora-user-images/image-20250528184440247.png)
+![image-20250528184440247](https://s2.loli.net/2025/05/28/zycg5pYDO31vw2a.png)
 
-![image-20250528184540228](C:/Users/12655/AppData/Roaming/Typora/typora-user-images/image-20250528184540228.png)
+![image-20250528184540228](https://s2.loli.net/2025/05/28/pRraMwydAqTK3gI.png)
 
-![image-20250528184900069](C:/Users/12655/AppData/Roaming/Typora/typora-user-images/image-20250528184900069.png)
+![image-20250528184900069](https://s2.loli.net/2025/05/28/Ki8vdegcYXTEQFB.png)
