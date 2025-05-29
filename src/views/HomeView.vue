@@ -311,6 +311,7 @@ onMounted(() => {
 <style scoped>
 .home {
     padding: 20px;
+    padding-top: 0;
     max-width: 1200px;
     margin: 0 auto;
 }
@@ -320,7 +321,7 @@ onMounted(() => {
 }
 
 .search-grid {
-    margin-top: 20px;
+    margin-top: 10px;
 }
 
 .manga-card {

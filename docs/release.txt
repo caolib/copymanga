@@ -1,18 +1,10 @@
 ## Commit
 
-- [00f77e4] Create release_notes.yml
-- [2a9fd67] Update release_notes.yml
-- [b823dc1] Delete .github/workflows/release_notes.yml
-- [0aac066] 🐳 chore: 添加提交信息生成脚本
-- [09dd71b] 更新 README.md
-- [75a4933] ✨ feat: 主页添加获取漫画榜单、热门漫画等功能
-- [aa3c847] ✨ feat: 设置添加界面设置
-- [bdb8ec2] 🌈 style: 优化设置-关于界面
-- [eb44096] ✨ feat: 添加主页漫画榜单等
-- [f5eec34] 🐛 fix: 个人书架添加分页
-- [919acfa] 🐛 fix: 修复个人书架错误显示
-- [6278649] 🐳 chore: 版本更新
+- [d712be7] 🐳 chore: 版本更新
+- [3d3f475] ✨ feat: 添加继续上次阅读功能
+- [a7abbeb] ✨ feat: 添加继续上次阅读功能
+- [a93fe87] 🐳 chore: 版本更新
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.2.0...v0.2.1)
+📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.2.1...v0.2.2)
 

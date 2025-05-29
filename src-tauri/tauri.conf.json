@@ -14,7 +14,10 @@
       {
         "title": "copymanga",
         "width": 1000,
-        "height": 600
+        "height": 600,
+        "decorations": false,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true
       }
     ],
     "security": {
