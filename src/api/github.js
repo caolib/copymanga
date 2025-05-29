@@ -26,6 +26,12 @@ const getLatestReleaseVersion = async () => {
  * @returns {number} 1表示version1较新，-1表示version2较新，0表示相同
  */
 const compareVersions = (version1, version2) => {
+    // 参数验证
+    if (!version1 || !version2) {
+        console.error('compareVersions: 版本号参数不能为空', { version1, version2 });
+        return 0;
+    }
+
     // 移除前缀字符（如 app-v, v 等）
     const cleanVersion1 = version1.replace(/^(app-)?v?/, '');
     const cleanVersion2 = version2.replace(/^(app-)?v?/, '');
@@ -53,6 +59,11 @@ const compareVersions = (version1, version2) => {
  */
 const checkForUpdates = async (currentVersion) => {
     try {
+        // 参数验证
+        if (!currentVersion) {
+            throw new Error('当前版本号不能为空');
+        }
+
         const release = await getLatestRelease();
         const latestVersion = release.tag_name;
 

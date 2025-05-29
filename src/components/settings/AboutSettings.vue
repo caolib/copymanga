@@ -183,7 +183,7 @@ const checkUpdate = async () => {
     checkingUpdate.value = true
     lastCheckTime.value = new Date().toLocaleString()
 
-    checkForUpdates().then(result => {
+    checkForUpdates(appVersion.value).then(result => {
         updateInfo.value = {
             hasUpdate: result.hasUpdate,
             currentVersion: result.currentVersion,
