@@ -10,7 +10,7 @@
                     <div class="about-info">
                         <h3>CopyManga</h3>
                         <div class="description">
-                            基于官方API的第三方漫画客户端
+                            拷贝漫画第三方桌面端应用
                         </div>
                     </div>
                 </div>
@@ -41,10 +41,31 @@
                 </div>
 
                 <a-divider />
-
                 <div class="disclaimer">
-                    <a-alert message="使用声明" description="本应用是基于拷贝漫画官方API的第三方客户端，仅供学习交流使用。所有漫画内容版权归原作者和平台所有。" type="info"
-                        show-icon />
+                    <a-alert message="使用声明" type="warning" show-icon style="margin-bottom: 12px;">
+                        <template #description>
+                            <div>
+                                <p>本应用是基于拷贝漫画官方API的第三方客户端，仅供学习交流使用。所有漫画内容版权归原作者和平台所有。</p>
+                                <p style="margin-bottom: 0; color: #d46b08; font-weight: 500;">
+                                    <strong>⚠️
+                                        重要提醒：</strong>本应用可能包含不适宜未成年人观看的内容，请用户自行判断并承担相应责任。使用本应用即表示您已年满18周岁，并同意遵守当地法律法规。
+                                </p>
+                            </div>
+                        </template>
+                    </a-alert>
+                    <a-alert message="法律声明" type="error" show-icon>
+                        <template #description>
+                            <div>
+                                <p>本应用不承担因使用本软件而产生的任何法律责任。用户在使用过程中应当：</p>
+                                <ul style="margin: 8px 0 0 16px; padding-left: 0;">
+                                    <li>遵守当地法律法规和相关规定</li>
+                                    <li>不得将本应用用于任何非法用途</li>
+                                    <li>如发现不合法内容，请立即停止使用并向相关部门举报</li>
+                                    <li>未成年人应在监护人指导下使用</li>
+                                </ul>
+                            </div>
+                        </template>
+                    </a-alert>
                 </div>
             </div>
         </a-card>
@@ -112,7 +133,7 @@ import {
     SyncOutlined
 } from '@ant-design/icons-vue'
 import { getVersion } from '@tauri-apps/api/app'
-import { open } from '@tauri-apps/plugin-shell'
+import { invoke } from '@tauri-apps/api/core'
 import { checkForUpdates } from '@/api/github'
 
 // 关于页面信息
@@ -130,7 +151,7 @@ const lastCheckTime = ref('')
 
 // 通用打开URL函数
 const openExternalUrl = (url, errorMsg = '打开链接失败') => {
-    open(url).catch(error => {
+    invoke('open_browser', { url }).catch(error => {
         console.error('打开链接失败:', error)
         message.error(errorMsg)
     })
@@ -262,6 +283,24 @@ onMounted(() => {
 
 .disclaimer {
     margin-top: 16px;
+}
+
+.disclaimer :deep(.ant-alert) {
+    border-radius: 8px;
+}
+
+.disclaimer :deep(.ant-alert-description) {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.disclaimer :deep(.ant-alert-description ul) {
+    margin-bottom: 8px;
+}
+
+.disclaimer :deep(.ant-alert-description li) {
+    margin-bottom: 4px;
+    font-size: 13px;
 }
 
 .update-section {

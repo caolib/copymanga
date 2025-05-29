@@ -4,6 +4,12 @@ import { appConfigDir, join } from '@tauri-apps/api/path'
 const DEFAULT_SERVER_PORT = '5001'
 const DEFAULT_API_DOMAIN = 'https://copy20.com'
 
+// 默认API源列表
+const DEFAULT_API_SOURCES = [
+    { name: '默认源', url: 'https://copy20.com' },
+    { name: '备用源1', url: 'https://api.copy2000.online' },
+]
+
 // 获取服务器配置文件路径
 async function getConfigFilePath() {
     const configDir = await appConfigDir()
@@ -66,19 +72,34 @@ export async function getAppConfig() {
         if (!fileExists) {
             // 如果文件不存在，返回默认配置
             return {
-                apiDomain: DEFAULT_API_DOMAIN
+                apiDomain: DEFAULT_API_DOMAIN,
+                apiSources: DEFAULT_API_SOURCES,
+                currentApiIndex: 0
             }
         }
 
         const content = await readTextFile(configPath)
         const config = JSON.parse(content)
-        return {
-            apiDomain: config.apiDomain || DEFAULT_API_DOMAIN
+
+        // 确保配置包含所有必要字段
+        const result = {
+            apiDomain: config.apiDomain || DEFAULT_API_DOMAIN,
+            apiSources: config.apiSources || DEFAULT_API_SOURCES,
+            currentApiIndex: config.currentApiIndex || 0
         }
+
+        // 如果当前索引超出范围，重置为0
+        if (result.currentApiIndex >= result.apiSources.length) {
+            result.currentApiIndex = 0
+        }
+
+        return result
     } catch (error) {
         console.error('读取应用配置失败:', error)
         return {
-            apiDomain: DEFAULT_API_DOMAIN
+            apiDomain: DEFAULT_API_DOMAIN,
+            apiSources: DEFAULT_API_SOURCES,
+            currentApiIndex: 0
         }
     }
 }
@@ -99,11 +120,19 @@ export async function saveServerConfig(serverPort) {
 }
 
 // 保存应用配置
-export async function saveAppConfig(apiDomain) {
+export async function saveAppConfig(config) {
     try {
         await ensureConfigDir()
         const configPath = await getAppConfigFilePath()
-        const config = { apiDomain }
+
+        // 如果传入的是字符串（向后兼容），转换为新格式
+        if (typeof config === 'string') {
+            const currentConfig = await getAppConfig()
+            config = {
+                ...currentConfig,
+                apiDomain: config
+            }
+        }
 
         await writeTextFile(configPath, JSON.stringify(config, null, 2))
         return true
@@ -126,6 +155,83 @@ export function validateApiDomain(domain) {
         return url.protocol === 'https:' || url.protocol === 'http:'
     } catch {
         return false
+    }
+}
+
+// 添加新的API源
+export async function addApiSource(name, url) {
+    try {
+        if (!name || !url) {
+            throw new Error('名称和URL不能为空')
+        }
+
+        if (!validateApiDomain(url)) {
+            throw new Error('无效的URL格式')
+        }
+
+        const config = await getAppConfig()
+
+        // 检查是否已存在相同的URL
+        const exists = config.apiSources.some(source => source.url === url)
+        if (exists) {
+            throw new Error('该API源已存在')
+        }
+
+        config.apiSources.push({ name, url })
+        await saveAppConfig(config)
+        return true
+    } catch (error) {
+        throw error
+    }
+}
+
+// 删除API源
+export async function removeApiSource(index) {
+    try {
+        const config = await getAppConfig()
+
+        if (index < 0 || index >= config.apiSources.length) {
+            throw new Error('无效的索引')
+        }
+
+        // 不能删除默认源
+        if (config.apiSources.length <= 1) {
+            throw new Error('至少需要保留一个API源')
+        }
+
+        config.apiSources.splice(index, 1)
+
+        // 如果删除的是当前使用的源，切换到第一个
+        if (config.currentApiIndex >= config.apiSources.length) {
+            config.currentApiIndex = 0
+        }
+
+        // 更新当前API域名
+        config.apiDomain = config.apiSources[config.currentApiIndex].url
+
+        await saveAppConfig(config)
+        return true
+    } catch (error) {
+        throw error
+    }
+}
+
+// 切换API源
+export async function switchApiSource(index) {
+    try {
+        const config = await getAppConfig()
+
+        if (index < 0 || index >= config.apiSources.length) {
+            throw new Error('无效的索引')
+        }
+
+        config.currentApiIndex = index
+        config.apiDomain = config.apiSources[index].url
+
+        await saveAppConfig(config)
+        return config.apiSources[index]
+    } catch (error) {
+        throw error
     }
 }
 
