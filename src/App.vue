@@ -176,6 +176,4 @@ onMounted(async () => {
   </a-config-provider>
 </template>
 
-<style>
-@import './assets/styles/app.scss';
-</style>
+<style src='./assets/styles/app.scss' lang="scss"></style>

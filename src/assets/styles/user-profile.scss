@@ -1,4 +1,4 @@
-@import "./variables";
+@use "./variables" as *;
 
 // 用户资料页面样式
 .user-profile-container {

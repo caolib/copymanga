@@ -89,11 +89,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                            }}
+                                                        }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                            }}</div>
+                                                        }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
@@ -207,6 +207,4 @@ const formatDate = (dateString) => {
 }
 </script>
 
-<style lang="scss">
-@import "@/assets/styles/user-profile.scss";
-</style>
+<style src="../assets/styles/user-profile.scss" lang="scss"></style>

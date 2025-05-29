@@ -1,4 +1,4 @@
-@import "./variables";
+@use "./variables" as *;
 
 .reader-container {
     max-width: 1000px;

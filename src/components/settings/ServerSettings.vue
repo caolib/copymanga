@@ -302,28 +302,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.help-text {
-    color: #999;
-    font-size: 12px;
-    margin-top: 4px;
-}
-
-.restart-help {
-    color: #666;
-    font-size: 13px;
-}
-
-.current-source {
-    font-weight: 600;
-    color: #1890ff;
-}
-
-.ant-input-group {
-    display: flex;
-}
-
-.ant-list-item-meta-title {
-    margin-bottom: 4px !important;
-}
-</style>
+<style src="../../assets/styles/server-settings.scss" lang="scss" scoped></style>

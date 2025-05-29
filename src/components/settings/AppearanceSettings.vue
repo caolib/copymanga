@@ -133,44 +133,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped>
-.setting-card {
-    margin-bottom: 24px;
-}
-
-.font-family-container {
-    width: 100%;
-}
-
-.font-preview {
-    padding: 12px;
-    background-color: #f5f5f5;
-    border-radius: 6px;
-    border: 1px solid #d9d9d9;
-}
-
-.preview-label {
-    font-size: 14px;
-    color: #666;
-    margin-right: 8px;
-}
-
-.preview-text {
-    font-size: 16px;
-    color: #333;
-}
-
-/* 暗色主题样式 */
-html.dark .preview-label {
-    color: #cccccc;
-}
-
-html.dark .font-preview {
-    background-color: #2a2a2a;
-    border-color: #434343;
-}
-
-html.dark .preview-text {
-    color: #e0e0e0;
-}
-</style>
+<style src="../../assets/styles/appearance-settings.scss" lang="scss" scoped></style>

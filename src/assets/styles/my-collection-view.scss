@@ -1,0 +1,171 @@
+@use "./variables" as *;
+
+.collection-container {
+    padding: 0 20px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.collection-header {
+    margin-bottom: 24px;
+    padding: 16px 0;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.manga-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.manga-card {
+    overflow: hidden;
+    width: 100%;
+}
+
+.manga-card :deep(.ant-card-body) {
+    padding: 12px;
+}
+
+.manga-card :deep(.ant-card-meta-title) {
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+.manga-card :deep(.ant-card-meta-description) {
+    height: auto;
+}
+
+.manga-cover {
+    position: relative;
+    padding-top: 140%;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.manga-cover img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.last-read {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    font-size: 12px;
+    text-align: center;
+}
+
+.manga-author {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.manga-update {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    margin-bottom: 4px;
+}
+
+.manga-datetime-updated {
+    font-size: 11px;
+    color: rgba(0, 0, 0, 0.35);
+    font-style: italic;
+}
+
+/* 暗色模式下的文字颜色 */
+html.dark .manga-author {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+html.dark .manga-update {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+html.dark .manga-datetime-updated {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* 骨架屏样式 */
+.skeleton-card {
+    pointer-events: none;
+}
+
+.skeleton-card :deep(.ant-card-body) {
+    padding: 12px;
+}
+
+.skeleton-cover {
+    width: 100%;
+    height: 200px;
+    background: #f5f5f5;
+    border-radius: 6px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.skeleton-cover::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}
+
+/* 响应式设计优化 */
+@media (max-width: 768px) {
+    .manga-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+    }
+
+    .collection-container {
+        padding: 0 16px 16px;
+    }
+
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .header-actions .ant-select {
+        width: 100% !important;
+        margin-right: 0 !important;
+        margin-bottom: 8px;
+    }
+}

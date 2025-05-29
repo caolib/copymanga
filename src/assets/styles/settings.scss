@@ -1,4 +1,4 @@
-@import "./variables";
+@use "./variables" as *;
 
 .settings-view {
     min-height: 100vh;

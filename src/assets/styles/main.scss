@@ -1,4 +1,4 @@
-@import "./variables.scss";
+@use "./variables.scss" as *;
 
 :root {
     --font-family: "Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace;

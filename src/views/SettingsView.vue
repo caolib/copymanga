@@ -59,6 +59,4 @@ import AboutSettings from '@/components/settings/AboutSettings.vue'
 const selectedMenu = ref(['server']) // 当前选中的菜单项
 </script>
 
-<style scoped lang="scss">
-@import '../assets/styles/settings';
-</style>
+<style src="../assets/styles/settings.scss" scoped></style>

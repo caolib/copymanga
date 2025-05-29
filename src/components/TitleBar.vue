@@ -148,6 +148,4 @@ const goToProfile = () => {
 }
 </script>
 
-<style scoped lang="scss">
-@import '../assets/styles/title-bar';
-</style>
+<style src="../assets/styles/title-bar.scss" lang="scss" scoped></style>

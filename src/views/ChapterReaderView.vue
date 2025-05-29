@@ -512,6 +512,4 @@ watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
 
 </script>
 
-<style scoped>
-@import '../assets/styles/chapter-reader.scss';
-</style>
+<style src='../assets/styles/chapter-reader.scss' scoped></style>
