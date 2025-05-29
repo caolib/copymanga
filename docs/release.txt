@@ -1,13 +1,13 @@
 ## Commit
 
-- [731557f] 🐳 chore: 版本更新
-- [32baac3] ✨ feat: 隐藏系统标题栏，设置自定义导航栏
-- [624a503] 🦄 refactor: 提取设置多个界面为组件
-- [f1318d3] 📄 docs: 添加免责声明
-- [e1d1479] ✨ feat: 更新获取漫画章节接口，可获取单行本等其他分组
-- [c1fe2ba] 🐛 fix: 修正部分跨域问题
-- [cde5428] 🐳 chore: 版本更新
+- [63d79ac] 📄 docs: 更新发布说明
+- [d651580] 🐛 fix: 修复检查更新功能
+- [8bdc9dc] 📄 docs: Update README
+- [c939eb3] ✨ feat: 添加深色模式，优化多个界面显示
+- [1c847d1] 🦄 refactor: 提取样式
+- [7358ec1] 🐛 fix: 修复部分样式异常
+- [69da131] 🐳 chore: 版本更新
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.2.2...v0.2.3)
+📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.2.3...v0.3.0)
 
