@@ -1,0 +1,259 @@
+@import "./variables";
+
+.title-bar {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 50px;
+    background: $bg-color-white;
+    color: $text-primary;
+    user-select: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: $z-index-dropdown;
+    border-bottom: 1px solid $border-color;
+    padding: 0 $spacing-sm;
+    box-shadow: $shadow-light;
+    transition: $transition-normal;
+
+    @include dark-theme {
+        background: $dark-bg-primary;
+        color: $dark-text-primary;
+        border-bottom: 1px solid $dark-border-color;
+        box-shadow: $shadow-dark-light;
+    }
+}
+
+.title-bar-left {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    flex: 1;
+}
+
+.title-bar-center {
+    flex: 1;
+    @include flex-center;
+    /* 用于拖动的空白区域 */
+}
+
+.title-bar-right {
+    @include flex-between;
+    gap: $spacing-sm;
+    min-width: 120px;
+    justify-content: flex-end;
+}
+
+// 导航样式
+.nav {
+    display: flex;
+}
+
+.nav-link {
+    color: $text-secondary;
+    text-decoration: none;
+    font-weight: 500;
+    padding: $spacing-sm 12px;
+    border-radius: $border-radius-medium;
+    transition: $transition-normal;
+    font-size: 14px;
+
+    &:hover {
+        background-color: $bg-color;
+        color: $text-primary;
+    }
+
+    &.router-link-active {
+        background-color: #e6f7ff;
+        color: $primary-color;
+    }
+
+    @include dark-theme {
+        color: $dark-text-primary;
+
+        &:hover {
+            background-color: $dark-bg-secondary;
+            color: $white;
+        }
+
+        &.router-link-active {
+            background-color: #1a3a5c;
+            color: $primary-hover;
+        }
+    }
+}
+
+.login-link {
+    background-color: $primary-color;
+    color: $white;
+    border: 1px solid $primary-color;
+
+    &:hover {
+        background-color: $primary-hover;
+        color: $white;
+    }
+}
+
+// 主题切换按钮
+.theme-toggle-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: $spacing-sm 12px;
+    border-radius: $border-radius-medium;
+    transition: $transition-normal;
+    color: $text-secondary;
+    @include flex-center;
+
+    &:hover {
+        background-color: $bg-color;
+        transform: scale(1.1);
+    }
+
+    @include dark-theme {
+        color: $dark-text-primary;
+
+        &:hover {
+            background-color: $dark-bg-secondary;
+            color: $white;
+        }
+    }
+}
+
+// 用户区域
+.user-section {
+    @include flex-center;
+    margin-right: 6px;
+}
+
+.user-avatar-dropdown {
+    cursor: pointer;
+    border-radius: 50%;
+    transition: $transition-normal;
+    padding: 2px;
+
+    &:hover {
+        background-color: $bg-color;
+        border-color: $primary-color;
+        transform: scale(1.05);
+    }
+
+    @include dark-theme {
+        border-color: $dark-border-color-light;
+
+        &:hover {
+            background-color: $dark-bg-secondary;
+            border-color: $primary-hover;
+        }
+    }
+}
+
+// 窗口控制按钮
+.window-controls {
+    @include flex-center;
+}
+
+.title-bar-button {
+    @include flex-center;
+    width: 36px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: $text-secondary;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+        background-color: $bg-color;
+    }
+
+    &.close:hover {
+        background-color: $error-color;
+        color: $white;
+    }
+
+    &.maximize:hover,
+    &.minimize:hover {
+        background-color: #e6f7ff;
+        color: $primary-color;
+    }
+
+    @include dark-theme {
+        color: $dark-text-primary;
+
+        &:hover {
+            background-color: $dark-bg-secondary;
+        }
+
+        &.close:hover {
+            background-color: $error-color;
+            color: $white;
+        }
+
+        &.maximize:hover,
+        &.minimize:hover {
+            background-color: #1a3a5c;
+            color: $primary-hover;
+        }
+    }
+
+    svg {
+        pointer-events: none;
+    }
+}
+
+.menu-icon {
+    font-size: 14px;
+    margin-right: $spacing-sm;
+}
+
+// 前进后退按钮
+.navigation-controls {
+    @include flex-center;
+    gap: 4px;
+    margin-left: 8px;
+
+    .ant-btn {
+        @include flex-center;
+        width: 28px;
+        height: 28px;
+        border-radius: $border-radius-small;
+        color: $text-secondary;
+        transition: $transition-normal;
+
+        &:hover {
+            background-color: $bg-color;
+            color: $text-primary;
+        }
+
+        @include dark-theme {
+            color: $dark-text-primary;
+
+            &:hover {
+                background-color: $dark-bg-secondary;
+                color: $white;
+            }
+        }
+    }
+}
+
+// 响应式设计
+@include responsive($breakpoint-sm) {
+    .nav {
+        gap: 12px;
+    }
+
+    .nav-link {
+        padding: $spacing-xs $spacing-sm;
+        font-size: 13px;
+    }
+
+    .app-title {
+        display: none;
+    }
+}

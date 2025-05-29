@@ -1,0 +1,133 @@
+// 主题变量定义
+// 基础颜色
+$white: #ffffff;
+$black: #000000;
+
+// 主色调
+$primary-color: #1890ff;
+$primary-hover: #40a9ff;
+$primary-active: #096dd9;
+
+// 功能性颜色
+$success-color: #52c41a;
+$warning-color: #faad14;
+$error-color: #ff4d4f;
+$info-color: #1890ff;
+
+// 中性色
+$text-primary: #333333;
+$text-secondary: #666666;
+$text-tertiary: #999999;
+$text-disabled: #cccccc;
+
+// 边框颜色
+$border-color: #e0e0e0;
+$border-color-light: #f0f0f0;
+
+// 背景颜色
+$bg-color: #f5f5f5;
+$bg-color-light: #fafafa;
+$bg-color-white: #ffffff;
+
+// 暗色主题变量
+$dark-bg-primary: #282c34;
+$dark-bg-secondary: #3a3f4b;
+$dark-bg-tertiary: #1a1e24;
+$dark-bg-elevated: #3a3f4b;
+$dark-bg-container: #282c34;
+
+$dark-text-primary: #e0e0e0;
+$dark-text-secondary: #cccccc;
+$dark-text-tertiary: #999999;
+
+$dark-border-color: #444444;
+$dark-border-color-light: #555555;
+$dark-border-secondary: #333333;
+
+// 暗色主题填充色
+$dark-fill-primary: #3a3f4b;
+$dark-fill-secondary: #2f343e;
+$dark-fill-tertiary: #262a33;
+$dark-fill-quaternary: #1f2329;
+
+// 暗色主题主色调
+$dark-primary-bg: #282c34;
+$dark-primary-bg-hover: #343944;
+
+// 阴影
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.1);
+$shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.15);
+$shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.2);
+
+$shadow-dark-light: 0 2px 8px rgba(0, 0, 0, 0.3);
+$shadow-dark-medium: 0 4px 12px rgba(0, 0, 0, 0.4);
+$shadow-dark-heavy: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+// 圆角
+$border-radius-small: 4px;
+$border-radius-medium: 8px;
+$border-radius-large: 16px;
+
+// 过渡动画
+$transition-fast: 0.2s ease;
+$transition-normal: 0.3s ease;
+$transition-slow: 0.5s ease;
+
+// 间距
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Z-index层级
+$z-index-dropdown: 1000;
+$z-index-modal: 1050;
+$z-index-tooltip: 1100;
+
+// 响应式断点
+$breakpoint-xs: 480px;
+$breakpoint-sm: 768px;
+$breakpoint-md: 992px;
+$breakpoint-lg: 1200px;
+$breakpoint-xl: 1600px;
+
+// 混合器
+@mixin dark-theme {
+    html.dark & {
+        @content;
+    }
+}
+
+@mixin flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@mixin flex-between {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+@mixin button-hover($bg-color, $hover-bg-color) {
+    background-color: $bg-color;
+    transition: $transition-normal;
+
+    &:hover {
+        background-color: $hover-bg-color;
+    }
+}
+
+@mixin text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+@mixin responsive($breakpoint) {
+    @media (max-width: $breakpoint) {
+        @content;
+    }
+}

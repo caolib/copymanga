@@ -3,6 +3,10 @@ import { appConfigDir, join } from '@tauri-apps/api/path'
 
 // 默认UI配置
 const DEFAULT_UI_CONFIG = {
+    theme: {
+        isDarkMode: false, // 默认浅色主题
+        fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace' // 字体系列
+    },
     reader: {
         layout: 'rtl', // 从右到左（默认，日漫风格）
         columnsPerRow: 2, // 一行显示的列数
@@ -83,10 +87,24 @@ async function updateReaderConfig(readerConfig) {
     return await saveUIConfig(updatedConfig)
 }
 
+// 更新主题配置
+async function updateThemeConfig(themeConfig) {
+    const currentConfig = await loadUIConfig()
+    const updatedConfig = {
+        ...currentConfig,
+        theme: {
+            ...currentConfig.theme,
+            ...themeConfig
+        }
+    }
+    return await saveUIConfig(updatedConfig)
+}
+
 export {
     loadUIConfig,
     saveUIConfig,
     updateUIConfig,
     updateReaderConfig,
+    updateThemeConfig,
     DEFAULT_UI_CONFIG
 }

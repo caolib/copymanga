@@ -1,0 +1,146 @@
+@import "./variables";
+
+.settings-view {
+    min-height: 100vh;
+    background-color: $bg-color;
+    padding: 0;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
+}
+
+.settings-container {
+    width: 100%;
+}
+
+.settings-layout {
+    display: flex;
+    position: relative;
+}
+
+.settings-sidebar {
+    width: 200px;
+    background: $bg-color-white;
+    border-right: 1px solid $border-color-light;
+    min-height: 100vh;
+    position: fixed;
+    left: 0;
+    z-index: $z-index-dropdown;
+
+    @include dark-theme {
+        background: $dark-bg-primary;
+        border-right: 1px solid $dark-border-color;
+    }
+}
+
+.settings-title {
+    padding: $spacing-md;
+    border-bottom: 1px solid $border-color-light;
+
+    @include dark-theme {
+        border-bottom: 1px solid $dark-border-color;
+        color: $dark-text-primary;
+    }
+}
+
+.settings-content {
+    flex: 1;
+    padding: $spacing-lg;
+    margin-left: 200px;
+}
+
+.setting-card {
+    margin-bottom: $spacing-lg;
+    scroll-margin-top: 20px;
+}
+
+.settings-section-title {
+    font-size: 22px;
+    font-weight: 500;
+    margin-bottom: $spacing-lg;
+    color: $text-primary;
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+}
+
+.about-container {
+    text-align: center;
+    padding: 20px;
+}
+
+.about-logo {
+    margin-bottom: $spacing-md;
+}
+
+.app-logo {
+    width: 80px;
+    height: 80px;
+}
+
+.version {
+    color: $text-tertiary;
+    margin-top: $spacing-sm;
+}
+
+.repo-link {
+    margin-top: 12px;
+    font-size: 14px;
+
+    a {
+        color: $primary-color;
+        text-decoration: none;
+        cursor: pointer;
+        transition: $transition-fast;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+.help-text {
+    font-size: 12px;
+    color: $text-tertiary;
+    margin-top: $spacing-xs;
+}
+
+h1 {
+    margin: 0;
+    color: $text-primary;
+    font-size: 20px;
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+}
+
+.restart-section {
+    text-align: center;
+}
+
+.restart-help {
+    color: $text-secondary;
+    font-size: 14px;
+    margin-left: $spacing-sm;
+}
+
+.update-section {
+    padding: $spacing-md 0;
+}
+
+.release-notes {
+    background: $bg-color;
+    border-radius: $border-radius-medium;
+    padding: 12px;
+    margin: 12px 0;
+    max-height: 300px;
+    overflow-y: auto;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}

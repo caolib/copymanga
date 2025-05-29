@@ -1,0 +1,207 @@
+@import "./variables";
+
+// 用户资料页面样式
+.user-profile-container {
+    background-color: $bg-color-light;
+    min-height: calc(100vh - 48px);
+    margin: $spacing-md;
+    padding: 0;
+}
+
+// 侧栏样式
+.user-profile-sider {
+    background: $bg-color-white !important;
+    border-right: 1px solid $border-color-light !important;
+}
+
+.user-sider-header {
+    padding: 20px $spacing-md;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid $border-color-light;
+}
+
+.user-nickname {
+    font-size: $spacing-md;
+    font-weight: 500;
+    margin-bottom: 2px;
+}
+
+.user-username {
+    font-size: 12px;
+    color: $text-tertiary;
+}
+
+.user-profile-menu {
+    border-right: none;
+}
+
+// 内容区域样式
+.user-profile-content {
+    background-color: $bg-color;
+    padding: 0 $spacing-lg;
+    min-height: calc(100vh - 48px);
+}
+
+// 个人资料卡片
+.profile-card {
+    margin-top: $spacing-md;
+}
+
+.profile-title {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: $spacing-lg;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    margin-bottom: $spacing-sm !important;
+}
+
+.profile-description {
+    margin-bottom: 0 !important;
+    font-size: 14px;
+    color: $text-secondary;
+}
+
+// 浏览记录样式
+.browse-history-content {
+    margin-top: $spacing-md;
+}
+
+.browse-history-title {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+// 浏览记录列表
+.browse-list-container {
+    margin-top: $spacing-sm;
+}
+
+// 浏览卡片
+.browse-card {
+    height: 100%;
+    cursor: pointer;
+    transition: $transition-normal;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: $shadow-medium;
+    }
+}
+
+.browse-card-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.browse-card-cover {
+    height: 180px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border-radius: $border-radius-small;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+}
+
+.browse-card:hover .browse-card-cover img {
+    transform: scale(1.05);
+}
+
+.browse-card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+// 分页样式
+.browse-pagination {
+    margin-top: $spacing-lg;
+    display: flex;
+    justify-content: center;
+}
+
+// 文本样式
+.comic-title {
+    font-size: $spacing-md;
+    font-weight: 500;
+    color: $text-primary;
+    margin-bottom: $spacing-sm;
+    @include text-ellipsis;
+}
+
+.comic-chapter,
+.comic-author,
+.read-chapter {
+    font-size: 13px;
+    color: $text-secondary;
+    margin-bottom: $spacing-xs;
+    @include text-ellipsis;
+}
+
+.read-chapter {
+    color: $primary-color;
+}
+
+// 暗色主题样式
+html.dark {
+    .user-profile-container {
+        background-color: var(--dark-bg-custom, $dark-bg-primary);
+    }
+
+    .user-profile-content {
+        background-color: var(--dark-bg-custom, $dark-bg-primary);
+    }
+
+    .user-profile-sider {
+        background: var(--dark-bg-custom, $dark-bg-primary) !important;
+        border-right: 1px solid $dark-border-color !important;
+    }
+
+    .user-sider-header {
+        border-bottom: 1px solid $dark-border-color !important;
+        color: $dark-text-primary;
+    }
+
+    .browse-card {
+        background: $dark-bg-primary;
+        border: 1px solid $dark-border-color;
+
+        &:hover {
+            border-color: $dark-border-color-light;
+            box-shadow: $shadow-dark-medium;
+        }
+    }
+
+    .comic-chapter,
+    .comic-author,
+    .read-chapter {
+        color: $dark-text-secondary;
+    }
+
+    .comic-title {
+        color: $dark-text-primary;
+    }
+
+    .read-chapter {
+        color: $primary-hover;
+    }
+}

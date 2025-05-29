@@ -1,24 +1,30 @@
 <template>
-    <div class="reader-container">
-        <!-- 顶部章节导航栏 - 根据内容条件显示 -->
-        <div class="reader-header" v-if="chapterInfo.comic_name">
-            <div class="reader-title">
-                <h1>{{ chapterInfo.comic_name }}</h1>
-                <h2>{{ chapterInfo.name }}</h2>
-            </div>
-            <div class="reader-controls">
-                <button @click="goBack" class="control-button">返回</button>
-                <button @click="prevChapter" class="control-button" :disabled="!hasPrevChapter">上一话</button>
-                <button @click="nextChapter" class="control-button" :disabled="!hasNextChapter">下一话</button>
-                <button @click="showSettingsDrawer = true" class="control-button settings-button">
-                    <span>设置</span>
-                </button>
+    <div class="reader-container" :class="{ 'dark-mode': isDarkMode }">
+        <!-- 底部章节导航栏 - 固定在屏幕底部 -->
+        <div class="bottom-navigation" :class="{ 'visible': showBottomNav }" @mouseenter="keepNavVisible"
+            @mouseleave="hideNavAfterDelay">
+            <div class="nav-content">
+                <div class="reader-title">
+                    <h3>{{ chapterInfo.comic_name || '漫画标题' }}</h3>
+                    <h4>{{ chapterInfo.name || '章节标题' }}</h4>
+                </div>
+                <div class="reader-controls">
+                    <button @click="goBack" class="control-button">返回</button>
+                    <button @click="prevChapter" class="control-button" :disabled="!hasPrevChapter">上一话</button>
+                    <button @click="nextChapter" class="control-button" :disabled="!hasNextChapter">下一话</button>
+                    <button @click="showSettingsDrawer = true" class="control-button settings-button">
+                        <span>设置</span>
+                    </button>
+                </div>
             </div>
         </div>
 
+        <!-- 底部触发区域 -->
+        <div class="bottom-trigger-area" @mouseenter="showNavigation"></div>
+
         <!-- 阅读器设置抽屉 -->
         <a-drawer title="阅读设置" :width="300" :visible="showSettingsDrawer" @close="showSettingsDrawer = false"
-            :footer-style="{ textAlign: 'right' }">
+            :footer-style="{ textAlign: 'right' }" :class="{ 'dark-drawer': isDarkMode }">
             <a-form layout="vertical">
                 <a-form-item label="漫画布局">
                     <a-radio-group v-model:value="readerConfig.layout">
@@ -123,18 +129,6 @@
                 <a-empty v-else-if="!commentsError && comments.length === 0" description="暂无评论" />
             </a-spin>
         </div>
-
-        <!-- 回到顶部按钮 -->
-        <a-back-top :visibility-height="300" :style="{
-            bottom: '5px',
-            right: '5px',
-            zIndex: 1000
-        }">
-            <div class="back-to-top-button">
-                <span class="arrow-up">↑</span>
-                <span>顶部</span>
-            </div>
-        </a-back-top>
     </div>
 </template>
 
@@ -144,12 +138,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { getChapterImages } from '../api/manga'
 import { getChapterComments } from '../api/comment'
 import { useMangaStore } from '../stores/manga'
+import { useThemeStore } from '../stores/theme'
 import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '../utils/ui-config'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
 const router = useRouter()
 const mangaStore = useMangaStore() // 使用漫画存储
+const themeStore = useThemeStore() // 使用主题存储
 const chapterInfo = ref({})
 const images = ref([])
 const allChapters = ref([])
@@ -165,6 +161,13 @@ const loadingComments = ref(false)
 const commentsError = ref('') // 评论独立的错误状态
 const showSettingsDrawer = ref(false); // 控制设置抽屉的显示
 const readerConfig = reactive({ ...DEFAULT_UI_CONFIG.reader }); // 阅读器配置
+
+// 底部导航栏显示控制
+const showBottomNav = ref(false)
+let hideNavTimer = null
+
+// 使用全局主题状态
+const isDarkMode = computed(() => themeStore.isDarkMode)
 
 // 计算属性：将图片分组，根据配置的每行列数
 const imageChunks = computed(() => {
@@ -282,6 +285,31 @@ const nextChapter = () => {
                 }
             });
         }
+    }
+}
+
+// 底部导航栏控制方法
+const showNavigation = () => {
+    console.log('鼠标进入底部触发区域')
+    showBottomNav.value = true
+    // 清除之前的隐藏定时器
+    if (hideNavTimer) {
+        clearTimeout(hideNavTimer)
+        hideNavTimer = null
+    }
+}
+
+const hideNavAfterDelay = () => {
+    hideNavTimer = setTimeout(() => {
+        showBottomNav.value = false
+    }, 0)
+}
+
+const keepNavVisible = () => {
+    // 鼠标进入导航栏时，清除隐藏定时器
+    if (hideNavTimer) {
+        clearTimeout(hideNavTimer)
+        hideNavTimer = null
     }
 }
 
@@ -451,6 +479,10 @@ onMounted(() => {
 
     // 加载用户配置
     loadSettings()
+
+    // 初始显示底部导航栏，1秒后自动隐藏
+    showBottomNav.value = true
+    hideNavAfterDelay()
 })
 
 // 监听路由参数 chapterId 的变化 - 完全独立的两个监听器
@@ -461,6 +493,10 @@ watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
         // 仅更新图片部分
         fetchChapterImages()
+
+        // 显示底部导航栏，1秒后自动隐藏
+        showBottomNav.value = true
+        hideNavAfterDelay()
     }
 }, { immediate: false })
 
@@ -477,5 +513,5 @@ watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
 </script>
 
 <style scoped>
-@import '../assets/styles/chapterReader.css';
+@import '../assets/styles/chapter-reader.scss';
 </style>

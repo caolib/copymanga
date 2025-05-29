@@ -19,8 +19,7 @@
                             </a-menu>
                         </template>
                     </a-dropdown>
-                </template>
-                <template v-else>
+                </template> <template v-else>
                     <router-link to="/login" class="nav-link login-link">登录</router-link>
                 </template>
             </div>
@@ -29,7 +28,19 @@
             <nav class="nav" data-tauri-drag-region="false">
                 <router-link to="/" class="nav-link">首页</router-link>
                 <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">我的书架</router-link>
-                <router-link to="/settings" class="nav-link">设置</router-link>
+                <router-link to="/settings" class="nav-link">设置</router-link> <button @click="themeStore.toggleTheme"
+                    class="theme-toggle-btn" :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
+                    {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
+                </button>
+                <!-- 前进后退按钮 -->
+                <div class="navigation-controls" data-tauri-drag-region="false">
+                    <a-button type="text" size="small" @click="goBack" title="后退">
+                        <ArrowLeftOutlined />
+                    </a-button>
+                    <a-button type="text" size="small" @click="goForward" title="前进">
+                        <ArrowRightOutlined />
+                    </a-button>
+                </div>
             </nav>
         </div>
 
@@ -72,15 +83,26 @@ import { useRouter } from 'vue-router'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { isLoggedIn, logout } from '../utils/auth'
 import { useUserStore } from '../stores/user'
-import { UserOutlined, LogoutOutlined } from '@ant-design/icons-vue'
+import { useThemeStore } from '../stores/theme'
+import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
+const themeStore = useThemeStore()
 const isMaximized = ref(false)
 const currentWindow = getCurrentWindow()
 
 const isLoggedInComputed = computed(() => isLoggedIn())
 const userInfo = computed(() => userStore.userInfo)
+
+// 前进后退功能
+const goBack = () => {
+    router.go(-1)
+}
+
+const goForward = () => {
+    router.go(1)
+}
 
 onMounted(async () => {
     // 监听窗口状态变化
@@ -126,167 +148,6 @@ const goToProfile = () => {
 }
 </script>
 
-<style scoped>
-.title-bar {
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    height: 50px;
-    background: white;
-    color: #333;
-    user-select: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    border-bottom: 1px solid #e0e0e0;
-    padding: 0 6px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.title-bar-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex: 1;
-}
-
-.app-title {
-    font-size: 14px;
-    font-weight: 500;
-    margin-right: 8px;
-}
-
-.title-bar-center {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* 用于拖动的空白区域 */
-}
-
-.nav {
-    display: flex;
-    gap: 20px;
-}
-
-.nav-link {
-    color: #666;
-    text-decoration: none;
-    font-weight: 500;
-    padding: 6px 12px;
-    border-radius: 16px;
-    transition: all 0.3s ease;
-    font-size: 14px;
-}
-
-.nav-link:hover {
-    background-color: #f5f5f5;
-    color: #333;
-}
-
-.nav-link.router-link-active {
-    background-color: #e6f7ff;
-    color: #1890ff;
-}
-
-.login-link {
-    background-color: #1890ff;
-    color: white;
-    border: 1px solid #1890ff;
-}
-
-.login-link:hover {
-    background-color: #40a9ff;
-    color: white;
-}
-
-.title-bar-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 120px;
-    justify-content: flex-end;
-}
-
-.user-section {
-    display: flex;
-    align-items: center;
-    margin-right: 12px;
-}
-
-.user-avatar-dropdown {
-    cursor: pointer;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-    padding: 2px;
-    border: 2px solid #e0e0e0;
-}
-
-.user-avatar-dropdown:hover {
-    background-color: #f5f5f5;
-    border-color: #1890ff;
-    transform: scale(1.05);
-}
-
-.window-controls {
-    display: flex;
-    align-items: center;
-}
-
-.title-bar-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    color: #666;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.title-bar-button:hover {
-    background-color: #f5f5f5;
-}
-
-.title-bar-button.close:hover {
-    background-color: #ff4d4f;
-    color: white;
-}
-
-.title-bar-button.maximize:hover,
-.title-bar-button.minimize:hover {
-    background-color: #e6f7ff;
-    color: #1890ff;
-}
-
-.title-bar-button svg {
-    pointer-events: none;
-}
-
-.menu-icon {
-    font-size: 14px;
-    margin-right: 8px;
-}
-
-/* 媒体查询：在较小屏幕上调整布局 */
-@media (max-width: 768px) {
-    .nav {
-        gap: 12px;
-    }
-
-    .nav-link {
-        padding: 4px 8px;
-        font-size: 13px;
-    }
-
-    .app-title {
-        display: none;
-    }
-}
+<style scoped lang="scss">
+@import '../assets/styles/title-bar';
 </style>

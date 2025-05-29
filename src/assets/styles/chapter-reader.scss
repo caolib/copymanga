@@ -1,0 +1,655 @@
+@import "./variables";
+
+.reader-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+
+    &.dark-mode {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
+}
+
+.image-section {
+    margin-bottom: 30px;
+    border-bottom: 1px solid $border-color;
+    padding-bottom: 20px;
+
+    @include dark-theme {
+        border-bottom: 1px solid $dark-border-color;
+    }
+}
+
+.loading,
+.error {
+    text-align: center;
+    padding: 50px 0;
+    font-size: 18px;
+    color: $text-secondary;
+
+    @include dark-theme {
+        color: $dark-text-secondary;
+    }
+}
+
+.error {
+    color: $error-color;
+
+    @include dark-theme {
+        color: #ff6b6b;
+    }
+}
+
+.retry-container {
+    margin-top: 20px;
+    @include flex-center;
+    gap: 15px;
+}
+
+.retry-button {
+    padding: $spacing-sm 20px;
+    background-color: $primary-color;
+    color: $white;
+    border: none;
+    border-radius: $border-radius-small;
+    cursor: pointer;
+    transition: $transition-fast;
+    font-size: 16px;
+
+    &:hover {
+        background-color: $primary-active;
+    }
+
+    &.secondary {
+        background-color: $bg-color;
+        color: $text-primary;
+
+        &:hover {
+            background-color: $border-color;
+        }
+
+        @include dark-theme {
+            background-color: $dark-bg-primary;
+            color: $dark-text-primary;
+            border: 1px solid $dark-border-color-light;
+
+            &:hover {
+                background-color: $dark-bg-secondary;
+            }
+        }
+    }
+
+    @include dark-theme {
+        background-color: $primary-color;
+        border: 1px solid $dark-border-color-light;
+
+        &:hover {
+            background-color: $primary-active;
+        }
+    }
+}
+
+.reader-header {
+    @include flex-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 10px;
+    background-color: rgba($white, 0.95);
+    padding: 15px;
+    border-radius: $border-radius-medium;
+    box-shadow: $shadow-light;
+}
+
+/* 底部导航栏样式 */
+.bottom-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba($white, 0.95);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid rgba($black, 0.1);
+    box-shadow: $shadow-medium;
+    z-index: $z-index-dropdown;
+    transform: translateY(100%);
+    transition: $transition-normal;
+
+    &.visible {
+        transform: translateY(0);
+    }
+
+    @include dark-theme {
+        background: rgba(45, 45, 45, 0.95);
+        border-top: 1px solid rgba($white, 0.1);
+        box-shadow: $shadow-dark-medium;
+    }
+}
+
+.nav-content {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 12px 20px;
+    @include flex-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* 底部触发区域 */
+.bottom-trigger-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+    z-index: 999;
+    background: transparent;
+    pointer-events: auto;
+}
+
+.reader-title {
+    h1 {
+        font-size: 20px;
+        margin: 0 0 5px;
+    }
+
+    h2 {
+        font-size: 16px;
+        margin: 0;
+        color: $text-secondary;
+    }
+
+    h3 {
+        font-size: 18px;
+        margin: 0 0 3px;
+        line-height: 1.2;
+
+        @include dark-theme {
+            color: $dark-text-primary;
+        }
+    }
+
+    h4 {
+        font-size: 14px;
+        margin: 0;
+        color: $text-secondary;
+        line-height: 1.2;
+
+        @include dark-theme {
+            color: $dark-text-primary;
+        }
+    }
+}
+
+.reader-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.chapter-info {
+    margin-bottom: 15px;
+    @include flex-between;
+    color: $text-secondary;
+    font-size: 14px;
+}
+
+.info-item {
+    margin-right: 15px;
+}
+
+.control-button {
+    padding: $spacing-sm 15px;
+    background-color: $primary-color;
+    color: $white;
+    border: none;
+    border-radius: $border-radius-small;
+    cursor: pointer;
+    transition: $transition-fast;
+
+    &:hover:not(:disabled) {
+        background-color: $primary-active;
+    }
+
+    &:disabled {
+        background-color: lighten($primary-color, 20%);
+        cursor: not-allowed;
+    }
+
+    @include dark-theme {
+        background: $dark-bg-secondary;
+        color: $dark-text-primary;
+        border: 1px solid $dark-border-color-light;
+
+        &:hover:not(:disabled) {
+            background-color: lighten($dark-bg-secondary, 10%);
+        }
+
+        &:disabled {
+            background-color: $dark-bg-primary;
+            color: $text-secondary;
+        }
+    }
+}
+
+/* 图片容器样式 - 支持动态间距配置 */
+.image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+}
+
+/* 漫画行样式 - 支持 RTL/LTR 布局 */
+.manga-row {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: flex-start;
+
+    &.row-rtl {
+        flex-direction: row-reverse;
+        /* 从右到左（日漫风格） */
+    }
+
+    &.row-ltr {
+        flex-direction: row;
+        /* 从左到右 */
+    }
+}
+
+/* 漫画列样式 - 支持动态列数 */
+.manga-column {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* 漫画图片样式 - 支持动态大小配置 */
+.manga-image {
+    max-width: 100%;
+    height: auto;
+    box-shadow: $shadow-light;
+    object-fit: contain;
+    border-radius: $border-radius-small;
+
+    &.placeholder {
+        visibility: hidden;
+        height: 0;
+        background: $bg-color;
+        min-height: 300px;
+        width: 100%;
+        display: block;
+        border-radius: $border-radius-medium;
+
+        @include dark-theme {
+            background: $dark-bg-primary;
+        }
+    }
+}
+
+.reader-footer {
+    margin-top: $spacing-lg;
+    padding: 20px 0;
+    text-align: center;
+}
+
+/* 评论区样式 - 独立模块 */
+.comments-section {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid $border-color;
+
+    @include dark-theme {
+        background: $dark-bg-primary;
+        border: 1px solid $dark-border-color;
+    }
+}
+
+.comments-error {
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+
+    @include dark-theme {
+        color: #ff6b6b;
+    }
+}
+
+.retry-comments-button {
+    margin-top: 12px;
+}
+
+/* 紧凑型评论布局 */
+.compact-comments-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+    margin: $spacing-md -5px 0;
+}
+
+.compact-comment-item {
+    padding: 10px !important;
+    background-color: $bg-color-light;
+    border-radius: $border-radius-medium;
+    margin: 0 !important;
+    height: 100%;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary !important;
+        border: 1px solid $dark-border-color;
+    }
+
+    :deep(.ant-comment-inner) {
+        padding: 6px 0;
+    }
+
+    :deep(.ant-comment-content-author) {
+        margin-bottom: 6px;
+    }
+
+    :deep(.ant-comment-content-detail) {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+
+    :deep(.ant-comment-avatar img) {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+.section-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: $text-primary;
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+}
+
+.comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background-color: $bg-color-light;
+    border-radius: $border-radius-medium;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+    }
+}
+
+.comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.comment-content {
+    flex: 1;
+}
+
+.comment-header {
+    @include flex-between;
+    margin-bottom: 5px;
+}
+
+.comment-username {
+    font-weight: bold;
+    color: $text-primary;
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+}
+
+.comment-time {
+    font-size: 12px;
+    color: $text-tertiary;
+}
+
+.comment-text {
+    color: $text-primary;
+    line-height: 1.5;
+
+    @include dark-theme {
+        color: lighten($dark-text-primary, -10%);
+    }
+}
+
+/* 设置按钮样式 */
+.settings-button {
+    background-color: $success-color;
+    position: relative;
+
+    &:hover:not(:disabled) {
+        background-color: darken($success-color, 10%);
+    }
+
+    span {
+        display: flex;
+        align-items: center;
+        gap: $spacing-xs;
+    }
+
+    @include dark-theme {
+        background-color: #2d5a27;
+
+        &:hover:not(:disabled) {
+            background-color: #236b1d;
+        }
+    }
+}
+
+/* 主题切换按钮样式 */
+.theme-button {
+    background-color: #722ed1;
+    position: relative;
+    font-size: 16px;
+
+    &:hover:not(:disabled) {
+        background-color: #531dab;
+    }
+
+    span {
+        @include flex-center;
+        font-size: 16px;
+        line-height: 1;
+    }
+
+    @include dark-theme {
+        background-color: #4a4a4a;
+        padding: 6px 12px;
+
+        &:hover:not(:disabled) {
+            background-color: #5a5a5a;
+        }
+    }
+}
+
+/* 设置抽屉内容样式 */
+:deep(.ant-drawer-body .ant-form-item) {
+    margin-bottom: $spacing-lg;
+}
+
+:deep(.ant-drawer-body .ant-slider) {
+    margin: 12px 0;
+}
+
+/* 回到顶部按钮样式 */
+.back-to-top-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    background-color: rgba($primary-color, 0.9);
+    color: $white;
+    border-radius: 50%;
+    box-shadow: $shadow-light;
+    transition: $transition-normal;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+        background-color: rgba($primary-active, 0.9);
+        transform: scale(1.05);
+        box-shadow: $shadow-medium;
+    }
+
+    .arrow-up {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 2px;
+    }
+
+    span:last-child {
+        font-size: 10px;
+    }
+
+    @include dark-theme {
+        background-color: rgba($primary-color, 0.8);
+
+        &:hover {
+            background-color: rgba($primary-active, 0.9);
+        }
+    }
+}
+
+/* 暗色模式下的抽屉样式 */
+@include dark-theme {
+    :deep(.ant-drawer .ant-drawer-content) {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
+
+    :deep(.ant-drawer .ant-drawer-header) {
+        background-color: $dark-bg-primary;
+        border-bottom: 1px solid $dark-border-color;
+        color: $dark-text-primary;
+    }
+
+    :deep(.ant-drawer .ant-drawer-body) {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
+
+    :deep(.ant-form-item-label > label) {
+        color: $dark-text-primary;
+    }
+
+    :deep(.ant-radio-wrapper) {
+        color: $dark-text-primary;
+    }
+
+    :deep(.ant-radio-button-wrapper) {
+        background-color: $dark-bg-primary;
+        border-color: $dark-border-color-light;
+        color: $dark-text-primary;
+    }
+
+    :deep(.ant-radio-button-wrapper-checked) {
+        background-color: $primary-color;
+        border-color: $primary-color;
+        color: $white;
+    }
+
+    :deep(.ant-slider-track) {
+        background-color: $primary-color;
+    }
+
+    :deep(.ant-slider-rail) {
+        background-color: $dark-border-color-light;
+    }
+}
+
+/* 响应式样式 */
+@include responsive($breakpoint-sm) {
+    .reader-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .reader-controls {
+        width: 100%;
+        justify-content: space-between;
+        flex-direction: column;
+        gap: $spacing-sm;
+    }
+
+    .manga-row {
+        flex-direction: column !important;
+        gap: 20px;
+    }
+
+    .reader-container {
+        padding: 10px;
+    }
+
+    .manga-column {
+        width: 100% !important;
+        margin-bottom: $spacing-sm;
+    }
+
+    .control-button {
+        width: 100%;
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+
+    /* 响应式样式 - 底部导航栏 */
+    .nav-content {
+        flex-direction: column;
+        padding: 10px 15px;
+        gap: $spacing-sm;
+
+        @include dark-theme {
+            background: rgba(45, 45, 45, 0.95);
+        }
+    }
+
+    .reader-title {
+        h3 {
+            font-size: 16px;
+            text-align: center;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        h4 {
+            font-size: 13px;
+            text-align: center;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+    }
+
+    .reader-controls {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+}

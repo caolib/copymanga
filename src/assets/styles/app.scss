@@ -1,0 +1,147 @@
+@import "./variables";
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans",
+        "Helvetica Neue", sans-serif;
+    background-color: $bg-color;
+    color: $text-primary;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
+}
+
+.app-container {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.restart-banner {
+    padding: $spacing-sm $spacing-md;
+    background-color: #fff3cd;
+    border-bottom: 1px solid #ffeaa7;
+    z-index: 999;
+    margin-top: 50px; /* 为标题栏留出空间 */
+
+    @include dark-theme {
+        background-color: $dark-fill-tertiary;
+        border-bottom: 1px solid $dark-border-color;
+    }
+}
+
+.main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 70px $spacing-lg $spacing-lg $spacing-lg; /* 上边距为标题栏高度 + 20px */
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
+}
+
+/* 在漫画阅读页面调整主内容区域 */
+.chapter-reader-mode .main-content {
+    padding: 0;
+    max-width: none;
+}
+
+/* 免责声明弹窗样式 */
+.disclaimer-content {
+    padding: $spacing-md 0;
+}
+
+.warning-header {
+    @include flex-center;
+    gap: 12px;
+    margin-bottom: $spacing-lg;
+    padding: $spacing-md;
+    background: #fff2e8;
+    border: 1px solid #ffcc02;
+    border-radius: $border-radius-medium;
+
+    @include dark-theme {
+        background: $dark-fill-secondary;
+        border: 1px solid $warning-color;
+    }
+}
+
+.warning-icon {
+    font-size: 24px;
+}
+
+.warning-header h3 {
+    margin: 0;
+    color: #d46b08;
+    font-size: 18px;
+
+    @include dark-theme {
+        color: $warning-color;
+    }
+}
+
+.disclaimer-text {
+    line-height: 1.6;
+    color: $text-primary;
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+
+    ul {
+        margin: $spacing-md 0;
+        padding-left: $spacing-lg;
+    }
+
+    li {
+        margin-bottom: $spacing-sm;
+    }
+}
+
+.age-notice {
+    background: #f6ffed;
+    padding: 12px;
+    border-left: 4px solid $success-color;
+    margin: $spacing-md 0;
+    font-weight: 500;
+
+    @include dark-theme {
+        background: $dark-fill-secondary;
+        color: $dark-text-primary;
+    }
+}
+
+.legal-notice {
+    background: #fff1f0;
+    padding: 12px;
+    border-left: 4px solid $error-color;
+    margin: $spacing-md 0;
+    color: #cf1322;
+    font-size: 13px;
+
+    @include dark-theme {
+        background: $dark-fill-tertiary;
+        color: $error-color;
+    }
+}
+
+.disclaimer-footer {
+    @include flex-between;
+    gap: 12px;
+
+    .ant-btn {
+        flex: 1;
+    }
+}

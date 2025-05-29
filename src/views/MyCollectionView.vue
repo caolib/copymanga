@@ -293,6 +293,19 @@ onMounted(() => {
     font-style: italic;
 }
 
+/* 暗色模式下的文字颜色 */
+html.dark .manga-author {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+html.dark .manga-update {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+html.dark .manga-datetime-updated {
+    color: rgba(255, 255, 255, 0.45);
+}
+
 /* 骨架屏样式 */
 .skeleton-card {
     pointer-events: none;

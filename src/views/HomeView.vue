@@ -368,6 +368,15 @@ onMounted(() => {
     margin-bottom: 8px;
 }
 
+/* 暗色模式下的主页漫画信息文字颜色 */
+html.dark .manga-author {
+    color: #bbb;
+}
+
+html.dark .manga-popular {
+    color: #999;
+}
+
 /* 轮播图样式 */
 .banner-item {
     position: relative;
@@ -412,6 +421,15 @@ onMounted(() => {
     border-bottom: none;
 }
 
+/* 暗色模式下的排行榜样式 */
+html.dark .rank-item {
+    border-bottom: 1px solid #333;
+}
+
+html.dark .rank-item:hover {
+    background-color: #282c34;
+}
+
 .rank-number {
     width: 24px;
     height: 24px;
@@ -444,6 +462,12 @@ onMounted(() => {
     color: #666;
 }
 
+/* 暗色模式下的排行榜编号样式 */
+html.dark .rank-number:not(.rank-1):not(.rank-2):not(.rank-3) {
+    background-color: #444;
+    color: #ccc;
+}
+
 .rank-cover {
     width: 40px;
     height: 54px;
@@ -470,5 +494,10 @@ onMounted(() => {
 .rank-popular {
     font-size: 11px;
     color: #999;
+}
+
+/* 暗色模式下的排行榜文字颜色 */
+html.dark .rank-popular {
+    color: #bbb;
 }
 </style>

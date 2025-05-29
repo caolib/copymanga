@@ -1,23 +1,22 @@
 <template>
-    <div class="user-profile-container" style="margin: 16px; padding: 0;">
+    <div class="user-profile-container">
         <!-- 左侧侧栏导航 -->
         <a-layout>
-            <a-layout-sider width="240" theme="light" style="background: #fff; border-right: 1px solid #f0f0f0;">
-                <div class="user-sider-header"
-                    style="padding: 20px 16px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f0f0;">
+            <a-layout-sider width="240" theme="light" class="user-profile-sider">
+                <div class="user-sider-header">
                     <a-avatar :src="userInfo?.avatar || '/logo.jpg'" :alt="userInfo?.username || '用户头像'" :size="56"
                         @error="handleAvatarError" />
                     <div>
-                        <div style="font-size: 16px; font-weight: 500; margin-bottom: 2px;">
+                        <div class="user-nickname">
                             {{ userInfo?.nickname || userInfo?.username || '用户' }}
                         </div>
-                        <div style="font-size: 12px; color: #999;">
+                        <div class="user-username">
                             {{ userInfo?.username || '-' }}
                         </div>
                     </div>
                 </div>
 
-                <a-menu v-model:selectedKeys="selectedMenu" mode="inline" style="border-right: none;">
+                <a-menu v-model:selectedKeys="selectedMenu" mode="inline" class="user-profile-menu">
                     <a-menu-item key="profile">
                         <template #icon><user-outlined /></template>
                         个人信息
@@ -29,22 +28,22 @@
                 </a-menu>
             </a-layout-sider>
 
-            <a-layout-content style="padding: 0 24px; min-height: calc(100vh - 48px);">
+            <a-layout-content class="user-profile-content">
                 <!-- 个人信息页面 -->
                 <div v-show="selectedMenu.includes('profile')">
-                    <a-card :bordered="false" style="margin-top: 16px;">
+                    <a-card :bordered="false" class="profile-card">
                         <template #title>
-                            <div style="font-size: 18px; font-weight: 500;">个人资料</div>
+                            <div class="profile-title">个人资料</div>
                         </template>
 
-                        <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 24px;">
+                        <div class="profile-header">
                             <a-avatar :src="userInfo?.avatar || '/logo.jpg'" :alt="userInfo?.username || '用户头像'"
                                 :size="80" @error="handleAvatarError" />
-                            <div style="flex: 1;">
-                                <a-typography-title :level="4" style="margin-bottom: 8px;">
+                            <div class="profile-info">
+                                <a-typography-title :level="4" class="profile-name">
                                     {{ userInfo?.nickname || userInfo?.username || '用户' }}
                                 </a-typography-title>
-                                <a-typography-paragraph style="margin-bottom: 0; font-size: 14px; color: #666;">
+                                <a-typography-paragraph class="profile-description">
                                     {{ userInfo?.description || '这个用户很懒，什么都没有写...' }}
                                 </a-typography-paragraph>
                             </div>
@@ -70,10 +69,10 @@
                 </div>
 
                 <!-- 浏览记录页面 -->
-                <div v-show="selectedMenu.includes('browse-history')" style="margin-top: 16px;">
+                <div v-show="selectedMenu.includes('browse-history')" class="browse-history-content">
                     <a-card :bordered="false">
                         <template #title>
-                            <div style="font-size: 18px; font-weight: 500;">浏览记录</div>
+                            <div class="browse-history-title">浏览记录</div>
                         </template>
 
                         <!-- 浏览记录内容 -->
@@ -90,11 +89,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                        }}
+                                                            }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                        }}</div>
+                                                            }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
@@ -102,7 +101,7 @@
                                         </a-col>
                                     </a-row>
 
-                                    <div style="margin-top: 24px; display: flex; justify-content: center;">
+                                    <div class="browse-pagination">
                                         <a-pagination v-if="browseTotal > browseLimit" :total="browseTotal"
                                             :page-size="browseLimit"
                                             :current="Math.floor(browseOffset / browseLimit) + 1"
@@ -208,79 +207,6 @@ const formatDate = (dateString) => {
 }
 </script>
 
-<style scoped>
-.user-profile-container {
-    background-color: #f5f7fa;
-    min-height: calc(100vh - 48px);
-}
-
-.browse-list-container {
-    margin-top: 8px;
-}
-
-.browse-card {
-    height: 100%;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.browse-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.browse-card-content {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.browse-card-cover {
-    height: 180px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    border-radius: 4px;
-}
-
-.browse-card-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s;
-}
-
-.browse-card:hover .browse-card-cover img {
-    transform: scale(1.05);
-}
-
-.browse-card-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.comic-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: #333;
-    margin-bottom: 8px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.comic-chapter,
-.comic-author,
-.read-chapter {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 4px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.read-chapter {
-    color: #1890ff;
-}
+<style lang="scss">
+@import "@/assets/styles/user-profile.scss";
 </style>

@@ -2,6 +2,32 @@
     <div>
         <h2 class="settings-section-title">界面设置</h2>
 
+        <!-- 主题设置 -->
+        <a-card title="主题设置" class="setting-card">
+            <a-form layout="vertical"> <a-form-item label="主题模式">
+                    <a-radio-group v-model:value="themeConfig.isDarkMode" button-style="solid"
+                        @change="onThemeModeChange">
+                        <a-radio-button :value="false">浅色模式</a-radio-button>
+                        <a-radio-button :value="true">暗色模式</a-radio-button>
+                    </a-radio-group>
+                </a-form-item>
+
+                <a-form-item label="字体系列">
+                    <div class="font-family-container">
+                        <a-textarea v-model:value="themeConfig.fontFamily" @change="onFontFamilyChange"
+                            placeholder="请输入字体系列，如：&quot;微软雅黑&quot;, Arial, sans-serif" :rows="2"
+                            style="margin-bottom: 12px" />
+                        <div class="font-preview">
+                            <span class="preview-label">预览：</span>
+                            <span class="preview-text" :style="{ fontFamily: themeConfig.fontFamily }">
+                                拷贝漫画 CopyManga 0123456789
+                            </span>
+                        </div>
+                    </div>
+                </a-form-item>
+            </a-form>
+        </a-card>
+
         <!-- 阅读器设置 -->
         <a-card title="阅读器设置" class="setting-card">
             <a-form layout="vertical">
@@ -46,17 +72,38 @@
 import { reactive, ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/utils/ui-config'
+import { useThemeStore } from '@/stores/theme'
+
+const themeStore = useThemeStore()
+
+// 主题配置
+const themeConfig = reactive({
+    isDarkMode: false,
+    fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace'
+})
 
 // UI界面设置
 const uiConfig = reactive({ ...DEFAULT_UI_CONFIG.reader })
 const savingUI = ref(false)
 
+// 主题相关方法
+const onThemeModeChange = () => {
+    themeStore.setTheme(themeConfig.isDarkMode)
+}
+
+const onFontFamilyChange = () => {
+    themeStore.setFontFamily(themeConfig.fontFamily)
+}
+
 // UI配置相关方法
 const loadUISettings = () => {
     loadUIConfig().then(config => {
-        Object.assign(uiConfig, config.reader)
+        // 加载阅读器配置
+        Object.assign(uiConfig, config.reader)        // 加载主题配置
+        themeConfig.isDarkMode = config.theme?.isDarkMode || false
+        themeConfig.fontFamily = config.theme?.fontFamily || '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace'
     }).catch(error => {
-        message.error('加载UI配置失败')
+        message.error('加载配置失败')
     })
 }
 
@@ -87,5 +134,43 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* 这里可以添加特定于界面设置的样式 */
+.setting-card {
+    margin-bottom: 24px;
+}
+
+.font-family-container {
+    width: 100%;
+}
+
+.font-preview {
+    padding: 12px;
+    background-color: #f5f5f5;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
+}
+
+.preview-label {
+    font-size: 14px;
+    color: #666;
+    margin-right: 8px;
+}
+
+.preview-text {
+    font-size: 16px;
+    color: #333;
+}
+
+/* 暗色主题样式 */
+html.dark .preview-label {
+    color: #cccccc;
+}
+
+html.dark .font-preview {
+    background-color: #2a2a2a;
+    border-color: #434343;
+}
+
+html.dark .preview-text {
+    color: #e0e0e0;
+}
 </style>

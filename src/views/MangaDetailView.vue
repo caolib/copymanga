@@ -476,6 +476,17 @@ onMounted(() => {
     box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
 }
 
+/* 暗色模式下的上次阅读章节样式 */
+html.dark .last-read-chapter {
+    border: 2px solid #40a9ff !important;
+    background: linear-gradient(135deg, #1a3a5c 0%, #2a4a6c 100%) !important;
+}
+
+html.dark .last-read-chapter:hover {
+    border-color: #69c0ff !important;
+    box-shadow: 0 4px 12px rgba(64, 169, 255, 0.3) !important;
+}
+
 .last-read-tag {
     position: absolute;
     top: -8px;
@@ -490,11 +501,11 @@ onMounted(() => {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+
 /* 分页容器样式 */
 .pagination-container {
     margin-top: 24px;
     padding: 16px 0;
     text-align: center;
-    border-top: 1px solid #f0f0f0;
 }
 </style>
