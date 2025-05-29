@@ -13,19 +13,19 @@
 ## 介绍
 这是一个拷贝漫画第三方桌面端应用
 
+![image-20250529161957872](https://s2.loli.net/2025/05/29/d1Hyigj9bwhLAPE.png)
 
+![image-20250529161929177](https://s2.loli.net/2025/05/29/hSA5YjyLaQXwE8N.png)
 
-![image-20250528184038200](https://s2.loli.net/2025/05/28/GtVb2fPQ7luc1pv.png)
+![image-20250529162057214](https://s2.loli.net/2025/05/29/rwYCb5BLvfHKn7X.png)
 
-![image-20250528184227555](https://s2.loli.net/2025/05/28/j4x6v7OIMruTVaB.png)
+![image-20250529162210160](https://s2.loli.net/2025/05/29/aopKubEDILBzkY7.png)
 
-![image-20250528184332216](https://s2.loli.net/2025/05/28/NKmcO8nIVryRTwi.png)
+![image-20250529162310278](https://s2.loli.net/2025/05/29/lX4aEtm83hOMI76.png)
 
-![image-20250528184440247](https://s2.loli.net/2025/05/28/zycg5pYDO31vw2a.png)
+![image-20250529162327732](https://s2.loli.net/2025/05/29/DNoF7gBPhOyZnf8.png)
 
-![image-20250528184540228](https://s2.loli.net/2025/05/28/pRraMwydAqTK3gI.png)
-
-![image-20250528184900069](https://s2.loli.net/2025/05/28/Ki8vdegcYXTEQFB.png)
+![image-20250529162352675](https://s2.loli.net/2025/05/29/Och2oB54ryxgUfF.png)
 
 ## ⚠️ 免责声明
 
