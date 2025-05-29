@@ -1,4 +1,5 @@
 @use "./variables" as *;
+@use "sass:color";
 
 .reader-container {
     max-width: 1000px;
@@ -211,7 +212,7 @@
     }
 
     &:disabled {
-        background-color: lighten($primary-color, 20%);
+        background-color: color.scale($primary-color, $lightness: 20%);
         cursor: not-allowed;
     }
 
@@ -221,7 +222,7 @@
         border: 1px solid $dark-border-color-light;
 
         &:hover:not(:disabled) {
-            background-color: lighten($dark-bg-secondary, 10%);
+            background-color: color.scale($dark-bg-secondary, $lightness: 10%);
         }
 
         &:disabled {
@@ -296,6 +297,7 @@
 /* 评论区样式 - 独立模块 */
 .comments-section {
     margin-top: 40px;
+    padding: 10px;
     padding-top: 20px;
     border-top: 1px solid $border-color;
 
@@ -430,7 +432,7 @@
     line-height: 1.5;
 
     @include dark-theme {
-        color: lighten($dark-text-primary, -10%);
+        color: color.scale($dark-text-primary, $lightness: 10%);
     }
 }
 
@@ -440,7 +442,7 @@
     position: relative;
 
     &:hover:not(:disabled) {
-        background-color: darken($success-color, 10%);
+        background-color: color.adjust($success-color, $lightness: -10%);
     }
 
     span {
@@ -450,10 +452,10 @@
     }
 
     @include dark-theme {
-        background-color: #2d5a27;
+        background-color: color.scale($success-color, $lightness: -10%);
 
         &:hover:not(:disabled) {
-            background-color: #236b1d;
+            background-color: color.scale($success-color, $lightness: -10%);
         }
     }
 }
@@ -537,50 +539,40 @@
 }
 
 /* 暗色模式下的抽屉样式 */
-@include dark-theme {
-    :deep(.ant-drawer .ant-drawer-content) {
-        background-color: $dark-bg-primary;
-        color: $dark-text-primary;
-    }
-
-    :deep(.ant-drawer .ant-drawer-header) {
-        background-color: $dark-bg-primary;
-        border-bottom: 1px solid $dark-border-color;
-        color: $dark-text-primary;
-    }
-
-    :deep(.ant-drawer .ant-drawer-body) {
-        background-color: $dark-bg-primary;
-        color: $dark-text-primary;
-    }
-
-    :deep(.ant-form-item-label > label) {
-        color: $dark-text-primary;
-    }
-
-    :deep(.ant-radio-wrapper) {
-        color: $dark-text-primary;
-    }
-
-    :deep(.ant-radio-button-wrapper) {
-        background-color: $dark-bg-primary;
-        border-color: $dark-border-color-light;
-        color: $dark-text-primary;
-    }
-
-    :deep(.ant-radio-button-wrapper-checked) {
-        background-color: $primary-color;
-        border-color: $primary-color;
-        color: $white;
-    }
-
-    :deep(.ant-slider-track) {
-        background-color: $primary-color;
-    }
-
-    :deep(.ant-slider-rail) {
-        background-color: $dark-border-color-light;
-    }
+html.dark :deep(.ant-drawer .ant-drawer-content) {
+    background-color: $dark-bg-primary;
+    color: $dark-text-primary;
+}
+html.dark :deep(.ant-drawer .ant-drawer-header) {
+    background-color: $dark-bg-primary;
+    border-bottom: 1px solid $dark-border-color;
+    color: $dark-text-primary;
+}
+html.dark :deep(.ant-drawer .ant-drawer-body) {
+    background-color: $dark-bg-primary;
+    color: $dark-text-primary;
+}
+html.dark :deep(.ant-form-item-label > label) {
+    color: $dark-text-primary;
+}
+html.dark :deep(.ant-radio-wrapper) {
+    color: $dark-text-primary;
+}
+html.dark :deep(.ant-radio-button-wrapper) {
+    background-color: $dark-bg-primary;
+    border-color: $dark-border-color-light;
+    color: $dark-text-primary;
+}
+html.dark :deep(.ant-radio-button-wrapper-checked) {
+    background-color: $primary-color;
+    border-color: $primary-color;
+    color: $white;
+}
+html.dark :deep(.ant-slider-track) {
+    background-color: $primary-color;
+}
+html.dark :deep(.ant-slider-rail) {
+    background-color: $dark-border-color-light;
 }
 
 /* 响应式样式 */
@@ -624,7 +616,7 @@
         gap: $spacing-sm;
 
         @include dark-theme {
-            background: rgba(45, 45, 45, 0.95);
+            background: $dark-bg-primary;
         }
     }
 

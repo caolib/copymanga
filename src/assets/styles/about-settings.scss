@@ -64,6 +64,20 @@
     border: 1px solid #e8e8e8;
     max-height: 300px;
     overflow-y: auto;
+
+    @include dark-theme {
+        background: $dark-bg-secondary;
+        border: 1px solid $dark-border-color;
+        color: $dark-text-primary;
+
+        h3 {
+            color: $dark-text-primary;
+        }
+
+        :deep(a) {
+            color: $primary-color;
+        }
+    }
 }
 
 .changelog-content h3 {

@@ -92,9 +92,11 @@ $breakpoint-md: 992px;
 $breakpoint-lg: 1200px;
 $breakpoint-xl: 1600px;
 
+@use "sass:selector";
+
 // 混合器
 @mixin dark-theme {
-    html.dark & {
+    @at-root #{selector.nest("html.dark", &)} {
         @content;
     }
 }
