@@ -2,7 +2,8 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
     state: () => ({
-        needsRestart: false
+        needsRestart: false,
+        disclaimerAccepted: false
     }),
 
     actions: {
@@ -12,6 +13,10 @@ export const useAppStore = defineStore('app', {
 
         clearNeedsRestart() {
             this.needsRestart = false
+        },
+
+        setDisclaimerAccepted(value) {
+            this.disclaimerAccepted = value
         }
     },
 

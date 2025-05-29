@@ -22,29 +22,60 @@
                     </a-space>
                 </a-form-item>
             </a-form>
-        </a-card>
-
-        <a-card title="API 域名配置" class="setting-card" id="api-config">
-            <a-form :model="appForm" layout="vertical" @finish="onSubmitApp">
-                <a-form-item label="API 域名" name="apiDomain" :rules="[
-                    { required: true, message: '请输入 API 域名' },
-                    { validator: validateDomain, trigger: 'blur' }
-                ]">
-                    <a-input v-model:value="appForm.apiDomain" placeholder="https://copy20.com" size="large" />
+        </a-card> <a-card title="API 域名配置" class="setting-card" id="api-config">
+            <a-form layout="vertical">
+                <!-- 当前API源选择 -->
+                <a-form-item label="当前API源">
+                    <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" size="large"
+                        style="width: 100%">
+                        <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
+                            {{ source.name }} ({{ source.url }})
+                        </a-select-option>
+                    </a-select>
                     <div class="help-text">
-                        默认: https://copy20.com
+                        选择要使用的API源
                     </div>
                 </a-form-item>
 
-                <a-form-item>
-                    <a-space>
-                        <a-button type="primary" html-type="submit" :loading="savingApp" size="large">
-                            保存设置
+                <!-- 添加新API源 -->
+                <a-form-item label="添加新API源">
+                    <a-input-group compact>
+                        <a-input v-model:value="newApiSource.name" placeholder="源名称" style="width: 30%" size="large" />
+                        <a-input v-model:value="newApiSource.url" placeholder="API域名 (如: https://copy20.com)"
+                            style="width: 50%" size="large" />
+                        <a-button type="primary" @click="addNewApiSource" :loading="addingSource" style="width: 20%"
+                            size="large">
+                            添加
                         </a-button>
-                        <a-button @click="resetAppToDefault" size="large">
-                            恢复默认
-                        </a-button>
-                    </a-space>
+                    </a-input-group>
+                </a-form-item>
+
+                <!-- API源管理 -->
+                <a-form-item label="API源管理">
+                    <a-list :data-source="apiSources" bordered size="small">
+                        <template #renderItem="{ item, index }">
+                            <a-list-item>
+                                <template #actions>
+                                    <a-button v-if="apiSources.length > 1" type="text" danger size="small"
+                                        @click="removeApiSource(index)" :loading="removingIndex === index">
+                                        删除
+                                    </a-button>
+                                </template>
+                                <a-list-item-meta>
+                                    <template #title>
+                                        <span :class="{ 'current-source': index === currentApiIndex }">
+                                            {{ item.name }}
+                                            <a-tag v-if="index === currentApiIndex" color="green"
+                                                size="small">当前</a-tag>
+                                        </span>
+                                    </template>
+                                    <template #description>
+                                        {{ item.url }}
+                                    </template>
+                                </a-list-item-meta>
+                            </a-list-item>
+                        </template>
+                    </a-list>
                 </a-form-item>
             </a-form>
         </a-card>
@@ -88,7 +119,10 @@ import {
     validateServerPort,
     getAppConfig,
     saveAppConfig,
-    validateApiDomain
+    validateApiDomain,
+    addApiSource,
+    removeApiSource as removeApiSourceConfig,
+    switchApiSource
 } from '@/utils/server-config'
 import { useAppStore } from '@/stores/app'
 import { relaunch } from '@tauri-apps/plugin-process'
@@ -107,6 +141,16 @@ const savingServer = ref(false)
 const savingApp = ref(false)
 const restarting = ref(false)
 const appStore = useAppStore()
+
+// 新增：API源管理相关状态
+const apiSources = ref([])
+const currentApiIndex = ref(0)
+const newApiSource = ref({
+    name: '',
+    url: ''
+})
+const addingSource = ref(false)
+const removingIndex = ref(-1)
 
 // 验证端口格式
 const validatePort = (rule, value) => {
@@ -144,6 +188,8 @@ const loadConfig = () => {
     getAppConfig().then(config => {
         currentApiDomain.value = config.apiDomain
         appForm.value.apiDomain = config.apiDomain
+        apiSources.value = config.apiSources || []
+        currentApiIndex.value = config.currentApiIndex || 0
     }).catch(error => {
         message.error('加载应用配置失败')
     })
@@ -197,6 +243,60 @@ const handleRestart = async () => {
     })
 }
 
+// 新增：API源切换
+const onApiSourceChange = async (index) => {
+    try {
+        const source = await switchApiSource(index)
+        currentApiDomain.value = source.url
+        appForm.value.apiDomain = source.url
+        appStore.setNeedsRestart(true)
+        message.success(`已切换到: ${source.name}`)
+    } catch (error) {
+        message.error(error.message || '切换API源失败')
+        // 切换失败时恢复原值
+        loadConfig()
+    }
+}
+
+// 新增：添加API源
+const addNewApiSource = async () => {
+    if (!newApiSource.value.name || !newApiSource.value.url) {
+        message.error('请输入源名称和URL')
+        return
+    }
+
+    addingSource.value = true
+    try {
+        await addApiSource(newApiSource.value.name, newApiSource.value.url)
+        message.success('API源添加成功')
+        newApiSource.value = { name: '', url: '' }
+        loadConfig() // 重新加载配置
+    } catch (error) {
+        message.error(error.message || '添加API源失败')
+    } finally {
+        addingSource.value = false
+    }
+}
+
+// 新增：删除API源
+const removeApiSource = async (index) => {
+    if (apiSources.value.length <= 1) {
+        message.error('至少需要保留一个API源')
+        return
+    }
+
+    removingIndex.value = index
+    try {
+        await removeApiSourceConfig(index)
+        message.success('API源删除成功')
+        loadConfig() // 重新加载配置
+    } catch (error) {
+        message.error(error.message || '删除API源失败')
+    } finally {
+        removingIndex.value = -1
+    }
+}
+
 onMounted(() => {
     loadConfig()
 })
@@ -212,5 +312,18 @@ onMounted(() => {
 .restart-help {
     color: #666;
     font-size: 13px;
+}
+
+.current-source {
+    font-weight: 600;
+    color: #1890ff;
+}
+
+.ant-input-group {
+    display: flex;
+}
+
+.ant-list-item-meta-title {
+    margin-bottom: 4px !important;
 }
 </style>

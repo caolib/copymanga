@@ -19,17 +19,17 @@ function getMyCollectionRaw(params = {}) {
         if (!response) {
             return { results: { list: [], total: 0 } }
         }
-        
+
         if (!response.results) {
             console.warn('API返回数据缺少results字段:', response)
             return { results: { list: [], total: 0 } }
         }
-        
+
         if (!Array.isArray(response.results.list)) {
             console.warn('API返回的list不是数组:', response.results)
             response.results.list = []
         }
-        
+
         return response
     })
 }
@@ -41,6 +41,24 @@ function getMyCollectionRaw(params = {}) {
  */
 function getMangaChapters(pathWord) {
     return request.get(`/comicdetail/${pathWord}/chapters`)
+}
+
+/**
+ * 获取漫画分组章节列表（新API）
+ * @param {string} pathWord 漫画路径标识
+ * @param {string} groupPathWord 分组路径，默认为default
+ * @param {number} limit 每页数量，默认100
+ * @param {number} offset 偏移量，默认0
+ * @returns {Promise} 漫画章节数据
+ */
+function getMangaGroupChapters(pathWord, groupPathWord = 'default', limit = 100, offset = 0) {
+    return request.get(`/api/v3/comic/${pathWord}/group/${groupPathWord}/chapters`, {
+        params: {
+            limit,
+            offset,
+            platform: 3
+        }
+    });
 }
 
 /**
@@ -113,6 +131,7 @@ function getHomeIndex() {
 export {
     getMyCollectionRaw,
     getMangaChapters,
+    getMangaGroupChapters,
     getChapterImages,
     searchManga,
     collectManga,

@@ -180,6 +180,32 @@ async fn proxy_handler(
     let headers_in = req.headers().clone();
     let uri = req.uri().clone();
 
+    // 获取 Origin 和相关 CORS 信息
+    let origin = headers_in.get("origin").and_then(|v| v.to_str().ok()).unwrap_or("");
+    let allow_headers = headers_in.get("access-control-request-headers")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("authorization,content-type,accept,origin,referer,user-agent");
+
+    // 处理 OPTIONS preflight 请求
+    if method == Method::OPTIONS {
+        let mut response = Response::builder().status(StatusCode::OK);
+        
+        // 设置 CORS 头
+        if !origin.is_empty() {
+            response = response
+                .header("Access-Control-Allow-Origin", origin)
+                .header("Access-Control-Allow-Credentials", "true");
+        } else {
+            response = response.header("Access-Control-Allow-Origin", "*");
+        }
+        response = response
+            .header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
+            .header("Access-Control-Allow-Headers", allow_headers)
+            .header("Access-Control-Max-Age", "86400"); // 缓存 preflight 结果 24 小时
+        
+        return Ok(response.body(Body::empty()).unwrap());
+    }
+
     // 构造目标 URL
     let path = uri.path().trim_start_matches("/proxy");
     let query = uri.query().map(|q| format!("?{}", q)).unwrap_or_default();
@@ -209,13 +235,6 @@ async fn proxy_handler(
     // 发起请求
     let resp = builder.send().await.map_err(|_| StatusCode::BAD_GATEWAY)?;
 
-    // 获取 Origin
-    let origin = headers_in.get("origin").and_then(|v| v.to_str().ok()).unwrap_or("");
-    // 获取 Access-Control-Request-Headers
-    let allow_headers = headers_in.get("access-control-request-headers")
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("authorization,content-type,accept,origin,referer,user-agent");
-
     // 构造响应
     let mut response = Response::builder().status(resp.status());
     for (k, v) in resp.headers().iter() {
@@ -227,7 +246,8 @@ async fn proxy_handler(
     if let Some(set_cookie) = resp.headers().get_all("set-cookie").iter().next() {
         response = response.header("set-cookie", set_cookie);
     }
-    // CORS 头：带 credentials 时不能用 *，要返回 Origin
+    
+    // 设置 CORS 头
     if !origin.is_empty() {
         response = response
             .header("Access-Control-Allow-Origin", origin)
@@ -238,6 +258,7 @@ async fn proxy_handler(
     response = response
         .header("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS")
         .header("Access-Control-Allow-Headers", allow_headers);
+    
     let body = resp.bytes().await.unwrap_or_default();
     Ok(response.body(Body::from(body)).unwrap())
 }
