@@ -24,8 +24,7 @@
             <a-row :gutter="32">
                 <a-col :xs="24" :sm="8">
                     <a-image :src="manga.cover" :alt="manga.name" width="100%" height="350px"
-                        style="border-radius: 8px; object-fit: cover;" :placeholder="true"
-                        :fallback="defaultCoverImage">
+                        style="border-radius: 8px; object-fit: cover;" :placeholder="true">
                         <template #placeholder>
                             <div class="image-placeholder">
                                 <a-spin size="large" />
@@ -108,12 +107,22 @@
         <a-divider />
         <a-row justify="space-between" align="middle" style="margin-bottom: 12px;">
             <a-col>
-                <a-button @click="toggleSortOrder" size="small">
-                    {{ isAscending ? '正序' : '倒序' }}
-                </a-button>
+                <a-space>
+                    <!-- 排序切换 -->
+                    <a-button @click="toggleSortOrder" size="small">
+                        {{ isAscending ? '正序' : '倒序' }}
+                    </a-button>
+                </a-space>
             </a-col>
         </a-row>
-        <a-skeleton :loading="loading" active>
+
+        <!-- 分组Tab页 -->
+        <a-tabs v-model:activeKey="currentGroup" @change="handleGroupChange" size="small" style="margin-bottom: 16px;">
+            <a-tab-pane v-for="(group, key) in groups" :key="key" :tab="`${group.name} (${group.count})`">
+            </a-tab-pane>
+        </a-tabs>
+
+        <a-skeleton :loading="loading || groupLoading" active>
             <a-row :gutter="[12, 12]">
                 <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in sortedChapters" :key="chapter.id">
                     <a-card :hoverable="true" @click="goToChapter(chapter)"
@@ -129,14 +138,22 @@
                 </a-col>
             </a-row>
         </a-skeleton>
+
+        <!-- 分页组件 -->
+        <div v-if="totalChapters > pageSize" class="pagination-container">
+            <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="totalChapters"
+                :show-size-changer="true" :show-quick-jumper="true"
+                :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 章`"
+                :page-size-options="['20', '50', '100', '200']" @change="handlePageChange"
+                @showSizeChange="handlePageChange" style="margin-top: 24px; text-align: center;" />
+        </div>
     </a-card>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMangaDetail, collectManga, getMangaChapters } from '../api/manga'
-import { decryptMangaData, processChapterData } from '../utils/crypto'
+import { getMangaDetail, collectManga, getMangaGroupChapters } from '../api/manga'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
@@ -148,12 +165,22 @@ const detailLoading = ref(true)
 const collectLoading = ref(false)
 const isAscending = ref(false)
 
-// 来自书架的特殊功能相关状态
+// 分组相关状态
+const groups = ref({})
+const currentGroup = ref('default')
+const groupLoading = ref(false)
+
+// 分页相关状态
+const currentPage = ref(1)
+const pageSize = ref(100)
+const totalChapters = ref(0)
+
+// 来自书架的功能相关状态
 const fromCollection = ref(false)
 const lastBrowseInfo = ref(null)
 
-// 默认封面图片 - base64 编码的简单图片
-const defaultCoverImage = ref('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjI4MCIgdmlld0JveD0iMCAwIDIwMCAyODAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjgwIiBmaWxsPSIjRjVGNUY1Ii8+CjxwYXRoIGQ9Ik03MCA5MEg5MFY3MEgxMTBWOTBIMTMwVjExMEgxMTBWMTMwSDkwVjExMEg3MFY5MFoiIGZpbGw9IiNEOUQ5RDkiLz4KPHRleHQgeD0iMTAwIiB5PSIxODAiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSI+5pqC5peg5bCB6Z2iPC90ZXh0Pgo8L3N2Zz4=')
+// 刷新状态
+const refreshing = ref(false)
 
 const sortedChapters = computed(() => {
     return [...chapters.value].sort((a, b) => isAscending.value ? a.index - b.index : b.index - a.index)
@@ -208,31 +235,163 @@ const isLastReadChapter = (chapter) => {
         lastBrowseInfo.value.last_browse_id === chapter.id
 }
 
-const fetchMangaData = async () => {
+// 获取漫画详情信息
+const fetchMangaDetail = async () => {
     detailLoading.value = true
     const pathWord = route.params.pathWord
 
-    // 获取漫画详情信息
-    await getMangaDetail(pathWord).then(res => {
+    return getMangaDetail(pathWord).then(res => {
         manga.value = res.results.comic
+        // 保存分组信息
+        if (res.results.groups) {
+            groups.value = res.results.groups
+            // 设置默认分组
+            currentGroup.value = 'default'
+        }
+        return true
     }).catch((error) => {
         console.error('获取漫画详情失败', error)
         message.error('获取漫画详情失败')
+        return false
     }).finally(() => {
         detailLoading.value = false
     })
+}
 
-    // 获取漫画章节
+// 获取漫画章节信息
+const fetchMangaChapter = async () => {
+    // 如果来自书架且有上次阅读信息，尝试找到对应章节所在的页面
+    if (fromCollection.value && lastBrowseInfo.value && lastBrowseInfo.value.last_browse_id) {
+        await findAndLoadPageWithChapter(lastBrowseInfo.value.last_browse_id)
+    } else {
+        // 加载默认分组的第一页章节
+        await loadGroupChapters('default', 1)
+    }
+}
+
+// 初始化数据加载
+const fetchMangaData = async () => {
+    if (!manga.value.name) {
+        await fetchMangaDetail()
+    }
+    if (chapters.value.length === 0) {
+        await fetchMangaChapter()
+    }
+
+}
+
+// 加载指定分组的章节
+const loadGroupChapters = async (groupPathWord, page = 1) => {
     loading.value = true
-    await getMangaChapters(pathWord).then(res => {
-        const decryptedData = decryptMangaData(res.results)
-        chapters.value = processChapterData(decryptedData)
-    }).catch((error) => {
-        console.error('获取漫画章节失败', error)
-        message.error('获取漫画章节失败')
-    }).finally(() => {
+    const pathWord = route.params.pathWord
+    const offset = (page - 1) * pageSize.value
+
+    try {
+        const res = await getMangaGroupChapters(pathWord, groupPathWord, pageSize.value, offset)
+        if (res && res.code === 200 && res.results) {
+            // 处理章节数据，转换为与旧API相同的格式
+            const chapterList = res.results.list || []
+            chapters.value = chapterList.map((chapter, index) => ({
+                id: chapter.uuid,
+                name: chapter.name,
+                index: chapter.index,
+                comic_path_word: chapter.comic_path_word,
+                group_path_word: chapter.group_path_word,
+                datetime_created: chapter.datetime_created,
+                size: chapter.size,
+                count: chapter.count
+            }))
+
+            // 更新分页信息
+            totalChapters.value = res.results.total || 0
+            currentPage.value = page
+        } else {
+            throw new Error('获取章节数据失败')
+        }
+    } catch (error) {
+        console.error('获取分组章节失败', error)
+        message.error('获取分组章节失败')
+        chapters.value = []
+        totalChapters.value = 0
+    } finally {
         loading.value = false
-    })
+    }
+}
+
+// 查找并加载包含指定章节ID的页面
+const findAndLoadPageWithChapter = async (targetChapterId) => {
+    const pathWord = route.params.pathWord
+
+    try {
+        // 先获取第一页来确定总章节数
+        const firstPageRes = await getMangaGroupChapters(pathWord, 'default', pageSize.value, 0)
+        if (firstPageRes && firstPageRes.code === 200 && firstPageRes.results) {
+            const total = firstPageRes.results.total || 0
+            const totalPages = Math.ceil(total / pageSize.value)
+
+            // 检查第一页是否包含目标章节
+            const firstPageChapters = firstPageRes.results.list || []
+            const foundInFirstPage = firstPageChapters.some(chapter => chapter.uuid === targetChapterId)
+
+            if (foundInFirstPage) {
+                // 在第一页找到了，直接加载第一页
+                await loadGroupChapters('default', 1)
+                console.log(`上次阅读章节在第 1 页`)
+                return
+            }
+
+            // 逐页搜索目标章节（从第2页开始）
+            for (let page = 2; page <= totalPages; page++) {
+                const offset = (page - 1) * pageSize.value
+                const pageRes = await getMangaGroupChapters(pathWord, 'default', pageSize.value, offset)
+
+                if (pageRes && pageRes.code === 200 && pageRes.results) {
+                    const pageChapters = pageRes.results.list || []
+                    const foundInPage = pageChapters.some(chapter => chapter.uuid === targetChapterId)
+
+                    if (foundInPage) {
+                        await loadGroupChapters('default', page)
+                        console.log(`上次阅读章节在第 ${page} 页`)
+                        return
+                    }
+                }
+
+                // 避免搜索过多页面，最多搜索10页
+                if (page >= 10) {
+                    console.log('搜索超过10页，停止搜索')
+                    break
+                }
+            }
+        }
+
+        // 如果没有找到目标章节，加载第一页
+        console.log('未找到上次阅读章节，加载第一页')
+        await loadGroupChapters('default', 1)
+
+    } catch (error) {
+        console.error('查找章节页面失败:', error)
+        // 发生错误时，回退到加载第一页
+        await loadGroupChapters('default', 1)
+    }
+}
+
+// 处理分页切换
+const handlePageChange = async (page, size) => {
+    pageSize.value = size
+    await loadGroupChapters(currentGroup.value, page)
+}
+
+// 处理分组切换
+const handleGroupChange = async (groupPathWord) => {
+    console.log('切换分组到:', groupPathWord)
+    currentGroup.value = groupPathWord
+    currentPage.value = 1 // 重置页码
+    groupLoading.value = true
+    try {
+        await loadGroupChapters(groupPathWord, 1)
+    } finally {
+        groupLoading.value = false
+    }
 }
 
 // 收藏或取消收藏漫画
@@ -305,180 +464,6 @@ onMounted(() => {
     font-size: 14px;
 }
 
-.loading,
-.error {
-    text-align: center;
-    padding: 50px 0;
-    font-size: 18px;
-    color: #666;
-}
-
-.error {
-    color: #ff3333;
-}
-
-.manga-header {
-    display: flex;
-    gap: 30px;
-    margin-bottom: 30px;
-}
-
-.manga-cover {
-    flex: 0 0 250px;
-    height: 350px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.manga-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.manga-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-.manga-title {
-    font-size: 28px;
-    margin: 0 0 15px;
-    font-weight: bold;
-}
-
-.manga-metadata {
-    margin-bottom: 20px;
-}
-
-.metadata-item {
-    margin-bottom: 10px;
-    font-size: 16px;
-}
-
-.label {
-    color: #666;
-    margin-right: 8px;
-    font-weight: 500;
-}
-
-.value {
-    color: #333;
-}
-
-.manga-actions {
-    margin-top: auto;
-    display: flex;
-    gap: 15px;
-}
-
-.action-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 500;
-    transition: all 0.2s;
-}
-
-.action-button.primary {
-    background-color: #4a89dc;
-    color: white;
-}
-
-.action-button.primary:hover {
-    background-color: #3a70c1;
-}
-
-.action-button:not(.primary) {
-    background-color: #f5f5f5;
-    color: #333;
-}
-
-.action-button:not(.primary):hover {
-    background-color: #e5e5e5;
-}
-
-.manga-description {
-    margin-bottom: 30px;
-}
-
-.manga-description h2 {
-    font-size: 20px;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.manga-description p {
-    line-height: 1.6;
-    white-space: pre-line;
-    color: #333;
-}
-
-.manga-chapters h2 {
-    font-size: 20px;
-    margin-bottom: 15px;
-    font-weight: bold;
-}
-
-.chapters-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 15px;
-}
-
-.sort-button {
-    padding: 5px 10px;
-    background-color: #f5f5f5;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.sort-button:hover {
-    background-color: #e5e5e5;
-}
-
-.chapters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
-}
-
-.chapter-item {
-    padding: 10px;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.chapter-item:hover {
-    background-color: #e5e5e5;
-    transform: translateY(-2px);
-}
-
-@media (max-width: 768px) {
-    .manga-header {
-        flex-direction: column;
-    }
-
-    .manga-cover {
-        width: 200px;
-        height: 280px;
-        margin: 0 auto 20px;
-    }
-
-    .chapters-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    }
-}
-
 /* 上次阅读章节的样式 */
 .last-read-chapter {
     position: relative;
@@ -503,5 +488,13 @@ onMounted(() => {
     white-space: nowrap;
     z-index: 1;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 分页容器样式 */
+.pagination-container {
+    margin-top: 24px;
+    padding: 16px 0;
+    text-align: center;
+    border-top: 1px solid #f0f0f0;
 }
 </style>
