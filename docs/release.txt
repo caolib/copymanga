@@ -1,13 +1,11 @@
 ## Commit
 
-- [63d79ac] 📄 docs: 更新发布说明
-- [d651580] 🐛 fix: 修复检查更新功能
-- [8bdc9dc] 📄 docs: Update README
-- [c939eb3] ✨ feat: 添加深色模式，优化多个界面显示
-- [1c847d1] 🦄 refactor: 提取样式
-- [7358ec1] 🐛 fix: 修复部分样式异常
-- [69da131] 🐳 chore: 版本更新
+- [b2698b0] ✨ feat: 漫画详情页面可显示评论
+- [0d139c6] 🐛 fix: 修正头像显示，删除多余信息
+- [4ca2a62] ✨ feat: 配置文件设置到软件安装目录下
+- [7ae89c2] 🐛 fix: 修正登录注册表单在暗色模式下的异常背景显示
+- [fd19a42] ✨ feat: 个人书架添加缓存；暗色模式添加图片遮罩设置
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.2.3...v0.3.0)
+📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.3.0...v0.4.0)
 
