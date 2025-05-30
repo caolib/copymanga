@@ -1,13 +1,18 @@
 # 拷贝漫画第三方客户端
 
 <p align="center">
-  <img src="https://img.shields.io/github/downloads/caolib/copymanga/total?labelColor=grey&color=blue" alt="Downloads">
-  <img src="https://img.shields.io/github/v/release/caolib/copymanga?labelColor=grey&color=red" alt="Release">
-  <img src="https://img.shields.io/github/license/caolib/copymanga" alt="License">
-  <img src="https://img.shields.io/github/stars/caolib/copymanga" alt="Stars">
-  <img src="https://img.shields.io/github/issues/caolib/copymanga?label=Issues" alt="Issues">
-  <img src="https://img.shields.io/github/downloads/caolib/copymanga/latest/total">
+  <img src="https://skillicons.dev/icons?i=tauri,vue,js,rust,pinia,scss,vite,pnpm"/>
 </p>
+
+<p align="center">
+  <img src="https://img.shields.io/github/downloads/caolib/copymanga/total?labelColor=grey&color=blue" alt="Downloads"/>
+  <img src="https://img.shields.io/github/v/release/caolib/copymanga?labelColor=grey&color=red" alt="Release"/>
+  <img src="https://img.shields.io/github/license/caolib/copymanga" alt="License"/>
+  <img src="https://img.shields.io/github/stars/caolib/copymanga" alt="Stars"/>
+  <img src="https://img.shields.io/github/issues/caolib/copymanga?label=Issues" alt="Issues"/>
+  <img src="https://img.shields.io/github/downloads/caolib/copymanga/latest/total" alt="Latest Downloads"/>
+</p>
+
 
 
 ## 介绍
