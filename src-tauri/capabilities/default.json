@@ -24,6 +24,7 @@
     "fs:default",
     "fs:scope-appconfig-recursive",
     "fs:scope-appconfig",
-    "process:default"
+    "process:default",
+    "fs:allow-resource-read-recursive"
   ]
 }

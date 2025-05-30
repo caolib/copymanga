@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { getToken } from './auth'
 import { message } from 'ant-design-vue'
-import { getServerConfig } from './server-config'
+import { getServerConfig } from '@/config/server-config'
 import router from '@/router'
 
 // 创建 axios 实例
@@ -48,7 +48,7 @@ request.interceptors.request.use(
     }
 )
 
-// 响应拦截器 TODO 处理4xx等状态
+// 响应拦截器
 request.interceptors.response.use(
     (response) => {
         if (response.status === 401) {

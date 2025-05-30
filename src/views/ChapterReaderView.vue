@@ -139,7 +139,7 @@ import { getChapterImages } from '../api/manga'
 import { getChapterComments } from '../api/comment'
 import { useMangaStore } from '../stores/manga'
 import { useThemeStore } from '../stores/theme'
-import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '../utils/ui-config'
+import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()

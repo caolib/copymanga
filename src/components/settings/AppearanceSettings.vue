@@ -71,7 +71,7 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/utils/ui-config'
+import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
 import { useThemeStore } from '@/stores/theme'
 
 const themeStore = useThemeStore()

@@ -1,0 +1,8 @@
+{
+  "apiSources": [
+    "https://copy20.com",
+    "https://api.copy2000.online",
+    "https://copymanga.com"
+  ],
+  "currentApiIndex": -1
+}

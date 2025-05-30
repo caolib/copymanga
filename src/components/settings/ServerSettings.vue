@@ -23,13 +23,12 @@
                 </a-form-item>
             </a-form>
         </a-card> <a-card title="API 域名配置" class="setting-card" id="api-config">
-            <a-form layout="vertical">
-                <!-- 当前API源选择 -->
+            <a-form layout="vertical"> <!-- 当前API源选择 -->
                 <a-form-item label="当前API源">
                     <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" size="large"
                         style="width: 100%">
                         <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
-                            {{ source.name }} ({{ source.url }})
+                            {{ source }}
                         </a-select-option>
                     </a-select>
                     <div class="help-text">
@@ -40,17 +39,14 @@
                 <!-- 添加新API源 -->
                 <a-form-item label="添加新API源">
                     <a-input-group compact>
-                        <a-input v-model:value="newApiSource.name" placeholder="源名称" style="width: 30%" size="large" />
                         <a-input v-model:value="newApiSource.url" placeholder="API域名 (如: https://copy20.com)"
-                            style="width: 50%" size="large" />
+                            style="width: 80%" size="large" />
                         <a-button type="primary" @click="addNewApiSource" :loading="addingSource" style="width: 20%"
                             size="large">
                             添加
                         </a-button>
                     </a-input-group>
-                </a-form-item>
-
-                <!-- API源管理 -->
+                </a-form-item> <!-- API源管理 -->
                 <a-form-item label="API源管理">
                     <a-list :data-source="apiSources" bordered size="small">
                         <template #renderItem="{ item, index }">
@@ -64,13 +60,10 @@
                                 <a-list-item-meta>
                                     <template #title>
                                         <span :class="{ 'current-source': index === currentApiIndex }">
-                                            {{ item.name }}
+                                            {{ item }}
                                             <a-tag v-if="index === currentApiIndex" color="green"
                                                 size="small">当前</a-tag>
                                         </span>
-                                    </template>
-                                    <template #description>
-                                        {{ item.url }}
                                     </template>
                                 </a-list-item-meta>
                             </a-list-item>
@@ -123,7 +116,7 @@ import {
     addApiSource,
     removeApiSource as removeApiSourceConfig,
     switchApiSource
-} from '@/utils/server-config'
+} from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
 import { relaunch } from '@tauri-apps/plugin-process'
 
@@ -146,7 +139,6 @@ const appStore = useAppStore()
 const apiSources = ref([])
 const currentApiIndex = ref(0)
 const newApiSource = ref({
-    name: '',
     url: ''
 })
 const addingSource = ref(false)
@@ -182,14 +174,36 @@ const loadConfig = () => {
         serverForm.value.serverPort = parseInt(config.serverPort)
     }).catch(error => {
         message.error('加载服务器配置失败')
-    })
-
-    // 加载应用配置
+    })    // 加载应用配置
     getAppConfig().then(config => {
-        currentApiDomain.value = config.apiDomain
-        appForm.value.apiDomain = config.apiDomain
         apiSources.value = config.apiSources || []
-        currentApiIndex.value = config.currentApiIndex || 0
+
+        // 如果有API源，确保索引有效
+        if (apiSources.value.length > 0) {
+            // 如果索引无效，重置为0
+            if (config.currentApiIndex < 0 || config.currentApiIndex >= apiSources.value.length) {
+                currentApiIndex.value = 0
+                // 同时保存更新后的配置
+                saveAppConfig({
+                    apiSources: apiSources.value,
+                    currentApiIndex: 0
+                }).catch(error => {
+                    console.warn('保存修正后的配置失败:', error)
+                })
+            } else {
+                currentApiIndex.value = config.currentApiIndex
+            }
+
+            // 设置当前域名
+            const currentSource = apiSources.value[currentApiIndex.value]
+            currentApiDomain.value = currentSource
+            appForm.value.apiDomain = currentSource
+        } else {
+            // 没有API源时，重置索引
+            currentApiIndex.value = -1
+            currentApiDomain.value = '未配置'
+            appForm.value.apiDomain = ''
+        }
     }).catch(error => {
         message.error('加载应用配置失败')
     })
@@ -209,27 +223,9 @@ const onSubmitServer = () => {
     })
 }
 
-// 保存应用配置
-const onSubmitApp = () => {
-    savingApp.value = true
-
-    saveAppConfig(appForm.value.apiDomain).then(() => {
-        message.info('请重启应用以使新的 API 配置生效', 3)
-        loadConfig()
-    }).catch(error => {
-        message.error(error.message || '保存 API 配置失败')
-    }).finally(() => {
-        savingApp.value = false
-    })
-}
-
 // 重置为默认值
 const resetServerToDefault = () => {
     serverForm.value.serverPort = 5001
-}
-
-const resetAppToDefault = () => {
-    appForm.value.apiDomain = 'https://copy20.com'
 }
 
 // 处理重启应用
@@ -247,10 +243,10 @@ const handleRestart = async () => {
 const onApiSourceChange = async (index) => {
     try {
         const source = await switchApiSource(index)
-        currentApiDomain.value = source.url
-        appForm.value.apiDomain = source.url
+        currentApiDomain.value = source
+        appForm.value.apiDomain = source
         appStore.setNeedsRestart(true)
-        message.success(`已切换到: ${source.name}`)
+        message.success(`已切换到: ${source}`)
     } catch (error) {
         message.error(error.message || '切换API源失败')
         // 切换失败时恢复原值
@@ -260,16 +256,16 @@ const onApiSourceChange = async (index) => {
 
 // 新增：添加API源
 const addNewApiSource = async () => {
-    if (!newApiSource.value.name || !newApiSource.value.url) {
-        message.error('请输入源名称和URL')
+    if (!newApiSource.value.url) {
+        message.error('请输入URL')
         return
     }
 
     addingSource.value = true
     try {
-        await addApiSource(newApiSource.value.name, newApiSource.value.url)
+        await addApiSource(newApiSource.value.url)
         message.success('API源添加成功')
-        newApiSource.value = { name: '', url: '' }
+        newApiSource.value = { url: '' }
         loadConfig() // 重新加载配置
     } catch (error) {
         message.error(error.message || '添加API源失败')

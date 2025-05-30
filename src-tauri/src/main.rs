@@ -8,112 +8,16 @@ use axum::{
     Router,
 };
 use reqwest::Client;
-use serde::{Deserialize, Serialize};
-use std::fs;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use tauri::{AppHandle, Manager};
+use tauri::AppHandle;
+
+mod config;
+use config::ConfigManager;
 
 #[tauri::command]
 fn open_browser(url: String) {
     tauri_plugin_opener::open_url(&url, None::<&str>).unwrap();
-}
-
-#[derive(Serialize, Deserialize)]
-struct ServerConfig {
-    #[serde(rename = "serverPort")]
-    server_port: String,
-}
-
-#[derive(Serialize, Deserialize)]
-struct AppConfig {
-    #[serde(rename = "apiDomain")]
-    api_domain: String,
-}
-
-fn get_config_port(app_handle: &AppHandle) -> Result<u16, String> {
-    // 使用 Tauri 的 app_config_dir 获取应用配置目录
-    let app_config_dir = app_handle.path().app_config_dir()
-        .map_err(|e| format!("无法获取应用配置目录: {}", e))?;
-    
-    let config_file = app_config_dir.join("server.json");
-    
-    // 如果配置文件不存在，创建默认配置
-    if !config_file.exists() {
-        // 确保配置目录存在
-        if let Err(e) = std::fs::create_dir_all(&app_config_dir) {
-            return Err(format!("无法创建配置目录: {}", e));
-        }
-        
-        // 创建默认配置
-        let default_config = ServerConfig {
-            server_port: "5001".to_string(),
-        };
-        
-        let default_content = serde_json::to_string_pretty(&default_config)
-            .map_err(|e| format!("无法序列化默认配置: {}", e))?;
-        
-        if let Err(e) = std::fs::write(&config_file, default_content) {
-            return Err(format!("无法创建默认配置文件: {}", e));
-        }
-        
-        println!("已创建默认配置文件: {:?}", config_file);
-        return Ok(5001);
-    }
-    
-    let content = fs::read_to_string(&config_file)
-        .map_err(|e| format!("无法读取配置文件 {:?}: {}", config_file, e))?;
-    
-    let config: ServerConfig = serde_json::from_str(&content)
-        .map_err(|e| format!("配置文件格式错误: {}", e))?;
-    
-    let port = config.server_port.parse::<u16>()
-        .map_err(|e| format!("端口号格式错误: {}", e))?;
-    
-    if port == 0 {
-        return Err("端口号不能为0".to_string());
-    }
-    
-    Ok(port)
-}
-
-fn get_config_domain(app_handle: &AppHandle) -> Result<String, String> {
-    // 使用 Tauri 的 app_config_dir 获取应用配置目录
-    let app_config_dir = app_handle.path().app_config_dir()
-        .map_err(|e| format!("无法获取应用配置目录: {}", e))?;
-    
-    let config_file = app_config_dir.join("copymanga.json");
-    
-    // 如果配置文件不存在，创建默认配置
-    if !config_file.exists() {
-        // 确保配置目录存在
-        if let Err(e) = std::fs::create_dir_all(&app_config_dir) {
-            return Err(format!("无法创建配置目录: {}", e));
-        }
-        
-        // 创建默认配置
-        let default_config = AppConfig {
-            api_domain: "https://copy20.com".to_string(),
-        };
-        
-        let default_content = serde_json::to_string_pretty(&default_config)
-            .map_err(|e| format!("无法序列化默认配置: {}", e))?;
-        
-        if let Err(e) = std::fs::write(&config_file, default_content) {
-            return Err(format!("无法创建默认配置文件: {}", e));
-        }
-        
-        println!("已创建默认应用配置文件: {:?}", config_file);
-        return Ok("https://copy20.com".to_string());
-    }
-    
-    let content = fs::read_to_string(&config_file)
-        .map_err(|e| format!("无法读取配置文件 {:?}: {}", config_file, e))?;
-    
-    let config: AppConfig = serde_json::from_str(&content)
-        .map_err(|e| format!("配置文件格式错误: {}", e))?;
-    
-    Ok(config.api_domain)
 }
 
 fn main() {
@@ -138,8 +42,11 @@ fn main() {
 async fn start_proxy(app_handle: AppHandle) {
     let client = Arc::new(Client::builder().cookie_store(true).build().unwrap());
     
+    // 使用新的配置管理器
+    let config_manager = ConfigManager::new(app_handle);
+    
     // 从配置文件读取端口，必须存在
-    let port = match get_config_port(&app_handle) {
+    let port = match config_manager.get_server_port() {
         Ok(port) => port,
         Err(e) => {
             eprintln!("配置读取失败: {}", e);
@@ -149,7 +56,7 @@ async fn start_proxy(app_handle: AppHandle) {
     };
 
     // 从配置文件读取域名，必须存在
-    let domain = match get_config_domain(&app_handle) {
+    let domain = match config_manager.get_current_api_domain() {
         Ok(domain) => domain,
         Err(e) => {
             eprintln!("域名配置读取失败: {}", e);

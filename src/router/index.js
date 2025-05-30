@@ -40,6 +40,11 @@ const routes = [
         name: 'ChapterReader',
         component: () => import('../views/ChapterReaderView.vue'),
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/test',
+        name: 'Test',
+        component: () => import('../views/test/TestView.vue'),
     }
 ]
 

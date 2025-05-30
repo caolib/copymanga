@@ -1,4 +1,4 @@
-import { pathHelper, CONFIG_FILES } from './path-helper'
+import { pathHelper, CONFIG_FILES } from '@/utils/path-helper'
 
 // 默认UI配置
 const DEFAULT_UI_CONFIG = {
@@ -16,15 +16,8 @@ const DEFAULT_UI_CONFIG = {
 
 // 加载UI配置
 async function loadUIConfig() {
-    const config = await pathHelper.readConfig(CONFIG_FILES.UI)
-
-    if (config) {
-        return { ...DEFAULT_UI_CONFIG, ...config }
-    }
-
-    // 如果文件不存在，创建默认配置文件
-    await saveUIConfig(DEFAULT_UI_CONFIG)
-    return DEFAULT_UI_CONFIG
+    const config = await pathHelper.readConfig(CONFIG_FILES.UI, DEFAULT_UI_CONFIG)
+    return { ...DEFAULT_UI_CONFIG, ...config }
 }
 
 // 保存UI配置

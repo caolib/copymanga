@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { loadUIConfig, updateThemeConfig } from '../utils/ui-config'
+import { loadUIConfig, updateThemeConfig } from '@/config/ui-config'
 
 export const useThemeStore = defineStore('theme', () => {    // 主题状态
     const isDarkMode = ref(false)
