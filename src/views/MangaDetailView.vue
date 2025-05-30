@@ -105,6 +105,7 @@
             </a-row>
         </a-skeleton>
         <a-divider />
+
         <a-row justify="space-between" align="middle" style="margin-bottom: 12px;">
             <a-col>
                 <a-space>
@@ -147,6 +148,33 @@
                 :page-size-options="['20', '50', '100', '200']" @change="handlePageChange"
                 @showSizeChange="handlePageChange" style="margin-top: 24px; text-align: center;" />
         </div>
+
+        <!-- 漫画评论区 -->
+        <a-collapse v-model:activeKey="commentsActiveKey" style="margin-top: 24px;" @change="handleCommentsToggle">
+            <a-collapse-panel key="comments" header="漫画评论">
+                <a-skeleton :loading="commentsLoading" active>
+                    <div v-if="comments.length === 0 && !commentsLoading"
+                        style="text-align: center; color: #999; padding: 20px;">
+                        暂无评论
+                    </div>
+                    <div v-else>
+                        <div class="compact-comments-container">
+                            <a-comment v-for="comment in comments" :key="comment.id" :author="comment.user_name"
+                                :avatar="comment.user_avatar" :content="comment.comment"
+                                :datetime="formatCommentTime(comment.create_at)" class="compact-comment-item" />
+                        </div>
+
+                        <!-- 评论分页 -->
+                        <div v-if="commentsTotal > commentsPageSize" style="text-align: center; margin-top: 16px;">
+                            <a-pagination v-model:current="commentsPage" v-model:page-size="commentsPageSize"
+                                :total="commentsTotal" :show-size-changer="false" :show-quick-jumper="true"
+                                :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条评论`"
+                                @change="handleCommentsPageChange" size="small" />
+                        </div>
+                    </div>
+                </a-skeleton>
+            </a-collapse-panel>
+        </a-collapse>
     </a-card>
 </template>
 
@@ -154,6 +182,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getMangaDetail, collectManga, getMangaGroupChapters } from '../api/manga'
+import { getMangaComments } from '../api/comment'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
@@ -182,6 +211,15 @@ const lastBrowseInfo = ref(null)
 // 刷新状态
 const refreshing = ref(false)
 
+// 评论相关状态
+const comments = ref([])
+const commentsLoading = ref(false)
+const commentsActiveKey = ref([])
+const commentsPage = ref(1)
+const commentsPageSize = ref(10)
+const commentsTotal = ref(0)
+const commentsLoaded = ref(false)
+
 const sortedChapters = computed(() => {
     return [...chapters.value].sort((a, b) => isAscending.value ? a.index - b.index : b.index - a.index)
 })
@@ -189,6 +227,26 @@ const sortedChapters = computed(() => {
 const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('zh-CN')
+}
+
+// 格式化评论时间
+const formatCommentTime = (dateString) => {
+    const date = new Date(dateString)
+    const now = new Date()
+    const diff = now - date
+    const minutes = Math.floor(diff / 60000)
+    const hours = Math.floor(diff / 3600000)
+    const days = Math.floor(diff / 86400000)
+
+    if (days > 0) {
+        return `${days}天前`
+    } else if (hours > 0) {
+        return `${hours}小时前`
+    } else if (minutes > 0) {
+        return `${minutes}分钟前`
+    } else {
+        return '刚刚'
+    }
 }
 
 const toggleSortOrder = () => {
@@ -404,6 +462,53 @@ const handleCollect = (isCollect = true) => {
     }).finally(() => {
         collectLoading.value = false
     })
+}
+
+// 处理评论区展开/折叠
+const handleCommentsToggle = (activeKey) => {
+    console.log('评论区切换:', activeKey, '已加载:', commentsLoaded.value, 'manga uuid:', manga.value.uuid)
+
+    // 当评论区被展开且还未加载过评论时，加载评论
+    if (activeKey &&
+        (Array.isArray(activeKey) ? activeKey.includes('comments') : activeKey === 'comments') &&
+        !commentsLoaded.value) {
+        fetchMangaComments()
+    }
+}
+
+// 获取漫画评论
+const fetchMangaComments = async (page = 1) => {
+    console.log('开始获取评论, uuid:', manga.value.uuid, 'page:', page)
+    if (!manga.value.uuid) {
+        console.log('没有 manga uuid，退出')
+        return
+    }
+
+    commentsLoading.value = true
+    const offset = (page - 1) * commentsPageSize.value
+
+    try {
+        console.log('调用 getMangaComments API')
+        const res = await getMangaComments(manga.value.uuid, commentsPageSize.value, offset)
+        console.log('API 响应:', res)
+        if (res && res.code === 200 && res.results) {
+            comments.value = res.results.list || []
+            commentsTotal.value = res.results.total || 0
+            commentsPage.value = page
+            commentsLoaded.value = true
+            console.log('评论加载成功:', comments.value.length, '条评论')
+        }
+    } catch (error) {
+        console.error('获取评论失败:', error)
+        message.error('获取评论失败')
+    } finally {
+        commentsLoading.value = false
+    }
+}
+
+// 处理评论分页
+const handleCommentsPageChange = (page) => {
+    fetchMangaComments(page)
 }
 
 onMounted(() => {
