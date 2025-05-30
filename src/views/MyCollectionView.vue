@@ -80,7 +80,6 @@ import { useRouter } from 'vue-router'
 import { useCollectionStore } from '../stores/collection'
 import { isLoggedIn } from '../utils/auth'
 import { message } from 'ant-design-vue'
-import { getMyCollectionRaw } from '../api/manga'
 import { formatDatetimeUpdated } from '../utils/date'
 
 const router = useRouter()
@@ -134,39 +133,50 @@ const goToManga = (item) => {
     })
 }
 
-const fetchCollection = async () => {
+const fetchCollection = async (forceRefresh = false) => {
+    if (!isLoggedIn()) {
+        error.value = '请先登录'
+        return
+    }
+
     loading.value = true
     error.value = ''
 
-    await getMyCollectionRaw({
-        limit: pageSize.value,
-        offset: (currentPage.value - 1) * pageSize.value,
-        free_type: 1,
+    // 使用 store 获取数据
+    const result = await collectionStore.fetchCollection({
+        page: currentPage.value,
+        pageSize: pageSize.value,
         ordering: ordering.value
-    }).then(res => {
-        // 安全检查：确保返回数据结构正确
-        if (res && res.results && Array.isArray(res.results.list)) {
-            mangaList.value = res.results.list
-            totalCount.value = res.results.total || 0
-        } else {
-            // 数据结构异常，清空列表
-            mangaList.value = []
-            totalCount.value = 0
-            console.warn('API返回数据结构异常:', res)
+    }, forceRefresh)
+
+    if (result.success) {
+        mangaList.value = result.data || []
+        totalCount.value = result.total || 0
+
+        if (!result.fromCache) {
+            lastUpdateTime.value = new Date().toISOString()
+            message.success(forceRefresh ? '收藏列表已刷新' : '收藏列表加载成功')
         }
-        lastUpdateTime.value = new Date().toISOString()
-    }).catch((err) => {
-        error.value = err.message || '获取书架失败'
-        mangaList.value = []
+
+        // 预加载下一页（如果不是强制刷新且有下一页）
+        if (!forceRefresh && currentPage.value < Math.ceil(totalCount.value / pageSize.value)) {
+            collectionStore.preloadNextPage(currentPage.value, pageSize.value, ordering.value)
+        }
+    } else {
+        error.value = result.error?.message || '获取收藏列表失败'
         totalCount.value = 0
-    }).finally(() => {
-        loading.value = false
-    })
+        mangaList.value = []
+    }
+
+    loading.value = false
 }
 
 
 const refreshCollection = () => {
-    fetchCollection().catch(() => {
+    // 清除当前页缓存
+    collectionStore.clearPageCache(currentPage.value, pageSize.value, ordering.value)
+    // 强制刷新
+    fetchCollection(true).catch(() => {
         message.error('书架更新失败，请稍后重试')
     })
 }
@@ -174,18 +184,26 @@ const refreshCollection = () => {
 // 分页事件处理
 const onPageChange = (page, size) => {
     currentPage.value = page
-    pageSize.value = size
+    if (size !== pageSize.value) {
+        pageSize.value = size
+        // 页大小改变时清除所有缓存
+        collectionStore.clearCache()
+    }
     fetchCollection()
 }
 
 const onPageSizeChange = (current, size) => {
     currentPage.value = 1
     pageSize.value = size
+    // 页大小改变时清除所有缓存
+    collectionStore.clearCache()
     fetchCollection()
 }
 
 const onOrderingChange = () => {
     currentPage.value = 1
+    // 排序改变时清除所有缓存
+    collectionStore.clearCache()
     fetchCollection()
 }
 

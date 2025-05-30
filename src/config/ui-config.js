@@ -4,7 +4,8 @@ import { pathHelper, CONFIG_FILES } from '@/utils/path-helper'
 const DEFAULT_UI_CONFIG = {
     theme: {
         isDarkMode: false, // 默认浅色主题
-        fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace' // 字体系列
+        fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace', // 字体系列
+        darkImageMask: 0.3 // 暗色模式图片遮罩透明度 (0-1，0为无遮罩，1为完全遮罩)
     },
     reader: {
         layout: 'rtl', // 从右到左（默认，日漫风格）

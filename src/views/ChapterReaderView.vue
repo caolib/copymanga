@@ -47,6 +47,14 @@
                     <a-slider v-model:value="readerConfig.imageGap" :min="0" :max="30" :step="1"
                         :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
                 </a-form-item>
+
+                <a-form-item label="暗色模式图片遮罩" v-if="isDarkMode">
+                    <a-slider v-model:value="darkImageMaskOpacity" :min="0" :max="1" :step="0.1"
+                        :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }" />
+                    <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                        调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
+                    </div>
+                </a-form-item>
             </a-form>
 
             <template #footer>
@@ -81,10 +89,14 @@
                             <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
                                 v-for="(image, colIndex) in chunk" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
-                                <img v-if="!image.isPlaceholder" :src="image.url"
-                                    :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
-                                    class="manga-image" loading="lazy"
-                                    :style="{ width: `${readerConfig.imageSize}%` }" />
+                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper">
+                                    <img :src="image.url"
+                                        :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
+                                        class="manga-image" loading="lazy"
+                                        :style="{ width: `${readerConfig.imageSize}%` }" />
+                                    <div v-if="isDarkMode" class="dark-image-mask"
+                                        :style="{ opacity: darkImageMaskOpacity }"></div>
+                                </div>
                                 <div v-else class="manga-image placeholder"></div>
                             </a-col>
                         </template>
@@ -92,10 +104,14 @@
                             <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
                                 v-for="(image, colIndex) in [...chunk].reverse()" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
-                                <img v-if="!image.isPlaceholder" :src="image.url"
-                                    :alt="`第${rowIndex * readerConfig.columnsPerRow + chunk.length - colIndex}页`"
-                                    class="manga-image" loading="lazy"
-                                    :style="{ width: `${readerConfig.imageSize}%` }" />
+                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper">
+                                    <img :src="image.url"
+                                        :alt="`第${rowIndex * readerConfig.columnsPerRow + chunk.length - colIndex}页`"
+                                        class="manga-image" loading="lazy"
+                                        :style="{ width: `${readerConfig.imageSize}%` }" />
+                                    <div v-if="isDarkMode" class="dark-image-mask"
+                                        :style="{ opacity: darkImageMaskOpacity }"></div>
+                                </div>
                                 <div v-else class="manga-image placeholder"></div>
                             </a-col>
                         </template>
@@ -165,6 +181,9 @@ const readerConfig = reactive({ ...DEFAULT_UI_CONFIG.reader }); // 阅读器配�
 // 底部导航栏显示控制
 const showBottomNav = ref(false)
 let hideNavTimer = null
+
+// 添加暗色模式图片遮罩配置
+const darkImageMaskOpacity = ref(0.3) // 暗色模式图片遮罩透明度
 
 // 使用全局主题状态
 const isDarkMode = computed(() => themeStore.isDarkMode)
@@ -290,7 +309,7 @@ const nextChapter = () => {
 
 // 底部导航栏控制方法
 const showNavigation = () => {
-    console.log('鼠标进入底部触发区域')
+    // console.log('鼠标进入底部触发区域')
     showBottomNav.value = true
     // 清除之前的隐藏定时器
     if (hideNavTimer) {
@@ -435,6 +454,8 @@ const loadSettings = async () => {
     try {
         const config = await loadUIConfig()
         Object.assign(readerConfig, config.reader)
+        // 加载暗色模式图片遮罩配置
+        darkImageMaskOpacity.value = config.theme?.darkImageMask || 0.3
         // console.log('UI配置加载成功:', config)
     } catch (error) {
         console.error('加载UI配置失败:', error)
@@ -444,15 +465,23 @@ const loadSettings = async () => {
 
 const saveSettings = async () => {
     try {
-        const success = await updateReaderConfig(readerConfig)
-        if (success) {
+        // 先保存阅读器配置
+        const readerSuccess = await updateReaderConfig(readerConfig)
+
+        // 再保存暗色模式图片遮罩配置
+        const { updateThemeConfig } = await import('@/config/ui-config')
+        const themeSuccess = await updateThemeConfig({
+            darkImageMask: darkImageMaskOpacity.value
+        })
+
+        if (readerSuccess && themeSuccess) {
             console.log('UI配置保存成功')
             message.success('配置保存成功')
             showSettingsDrawer.value = false // 保存成功后关闭抽屉
         } else {
             message.error('配置保存失败')
         }
-        return success
+        return readerSuccess && themeSuccess
     } catch (error) {
         console.error('保存UI配置失败:', error)
         message.error('配置保存失败')

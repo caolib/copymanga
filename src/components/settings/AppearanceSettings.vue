@@ -10,9 +10,7 @@
                         <a-radio-button :value="false">浅色模式</a-radio-button>
                         <a-radio-button :value="true">暗色模式</a-radio-button>
                     </a-radio-group>
-                </a-form-item>
-
-                <a-form-item label="字体系列">
+                </a-form-item> <a-form-item label="字体系列">
                     <div class="font-family-container">
                         <a-textarea v-model:value="themeConfig.fontFamily" @change="onFontFamilyChange"
                             placeholder="请输入字体系列，如：&quot;微软雅黑&quot;, Arial, sans-serif" :rows="2"
@@ -23,6 +21,14 @@
                                 拷贝漫画 CopyManga 0123456789
                             </span>
                         </div>
+                    </div>
+                </a-form-item>
+
+                <a-form-item label="暗色模式图片遮罩" v-if="themeConfig.isDarkMode">
+                    <a-slider v-model:value="themeConfig.darkImageMask" :min="0" :max="1" :step="0.1"
+                        :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }" @change="onDarkImageMaskChange" />
+                    <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                        调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
                     </div>
                 </a-form-item>
             </a-form>
@@ -79,7 +85,8 @@ const themeStore = useThemeStore()
 // 主题配置
 const themeConfig = reactive({
     isDarkMode: false,
-    fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace'
+    fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace',
+    darkImageMask: 0.3 // 暗色模式图片遮罩透明度
 })
 
 // UI界面设置
@@ -95,13 +102,29 @@ const onFontFamilyChange = () => {
     themeStore.setFontFamily(themeConfig.fontFamily)
 }
 
+const onDarkImageMaskChange = async () => {
+    // 暗色模式图片遮罩变化时立即保存
+    try {
+        const { updateThemeConfig } = await import('@/config/ui-config')
+        await updateThemeConfig({
+            darkImageMask: themeConfig.darkImageMask
+        })
+        console.log('暗色模式图片遮罩设置已保存')
+    } catch (error) {
+        console.error('保存暗色模式图片遮罩设置失败:', error)
+        message.error('保存设置失败')
+    }
+}
+
 // UI配置相关方法
 const loadUISettings = () => {
     loadUIConfig().then(config => {
         // 加载阅读器配置
-        Object.assign(uiConfig, config.reader)        // 加载主题配置
+        Object.assign(uiConfig, config.reader)
+        // 加载主题配置
         themeConfig.isDarkMode = config.theme?.isDarkMode || false
         themeConfig.fontFamily = config.theme?.fontFamily || '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace'
+        themeConfig.darkImageMask = config.theme?.darkImageMask || 0.3
     }).catch(error => {
         message.error('加载配置失败')
     })

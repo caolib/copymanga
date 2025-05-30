@@ -266,12 +266,19 @@
 }
 
 /* 漫画图片样式 - 支持动态大小配置 */
+.manga-image-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
 .manga-image {
     max-width: 100%;
     height: auto;
     box-shadow: $shadow-light;
     object-fit: contain;
     border-radius: $border-radius-small;
+    display: block;
 
     &.placeholder {
         visibility: hidden;
@@ -286,6 +293,19 @@
             background: $dark-bg-primary;
         }
     }
+}
+
+/* 暗色模式图片遮罩 */
+.dark-image-mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    border-radius: $border-radius-small;
+    transition: opacity 0.3s ease;
 }
 
 .reader-footer {
