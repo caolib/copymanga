@@ -31,5 +31,3 @@ coverage
 .github/instructions/
 
 get-commits.ps1
-
-**/src-tauri/config/*
