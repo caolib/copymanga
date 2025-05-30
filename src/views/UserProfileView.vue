@@ -43,9 +43,6 @@
                                 <a-typography-title :level="4" class="profile-name">
                                     {{ userInfo?.nickname || userInfo?.username || '用户' }}
                                 </a-typography-title>
-                                <a-typography-paragraph class="profile-description">
-                                    {{ userInfo?.description || '这个用户很懒，什么都没有写...' }}
-                                </a-typography-paragraph>
                             </div>
                         </div>
 
@@ -89,11 +86,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                        }}
+                                                            }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                        }}</div>
+                                                            }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>

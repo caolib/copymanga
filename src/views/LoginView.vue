@@ -151,7 +151,7 @@ const handleLogin = () => {
             username: result.results.username,
             token: result.results.token,
             email: result.results.email || '',
-            avatar: result.results.avatar || '',
+            avatar: 'https://s3.mangafuna.xyz/' + result.results.avatar || '',
             description: result.results.description || '',
             createdAt: result.results.created_at || new Date().toISOString(),
             lastLoginAt: new Date().toISOString(),

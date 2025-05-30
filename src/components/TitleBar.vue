@@ -104,9 +104,12 @@ const goForward = () => {
     router.go(1)
 }
 
+// 用于存储监听器清理函数
+let unlisten = null
+
 onMounted(async () => {
     // 监听窗口状态变化
-    const unlisten = await currentWindow.onResized(async () => {
+    unlisten = await currentWindow.onResized(async () => {
         isMaximized.value = await currentWindow.isMaximized()
     })
 
@@ -119,11 +122,13 @@ onMounted(async () => {
             console.error('获取用户信息失败:', error)
         })
     }
+})
 
-    // 组件销毁时清理监听器
-    onUnmounted(() => {
+// 组件销毁时清理监听器
+onUnmounted(() => {
+    if (unlisten) {
         unlisten()
-    })
+    }
 })
 
 const minimizeWindow = async () => {
