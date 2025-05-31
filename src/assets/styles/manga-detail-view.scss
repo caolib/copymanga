@@ -133,7 +133,7 @@ html.dark .last-read-chapter:hover {
 
 /* 暗色模式下的评论输入框样式 */
 html.dark .comment-input-section {
-    background-color: #1f1f1f !important;
+    background-color: var(--dark-primary-bg) !important;
     border-color: #303030 !important;
 }
 
@@ -181,8 +181,8 @@ html.dark .comment-input-section {
 
 /* 暗色模式下的评论样式 */
 html.dark .compact-comment-item {
-    background-color: #1f1f1f !important;
-    border: 1px solid #303030;
+    background-color: var(--dark-primary-bg) !important;
+    border: 1px solid var(--dark-border-color);
 }
 
 html.dark .comment-item {
