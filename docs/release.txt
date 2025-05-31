@@ -1,11 +1,11 @@
 ## Commit
 
-- [b2698b0] ✨ feat: 漫画详情页面可显示评论
-- [0d139c6] 🐛 fix: 修正头像显示，删除多余信息
-- [4ca2a62] ✨ feat: 配置文件设置到软件安装目录下
-- [7ae89c2] 🐛 fix: 修正登录注册表单在暗色模式下的异常背景显示
-- [fd19a42] ✨ feat: 个人书架添加缓存；暗色模式添加图片遮罩设置
+- [61c1d4d] 🐳 chore: 版本更新
+- [ad887b5] ✨ feat: 漫画添加评论
+- [ddeab4a] ✨ feat: 新增漫画章节添加评论功能
+- [91c65f1] 🐛 fix: 修正两处暗色背景色
+- [00037f0] ✨ feat: 添加修改用户昵称功能
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.3.0...v0.4.0)
+📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.4.0...v0.4.1)
 
