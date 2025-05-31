@@ -75,6 +75,39 @@
     color: $text-secondary;
 }
 
+// 昵称编辑样式
+.nickname-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .edit-btn {
+        opacity: 0;
+        transition: opacity 0.2s;
+        padding: 0 4px;
+        height: 20px;
+        font-size: 12px;
+    }
+
+    &:hover .edit-btn {
+        opacity: 1;
+    }
+}
+
+.nickname-edit {
+    .edit-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+
+        .ant-btn {
+            height: 24px;
+            padding: 0 8px;
+            font-size: 12px;
+        }
+    }
+}
+
 // 浏览记录样式
 .browse-history-content {
     margin-top: $spacing-md;

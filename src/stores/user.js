@@ -110,6 +110,14 @@ export const useUserStore = defineStore('user', {
                 console.error('获取用户信息失败', error);
                 throw error;
             }
+        },
+
+        // 更新本地用户信息
+        updateUserInfo(updates) {
+            this.userInfo = {
+                ...this.userInfo,
+                ...updates
+            }
         }
     },
 

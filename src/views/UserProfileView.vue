@@ -53,7 +53,26 @@
                                 {{ userInfo?.username || '-' }}
                             </a-descriptions-item>
                             <a-descriptions-item label="昵称">
-                                {{ userInfo?.nickname || '-' }}
+                                <div v-if="!editingNickname" class="nickname-display">
+                                    <span>{{ userInfo?.nickname || '-' }}</span>
+                                    <a-button type="text" size="small" @click="startEditNickname" class="edit-btn">
+                                        <template #icon><edit-outlined /></template>
+                                        编辑
+                                    </a-button>
+                                </div>
+                                <div v-else class="nickname-edit">
+                                    <a-input v-model:value="tempNickname" placeholder="请输入昵称" :maxlength="20" show-count
+                                        size="small" @pressEnter="saveNickname" />
+                                    <div class="edit-actions">
+                                        <a-button type="primary" size="small" :loading="savingNickname"
+                                            @click="saveNickname">
+                                            保存
+                                        </a-button>
+                                        <a-button size="small" @click="cancelEditNickname">
+                                            取消
+                                        </a-button>
+                                    </div>
+                                </div>
                             </a-descriptions-item>
                             <a-descriptions-item label="注册时间">
                                 {{ formatDate(userInfo?.createdAt) || '-' }}
@@ -86,11 +105,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                            }}
+                                                        }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                            }}</div>
+                                                        }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
@@ -124,7 +143,8 @@ import { useUserStore } from '../stores/user'
 import { useMangaStore } from '../stores/manga'
 import { message } from 'ant-design-vue'
 import { getUserBrowseList } from '../api/browse'
-import { UserOutlined, HistoryOutlined } from '@ant-design/icons-vue'
+import { updateUserNickname } from '../api/user'
+import { UserOutlined, HistoryOutlined, EditOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -149,6 +169,55 @@ const browseLoading = ref(false)
 const browseVisible = ref(true) // 默认显示，不需要通过按钮控制
 const browseLimit = ref(18) // 默认每页18条记录
 const browseOffset = ref(0)
+
+// 昵称编辑相关
+const editingNickname = ref(false)
+const tempNickname = ref('')
+const savingNickname = ref(false)
+
+// 开始编辑昵称
+function startEditNickname() {
+    editingNickname.value = true
+    tempNickname.value = userInfo.value?.nickname || ''
+}
+
+// 取消编辑昵称
+function cancelEditNickname() {
+    editingNickname.value = false
+    tempNickname.value = ''
+}
+
+// 保存昵称
+function saveNickname() {
+    if (!tempNickname.value.trim()) {
+        message.error('昵称不能为空')
+        return
+    }
+
+    if (tempNickname.value === userInfo.value?.nickname) {
+        editingNickname.value = false
+        return
+    }
+
+    savingNickname.value = true
+    updateUserNickname(tempNickname.value.trim())
+        .then(() => {
+            message.success('昵称修改成功')
+            // 更新本地用户信息
+            userStore.updateUserInfo({ nickname: tempNickname.value.trim() })
+            editingNickname.value = false
+        })
+        .catch(error => {
+            if (error.response?.status === 400) {
+                message.error('昵称已被占用，请换一个试试')
+            } else {
+                message.error('昵称修改失败')
+            }
+        })
+        .finally(() => {
+            savingNickname.value = false
+        })
+}
 
 function loadBrowseList() {
     browseLoading.value = true
