@@ -1,4 +1,4 @@
-# 拷贝漫画第三方客户端
+# 拷贝漫画
 
 <p align="center">
   <img src="https://skillicons.dev/icons?i=tauri,vue,js,rust,pinia,scss,vite,pnpm"/>
@@ -14,9 +14,9 @@
 </p>
 
 
+## 1 介绍
 
-## 介绍
-这是一个拷贝漫画第三方桌面端应用
+这是一个拷贝漫画第三方桌面端应用，目前支持win、mac、linux，只有windows有简单测试过，[前往下载](https://github.com/caolib/copymanga/releases)
 
 ![image-20250529161957872](https://s2.loli.net/2025/05/29/d1Hyigj9bwhLAPE.png)
 
@@ -35,6 +35,36 @@
 ![image-20250529162327732](https://s2.loli.net/2025/05/29/DNoF7gBPhOyZnf8.png)
 
 ![image-20250529162352675](https://s2.loli.net/2025/05/29/Och2oB54ryxgUfF.png)
+
+## 2 开发
+
+### 2.1 环境
+
+开发之前，确保你已经安装了rust、nodejs等环境，这有一篇[rust安装教程](https://clb.pages.dev/2025/02/16/rust%E4%BD%BF%E7%94%A8MSVC%E6%9C%80%E5%B0%8F%E5%AE%89%E8%A3%85/)
+
+### 
+
+### 2.1 克隆仓库
+
+在一个合适位置克隆该仓库，最好有30GB左右的存储空间（桌面应用是这样的）
+
+### 2.2 Tauri，启动！
+
+先进入项目根目录下载前端依赖
+
+```bash
+pnpm i
+```
+
+启动项目，其他脚本可以在`package.json`文件查看，第一次启动会花比较长的时间下载依赖和编译
+
+```bash
+pnpm dev:cli
+```
+
+> 欢迎PR，另外项目基本都是AI完成，如有错误请指正
+
+---
 
 ## ⚠️ 免责声明
 
