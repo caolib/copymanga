@@ -155,12 +155,12 @@
                 <!-- 评论输入框 -->
                 <div v-if="commentsActiveKey.includes('comments')" class="comment-input-section"
                     style="margin-bottom: 16px;">
-                    <a-textarea v-model:value="newComment" placeholder="发表你的评论..." :rows="1" :maxlength="500" show-count
-                        style="margin-bottom: 8px;" />
+                    <a-textarea v-model:value="newComment" placeholder="这里是评论区，不是无人区..." :rows="1" :maxlength="500"
+                        show-count style="margin-bottom: 8px;" />
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <a-button type="primary" @click="submitComment" :loading="submitCommentLoading"
                             :disabled="!newComment.trim() || !isLoggedIn" size="small">
-                            发表评论
+                            发送
                         </a-button>
                     </div>
                 </div>

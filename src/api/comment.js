@@ -60,9 +60,30 @@ function postMangaComment(comicId, comment, replyId = '') {
     })
 }
 
+/**
+ * 发送章节评论
+ * @param {string} chapterId 章节ID
+ * @param {string} roast 评论内容
+ * @returns {Promise} 评论发送结果
+ */
+function postChapterComment(chapterId, roast) {
+    const data = qs.stringify({
+        chapter_id: chapterId,
+        roast: roast,
+        _update: 'true'
+    })
+
+    return request.post('/api/v3/member/roast', data, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    })
+}
+
 export {
     getChapterComments,
     getMangaComments,
-    postMangaComment
+    postMangaComment,
+    postChapterComment
 }
 

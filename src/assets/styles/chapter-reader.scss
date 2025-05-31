@@ -327,6 +327,27 @@
     }
 }
 
+/* 评论输入框样式 */
+.comment-input-section {
+    background-color: $bg-color-light;
+    padding: 16px;
+    border-radius: $border-radius-medium;
+    border: 1px solid $border-color;
+
+    .ant-input {
+        border-radius: 6px;
+    }
+
+    .ant-btn {
+        border-radius: 6px;
+    }
+
+    @include dark-theme {
+        background-color: $dark-bg-primary !important;
+        border-color: $dark-border-color !important;
+    }
+}
+
 .comments-error {
     margin: 20px 0;
     display: flex;

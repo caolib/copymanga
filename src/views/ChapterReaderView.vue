@@ -128,8 +128,21 @@
 
         <!-- 漫画评论区 -->
         <div class="comments-section">
-            <a-divider>评论区</a-divider>
-            <a-typography-title :level="4">评论 ({{ comments.length }})</a-typography-title>
+            <a-divider>评论区({{ comments.length }})</a-divider>
+
+            <!-- 评论输入框 -->
+            <div class="comment-input-section" style="margin-bottom: 16px;">
+                <a-textarea v-model:value="newComment" placeholder="这里是评论区，不是无人区..." :rows="1" :maxlength="500"
+                    show-count style="margin-bottom: 8px;" />
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+
+                    <a-button type="primary" @click="submitComment" :loading="submitCommentLoading"
+                        :disabled="!newComment.trim() || !isLoggedIn" size="small">
+                        发送
+                    </a-button>
+                </div>
+            </div>
+            <a-divider style="margin: 16px 0;" />
 
             <div v-if="commentsError" class="comments-error">
                 <a-alert type="error" message="加载评论失败" :description="commentsError" />
@@ -152,9 +165,10 @@
 import { ref, computed, onMounted, watch, nextTick, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getChapterImages } from '../api/manga'
-import { getChapterComments } from '../api/comment'
+import { getChapterComments, postChapterComment } from '../api/comment'
 import { useMangaStore } from '../stores/manga'
 import { useThemeStore } from '../stores/theme'
+import { useUserStore } from '../stores/user'
 import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
 import { message } from 'ant-design-vue'
 
@@ -162,6 +176,7 @@ const route = useRoute()
 const router = useRouter()
 const mangaStore = useMangaStore() // 使用漫画存储
 const themeStore = useThemeStore() // 使用主题存储
+const userStore = useUserStore() // 使用用户存储
 const chapterInfo = ref({})
 const images = ref([])
 const allChapters = ref([])
@@ -175,6 +190,14 @@ const currentNextChapterId = ref(null)
 const comments = ref([])
 const loadingComments = ref(false)
 const commentsError = ref('') // 评论独立的错误状态
+
+// 新评论相关状态
+const newComment = ref('')
+const submitCommentLoading = ref(false)
+
+// 计算属性：检查用户是否已登录
+const isLoggedIn = computed(() => userStore.isLoggedIn)
+
 const showSettingsDrawer = ref(false); // 控制设置抽屉的显示
 const readerConfig = reactive({ ...DEFAULT_UI_CONFIG.reader }); // 阅读器配置
 
@@ -446,6 +469,45 @@ const fetchComments = () => {
         })
         .finally(() => {
             loadingComments.value = false
+        })
+}
+
+// 提交章节评论
+const submitComment = () => {
+    if (!newComment.value.trim()) {
+        message.warning('请输入评论内容')
+        return
+    }
+
+    if (!isLoggedIn.value) {
+        message.warning('请先登录')
+        return
+    }
+
+    if (!route.params.chapterId) {
+        message.error('章节信息不完整')
+        return
+    }
+
+    submitCommentLoading.value = true
+
+    postChapterComment(route.params.chapterId, newComment.value.trim())
+        .then(res => {
+            if (res && res.code === 200) {
+                message.success('评论发表成功')
+                newComment.value = ''
+                // 刷新评论列表
+                fetchComments()
+            } else {
+                throw new Error(res?.message || '发表评论失败')
+            }
+        })
+        .catch(error => {
+            console.error('发表评论失败:', error)
+            message.error(error.message || '发表评论失败')
+        })
+        .finally(() => {
+            submitCommentLoading.value = false
         })
 }
 
