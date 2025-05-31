@@ -152,6 +152,20 @@
         <!-- 漫画评论区 -->
         <a-collapse v-model:activeKey="commentsActiveKey" style="margin-top: 24px;" @change="handleCommentsToggle">
             <a-collapse-panel key="comments" header="漫画评论">
+                <!-- 评论输入框 -->
+                <div v-if="commentsActiveKey.includes('comments')" class="comment-input-section"
+                    style="margin-bottom: 16px;">
+                    <a-textarea v-model:value="newComment" placeholder="发表你的评论..." :rows="1" :maxlength="500" show-count
+                        style="margin-bottom: 8px;" />
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <a-button type="primary" @click="submitComment" :loading="submitCommentLoading"
+                            :disabled="!newComment.trim() || !isLoggedIn" size="small">
+                            发表评论
+                        </a-button>
+                    </div>
+                </div>
+                <a-divider v-if="commentsActiveKey.includes('comments')" style="margin: 16px 0;" />
+
                 <a-skeleton :loading="commentsLoading" active>
                     <div v-if="comments.length === 0 && !commentsLoading"
                         style="text-align: center; color: #999; padding: 20px;">
@@ -182,11 +196,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getMangaDetail, collectManga, getMangaGroupChapters } from '../api/manga'
-import { getMangaComments } from '../api/comment'
+import { getMangaComments, postMangaComment } from '../api/comment'
+import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
 const router = useRouter()
+const userStore = useUserStore()
 const manga = ref({})
 const chapters = ref([])
 const loading = ref(true)
@@ -219,6 +235,13 @@ const commentsPage = ref(1)
 const commentsPageSize = ref(10)
 const commentsTotal = ref(0)
 const commentsLoaded = ref(false)
+
+// 新评论相关状态
+const newComment = ref('')
+const submitCommentLoading = ref(false)
+
+// 计算属性：检查用户是否已登录
+const isLoggedIn = computed(() => userStore.isLoggedIn)
 
 const sortedChapters = computed(() => {
     return [...chapters.value].sort((a, b) => isAscending.value ? a.index - b.index : b.index - a.index)
@@ -509,6 +532,43 @@ const fetchMangaComments = async (page = 1) => {
 // 处理评论分页
 const handleCommentsPageChange = (page) => {
     fetchMangaComments(page)
+}
+
+// 提交评论
+const submitComment = async () => {
+    if (!newComment.value.trim()) {
+        message.warning('请输入评论内容')
+        return
+    }
+
+    if (!isLoggedIn.value) {
+        message.warning('请先登录')
+        return
+    }
+
+    if (!manga.value.uuid) {
+        message.error('漫画信息不完整')
+        return
+    }
+
+    submitCommentLoading.value = true
+
+    try {
+        const res = await postMangaComment(manga.value.uuid, newComment.value.trim())
+        if (res && res.code === 200) {
+            message.success('评论发表成功')
+            newComment.value = ''
+            // 刷新评论列表
+            await fetchMangaComments(1)
+        } else {
+            throw new Error(res?.message || '发表评论失败')
+        }
+    } catch (error) {
+        console.error('发表评论失败:', error)
+        message.error(error.message || '发表评论失败')
+    } finally {
+        submitCommentLoading.value = false
+    }
 }
 
 onMounted(() => {

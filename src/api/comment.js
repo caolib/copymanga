@@ -1,4 +1,5 @@
 import request from '../utils/request'
+import qs from 'qs'
 
 /**
  * 获取章节评论
@@ -37,8 +38,31 @@ function getMangaComments(comicId, limit = 10, offset = 0) {
     })
 }
 
+/**
+ * 发送漫画评论
+ * @param {string} comicId 漫画ID
+ * @param {string} comment 评论内容
+ * @param {string} replyId 回复评论ID，默认为空
+ * @returns {Promise} 评论发送结果
+ */
+function postMangaComment(comicId, comment, replyId = '') {
+    const data = qs.stringify({
+        comic_id: comicId,
+        comment: comment,
+        reply_id: replyId,
+        platform: '3'
+    })
+
+    return request.post('/api/v3/member/comment', data, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    })
+}
+
 export {
     getChapterComments,
-    getMangaComments
+    getMangaComments,
+    postMangaComment
 }
 

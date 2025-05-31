@@ -115,6 +115,28 @@ html.dark .last-read-chapter:hover {
     }
 }
 
+/* 评论输入框样式 */
+.comment-input-section {
+    background-color: #fafafa;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #f0f0f0;
+
+    .ant-input {
+        border-radius: 6px;
+    }
+
+    .ant-btn {
+        border-radius: 6px;
+    }
+}
+
+/* 暗色模式下的评论输入框样式 */
+html.dark .comment-input-section {
+    background-color: #1f1f1f !important;
+    border-color: #303030 !important;
+}
+
 /* 原有的评论样式（保留作为备用） */
 .comment-item {
     padding: 12px 0;

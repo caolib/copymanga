@@ -4,7 +4,8 @@
     --font-family: "Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace;
 }
 
-* {
+*,
+.ant-input {
     font-family: var(--font-family);
 }
 
