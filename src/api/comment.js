@@ -8,7 +8,7 @@ import qs from 'qs'
  * @param {number} offset 偏移量
  * @returns {Promise} 评论数据
  */
-function getChapterComments(chapterId, limit = 100, offset = 0) {
+function getChapterComments(chapterId, limit = 20, offset = 0) {
     return request.get('/api/v3/roasts', {
         params: {
             chapter_id: chapterId,
@@ -33,7 +33,6 @@ function getMangaComments(comicId, limit = 10, offset = 0) {
             reply_id: '',
             limit,
             offset,
-            platform: 3
         }
     })
 }

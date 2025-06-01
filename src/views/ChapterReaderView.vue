@@ -128,7 +128,7 @@
 
         <!-- 漫画评论区 -->
         <div class="comments-section">
-            <a-divider>评论区({{ comments.length }})</a-divider>
+            <a-divider>评论区({{ commentsTotal }})</a-divider>
 
             <!-- 评论输入框 -->
             <div class="comment-input-section" style="margin-bottom: 16px;">
@@ -146,16 +146,27 @@
 
             <div v-if="commentsError" class="comments-error">
                 <a-alert type="error" message="加载评论失败" :description="commentsError" />
-                <a-button type="primary" @click="fetchComments" class="retry-comments-button">
+                <a-button type="primary" @click="fetchComments(1)" class="retry-comments-button">
                     重试加载评论
                 </a-button>
-            </div> <a-spin :spinning="loadingComments" tip="加载评论中...">
+            </div>
+
+            <a-spin :spinning="loadingComments" tip="加载评论中...">
                 <div v-if="!commentsError && comments.length > 0" class="compact-comments-container">
                     <a-comment v-for="(item, index) in comments" :key="index" :author="item.user_name"
                         :avatar="item.user_avatar" :content="item.comment" :datetime="formatCommentTime(item.create_at)"
                         class="compact-comment-item" />
                 </div>
                 <a-empty v-else-if="!commentsError && comments.length === 0" description="暂无评论" />
+
+                <!-- 评论分页 -->
+                <div v-if="!commentsError && commentsTotal > commentsPageSize"
+                    style="text-align: center; margin-top: 16px;">
+                    <a-pagination v-model:current="commentsPage" :total="commentsTotal" :page-size="commentsPageSize"
+                        :show-size-changer="false" :show-quick-jumper="true"
+                        :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条评论`" size="small"
+                        @change="handleCommentsPageChange" />
+                </div>
             </a-spin>
         </div>
     </div>
@@ -191,6 +202,9 @@ const currentNextChapterId = ref(null)
 const comments = ref([])
 const loadingComments = ref(false)
 const commentsError = ref('') // 评论独立的错误状态
+const commentsTotal = ref(0) // 评论总数
+const commentsPage = ref(1) // 当前评论页码
+const commentsPageSize = ref(100) // 每页评论数量
 
 // 新评论相关状态
 const newComment = ref('')
@@ -274,81 +288,51 @@ const goBack = () => {
     router.push(`/manga/${mangaStore.pathWord || route.params.pathWord}`);
 }
 
-// 跳转到上一章
-const prevChapter = () => {
-    if (hasPrevChapter.value) {
-        // 如果有API返回的上一章ID，优先使用
-        if (currentPrevChapterId.value) {
-            const prevChapterId = currentPrevChapterId.value;
+// 通用章节导航函数
+const navigateToChapter = (direction) => {
+    const isNext = direction === 'next'
+    const hasChapter = isNext ? hasNextChapter.value : hasPrevChapter.value
+    const apiChapterId = isNext ? currentNextChapterId.value : currentPrevChapterId.value
+    const indexOffset = isNext ? 1 : -1
+    const storeHasChapter = isNext ? mangaStore.hasNextChapter : mangaStore.hasPrevChapter
 
-            // 在Pinia中查找索引并更新
-            const prevIndex = mangaStore.findChapterIndex(prevChapterId);
-            if (prevIndex !== -1) {
-                mangaStore.setCurrentChapterIndex(prevIndex);
-            }
+    if (!hasChapter) return
 
-            // 跳转到上一章
-            router.push({
-                name: 'ChapterReader',
-                params: {
-                    pathWord: mangaStore.pathWord || route.params.pathWord,
-                    chapterId: prevChapterId
-                }
-            });
-        } else if (mangaStore.hasPrevChapter) {
-            // 使用pinia中的章节信息
-            const prevIndex = mangaStore.currentChapterIndex - 1;
-            const prevChapter = mangaStore.currentChapters[prevIndex];
-
-            mangaStore.setCurrentChapterIndex(prevIndex);
-            router.push({
-                name: 'ChapterReader',
-                params: {
-                    pathWord: mangaStore.pathWord,
-                    chapterId: prevChapter.id
-                }
-            });
+    // 如果有API返回的章节ID，优先使用
+    if (apiChapterId) {
+        const targetIndex = mangaStore.findChapterIndex(apiChapterId)
+        if (targetIndex !== -1) {
+            mangaStore.setCurrentChapterIndex(targetIndex)
         }
+
+        router.push({
+            name: 'ChapterReader',
+            params: {
+                pathWord: mangaStore.pathWord || route.params.pathWord,
+                chapterId: apiChapterId
+            }
+        })
+    } else if (storeHasChapter) {
+        // 使用pinia中的章节信息
+        const targetIndex = mangaStore.currentChapterIndex + indexOffset
+        const targetChapter = mangaStore.currentChapters[targetIndex]
+
+        mangaStore.setCurrentChapterIndex(targetIndex)
+        router.push({
+            name: 'ChapterReader',
+            params: {
+                pathWord: mangaStore.pathWord,
+                chapterId: targetChapter.id
+            }
+        })
     }
 }
+
+// 跳转到上一章
+const prevChapter = () => navigateToChapter('prev')
 
 // 跳转到下一章
-const nextChapter = () => {
-    if (hasNextChapter.value) {
-        // 如果有API返回的下一章ID，优先使用
-        if (currentNextChapterId.value) {
-            const nextChapterId = currentNextChapterId.value;
-
-            // 在Pinia中查找索引并更新
-            const nextIndex = mangaStore.findChapterIndex(nextChapterId);
-            if (nextIndex !== -1) {
-                mangaStore.setCurrentChapterIndex(nextIndex);
-            }
-
-            // 跳转到下一章
-            router.push({
-                name: 'ChapterReader',
-                params: {
-                    pathWord: mangaStore.pathWord || route.params.pathWord,
-                    chapterId: nextChapterId
-                }
-            });
-        } else if (mangaStore.hasNextChapter) {
-            // 使用pinia中的章节信息
-            const nextIndex = mangaStore.currentChapterIndex + 1;
-            const nextChapter = mangaStore.currentChapters[nextIndex];
-
-            mangaStore.setCurrentChapterIndex(nextIndex);
-            router.push({
-                name: 'ChapterReader',
-                params: {
-                    pathWord: mangaStore.pathWord,
-                    chapterId: nextChapter.id
-                }
-            });
-        }
-    }
-}
+const nextChapter = () => navigateToChapter('next')
 
 // 底部导航栏控制方法
 const showNavigation = () => {
@@ -460,15 +444,18 @@ const formatCommentTime = (timeStr) => {
 }
 
 // 获取章节评论
-const fetchComments = () => {
+const fetchComments = (page = 1) => {
     if (!route.params.chapterId) return
 
     loadingComments.value = true
     commentsError.value = '' // 重置错误状态
+    const offset = (page - 1) * commentsPageSize.value
 
-    getChapterComments(route.params.chapterId, 100, 0).then(response => {
+    getChapterComments(route.params.chapterId, commentsPageSize.value, offset).then(response => {
         if (response && response.code === 200 && response.results) {
             comments.value = response.results.list || []
+            commentsTotal.value = response.results.total || 0
+            commentsPage.value = page
         } else {
             throw new Error('获取评论数据失败')
         }
@@ -502,14 +489,19 @@ const submitComment = () => {
     postChapterComment(route.params.chapterId, newComment.value.trim()).then(res => {
         message.success('评论发表成功')
         newComment.value = ''
-        // 刷新评论列表
-        fetchComments()
+        // 刷新评论列表，回到第一页
+        fetchComments(1)
     }).catch(error => {
         console.error('发表评论失败:', error)
         message.error(error.message || '发表评论失败')
     }).finally(() => {
         submitCommentLoading.value = false
     })
+}
+
+// 处理评论分页
+const handleCommentsPageChange = (page) => {
+    fetchComments(page)
 }
 
 // 配置管理方法
@@ -558,7 +550,7 @@ onMounted(() => {
 
     // 短暂延迟后再加载评论，避免两个请求同时发出导致的性能问题
     setTimeout(() => {
-        fetchComments()
+        fetchComments(1)
     }, 300)
 
     // 加载用户配置
@@ -588,9 +580,11 @@ watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
 // 监听器2：章节ID变化时更新评论
 watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
     if (newChapterId && newChapterId !== oldChapterId) {
+        // 重置评论分页到第一页
+        commentsPage.value = 1
         // 延迟加载评论，优先处理图片加载
         setTimeout(() => {
-            fetchComments()
+            fetchComments(1)
         }, 500)
     }
 }, { immediate: false })

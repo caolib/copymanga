@@ -121,7 +121,7 @@
     }
 
     @include dark-theme {
-        background: rgba(45, 45, 45, 0.95);
+        background: $dark-primary-bg;
         border-top: 1px solid rgba($white, 0.1);
         box-shadow: $shadow-dark-medium;
     }
@@ -529,7 +529,7 @@
 
 /* 设置抽屉内容样式 */
 :deep(.ant-drawer-body .ant-form-item) {
-    margin-bottom: $spacing-lg;
+    margin-bottom: $spacing-sm;
 }
 
 :deep(.ant-drawer-body .ant-slider) {
