@@ -170,6 +170,7 @@ import { useMangaStore } from '../stores/manga'
 import { useThemeStore } from '../stores/theme'
 import { useUserStore } from '../stores/user'
 import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
+import { formatDatetimeUpdated } from '../utils/date'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
@@ -210,6 +211,25 @@ const darkImageMaskOpacity = ref(0.3) // 暗色模式图片遮罩透明度
 
 // 使用全局主题状态
 const isDarkMode = computed(() => themeStore.isDarkMode)
+
+// 滚动到顶部的工具函数
+const scrollToTop = () => {
+    // 首先尝试找到主内容滚动容器
+    const mainContent = document.querySelector('.main-content')
+    if (mainContent) {
+        mainContent.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        })
+    } else {
+        // 回退到window滚动
+        window.scrollTo({
+            top: 0,
+            left: 0,
+            behavior: 'smooth'
+        })
+    }
+}
 
 // 计算属性：将图片分组，根据配置的每行列数
 const imageChunks = computed(() => {
@@ -427,52 +447,40 @@ const fetchChapterImages = () => {
         })
         .finally(() => {
             loading.value = false
-            // 滚动到顶部
-            nextTick(() => {
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-            })
+            // 首次加载时滚动到顶部
+            if (!route.params.chapterId || !images.value.length) {
+                scrollToTop()
+            }
         })
 }
 
-// 格式化评论时间
+// 格式化评论时间 - 使用统一的日期格式化函数
 const formatCommentTime = (timeStr) => {
-    const date = new Date(timeStr)
-    const now = new Date()
-
-    // 同一天内显示时间
-    if (date.toDateString() === now.toDateString()) {
-        return `今天 ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
-    }
-
-    // 超过一天显示日期和时间
-    return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`
+    return formatDatetimeUpdated(timeStr)
 }
 
-// 获取章节评论 - 完全独立的加载过程
+// 获取章节评论
 const fetchComments = () => {
     if (!route.params.chapterId) return
 
     loadingComments.value = true
     commentsError.value = '' // 重置错误状态
 
-    getChapterComments(route.params.chapterId, 100, 0)
-        .then(response => {
-            if (response && response.code === 200 && response.results) {
-                comments.value = response.results.list || []
-            } else {
-                throw new Error('获取评论数据失败')
-            }
-        })
-        .catch(error => {
-            console.error('获取评论失败', error)
-            commentsError.value = '获取评论失败，请点击重试按钮重新加载'
-        })
-        .finally(() => {
-            loadingComments.value = false
-        })
+    getChapterComments(route.params.chapterId, 100, 0).then(response => {
+        if (response && response.code === 200 && response.results) {
+            comments.value = response.results.list || []
+        } else {
+            throw new Error('获取评论数据失败')
+        }
+    }).catch(error => {
+        console.error('获取评论失败', error)
+        commentsError.value = '获取评论失败，请点击重试按钮重新加载'
+    }).finally(() => {
+        loadingComments.value = false
+    })
 }
 
-// 提交章节评论
+// 发送章节评论
 const submitComment = () => {
     if (!newComment.value.trim()) {
         message.warning('请输入评论内容')
@@ -491,24 +499,17 @@ const submitComment = () => {
 
     submitCommentLoading.value = true
 
-    postChapterComment(route.params.chapterId, newComment.value.trim())
-        .then(res => {
-            if (res && res.code === 200) {
-                message.success('评论发表成功')
-                newComment.value = ''
-                // 刷新评论列表
-                fetchComments()
-            } else {
-                throw new Error(res?.message || '发表评论失败')
-            }
-        })
-        .catch(error => {
-            console.error('发表评论失败:', error)
-            message.error(error.message || '发表评论失败')
-        })
-        .finally(() => {
-            submitCommentLoading.value = false
-        })
+    postChapterComment(route.params.chapterId, newComment.value.trim()).then(res => {
+        message.success('评论发表成功')
+        newComment.value = ''
+        // 刷新评论列表
+        fetchComments()
+    }).catch(error => {
+        console.error('发表评论失败:', error)
+        message.error(error.message || '发表评论失败')
+    }).finally(() => {
+        submitCommentLoading.value = false
+    })
 }
 
 // 配置管理方法
@@ -552,15 +553,7 @@ const saveSettings = async () => {
 }
 
 onMounted(() => {
-    // 检查是否有有效的章节数据
-    if (!route.params.chapterId || (!mangaStore.currentChapters.length && !mangaStore.pathWord)) {
-        // 数据不完整，返回首页
-        console.error('缺少必要的章节数据')
-        router.push('/')
-        return
-    }
-
-    // 并行发起两个独立的请求，但互不影响
+    // 获取漫画图片
     fetchChapterImages()
 
     // 短暂延迟后再加载评论，避免两个请求同时发出导致的性能问题
@@ -580,8 +573,9 @@ onMounted(() => {
 // 监听器1：章节ID变化时更新漫画图片
 watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
     if (newChapterId && newChapterId !== oldChapterId) {
-        // 滚动到顶部，以便用户看到新章节的开头
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // 立即滚动到顶部，以便用户看到新章节的开头
+        scrollToTop('smooth')
+
         // 仅更新图片部分
         fetchChapterImages()
 
