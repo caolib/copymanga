@@ -60,12 +60,6 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
-        path: '/book/:pathWord/chapter/:chapterId',
-        name: 'BookChapterReader',
-        component: () => import('../views/BookChapterReaderView.vue'),
-        meta: { requiresAuth: true }
-    },
-    {
         path: '/book/:pathWord/volume/:volumeId/reader',
         name: 'BookTextReader',
         component: () => import('../views/BookTextReaderView.vue'),
