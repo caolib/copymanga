@@ -27,7 +27,7 @@
             <!-- 导航栏 -->
             <nav class="nav" data-tauri-drag-region="false">
                 <router-link to="/" class="nav-link">首页</router-link>
-                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">我的书架</router-link>
+                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">书架</router-link>
                 <router-link to="/settings" class="nav-link">设置</router-link>
                 <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
@@ -40,6 +40,9 @@
                     </a-button>
                     <a-button type="text" size="small" @click="goForward" title="前进">
                         <ArrowRightOutlined />
+                    </a-button>
+                    <a-button type="text" size="small" @click="refreshPage" title="刷新">
+                        <ReloadOutlined />
                     </a-button>
                 </div>
             </nav>
@@ -85,7 +88,7 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { isLoggedIn, logout } from '../utils/auth'
 import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
-import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -103,6 +106,12 @@ const goBack = () => {
 
 const goForward = () => {
     router.go(1)
+}
+
+// 刷新功能
+const refreshPage = () => {
+    // 在Vue Router中刷新当前页面
+    router.go(0)
 }
 
 // 用于存储监听器清理函数

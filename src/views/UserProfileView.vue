@@ -2,7 +2,7 @@
     <div class="user-profile-container">
         <!-- 左侧侧栏导航 -->
         <a-layout>
-            <a-layout-sider width="240" theme="light" class="user-profile-sider">
+            <a-layout-sider width="200" theme="light" class="user-profile-sider">
                 <div class="user-sider-header">
                     <a-avatar :src="userInfo?.avatar || '/logo.jpg'" :alt="userInfo?.username || '用户头像'" :size="56"
                         @error="handleAvatarError" />
@@ -105,11 +105,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                        }}
+                                                            }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                        }}</div>
+                                                            }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
