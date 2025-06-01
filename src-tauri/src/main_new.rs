@@ -38,7 +38,7 @@ fn main() {
 }
 
 async fn start_proxy(app_handle: AppHandle) {
-    let config_manager = ConfigManager::new(app_handle);
+    let config_manager = ConfigManager::new(app_handle).unwrap();
     let domain = config_manager.get_current_api_domain().unwrap();
     let port = config_manager.get_server_port().unwrap_or(12121);
 
@@ -47,8 +47,9 @@ async fn start_proxy(app_handle: AppHandle) {
             .timeout(std::time::Duration::from_secs(120))
             .build()
             .unwrap(),
-    );    let app = Router::new()
-        .route("/proxy", any(proxy_handler))
+    );
+
+    let app = Router::new()
         .route("/proxy/*path", any(proxy_handler))
         .with_state((client, domain));
     
@@ -65,7 +66,9 @@ async fn proxy_handler(
 ) -> Result<Response, StatusCode> {
     let method = req.method().clone();
     let headers_in = req.headers().clone();
-    let uri = req.uri().clone();    let origin = headers_in
+    let uri = req.uri().clone();
+
+    let origin = headers_in
         .get("origin")
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
@@ -73,30 +76,28 @@ async fn proxy_handler(
     // 处理 OPTIONS 请求
     if method == Method::OPTIONS {
         return build_cors_response(origin);
-    }    let path = uri.path().trim_start_matches("/proxy");
-    let query = uri.query().unwrap_or("");
+    }
+
+    let path = uri.path().trim_start_matches("/proxy");
+    let query = uri.query().map(|q| format!("?{}", q)).unwrap_or_default();
     
     // 检查是否是外部URL请求 (/proxy?url=...)
-    if path.is_empty() && query.starts_with("url=") {
-        let url_param = &query[4..]; // 去掉 "url=" 前缀
-        // 简单的URL解码，只处理基本情况
-        let decoded_url = url_param.replace("%3A", ":").replace("%2F", "/").replace("%3F", "?").replace("%3D", "=").replace("%26", "&");
-        return handle_external_request(&client, &decoded_url, origin).await;
+    if path.is_empty() && query.starts_with("?url=") {
+        let url_param = &query[5..]; // 去掉 "?url=" 前缀
+        let external_url = percent_decode(url_param);
+        return handle_external_request(&client, &external_url, origin).await;
     }
     
     // 内部代理请求
-    let query_str = if query.is_empty() { String::new() } else { format!("?{}", query) };
-    let target_url = format!("{}{}{}", domain, path, query_str);
-    handle_internal_request(&client, method, headers_in.clone(), req, &target_url, origin).await
+    let target_url = format!("{}{}{}", domain, path, query);
+    handle_internal_request(&client, method, headers_in, req, &target_url, origin).await
 }
 
 fn build_cors_response(origin: &str) -> Result<Response, StatusCode> {
     let mut response = Response::builder().status(StatusCode::OK);
     
     if !origin.is_empty() {
-        response = response
-            .header("Access-Control-Allow-Origin", origin)
-            .header("Access-Control-Allow-Credentials", "true");
+        response = response.header("Access-Control-Allow-Origin", origin);
     } else {
         response = response.header("Access-Control-Allow-Origin", "*");
     }
@@ -111,11 +112,11 @@ fn build_cors_response(origin: &str) -> Result<Response, StatusCode> {
 
 async fn handle_external_request(
     client: &Client,
-    url_param: &str,
+    external_url: &str,
     origin: &str,
 ) -> Result<Response, StatusCode> {
     let resp = client
-        .get(url_param)
+        .get(external_url)
         .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
         .send()
         .await
@@ -158,16 +159,14 @@ async fn build_response(resp: reqwest::Response, origin: &str) -> Result<Respons
     
     // 复制响应头，过滤CORS相关的
     for (k, v) in resp.headers().iter() {
-        if !["content-length", "transfer-encoding", "connection", "access-control-allow-origin", "access-control-allow-credentials"].contains(&k.as_str()) {
+        if !["content-length", "transfer-encoding", "connection", "access-control-allow-origin"].contains(&k.as_str()) {
             response = response.header(k, v);
         }
     }
     
     // 设置CORS头（只设置一次）
     if !origin.is_empty() {
-        response = response
-            .header("Access-Control-Allow-Origin", origin)
-            .header("Access-Control-Allow-Credentials", "true");
+        response = response.header("Access-Control-Allow-Origin", origin);
     } else {
         response = response.header("Access-Control-Allow-Origin", "*");
     }
@@ -176,4 +175,16 @@ async fn build_response(resp: reqwest::Response, origin: &str) -> Result<Respons
     Ok(response.body(Body::from(body)).unwrap())
 }
 
-
+// 简单的URL解码
+fn percent_decode(input: &str) -> String {
+    input
+        .replace("%3A", ":")
+        .replace("%2F", "/")
+        .replace("%3F", "?")
+        .replace("%3D", "=")
+        .replace("%26", "&")
+        .replace("%2E", ".")
+        .replace("%2D", "-")
+        .replace("%5F", "_")
+        .replace("%7E", "~")
+}

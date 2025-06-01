@@ -1,0 +1,252 @@
+@use "./variables" as *;
+
+.book-volume-chapters-container {
+    padding: $spacing-lg;
+    max-width: 1200px;
+    margin: 0 auto;
+
+    .back-button {
+        margin-bottom: $spacing-lg;
+    }
+
+    .volume-header {
+        margin-bottom: $spacing-lg;
+        padding: $spacing-lg;
+        background: $bg-color-white;
+        border-radius: $border-radius-large;
+        border: 1px solid $border-color;
+
+        @include dark-theme {
+            background: $dark-bg-secondary;
+            border-color: $dark-border-color;
+        }
+
+        .volume-title {
+            margin: 0 0 $spacing-md 0;
+            color: $text-primary;
+            font-size: 24px;
+            font-weight: 600;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        .volume-meta {
+            color: $text-secondary;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+    }
+
+    .volume-contents {
+        .content-count {
+            color: $text-secondary;
+            font-size: 12px;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+
+        .contents-list {
+            .content-item {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: $spacing-md;
+                margin-bottom: $spacing-xs;
+                background: $bg-color;
+                border: 1px solid $border-color;
+                border-radius: $border-radius-medium;
+                cursor: pointer;
+                transition: $transition-normal;
+
+                &:hover {
+                    background: $bg-color-hover;
+                    border-color: $primary-color;
+                }
+
+                @include dark-theme {
+                    background: $dark-bg-primary;
+                    border-color: $dark-border-color;
+
+                    &:hover {
+                        background: $dark-bg-secondary;
+                        border-color: $primary-color;
+                    }
+                }
+
+                .content-info {
+                    display: flex;
+                    align-items: center;
+                    flex: 1;
+
+                    .content-type-icon {
+                        font-size: 24px;
+                        margin-right: $spacing-md;
+                    }
+
+                    .content-details {
+                        flex: 1;
+
+                        .content-title {
+                            margin: 0 0 $spacing-xs 0;
+                            color: $text-primary;
+                            font-size: 16px;
+                            font-weight: 500;
+
+                            @include dark-theme {
+                                color: $dark-text-primary;
+                            }
+                        }
+
+                        .content-meta {
+                            color: $text-secondary;
+                            font-size: 12px;
+
+                            @include dark-theme {
+                                color: $dark-text-secondary;
+                            }
+                        }
+                    }
+                }
+
+                .content-action {
+                    flex-shrink: 0;
+                }
+            }
+        }
+    }
+}
+
+// 全文阅读模态框样式
+.text-modal {
+    :deep(.ant-modal-content) {
+        @include dark-theme {
+            background: $dark-bg-primary;
+            color: $dark-text-primary;
+        }
+    }
+
+    :deep(.ant-modal-header) {
+        @include dark-theme {
+            background: $dark-bg-primary;
+            border-bottom: 1px solid $dark-border-color;
+
+            .ant-modal-title {
+                color: $dark-text-primary;
+            }
+        }
+    }
+
+    .full-text-content {
+        max-height: 70vh;
+        overflow-y: auto;
+
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.8;
+            font-family: $font-family-base;
+            font-size: 14px;
+            color: $text-primary;
+            margin: 0;
+            padding: $spacing-md;
+            background: $bg-color;
+            border-radius: $border-radius-medium;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+                background: $dark-bg-secondary;
+            }
+        }
+    }
+}
+
+// 插图查看模态框样式
+.image-modal {
+    :deep(.ant-modal-content) {
+        @include dark-theme {
+            background: $dark-bg-primary;
+            color: $dark-text-primary;
+        }
+    }
+
+    :deep(.ant-modal-header) {
+        @include dark-theme {
+            background: $dark-bg-primary;
+            border-bottom: 1px solid $dark-border-color;
+
+            .ant-modal-title {
+                color: $dark-text-primary;
+            }
+        }
+    }
+
+    .image-content {
+        text-align: center;
+
+        .full-image {
+            max-width: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: $border-radius-medium;
+            box-shadow: $shadow-light;
+        }
+
+        .image-title {
+            margin-top: $spacing-md;
+            color: $text-secondary;
+            font-size: 14px;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+    }
+}
+
+// 响应式设计
+@include responsive($breakpoint-md) {
+    .book-volume-chapters-container {
+        padding: $spacing-md;
+
+        .volume-header {
+            padding: $spacing-md;
+
+            .volume-title {
+                font-size: 20px;
+            }
+        }
+
+        .volume-contents .contents-list .content-item {
+            .content-info .content-type-icon {
+                font-size: 20px;
+                margin-right: $spacing-sm;
+            }
+
+            .content-details .content-title {
+                font-size: 14px;
+            }
+        }
+    }
+}
+
+@include responsive($breakpoint-sm) {
+    .book-volume-chapters-container {
+        padding: $spacing-sm;
+
+        .volume-contents .contents-list .content-item {
+            flex-direction: column;
+            align-items: flex-start;
+
+            .content-action {
+                align-self: flex-end;
+                margin-top: $spacing-sm;
+            }
+        }
+    }
+}

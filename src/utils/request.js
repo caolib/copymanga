@@ -6,7 +6,7 @@ import router from '@/router'
 
 // 创建 axios 实例
 const request = axios.create({
-    timeout: 60000,
+    timeout: 40000,
     withCredentials: true
 })
 
@@ -14,9 +14,6 @@ const request = axios.create({
 const updateBaseURL = async () => {
     await getServerConfig().then(config => {
         request.defaults.baseURL = `http://localhost:${config.serverPort}/proxy`
-    }).catch(error => {
-        console.error('获取服务器配置失败:', error)
-        message.error('获取配置失败')
     })
 }
 
@@ -72,7 +69,16 @@ request.interceptors.response.use(
             return Promise.reject(new Error('未授权，请登录'))
         }
 
-        if (error.response && error.response.data) {
+        // 处理超时错误
+        if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+            msg = '请求超时，请检查网络连接或稍后重试'
+        }
+        // 处理网络错误
+        else if (error.code === 'ERR_NETWORK') {
+            msg = '网络连接失败，请检查网络设置'
+        }
+        // 处理服务器响应错误
+        else if (error.response && error.response.data) {
             if (error.response.data.detail) {
                 msg = error.response.data.detail
             } else if (error.response.data.message) {
@@ -81,6 +87,7 @@ request.interceptors.response.use(
         } else if (error.message) {
             msg = error.message
         }
+
         message.error(msg)
         return Promise.reject(error)
     }

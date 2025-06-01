@@ -26,9 +26,10 @@
 
             <!-- 导航栏 -->
             <nav class="nav" data-tauri-drag-region="false">
-                <router-link to="/" class="nav-link">首页</router-link>
-                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">书架</router-link>
-                <router-link to="/settings" class="nav-link">设置</router-link>
+                <router-link to="/" class="nav-link">🏠首页</router-link>
+                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">⭐漫画</router-link>
+                <router-link to="/my-book-collection" class="nav-link" v-if="isLoggedInComputed">📚小说</router-link>
+                <router-link to="/settings" class="nav-link">⚙️设置</router-link>
                 <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
                     {{ themeStore.isDarkMode ? '🌞' : '🌙' }}

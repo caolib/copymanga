@@ -16,7 +16,7 @@
     right: 0;
     z-index: $z-index-dropdown;
     border-bottom: 1px solid $border-color;
-    padding: 0 $spacing-sm;
+    padding: 0 $spacing-xs; // 减少左右内边距
     box-shadow: $shadow-light;
     transition: $transition-normal;
 
@@ -31,8 +31,10 @@
 .title-bar-left {
     display: flex;
     align-items: center;
-    gap: $spacing-sm;
+    gap: $spacing-xs; // 减少间距
     flex: 1;
+    min-width: 0; // 允许收缩
+    overflow: hidden; // 处理溢出
 }
 
 .title-bar-center {
@@ -51,16 +53,23 @@
 // 导航样式
 .nav {
     display: flex;
+    align-items: center;
+    gap: 2px; // 减少间距，让导航项更紧凑
+    flex-wrap: nowrap; // 防止换行
+    min-width: 0; // 允许收缩
 }
 
 .nav-link {
     color: $text-secondary;
     text-decoration: none;
     font-weight: 500;
-    padding: $spacing-sm 12px;
+    padding: $spacing-sm 8px; // 减少左右内边距
     border-radius: $border-radius-medium;
     transition: $transition-normal;
-    font-size: 14px;
+    font-size: 13px; // 稍微减小字体
+    white-space: nowrap; // 防止文字换行
+    flex-shrink: 0; // 防止收缩
+    min-width: fit-content; // 最小宽度适应内容
 
     &:hover {
         background-color: $bg-color;
@@ -104,11 +113,12 @@
     border: none;
     font-size: 16px;
     cursor: pointer;
-    padding: $spacing-sm 12px;
+    padding: $spacing-sm 8px; // 减少左右内边距
     border-radius: $border-radius-medium;
     transition: $transition-normal;
     color: $text-secondary;
     @include flex-center;
+    flex-shrink: 0; // 防止收缩
 
     &:hover {
         background-color: $bg-color;
@@ -128,7 +138,8 @@
 // 用户区域
 .user-section {
     @include flex-center;
-    margin-right: 6px;
+    margin-right: 4px; // 减少右边距
+    flex-shrink: 0; // 防止收缩
 }
 
 .user-avatar-dropdown {
@@ -215,16 +226,18 @@
 // 前进后退按钮
 .navigation-controls {
     @include flex-center;
-    gap: 4px;
-    margin-left: 8px;
+    gap: 2px; // 减少间距
+    margin-left: 4px; // 减少左边距
+    flex-shrink: 0; // 防止收缩
 
     .ant-btn {
         @include flex-center;
-        width: 28px;
-        height: 28px;
+        width: 24px; // 减小按钮尺寸
+        height: 24px;
         border-radius: $border-radius-small;
         color: $text-secondary;
         transition: $transition-normal;
+        font-size: 12px; // 减小图标尺寸
 
         &:hover {
             background-color: $bg-color;
