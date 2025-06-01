@@ -1,0 +1,170 @@
+@use "./variables" as *;
+
+.book-text-reader {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background-color: $bg-color-paper;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+    }
+}
+
+.main-content {
+    background: $bg-color-paper;
+}
+
+.toolbar {
+    padding: $spacing-md;
+    border-bottom: 1px solid $border-color;
+    background-color: $bg-color-paper;
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    flex-shrink: 0;
+
+    .ant-btn {
+        color: $text-primary;
+
+        &:hover {
+            color: $primary-hover;
+        }
+    }
+
+    @include dark-theme {
+        background-color: $dark-bg-secondary;
+        border-bottom-color: $dark-border-color;
+
+        .ant-btn {
+            color: $dark-text-primary;
+
+            &:hover {
+                color: $primary-hover;
+            }
+        }
+    }
+}
+
+.loading-container {
+    flex: 1;
+    padding: $spacing-lg;
+    background-color: $bg-color-paper;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
+
+    @include dark-theme {
+        background-color: $dark-bg-secondary;
+    }
+}
+
+.error-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $bg-color-paper;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+    }
+}
+
+.reader-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-lg;
+    background-color: $bg-color-paper;
+
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: rgba(0, 0, 0, 0.2);
+        border-radius: 3px;
+
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+    }
+
+    @include dark-theme {
+        background-color: $dark-bg-secondary;
+
+        &::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.2);
+
+            &:hover {
+                background-color: rgba(255, 255, 255, 0.3);
+            }
+        }
+    }
+}
+
+.text-content {
+    max-width: 800px;
+    margin: 0 auto;
+    color: $text-primary;
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+}
+
+.text-line {
+    font-size: 16px;
+    line-height: 1.8;
+    margin-bottom: 0.5em !important;
+    text-align: justify;
+    letter-spacing: 0.5px;
+    text-indent: 2em;
+
+    &.empty-line {
+        margin-bottom: 1em !important;
+        min-height: 1.2em;
+    }
+
+    // 覆盖 ant-design 默认样式
+    &.ant-typography {
+        margin-bottom: 0.5em !important;
+        color: inherit;
+    }
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+}
+
+/* 响应式设计 */
+@include responsive($breakpoint-sm) {
+    .reader-content {
+        padding: $spacing-md;
+    }
+
+    .text-line {
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .text-content {
+        max-width: 100%;
+    }
+
+    .toolbar {
+        padding: $spacing-sm $spacing-md;
+    }
+}
+
+@include responsive($breakpoint-xs) {
+    .text-line {
+        font-size: 14px;
+        line-height: 1.5;
+        text-indent: 1.5em;
+    }
+}

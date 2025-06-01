@@ -19,18 +19,26 @@ export async function getServerConfig() {
 export async function getAppConfig() {
     const config = await pathHelper.readConfig(CONFIG_FILES.APP, {
         apiSources: [],
-        currentApiIndex: -1
+        currentApiIndex: -1,
+        bookApiSources: [],
+        currentBookApiIndex: -1
     })
 
     // 确保配置包含所有必要字段
     const result = {
         apiSources: config.apiSources || [],
-        currentApiIndex: config.currentApiIndex || -1
+        currentApiIndex: config.currentApiIndex || -1,
+        bookApiSources: config.bookApiSources || [],
+        currentBookApiIndex: config.currentBookApiIndex || -1
     }
 
     // 如果当前索引超出范围，重置为-1
     if (result.currentApiIndex >= result.apiSources.length || result.currentApiIndex < -1) {
         result.currentApiIndex = -1
+    }
+
+    if (result.currentBookApiIndex >= result.bookApiSources.length || result.currentBookApiIndex < -1) {
+        result.currentBookApiIndex = -1
     }
 
     return result
@@ -184,6 +192,172 @@ export async function validateApiConfig() {
         return {
             valid: false,
             message: `当前API源URL无效: ${currentSource}`
+        }
+    }
+
+    return {
+        valid: true,
+        message: '配置有效',
+        currentSource
+    }
+}
+
+// ============ 轻小说源管理 ============
+
+// 添加新的轻小说源
+export async function addBookApiSource(url) {
+    if (!url) {
+        throw new Error('URL不能为空')
+    }
+
+    if (!validateApiDomain(url)) {
+        throw new Error('无效的URL格式')
+    }
+
+    const config = await getAppConfig()
+
+    // 检查是否已存在相同的URL
+    const exists = config.bookApiSources.some(source => source === url)
+    if (exists) {
+        throw new Error('该轻小说源已存在')
+    }
+
+    config.bookApiSources.push(url)
+    await saveAppConfig(config)
+    return true
+}
+
+// 删除轻小说源
+export async function removeBookApiSource(index) {
+    const config = await getAppConfig()
+
+    if (index < 0 || index >= config.bookApiSources.length) {
+        throw new Error('无效的索引')
+    }
+
+    // 不能删除所有源
+    if (config.bookApiSources.length <= 1) {
+        throw new Error('至少需要保留一个轻小说源')
+    }
+
+    config.bookApiSources.splice(index, 1)
+
+    // 如果删除的是当前使用的源，切换到第一个
+    if (config.currentBookApiIndex === index) {
+        config.currentBookApiIndex = 0
+    } else if (config.currentBookApiIndex > index) {
+        // 如果删除的源在当前源之前，需要调整索引
+        config.currentBookApiIndex = config.currentBookApiIndex - 1
+    }
+
+    // 确保索引在有效范围内
+    if (config.currentBookApiIndex >= config.bookApiSources.length) {
+        config.currentBookApiIndex = config.bookApiSources.length - 1
+    }
+
+    await saveAppConfig(config)
+    return true
+}
+
+// 切换轻小说源
+export async function switchBookApiSource(index) {
+    const config = await getAppConfig()
+
+    if (index < 0 || index >= config.bookApiSources.length) {
+        throw new Error('无效的索引')
+    }
+
+    config.currentBookApiIndex = index
+    await saveAppConfig(config)
+    return config.bookApiSources[index]
+}
+
+// 获取当前轻小说源
+export async function getCurrentBookApiSource() {
+    const config = await getAppConfig()
+
+    if (config.bookApiSources.length === 0 || config.currentBookApiIndex < 0) {
+        return null
+    }
+
+    if (config.currentBookApiIndex >= config.bookApiSources.length) {
+        // 如果索引超出范围，使用第一个源
+        return config.bookApiSources[0]
+    }
+
+    return config.bookApiSources[config.currentBookApiIndex]
+}
+
+// 初始化默认轻小说API源
+export async function initializeDefaultBookApiSources() {
+    try {
+        const config = await getAppConfig()
+
+        // 如果轻小说API源为空，添加默认源
+        if (!config.bookApiSources || config.bookApiSources.length === 0) {
+            const defaultBookApiSource = 'https://api.copy-manga.com'
+
+            config.bookApiSources = [defaultBookApiSource]
+            config.currentBookApiIndex = 0
+
+            await saveAppConfig(config)
+            console.log('已初始化默认轻小说API源:', defaultBookApiSource)
+            return true
+        }
+
+        return false // 已存在API源，无需初始化
+    } catch (error) {
+        console.error('初始化默认轻小说API源失败:', error)
+        throw error
+    }
+}
+
+// 获取当前轻小说API域名
+export async function getCurrentBookApiDomain() {
+    const config = await getAppConfig()
+
+    if (config.bookApiSources.length === 0 || config.currentBookApiIndex < 0) {
+        // 如果没有配置，先初始化默认源
+        await initializeDefaultBookApiSources()
+        const newConfig = await getAppConfig()
+        return newConfig.bookApiSources[newConfig.currentBookApiIndex] || 'https://api.copy-manga.com'
+    }
+
+    return config.bookApiSources[config.currentBookApiIndex] || 'https://api.copy-manga.com'
+}
+
+// 获取所有轻小说源
+export async function getBookApiSources() {
+    const config = await getAppConfig()
+    return config.bookApiSources || []
+}
+
+// 验证轻小说源配置
+export async function validateBookApiConfig() {
+    const config = await getAppConfig()
+
+    // 检查是否有轻小说源
+    if (!config.bookApiSources || config.bookApiSources.length === 0) {
+        return {
+            valid: false,
+            message: '没有配置轻小说源'
+        }
+    }
+
+    // 检查当前索引是否有效
+    if (config.currentBookApiIndex < 0 || config.currentBookApiIndex >= config.bookApiSources.length) {
+        return {
+            valid: false,
+            message: '当前轻小说源索引无效'
+        }
+    }
+
+    // 检查当前轻小说源的URL是否有效
+    const currentSource = config.bookApiSources[config.currentBookApiIndex]
+    if (!validateApiDomain(currentSource)) {
+        return {
+            valid: false,
+            message: `当前轻小说源URL无效: ${currentSource}`
         }
     }
 

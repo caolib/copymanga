@@ -7,6 +7,7 @@ import 'ant-design-vue/dist/reset.css'
 import App from './App.vue'
 import router from './router'
 import { useThemeStore } from './stores/theme'
+import { initializeDefaultBookApiSources } from './config/server-config'
 
 import './assets/styles/main.scss'
 
@@ -28,4 +29,9 @@ app.mount('#app')
 const themeStore = useThemeStore()
 themeStore.initTheme().catch(error => {
     console.error('初始化主题失败:', error)
+})
+
+// 初始化默认轻小说API源
+initializeDefaultBookApiSources().catch(error => {
+    console.error('初始化轻小说API源失败:', error)
 })

@@ -70,16 +70,72 @@
                         </template>
                     </a-list>
                 </a-form-item>
+            </a-form> </a-card>
+
+        <!-- 轻小说API源配置 -->
+        <a-card title="轻小说API源配置" class="setting-card" id="book-api-config">
+            <a-form layout="vertical">
+                <!-- 当前轻小说API源选择 -->
+                <a-form-item label="当前轻小说API源">
+                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange" size="large"
+                        style="width: 100%">
+                        <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
+                            {{ source }}
+                        </a-select-option>
+                    </a-select>
+                    <div class="help-text">
+                        选择要使用的轻小说API源
+                    </div>
+                </a-form-item>
+
+                <!-- 添加新轻小说API源 -->
+                <a-form-item label="添加新轻小说API源">
+                    <a-input-group compact>
+                        <a-input v-model:value="newBookApiSource.url"
+                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: 80%" size="large" />
+                        <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
+                            style="width: 20%" size="large">
+                            添加
+                        </a-button>
+                    </a-input-group>
+                </a-form-item>
+
+                <!-- 轻小说API源管理 -->
+                <a-form-item label="轻小说API源管理">
+                    <a-list :data-source="bookApiSources" bordered size="small">
+                        <template #renderItem="{ item, index }">
+                            <a-list-item>
+                                <template #actions>
+                                    <a-button v-if="bookApiSources.length > 1" type="text" danger size="small"
+                                        @click="removeBookApiSource(index)" :loading="removingBookIndex === index">
+                                        删除
+                                    </a-button>
+                                </template>
+                                <a-list-item-meta>
+                                    <template #title>
+                                        <span :class="{ 'current-source': index === currentBookApiIndex }">
+                                            {{ item }}
+                                            <a-tag v-if="index === currentBookApiIndex" color="orange"
+                                                size="small">当前</a-tag>
+                                        </span>
+                                    </template>
+                                </a-list-item-meta>
+                            </a-list-item>
+                        </template>
+                    </a-list>
+                </a-form-item>
             </a-form>
         </a-card>
 
-        <a-card title="当前状态" class="setting-card" id="status">
-            <a-descriptions :column="1">
+        <a-card title="当前状态" class="setting-card" id="status"> <a-descriptions :column="1">
                 <a-descriptions-item label="转发服务器">
                     http://localhost:{{ currentServerPort }}
                 </a-descriptions-item>
-                <a-descriptions-item label="API 域名">
+                <a-descriptions-item label="漫画API域名">
                     {{ currentApiDomain }}
+                </a-descriptions-item>
+                <a-descriptions-item label="轻小说API域名">
+                    {{ currentBookApiDomain }}
                 </a-descriptions-item>
             </a-descriptions>
 
@@ -115,7 +171,10 @@ import {
     validateApiDomain,
     addApiSource,
     removeApiSource as removeApiSourceConfig,
-    switchApiSource
+    switchApiSource,
+    addBookApiSource,
+    removeBookApiSource as removeBookApiSourceConfig,
+    switchBookApiSource
 } from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
 import { relaunch } from '@tauri-apps/plugin-process'
@@ -143,6 +202,16 @@ const newApiSource = ref({
 })
 const addingSource = ref(false)
 const removingIndex = ref(-1)
+
+// 新增：轻小说API源管理相关状态
+const bookApiSources = ref([])
+const currentBookApiIndex = ref(0)
+const currentBookApiDomain = ref('未配置')
+const newBookApiSource = ref({
+    url: ''
+})
+const addingBookSource = ref(false)
+const removingBookIndex = ref(-1)
 
 // 验证端口格式
 const validatePort = (rule, value) => {
@@ -174,8 +243,11 @@ const loadConfig = () => {
         serverForm.value.serverPort = parseInt(config.serverPort)
     }).catch(error => {
         message.error('加载服务器配置失败')
-    })    // 加载应用配置
+    })
+
+    // 加载应用配置
     getAppConfig().then(config => {
+        // 加载漫画API源
         apiSources.value = config.apiSources || []
 
         // 如果有API源，确保索引有效
@@ -186,7 +258,9 @@ const loadConfig = () => {
                 // 同时保存更新后的配置
                 saveAppConfig({
                     apiSources: apiSources.value,
-                    currentApiIndex: 0
+                    currentApiIndex: 0,
+                    bookApiSources: config.bookApiSources || [],
+                    currentBookApiIndex: config.currentBookApiIndex || 0
                 }).catch(error => {
                     console.warn('保存修正后的配置失败:', error)
                 })
@@ -203,6 +277,36 @@ const loadConfig = () => {
             currentApiIndex.value = -1
             currentApiDomain.value = '未配置'
             appForm.value.apiDomain = ''
+        }
+
+        // 加载轻小说API源
+        bookApiSources.value = config.bookApiSources || []
+
+        // 如果有轻小说API源，确保索引有效
+        if (bookApiSources.value.length > 0) {
+            // 如果索引无效，重置为0
+            if (config.currentBookApiIndex < 0 || config.currentBookApiIndex >= bookApiSources.value.length) {
+                currentBookApiIndex.value = 0
+                // 同时保存更新后的配置
+                saveAppConfig({
+                    apiSources: config.apiSources || [],
+                    currentApiIndex: config.currentApiIndex || 0,
+                    bookApiSources: bookApiSources.value,
+                    currentBookApiIndex: 0
+                }).catch(error => {
+                    console.warn('保存修正后的轻小说配置失败:', error)
+                })
+            } else {
+                currentBookApiIndex.value = config.currentBookApiIndex
+            }
+
+            // 设置当前轻小说域名
+            const currentBookSource = bookApiSources.value[currentBookApiIndex.value]
+            currentBookApiDomain.value = currentBookSource
+        } else {
+            // 没有轻小说API源时，重置索引
+            currentBookApiIndex.value = -1
+            currentBookApiDomain.value = '未配置'
         }
     }).catch(error => {
         message.error('加载应用配置失败')
@@ -290,6 +394,59 @@ const removeApiSource = async (index) => {
         message.error(error.message || '删除API源失败')
     } finally {
         removingIndex.value = -1
+    }
+}
+
+// 新增：轻小说API源切换
+const onBookApiSourceChange = async (index) => {
+    try {
+        const source = await switchBookApiSource(index)
+        currentBookApiDomain.value = source
+        appStore.setNeedsRestart(true)
+        message.success(`已切换轻小说API源到: ${source}`)
+    } catch (error) {
+        message.error(error.message || '切换轻小说API源失败')
+        // 切换失败时恢复原值
+        loadConfig()
+    }
+}
+
+// 新增：添加轻小说API源
+const addNewBookApiSource = async () => {
+    if (!newBookApiSource.value.url) {
+        message.error('请输入轻小说API URL')
+        return
+    }
+
+    addingBookSource.value = true
+    try {
+        await addBookApiSource(newBookApiSource.value.url)
+        message.success('轻小说API源添加成功')
+        newBookApiSource.value = { url: '' }
+        loadConfig() // 重新加载配置
+    } catch (error) {
+        message.error(error.message || '添加轻小说API源失败')
+    } finally {
+        addingBookSource.value = false
+    }
+}
+
+// 新增：删除轻小说API源
+const removeBookApiSource = async (index) => {
+    if (bookApiSources.value.length <= 1) {
+        message.error('至少需要保留一个轻小说API源')
+        return
+    }
+
+    removingBookIndex.value = index
+    try {
+        await removeBookApiSourceConfig(index)
+        message.success('轻小说API源删除成功')
+        loadConfig() // 重新加载配置
+    } catch (error) {
+        message.error(error.message || '删除轻小说API源失败')
+    } finally {
+        removingBookIndex.value = -1
     }
 }
 

@@ -3,6 +3,11 @@ use std::fs;
 use tauri::{AppHandle, Manager};
 use serde::{Deserialize, Serialize};
 
+/// 默认轻小说API索引
+fn default_book_api_index() -> i32 {
+    -1
+}
+
 /// 配置文件名常量
 pub struct ConfigFiles;
 
@@ -92,6 +97,10 @@ pub struct AppConfig {
     pub api_sources: Vec<String>,
     #[serde(rename = "currentApiIndex")]
     pub current_api_index: i32,
+    #[serde(rename = "bookApiSources", default = "Vec::new")]
+    pub book_api_sources: Vec<String>,
+    #[serde(rename = "currentBookApiIndex", default = "default_book_api_index")]
+    pub current_book_api_index: i32,
 }
 
 /// UI配置结构
@@ -169,10 +178,60 @@ impl ConfigManager {
         Ok(current_domain.clone())
     }    /// 保存应用配置
     pub fn save_app_config(&self, api_sources: Vec<String>, current_index: i32) -> Result<(), String> {
+        // 读取现有配置以保留轻小说源配置
+        let existing_config: Result<AppConfig, String> = self.path_helper.read_config(ConfigFiles::APP);
+        let (book_api_sources, current_book_api_index) = match existing_config {
+            Ok(config) => (config.book_api_sources, config.current_book_api_index),
+            Err(_) => (Vec::new(), -1)
+        };
+
         let config = AppConfig {
             api_sources,
             current_api_index: current_index,
+            book_api_sources,
+            current_book_api_index,
         };
         self.path_helper.save_config(ConfigFiles::APP, &config)
+    }
+
+    /// 保存完整应用配置（包含轻小说源）
+    pub fn save_full_app_config(&self, api_sources: Vec<String>, current_index: i32, 
+                                 book_api_sources: Vec<String>, current_book_index: i32) -> Result<(), String> {
+        let config = AppConfig {
+            api_sources,
+            current_api_index: current_index,
+            book_api_sources,
+            current_book_api_index: current_book_index,
+        };
+        self.path_helper.save_config(ConfigFiles::APP, &config)
+    }
+
+    /// 获取当前轻小说API域名
+    pub fn get_current_book_api_domain(&self) -> Result<String, String> {
+        let mut config: AppConfig = self.path_helper.read_config(ConfigFiles::APP)?;
+        
+        // 检查是否有轻小说源配置
+        if config.book_api_sources.is_empty() {
+            return Err("没有配置轻小说源，请在前端设置中添加轻小说源".to_string());
+        }
+        
+        // 如果当前索引无效，自动选择第一个轻小说源
+        if config.current_book_api_index < 0 || config.current_book_api_index as usize >= config.book_api_sources.len() {
+            println!("当前轻小说源索引无效: {}，自动选择第一个轻小说源", config.current_book_api_index);
+            config.current_book_api_index = 0;
+            
+            // 保存更新后的配置
+            if let Err(e) = self.save_full_app_config(
+                config.api_sources.clone(), 
+                config.current_api_index,
+                config.book_api_sources.clone(), 
+                config.current_book_api_index
+            ) {
+                println!("警告：无法保存更新后的配置: {}", e);
+            }
+        }
+        
+        let current_domain = &config.book_api_sources[config.current_book_api_index as usize];
+        Ok(current_domain.clone())
     }
 }

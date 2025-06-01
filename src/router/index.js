@@ -24,6 +24,12 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
+        path: '/my-book-collection',
+        name: 'MyBookCollection',
+        component: () => import('../views/MyBookCollectionView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
         path: '/profile',
         name: 'UserProfile',
         component: () => import('../views/UserProfileView.vue'),
@@ -39,6 +45,30 @@ const routes = [
         path: '/manga/:pathWord/chapter/:chapterId',
         name: 'ChapterReader',
         component: () => import('../views/ChapterReaderView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/book/:pathWord',
+        name: 'BookDetail',
+        component: () => import('../views/BookDetailView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/book/:pathWord/volume/:volumeId',
+        name: 'BookVolumeChapters',
+        component: () => import('../views/BookVolumeChaptersView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/book/:pathWord/chapter/:chapterId',
+        name: 'BookChapterReader',
+        component: () => import('../views/BookChapterReaderView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/book/:pathWord/volume/:volumeId/reader',
+        name: 'BookTextReader',
+        component: () => import('../views/BookTextReaderView.vue'),
         meta: { requiresAuth: true }
     }
 ]
