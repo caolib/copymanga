@@ -75,13 +75,11 @@ export const useBookCollectionStore = defineStore('book-collection', {
 
             try {
                 const offset = (page - 1) * pageSize
-                const response = await getMyBookCollection({
+                await getMyBookCollection({
                     limit: pageSize,
                     offset: offset,
                     ordering: ordering
-                })
-
-                if (response && response.code === 200 && response.results) {
+                }).then(response => {
                     const bookList = response.results.list || []
                     const total = response.results.total || 0
 
@@ -98,9 +96,8 @@ export const useBookCollectionStore = defineStore('book-collection', {
                         total,
                         fromCache: false
                     }
-                } else {
-                    throw new Error(response?.message || '获取收藏列表失败')
-                }
+                })
+
             } catch (error) {
                 console.error('获取轻小说收藏列表失败:', error)
                 this.error = error.message || '获取收藏列表失败'

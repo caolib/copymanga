@@ -1,6 +1,6 @@
 <template>
     <div class="collection-container">
-        <a-page-header title="我的书架" class="collection-header">
+        <a-page-header title="收藏漫画" class="collection-header">
             <template #extra>
                 <div class="header-actions">
                     <a-select v-model:value="ordering" style="width: 180px; margin-right: 12px;"

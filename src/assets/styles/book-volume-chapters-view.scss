@@ -5,6 +5,49 @@
     max-width: 1200px;
     margin: 0 auto;
 
+    // 骨架屏样式
+    .volume-detail-skeleton {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-lg;
+    }
+
+    // 导航区域
+    .volume-navigation {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: $spacing-lg;
+        padding: $spacing-md;
+        background: $bg-color-white;
+        border-radius: $border-radius-medium;
+        border: 1px solid $border-color-light;
+
+        @include dark-theme {
+            background: $dark-bg-elevated;
+            border-color: $dark-border-color-light;
+        }
+
+        .chapter-navigation {
+            display: flex;
+            gap: $spacing-md;
+        }
+    }
+
+    // 底部导航
+    .bottom-navigation {
+        margin-top: $spacing-lg;
+        padding: $spacing-lg;
+        background: $bg-color-white;
+        border-radius: $border-radius-medium;
+        border: 1px solid $border-color-light;
+
+        @include dark-theme {
+            background: $dark-bg-elevated;
+            border-color: $dark-border-color-light;
+        }
+    }
+
     .back-button {
         margin-bottom: $spacing-lg;
     }

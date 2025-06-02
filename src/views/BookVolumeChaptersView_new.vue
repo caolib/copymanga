@@ -122,7 +122,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons-vue'
@@ -185,15 +185,9 @@ const goBack = () => {
 }
 
 // 跳转到指定卷
-const goToVolume = async (volumeId) => {
+const goToVolume = (volumeId) => {
     const pathWord = route.params.pathWord
-    // 更新路由参数但保持在同一组件
-    await router.replace(`/book/${pathWord}/volume/${volumeId}`).then(() => {
-        // 路由参数监听器会自动触发数据重新获取
-    }).catch(err => {
-        console.error('导航失败:', err)
-        message.error('页面跳转失败')
-    })
+    router.push(`/book/${pathWord}/volume/${volumeId}`)
 }
 
 // 打开内容
@@ -231,16 +225,6 @@ const readTextContent = (content) => {
 onMounted(async () => {
     await fetchVolumeDetail()
 })
-
-// 监听路由参数变化，当volumeId改变时重新获取数据
-watch(
-    () => route.params.volumeId,
-    async (newVolumeId, oldVolumeId) => {
-        if (newVolumeId && newVolumeId !== oldVolumeId) {
-            await fetchVolumeDetail()
-        }
-    }
-)
 </script>
 
 <style scoped src="../assets/styles/book-volume-chapters-view.scss" lang="scss"></style>

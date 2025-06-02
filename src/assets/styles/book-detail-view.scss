@@ -6,6 +6,48 @@
     padding: 20px;
 }
 
+// 骨架屏样式
+.book-detail-skeleton {
+    .book-header-skeleton {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 24px;
+        padding: 24px;
+        background: $bg-color-white;
+        border-radius: $border-radius-medium;
+        box-shadow: $shadow-light;
+        border: 1px solid $border-color-light;
+
+        @include dark-theme {
+            background: $dark-bg-elevated;
+            box-shadow: $shadow-dark-light;
+            border-color: $dark-border-color-light;
+        }
+
+        .cover-skeleton {
+            width: 200px;
+            height: 300px;
+            flex-shrink: 0;
+        }
+
+        .info-skeleton {
+            flex: 1;
+
+            .actions-skeleton {
+                display: flex;
+                gap: 12px;
+                margin-top: 20px;
+            }
+        }
+    }
+}
+
+.volumes-skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .book-header {
     display: flex;
     gap: 24px;
