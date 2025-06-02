@@ -26,11 +26,11 @@
 
             <!-- 导航栏 -->
             <nav class="nav" data-tauri-drag-region="false">
-                <router-link to="/" class="nav-link">🏠漫画</router-link>
-                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">⭐收藏漫画</router-link>
-                <router-link to="/books" class="nav-link">📚轻小说</router-link>
-                <router-link to="/my-book-collection" class="nav-link" v-if="isLoggedInComputed">📖书架</router-link>
-                <router-link to="/settings" class="nav-link">⚙️设置</router-link>
+                <router-link to="/" class="nav-link">漫画</router-link>
+                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">收藏漫画</router-link>
+                <router-link to="/books" class="nav-link">轻小说</router-link>
+                <router-link to="/my-book-collection" class="nav-link" v-if="isLoggedInComputed">书架</router-link>
+                <router-link to="/settings" class="nav-link">设置</router-link>
                 <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
                     {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
@@ -39,19 +39,16 @@
                     <template #icon>
                         <ArrowLeftOutlined />
                     </template>
-                    后退
                 </a-button>
                 <a-button type="text" class="nav-link" @click="goForward" title="前进">
                     <template #icon>
                         <ArrowRightOutlined />
                     </template>
-                    前进
                 </a-button>
                 <a-button type="text" class="nav-link" @click="refreshPage" title="刷新">
                     <template #icon>
                         <ReloadOutlined />
                     </template>
-                    刷新
                 </a-button>
             </nav>
         </div>

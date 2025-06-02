@@ -185,7 +185,6 @@
 
     &:hover {
         background-color: $bg-color;
-        transform: scale(1.1);
     }
 
     @include dark-theme {

@@ -13,6 +13,16 @@
                         更新
                     </a-button>
                 </div>
+                <div class="header-actions">
+                    <a-button type="primary" @click="refreshBooks" :loading="loading" size="small">
+                        刷新数据
+                    </a-button>
+                    <div v-if="lastUpdateTime" class="update-info">
+                        <a-typography-text type="secondary" style="font-size: 12px;">
+                            最后更新：{{ formatUpdateTime(lastUpdateTime) }}
+                        </a-typography-text>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -42,40 +52,57 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { getBookHome } from '@/api/book'
 import { useBookStore } from '@/stores/book'
+import { useBookHomeStore } from '@/stores/book-home'
 import { message } from 'ant-design-vue'
 
 const router = useRouter()
 const bookStore = useBookStore()
+const bookHomeStore = useBookHomeStore()
 const books = ref([])
 const total = ref(0)
-const loading = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(18)
 const currentOrdering = ref('-popular')
 const currentTheme = ref('')
+const lastUpdateTime = ref(null)
 
-const fetchBooks = async () => {
-    loading.value = true
+// 使用 store 的加载状态
+const loading = computed(() => bookHomeStore.isLoading)
 
-    await getBookHome({
+const fetchBooks = async (forceRefresh = false) => {
+    const result = await bookHomeStore.fetchBookHome({
         ordering: currentOrdering.value,
-        limit: pageSize.value,
-        offset: (currentPage.value - 1) * pageSize.value,
+        page: currentPage.value,
+        pageSize: pageSize.value,
         theme: currentTheme.value,
-        platform: 3,
-    }).then(response => {
-        books.value = response.results.list
-        total.value = response.results.total
-    }).catch(error => {
-        console.error('获取轻小说列表失败:', error)
-        message.error('获取轻小说列表失败，请检查网络连接')
-    }).finally(() => {
-        loading.value = false
-    })
+        platform: 3
+    }, forceRefresh)
+
+    if (result.success) {
+        books.value = result.data.list
+        total.value = result.data.total
+
+        if (!result.fromCache) {
+            lastUpdateTime.value = new Date().toISOString()
+            message.success(forceRefresh ? '轻小说列表已刷新' : '轻小说列表加载成功')
+        }
+
+        // 预加载下一页（如果不是强制刷新且有下一页）
+        if (!forceRefresh && currentPage.value < Math.ceil(total.value / pageSize.value)) {
+            bookHomeStore.preloadNextPage(
+                currentOrdering.value,
+                currentPage.value,
+                pageSize.value,
+                currentTheme.value,
+                total.value
+            )
+        }
+    } else {
+        message.error(result.error?.message || '获取轻小说列表失败，请检查网络连接')
+    }
 }
 
 const handlePageChange = (page) => {
@@ -87,7 +114,17 @@ const changeOrdering = (ordering) => {
     if (currentOrdering.value === ordering) return
     currentOrdering.value = ordering
     currentPage.value = 1
+    // 清除当前页的缓存
+    bookHomeStore.clearPageCache(ordering, 1, pageSize.value, currentTheme.value)
     fetchBooks()
+}
+
+// 刷新数据
+const refreshBooks = () => {
+    // 清除当前页缓存
+    bookHomeStore.clearPageCache(currentOrdering.value, currentPage.value, pageSize.value, currentTheme.value)
+    // 强制刷新
+    fetchBooks(true)
 }
 
 const goToDetail = (pathWord) => {
@@ -109,7 +146,21 @@ const getAuthors = (authors) => {
 
 const formatDate = (dateStr) => {
     if (!dateStr) return '未知'
-    return dateStr
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('zh-CN')
+}
+
+// 格式化缓存更新时间
+const formatUpdateTime = (timeString) => {
+    if (!timeString) return ''
+    const date = new Date(timeString)
+    return date.toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    })
 }
 
 onMounted(() => {
