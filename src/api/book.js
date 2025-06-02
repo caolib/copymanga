@@ -112,11 +112,8 @@ function collectBook(bookId, isCollect = true) {
     const data = new URLSearchParams()
     data.append('book_id', bookId)
     data.append('is_collect', isCollect ? '1' : '0')
-    return request.post('/api/v3/member/collect/book', data, {
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
-        }
-    })
+    data.append('platform', '3')
+    return request.post('/api/v3/member/collect/book', data)
 }
 
 export {

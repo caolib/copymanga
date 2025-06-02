@@ -111,8 +111,8 @@ const goForward = () => {
 
 // 刷新功能
 const refreshPage = () => {
-    // 在Vue Router中刷新当前页面
-    router.go(0)
+    // 使用浏览器自带刷新
+    window.location.reload()
 }
 
 // 用于存储监听器清理函数

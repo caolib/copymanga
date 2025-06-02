@@ -53,8 +53,11 @@
                         </div>
                     </div>
                     <div class="book-actions">
-                        <a-button type="primary" size="large" :loading="collectLoading" @click="toggleCollect">
-                            {{ isCollected ? '取消收藏' : '加入书架' }}
+                        <a-button type="primary" size="large" :loading="collectLoading" @click="handleCollect">
+                            收藏
+                        </a-button>
+                        <a-button type="default" size="large" :loading="collectLoading" @click="handleUncollect">
+                            取消收藏
                         </a-button>
                         <a-button v-if="volumes.length > 0" size="large" @click="startReading">
                             开始阅读
@@ -132,7 +135,6 @@ const collectLoading = ref(false)
 const error = ref('')
 const bookDetail = ref(null)
 const volumes = ref([])
-const isCollected = ref(false)
 const sortOrder = ref('asc')
 
 // 计算属性
@@ -176,17 +178,41 @@ const fetchVolumes = async () => {
     })
 }
 
-// 切换收藏状态
-const toggleCollect = async () => {
+// 收藏轻小说
+const handleCollect = () => {
     collectLoading.value = true
 
-    const pathWord = route.params.pathWord
-    await collectBook(pathWord, !isCollected.value).then(response => {
-        isCollected.value = !isCollected.value
-        message.success(isCollected.value ? '收藏成功' : '取消收藏成功')
+    const bookUuid = bookDetail.value?.uuid
+    if (!bookUuid) {
+        message.error('无法获取书籍信息')
+        collectLoading.value = false
+        return
+    }
+    collectBook(bookUuid, true).then(response => {
+        message.success('收藏成功')
     }).catch(err => {
-        console.error('收藏操作失败:', err)
-        message.error(err.message || '收藏操作失败')
+        console.error('收藏失败:', err)
+        message.error(err.message || '收藏失败')
+    }).finally(() => {
+        collectLoading.value = false
+    })
+}
+
+// 取消收藏轻小说
+const handleUncollect = () => {
+    collectLoading.value = true
+
+    const bookUuid = bookDetail.value?.uuid
+    if (!bookUuid) {
+        message.error('无法获取书籍信息')
+        collectLoading.value = false
+        return
+    }
+    collectBook(bookUuid, false).then(response => {
+        message.success('取消收藏成功')
+    }).catch(err => {
+        console.error('取消收藏失败:', err)
+        message.error(err.message || '取消收藏失败')
     }).finally(() => {
         collectLoading.value = false
     })
