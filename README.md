@@ -18,6 +18,9 @@
 
 这是一个拷贝漫画第三方桌面端应用，目前支持win、mac、linux，只有windows有简单测试过，[前往下载](https://github.com/caolib/copymanga/releases)
 
+
+### 漫画
+
 ![image-20250529161957872](https://s2.loli.net/2025/05/29/d1Hyigj9bwhLAPE.png)
 
 ![image-20250530202817836](https://s2.loli.net/2025/05/30/IZoxw6aBgunrJYL.png)
@@ -36,13 +39,19 @@
 
 ![image-20250529162352675](https://s2.loli.net/2025/05/29/Och2oB54ryxgUfF.png)
 
+### 轻小说
+
+![image-20250602164731951](https://s2.loli.net/2025/06/02/D5jpQv89Idc4wsm.png)
+
+![image-20250602193020756](https://s2.loli.net/2025/06/02/MtHREhCqiTZK9pN.png)
+
+
+
 ## 2 开发
 
 ### 2.1 环境
 
 开发之前，确保你已经安装了rust、nodejs等环境，这有一篇[rust安装教程](https://clb.pages.dev/2025/02/16/rust%E4%BD%BF%E7%94%A8MSVC%E6%9C%80%E5%B0%8F%E5%AE%89%E8%A3%85/)
-
-### 
 
 ### 2.1 克隆仓库
 
@@ -61,8 +70,6 @@ pnpm i
 ```bash
 pnpm dev:cli
 ```
-
-> 欢迎PR，另外项目基本都是AI完成，如有错误请指正
 
 ---
 
