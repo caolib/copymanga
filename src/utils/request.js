@@ -6,7 +6,7 @@ import router from '@/router'
 
 // 创建 axios 实例
 const request = axios.create({
-    timeout: 40000,
+    timeout: 60000,
     withCredentials: true
 })
 

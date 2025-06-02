@@ -137,6 +137,16 @@ function collectBook(bookId, isCollect = true) {
     return request.post('/api/v3/member/collect/book', data)
 }
 
+/**
+ * 获取书籍主题标签
+ * @returns {Promise}
+ */
+function getBookThemes() {
+    return request.get('/api/v3/h5/filter/book/tags', {
+        params: { platform: 3 }
+    })
+}
+
 export {
     getBookHome,
     getMyBookCollection,
@@ -146,5 +156,6 @@ export {
     getBookTextContent,
     getBookChapterContent,
     searchBooks,
-    collectBook
+    collectBook,
+    getBookThemes
 }

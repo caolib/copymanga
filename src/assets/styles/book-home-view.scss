@@ -1,14 +1,16 @@
 @use "./variables" as *;
 
 .book-home-container {
-    --primary-color: var(--theme-primary-color, $primary-color);
-    --hover-color: var(--theme-hover-color, $hover-color);
-    --text-color-secondary: var(--theme-text-color-secondary, $text-secondary);
-    --text-color-tertiary: var(--theme-text-color-tertiary, $text-tertiary);
+    --primary-color: var(--theme-primary-color, #{$primary-color});
+    --hover-color: var(--theme-hover-color, #{$primary-hover});
+    --text-color-primary: var(--theme-text-color-primary, #{$text-primary});
+    --text-color-secondary: var(--theme-text-color-secondary, #{$text-secondary});
+    --text-color-tertiary: var(--theme-text-color-tertiary, #{$text-tertiary});
+    --background-color-light: var(--theme-background-color-light, #{$bg-color-light});
+    --border-color: var(--theme-border-color, #{$border-color});
     padding: 20px;
     position: relative;
     min-height: 500px;
-
     .header {
         display: flex;
         justify-content: space-between;
@@ -18,26 +20,70 @@
         h1 {
             margin: 0;
             font-size: 24px;
+            color: var(--text-color-primary);
+
+            @include dark-theme {
+                color: var(--theme-text-color-primary, #{$dark-text-primary});
+            }
         }
 
-        .filters {
+        .header-actions {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
 
-            .sort-options {
-                display: flex;
-                gap: 8px;
+            .update-info {
+                font-size: 12px;
+                color: var(--text-color-secondary);
+
+                @include dark-theme {
+                    color: var(--theme-text-color-secondary, #{$dark-text-secondary});
+                }
+            }
+        }
+    }
+    .filters-section {
+        background: var(--background-color-light);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+
+        @include dark-theme {
+            background: var(--theme-background-color-elevated, #{$dark-bg-elevated});
+            border-color: var(--theme-border-color, #{$dark-border-color});
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+
+            &:last-child {
+                margin-bottom: 0;
             }
 
-            .header-actions {
-                display: flex;
-                align-items: center;
-                gap: 12px;
+            .filter-label {
+                font-size: 14px;
+                font-weight: 600;
+                color: var(--text-color-primary);
+                margin-bottom: 8px;
 
-                .update-info {
-                    font-size: 12px;
-                    color: var(--text-color-secondary);
+                @include dark-theme {
+                    color: var(--theme-text-color-primary, #{$dark-text-primary});
+                }
+            }
+
+            .filter-buttons {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+
+                .ant-btn {
+                    margin: 0;
+                    transition: all 0.2s;
+
+                    &:hover {
+                        transform: translateY(-1px);
+                    }
                 }
             }
         }
@@ -191,9 +237,52 @@
     .book-home-container {
         padding: 10px;
 
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        .filters-section {
+            padding: 12px;
+
+            .filter-group {
+                .filter-buttons {
+                    .ant-btn {
+                        margin-bottom: 4px;
+                        font-size: 12px;
+                    }
+                }
+            }
+        }
+
         .books-grid {
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 15px;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .book-home-container {
+        .filters-section {
+            .filter-group {
+                .filter-buttons {
+                    .ant-btn {
+                        flex: 1;
+                        min-width: 60px;
+                    }
+                }
+            }
         }
     }
 }
