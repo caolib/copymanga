@@ -194,44 +194,5 @@ impl ConfigManager {
         self.path_helper.save_config(ConfigFiles::APP, &config)
     }
 
-    /// 保存完整应用配置（包含轻小说源）
-    pub fn save_full_app_config(&self, api_sources: Vec<String>, current_index: i32, 
-                                 book_api_sources: Vec<String>, current_book_index: i32) -> Result<(), String> {
-        let config = AppConfig {
-            api_sources,
-            current_api_index: current_index,
-            book_api_sources,
-            current_book_api_index: current_book_index,
-        };
-        self.path_helper.save_config(ConfigFiles::APP, &config)
-    }
 
-    /// 获取当前轻小说API域名
-    pub fn get_current_book_api_domain(&self) -> Result<String, String> {
-        let mut config: AppConfig = self.path_helper.read_config(ConfigFiles::APP)?;
-        
-        // 检查是否有轻小说源配置
-        if config.book_api_sources.is_empty() {
-            return Err("没有配置轻小说源，请在前端设置中添加轻小说源".to_string());
-        }
-        
-        // 如果当前索引无效，自动选择第一个轻小说源
-        if config.current_book_api_index < 0 || config.current_book_api_index as usize >= config.book_api_sources.len() {
-            println!("当前轻小说源索引无效: {}，自动选择第一个轻小说源", config.current_book_api_index);
-            config.current_book_api_index = 0;
-            
-            // 保存更新后的配置
-            if let Err(e) = self.save_full_app_config(
-                config.api_sources.clone(), 
-                config.current_api_index,
-                config.book_api_sources.clone(), 
-                config.current_book_api_index
-            ) {
-                println!("警告：无法保存更新后的配置: {}", e);
-            }
-        }
-        
-        let current_domain = &config.book_api_sources[config.current_book_api_index as usize];
-        Ok(current_domain.clone())
-    }
 }
