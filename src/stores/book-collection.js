@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { useBookStore } from './book'
+import { useUserStore } from './user'
 import { getMyBookCollection } from '../api/book'
 
 export const useBookCollectionStore = defineStore('book-collection', {
@@ -46,69 +47,82 @@ export const useBookCollectionStore = defineStore('book-collection', {
          * @param {Object} options 查询选项
          * @param {boolean} forceRefresh 是否强制刷新
          */
-        async fetchCollection(options = {}, forceRefresh = false) {
+        fetchCollection(options = {}, forceRefresh = false) {
             const {
                 page = 1,
                 pageSize = 18,
                 ordering = '-datetime_modifier'
             } = options
 
+            // 检查用户登录状态
+            const userStore = useUserStore()
+            if (!userStore.isLoggedIn || !userStore.token) {
+                this.loading = false
+                return Promise.reject(new Error('请先登录'))
+            }
+
             this.loading = true
             this.error = ''
 
             // 生成缓存键
-            const cacheKey = this.getCacheKey(page, pageSize, ordering)            // 检查是否需要使用缓存
-            if (!forceRefresh &&
-                this.collectionCache[cacheKey] &&
-                !this.isCacheExpired &&
-                this.cacheParams.pageSize === pageSize &&
-                this.cacheParams.ordering === ordering) {
+            const cacheKey = this.getCacheKey(page, pageSize, ordering)
 
+            // 如果不是强制刷新且有缓存，优先使用缓存（简化逻辑）
+            if (!forceRefresh && this.collectionCache[cacheKey]) {
                 this.loading = false
-                return {
-                    success: true,
+                return Promise.resolve({
                     data: this.collectionCache[cacheKey],
                     total: this.totalCount,
                     fromCache: true
-                }
+                })
             }
 
-            try {
-                const offset = (page - 1) * pageSize
-                await getMyBookCollection({
-                    limit: pageSize,
-                    offset: offset,
-                    ordering: ordering
-                }).then(response => {
-                    const bookList = response.results.list || []
-                    const total = response.results.total || 0
+            // 发送请求获取新数据
+            return getMyBookCollection({
+                limit: pageSize,
+                offset: (page - 1) * pageSize,
+                ordering: ordering
+            }).then(response => {
+                // 检查响应结构
+                if (!response || !response.results) {
+                    throw new Error('API响应格式错误')
+                }
 
-                    // 缓存数据
-                    this.collectionCache[cacheKey] = bookList
-                    this.totalCount = total
-                    this.cacheParams = { pageSize, ordering }
-                    this.lastUpdateTime = Date.now()
+                const bookList = response.results.list || []
+                const total = response.results.total || 0
 
-                    this.loading = false
-                    return {
-                        success: true,
-                        data: bookList,
-                        total,
-                        fromCache: false
-                    }
-                })
+                // 缓存数据
+                this.collectionCache[cacheKey] = bookList
+                this.totalCount = total
+                this.cacheParams = { pageSize, ordering }
+                this.lastUpdateTime = Date.now()
 
-            } catch (error) {
-                console.error('获取轻小说收藏列表失败:', error)
-                this.error = error.message || '获取收藏列表失败'
                 this.loading = false
                 return {
-                    success: false,
-                    error: this.error,
-                    data: [],
-                    total: 0
+                    data: bookList,
+                    total,
+                    fromCache: false
                 }
-            }
+            }).catch(error => {
+                this.error = error.message || '获取收藏列表失败'
+                this.loading = false
+                throw error
+            })
+        },
+
+        /**
+         * 更新缓存数据（供组件直接调用API后使用）
+         * @param {Object} params 缓存参数
+         */
+        updateCache(params) {
+            const { page, pageSize, ordering, data, total } = params
+            const cacheKey = this.getCacheKey(page, pageSize, ordering)
+
+            // 更新缓存
+            this.collectionCache[cacheKey] = data
+            this.totalCount = total
+            this.cacheParams = { pageSize, ordering }
+            this.lastUpdateTime = Date.now()
         },
 
         /**

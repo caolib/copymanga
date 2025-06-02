@@ -37,6 +37,21 @@
         background: rgba($primary-color, 0.2);
         color: $dark-text-secondary;
     }
+
+    // 操作栏中的更新信息样式
+    &.header-update-info {
+        background: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        color: $text-secondary;
+
+        @include dark-theme {
+            background: none;
+            color: $dark-text-secondary;
+        }
+    }
 }
 
 // 轻小说卡片样式
@@ -46,13 +61,9 @@
     border-radius: $border-radius-large;
     border: 1px solid $border-color-light;
     overflow: hidden;
-    transition: all $transition-normal cubic-bezier(0.25, 0.8, 0.25, 1); // 强制移除默认padding
-    .ant-card-body {
-        padding: 0 !important;
-    }
+    transition: all $transition-normal cubic-bezier(0.25, 0.8, 0.25, 1);
 
     &:hover {
-        transform: translateY(-4px);
         border-color: $primary-color;
         box-shadow: $shadow-heavy;
     }
@@ -85,10 +96,6 @@
     height: 100%;
     object-fit: cover;
     transition: all $transition-normal;
-
-    &:hover {
-        transform: scale(1.05);
-    }
 }
 
 .reading-progress {

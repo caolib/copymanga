@@ -599,7 +599,7 @@ dependencies = [
 
 [[package]]
 name = "copymanga"
-version = "0.5.0"
+version = "0.5.1"
 dependencies = [
  "axum",
  "futures-util",
