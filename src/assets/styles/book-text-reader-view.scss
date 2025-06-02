@@ -13,6 +13,7 @@
 
 .main-content {
     background: $bg-color-paper;
+    padding: 50px 0 0 0 !important;
 }
 
 .toolbar {
@@ -21,6 +22,7 @@
     background-color: $bg-color-paper;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: $spacing-sm;
     flex-shrink: 0;
 
@@ -30,6 +32,14 @@
         &:hover {
             color: $primary-hover;
         }
+    }
+
+    .reading-info {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        font-size: 14px;
+        color: $text-secondary;
     }
 
     @include dark-theme {
@@ -42,6 +52,10 @@
             &:hover {
                 color: $primary-hover;
             }
+        }
+
+        .reading-info {
+            color: $dark-text-secondary;
         }
     }
 }
@@ -108,32 +122,32 @@
 }
 
 .text-content {
-    max-width: 800px;
-    margin: 0 auto;
-    color: $text-primary;
-
-    @include dark-theme {
-        color: $dark-text-primary;
-    }
+    position: relative;
+    width: 100%;
 }
 
 .text-line {
-    font-size: 16px;
-    line-height: 1.8;
-    margin-bottom: 0.5em !important;
+    // 移除固定的font-size和line-height，让Vue组件控制
+    padding: 4px 0;
     text-align: justify;
     letter-spacing: 0.5px;
     text-indent: 2em;
+    color: $text-primary;
+    // 移除固定高度，改为最小高度以支持文本换行
+    min-height: auto;
+    display: block; // 改为block以支持文本自然换行
+    max-width: 800px;
+    margin: 0 auto;
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
+    word-wrap: break-word; // 长单词自动换行
+    overflow-wrap: break-word; // 更好的换行支持
+    white-space: pre-wrap; // 保持空格和换行
 
     &.empty-line {
-        margin-bottom: 1em !important;
-        min-height: 1.2em;
-    }
-
-    // 覆盖 ant-design 默认样式
-    &.ant-typography {
-        margin-bottom: 0.5em !important;
-        color: inherit;
+        // 空行保持最小高度
+        min-height: 1em;
+        padding: 4px 0;
     }
 
     @include dark-theme {
@@ -144,27 +158,202 @@
 /* 响应式设计 */
 @include responsive($breakpoint-sm) {
     .reader-content {
-        padding: $spacing-md;
+        padding: $spacing-sm;
     }
 
     .text-line {
-        font-size: 15px;
-        line-height: 1.6;
-    }
-
-    .text-content {
-        max-width: 100%;
+        // 移除固定的字体大小和行高，让Vue组件控制
+        // 移除固定高度，改为最小高度
+        min-height: auto;
+        padding-left: $spacing-sm;
+        padding-right: $spacing-sm;
     }
 
     .toolbar {
         padding: $spacing-sm $spacing-md;
+
+        .reading-info {
+            font-size: 12px;
+        }
     }
 }
 
 @include responsive($breakpoint-xs) {
     .text-line {
-        font-size: 14px;
-        line-height: 1.5;
+        // 移除固定的字体大小和行高，让Vue组件控制
         text-indent: 1.5em;
+        // 移除固定高度
+        min-height: auto;
+    }
+
+    .reading-info {
+        display: none;
+    }
+}
+
+/* 设置面板样式 */
+.setting-value {
+    text-align: center;
+    margin-top: 8px;
+    font-size: 14px;
+    color: $text-secondary;
+    font-weight: 500;
+
+    @include dark-theme {
+        color: $dark-text-secondary;
+    }
+}
+
+/* 自定义字体项样式 */
+.custom-font-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    margin-bottom: 4px;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 4px;
+    font-size: 13px;
+
+    @include dark-theme {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    span {
+        flex: 1;
+        color: $text-primary;
+        font-family: monospace;
+
+        @include dark-theme {
+            color: $dark-text-primary;
+        }
+    }
+
+    .ant-btn {
+        margin-left: 8px;
+        font-size: 12px;
+        height: auto;
+        padding: 2px 4px;
+    }
+}
+
+/* 设置抽屉样式覆盖 */
+:deep(.ant-drawer) {
+    .ant-drawer-header {
+        background-color: $bg-color-paper;
+        border-bottom: 1px solid $border-color;
+
+        .ant-drawer-title {
+            color: $text-primary;
+            font-weight: 600;
+        }
+
+        @include dark-theme {
+            background-color: $dark-bg-secondary;
+            border-bottom-color: $dark-border-color;
+
+            .ant-drawer-title {
+                color: $dark-text-primary;
+            }
+        }
+    }
+
+    .ant-drawer-body {
+        background-color: $bg-color-paper;
+        padding: $spacing-lg;
+
+        @include dark-theme {
+            background-color: $dark-bg-secondary;
+        }
+    }
+
+    .ant-form-item-label > label {
+        color: $text-primary;
+        font-weight: 500;
+
+        @include dark-theme {
+            color: $dark-text-primary;
+        }
+    }
+
+    .ant-slider-rail {
+        background-color: $border-color;
+
+        @include dark-theme {
+            background-color: $dark-border-color;
+        }
+    }
+
+    .ant-slider-track {
+        background-color: $primary-color;
+    }
+
+    .ant-slider-handle {
+        border-color: $primary-color;
+
+        &:hover {
+            border-color: $primary-hover;
+        }
+
+        &:focus {
+            border-color: $primary-hover;
+            box-shadow: 0 0 0 3px rgba($primary-color, 0.12);
+        }
+    }
+
+    .ant-slider-mark-text {
+        color: $text-secondary;
+        font-size: 12px;
+
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+
+    .ant-select {
+        .ant-select-selector {
+            background-color: $bg-color-paper;
+            border-color: $border-color;
+
+            @include dark-theme {
+                background-color: $dark-bg-primary;
+                border-color: $dark-border-color;
+            }
+        }
+
+        .ant-select-selection-item {
+            color: $text-primary;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+    }
+
+    .ant-btn {
+        &.ant-btn-primary {
+            background-color: $primary-color;
+            border-color: $primary-color;
+
+            &:hover {
+                background-color: $primary-hover;
+                border-color: $primary-hover;
+            }
+        }
+
+        &:not(.ant-btn-primary) {
+            color: $text-primary;
+            border-color: $border-color;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+                border-color: $dark-border-color;
+            }
+
+            &:hover {
+                color: $primary-hover;
+                border-color: $primary-hover;
+            }
+        }
     }
 }

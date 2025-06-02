@@ -117,7 +117,6 @@
 
 .book-info {
     padding: $spacing-sm;
-    height: 160px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -145,7 +144,7 @@
 .book-author {
     font-size: 14px;
     color: $text-secondary;
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-xs;
     font-weight: 500;
     @include text-ellipsis;
 
@@ -158,7 +157,6 @@
     @include flex-between;
     font-size: 12px;
     color: $text-tertiary;
-    margin-top: auto;
 
     @include dark-theme {
         color: $dark-text-tertiary;

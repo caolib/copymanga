@@ -11,6 +11,12 @@ const DEFAULT_UI_CONFIG = {
         columnsPerRow: 2, // 一行显示的列数
         imageSize: 100, // 图片大小百分比
         imageGap: 8 // 图片间距，单位px
+    },
+    textReader: {
+        fontFamily: 'var(--font-family)', // 使用main.scss中定义的默认字体
+        fontSize: 16, // 字体大小(px)
+        lineHeight: 1.8, // 行高倍数
+        addedFonts: [] // 用户添加的自定义字体列表
     }
 }
 
@@ -65,11 +71,25 @@ async function updateThemeConfig(themeConfig) {
     return await saveUIConfig(updatedConfig)
 }
 
+// 更新文本阅读器配置
+async function updateTextReaderConfig(textReaderConfig) {
+    const currentConfig = await loadUIConfig()
+    const updatedConfig = {
+        ...currentConfig,
+        textReader: {
+            ...currentConfig.textReader,
+            ...textReaderConfig
+        }
+    }
+    return await saveUIConfig(updatedConfig)
+}
+
 export {
     loadUIConfig,
     saveUIConfig,
     updateUIConfig,
     updateReaderConfig,
     updateThemeConfig,
+    updateTextReaderConfig,
     DEFAULT_UI_CONFIG
 }
