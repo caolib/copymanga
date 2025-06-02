@@ -1,15 +1,10 @@
 ## Commit
 
-- [08ed100] 🐳 chore: 发布新版本
-- [032808f] 🐛 fix: 删除多余文件
-- [4195809] ✨ feat: 轻小说添加上下章节跳转；优化了代码风格
-- [ec2c727] ✨ feat: 添加轻小说收藏功能
-- [f271c43] ✨ feat: 添加轻小说主页界面
-- [ec54157] ✨ feat: 轻小说主页添加缓存
-- [222b17b] ✨ feat: 轻小说主页添加主题分类
-- [06635dc] 🐛 fix: 修改顶部栏为可拖动窗口区域
-- [dddac3d] 🌈 style: 清除未使用代码
+- [1d22c6c] 🐳 chore: 发布新版本
+- [b35ac58] 🐛 fix: 修复书架缓存加载异常
+- [2c66b9f] ✨ feat: 阅读界面实现懒加载，新增阅读界面设置
+- [8220bfe] 📄 docs: 更新图片
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.5.0...v0.5.1)
+📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.5.1...v0.5.2)
 
