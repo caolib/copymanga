@@ -182,26 +182,21 @@ const fetchCollection = async (forceRefresh = false) => {
     error.value = ''
 
     // 使用 store 获取数据
-    const result = await bookCollectionStore.fetchCollection({
+    await bookCollectionStore.fetchCollection({
         page: currentPage.value,
         pageSize: pageSize.value,
         ordering: ordering.value
-    }, forceRefresh)
-
-    if (result.success) {
+    }, forceRefresh).then(result => {
         bookList.value = result.data || []
         totalCount.value = result.total || 0
-
-        if (!result.fromCache) {
-            lastUpdateTime.value = new Date().toISOString()
-            message.success(forceRefresh ? '轻小说收藏列表已刷新' : '轻小说收藏列表加载成功')
-        }
-    } else {
-        error.value = result.error || '获取收藏列表失败'
-        message.error(error.value)
-    }
-
-    loading.value = false
+        lastUpdateTime.value = new Date().toISOString()
+        message.success(forceRefresh ? '轻小说收藏列表已刷新' : '轻小说收藏列表加载成功')
+    }).catch(err => {
+        console.error('获取收藏列表失败:', err)
+        return { success: false, error: err.message || '网络错误' }
+    }).finally(() => {
+        loading.value = false
+    })
 }
 
 const refreshCollection = () => {
