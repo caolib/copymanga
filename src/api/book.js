@@ -3,6 +3,27 @@ import axios from 'axios'
 import { getServerConfig } from '@/config/server-config'
 
 /**
+ * 获取轻小说主页数据
+ * @param {Object} params 请求参数
+ * @param {String} params.ordering 排序方式 -popular: 人气排序 -datetime_updated: 更新时间排序
+ * @param {Number} params.limit 每页数量
+ * @param {Number} params.offset 偏移量
+ * @param {String} params.theme 主题分类
+ * @returns {Promise}
+ */
+function getBookHome(params = {}) {
+    return request.get('/api/v3/books', {
+        params: {
+            limit: 18,
+            offset: 0,
+            ordering: '-popular',
+            platform: 3,
+            ...params
+        }
+    })
+}
+
+/**
  * 获取个人收藏轻小说列表
  * @param {Object} params 查询参数
  * @returns {Promise}
@@ -117,6 +138,7 @@ function collectBook(bookId, isCollect = true) {
 }
 
 export {
+    getBookHome,
     getMyBookCollection,
     getBookDetail,
     getBookVolumes,

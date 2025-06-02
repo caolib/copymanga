@@ -26,26 +26,33 @@
 
             <!-- 导航栏 -->
             <nav class="nav" data-tauri-drag-region="false">
-                <router-link to="/" class="nav-link">🏠首页</router-link>
-                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">⭐漫画</router-link>
-                <router-link to="/my-book-collection" class="nav-link" v-if="isLoggedInComputed">📚小说</router-link>
+                <router-link to="/" class="nav-link">🏠漫画</router-link>
+                <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">⭐收藏漫画</router-link>
+                <router-link to="/books" class="nav-link">📚轻小说</router-link>
+                <router-link to="/my-book-collection" class="nav-link" v-if="isLoggedInComputed">📖书架</router-link>
                 <router-link to="/settings" class="nav-link">⚙️设置</router-link>
                 <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
                     {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
                 </button>
-                <!-- 前进后退按钮 -->
-                <div class="navigation-controls" data-tauri-drag-region="false">
-                    <a-button type="text" size="small" @click="goBack" title="后退">
+                <a-button type="text" class="nav-link" @click="goBack" title="后退">
+                    <template #icon>
                         <ArrowLeftOutlined />
-                    </a-button>
-                    <a-button type="text" size="small" @click="goForward" title="前进">
+                    </template>
+                    后退
+                </a-button>
+                <a-button type="text" class="nav-link" @click="goForward" title="前进">
+                    <template #icon>
                         <ArrowRightOutlined />
-                    </a-button>
-                    <a-button type="text" size="small" @click="refreshPage" title="刷新">
+                    </template>
+                    前进
+                </a-button>
+                <a-button type="text" class="nav-link" @click="refreshPage" title="刷新">
+                    <template #icon>
                         <ReloadOutlined />
-                    </a-button>
-                </div>
+                    </template>
+                    刷新
+                </a-button>
             </nav>
         </div>
 

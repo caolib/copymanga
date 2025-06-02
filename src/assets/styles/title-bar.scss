@@ -32,21 +32,22 @@
     display: flex;
     align-items: center;
     gap: $spacing-xs; // 减少间距
-    flex: 1;
+    flex: 3; // 增加比例，给导航栏更多空间
     min-width: 0; // 允许收缩
     overflow: hidden; // 处理溢出
 }
 
 .title-bar-center {
-    flex: 1;
+    flex: 0.5; // 减少中间区域所占比例
     @include flex-center;
     /* 用于拖动的空白区域 */
 }
 
 .title-bar-right {
     @include flex-between;
-    gap: $spacing-sm;
-    min-width: 120px;
+    gap: $spacing-xs; // 减少间距
+    min-width: 100px; // 减少最小宽度
+    max-width: 120px; // 限制最大宽度
     justify-content: flex-end;
 }
 
@@ -57,6 +58,68 @@
     gap: 2px; // 减少间距，让导航项更紧凑
     flex-wrap: nowrap; // 防止换行
     min-width: 0; // 允许收缩
+    flex: 1; // 允许导航栏占据更多可用空间
+    overflow-x: auto; // 当空间不足时允许水平滚动
+    scrollbar-width: thin; // 使滚动条更细（Firefox）
+
+    // 自定义滚动条样式（Webkit浏览器）
+    &::-webkit-scrollbar {
+        height: 3px; // 水平滚动条高度
+    }
+
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        background-color: $border-color;
+        border-radius: 10px;
+    }
+
+    @include dark-theme {
+        &::-webkit-scrollbar-thumb {
+            background-color: $dark-border-color;
+        }
+    }
+
+    // 按钮导航链接的样式
+    .ant-btn.nav-link {
+        display: flex;
+        align-items: center;
+        height: auto;
+        color: $text-secondary;
+        text-decoration: none;
+        font-weight: 500;
+        padding: $spacing-sm 8px; // 减少左右内边距
+        border-radius: $border-radius-medium;
+        transition: $transition-normal;
+        font-size: 13px; // 稍微减小字体
+        white-space: nowrap; // 防止文字换行
+        flex-shrink: 0; // 防止收缩
+        min-width: fit-content; // 最小宽度适应内容
+        background: transparent;
+        border: none;
+        box-shadow: none;
+
+        .anticon {
+            margin-right: 3px;
+            font-size: 12px;
+        }
+
+        &:hover {
+            background-color: $bg-color;
+            color: $text-primary;
+        }
+
+        @include dark-theme {
+            color: $dark-text-primary;
+
+            &:hover {
+                background-color: $dark-bg-secondary;
+                color: $white;
+            }
+        }
+    }
 }
 
 .nav-link {
