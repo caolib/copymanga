@@ -187,6 +187,18 @@
     gap: 10px;
 }
 
+.reader-footer {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+    margin-top: 20px;
+    border-top: 1px solid $border-color;
+
+    @include dark-theme {
+        border-color: $dark-border-color;
+    }
+}
+
 .chapter-info {
     margin-bottom: 15px;
     @include flex-between;
@@ -196,40 +208,6 @@
 
 .info-item {
     margin-right: 15px;
-}
-
-.control-button {
-    padding: $spacing-sm 15px;
-    background-color: $primary-color;
-    color: $white;
-    border: none;
-    border-radius: $border-radius-small;
-    cursor: pointer;
-    transition: $transition-fast;
-
-    &:hover:not(:disabled) {
-        background-color: $primary-active;
-    }
-
-    &:disabled {
-        background-color: color.scale($primary-color, $lightness: 20%);
-        cursor: not-allowed;
-    }
-
-    @include dark-theme {
-        background: $dark-bg-secondary;
-        color: $dark-text-primary;
-        border: 1px solid $dark-border-color-light;
-
-        &:hover:not(:disabled) {
-            background-color: color.scale($dark-bg-secondary, $lightness: 10%);
-        }
-
-        &:disabled {
-            background-color: $dark-bg-primary;
-            color: $text-secondary;
-        }
-    }
 }
 
 /* 图片容器样式 - 支持动态间距配置 */

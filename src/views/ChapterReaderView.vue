@@ -5,16 +5,26 @@
             @mouseleave="hideNavAfterDelay">
             <div class="nav-content">
                 <div class="reader-title">
-                    <h3>{{ chapterInfo.comic_name || '漫画标题' }}</h3>
-                    <h4>{{ chapterInfo.name || '章节标题' }}</h4>
+                    <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
+                    }}</a-typography-title>
+                    <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
-                    <button @click="goBack" class="control-button">返回</button>
-                    <button @click="prevChapter" class="control-button" :disabled="!hasPrevChapter">上一话</button>
-                    <button @click="nextChapter" class="control-button" :disabled="!hasNextChapter">下一话</button>
-                    <button @click="showSettingsDrawer = true" class="control-button settings-button">
-                        <span>设置</span>
-                    </button>
+                    <a-space>
+                        <a-button @click="goBack" size="small" :icon="h(ArrowLeftOutlined)">
+                            返回
+                        </a-button>
+                        <a-button @click="prevChapter" :disabled="!hasPrevChapter" size="small" :icon="h(LeftOutlined)">
+                            上一话
+                        </a-button>
+                        <a-button @click="nextChapter" :disabled="!hasNextChapter" size="small">
+                            下一话
+                            <RightOutlined />
+                        </a-button>
+                        <a-button @click="showSettingsDrawer = true" size="small" :icon="h(SettingOutlined)">
+                            设置
+                        </a-button>
+                    </a-space>
                 </div>
             </div>
         </div>
@@ -69,11 +79,18 @@
                 <a-spin tip="加载图片中..."></a-spin>
             </div>
             <div v-else-if="error" class="error">
-                {{ error }}
-                <div class="retry-container">
-                    <button @click="fetchChapterImages" class="retry-button">重试加载图片</button>
-                    <button @click="goBack" class="retry-button secondary">返回</button>
-                </div>
+                <a-result status="error" :title="error">
+                    <template #extra>
+                        <a-space>
+                            <a-button type="primary" @click="fetchChapterImages" :icon="h(ReloadOutlined)">
+                                重试加载图片
+                            </a-button>
+                            <a-button @click="goBack" :icon="h(ArrowLeftOutlined)">
+                                返回
+                            </a-button>
+                        </a-space>
+                    </template>
+                </a-result>
             </div>
             <div v-else class="reader">
                 <div class="chapter-info" v-if="chapterInfo.datetime_created">
@@ -118,10 +135,15 @@
                     </a-row>
                 </div>
                 <div class="reader-footer">
-                    <div class="reader-controls">
-                        <button @click="prevChapter" class="control-button" :disabled="!hasPrevChapter">上一话</button>
-                        <button @click="nextChapter" class="control-button" :disabled="!hasNextChapter">下一话</button>
-                    </div>
+                    <a-space>
+                        <a-button @click="prevChapter" :disabled="!hasPrevChapter" size="large" :icon="h(LeftOutlined)">
+                            上一话
+                        </a-button>
+                        <a-button @click="nextChapter" :disabled="!hasNextChapter" size="large">
+                            下一话
+                            <RightOutlined />
+                        </a-button>
+                    </a-space>
                 </div>
             </div>
         </div>
@@ -146,7 +168,7 @@
 
             <div v-if="commentsError" class="comments-error">
                 <a-alert type="error" message="加载评论失败" :description="commentsError" />
-                <a-button type="primary" @click="fetchComments(1)" class="retry-comments-button">
+                <a-button type="primary" @click="fetchComments(1)" style="margin-top: 8px;" :icon="h(ReloadOutlined)">
                     重试加载评论
                 </a-button>
             </div>
@@ -173,8 +195,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick, reactive } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, reactive, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import {
+    ArrowLeftOutlined,
+    LeftOutlined,
+    RightOutlined,
+    SettingOutlined,
+    ReloadOutlined
+} from '@ant-design/icons-vue'
 import { getChapterImages } from '../api/manga'
 import { getChapterComments, postChapterComment } from '../api/comment'
 import { useMangaStore } from '../stores/manga'
@@ -346,9 +375,17 @@ const showNavigation = () => {
 }
 
 const hideNavAfterDelay = () => {
+    // 清除之前的定时器
+    if (hideNavTimer) {
+        clearTimeout(hideNavTimer)
+        hideNavTimer = null
+    }
+
+    // 1秒后隐藏导航栏
     hideNavTimer = setTimeout(() => {
         showBottomNav.value = false
-    }, 0)
+        hideNavTimer = null
+    }, 1000)
 }
 
 const keepNavVisible = () => {
