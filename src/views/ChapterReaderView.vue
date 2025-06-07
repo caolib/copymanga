@@ -34,7 +34,7 @@
 
         <!-- 阅读器设置抽屉 -->
         <a-drawer title="阅读设置" :width="300" :visible="showSettingsDrawer" @close="showSettingsDrawer = false"
-            :footer-style="{ textAlign: 'right' }" :class="{ 'dark-drawer': isDarkMode }">
+            :footer-style="{ textAlign: 'right' }" :class="{ 'dark-drawer': isDarkMode }" :mask="false">
             <a-form layout="vertical">
                 <a-form-item label="漫画布局">
                     <a-radio-group v-model:value="readerConfig.layout">
@@ -49,8 +49,8 @@
                 </a-form-item>
 
                 <a-form-item label="图片大小">
-                    <a-slider v-model:value="readerConfig.imageSize" :min="50" :max="150" :step="10"
-                        :marks="{ 50: '50%', 100: '100%', 150: '150%' }" />
+                    <a-slider v-model:value="readerConfig.imageSize" :min="50" :max="100" :step="10"
+                        :marks="{ 50: '50%', 100: '100%' }" />
                 </a-form-item>
 
                 <a-form-item label="图片间距">
@@ -60,9 +60,9 @@
 
                 <a-form-item label="暗色模式图片遮罩" v-if="isDarkMode">
                     <a-slider v-model:value="darkImageMaskOpacity" :min="0" :max="1" :step="0.1"
-                        :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }" />
+                        :marks="{ 0: '无遮罩', 0.5: '50%', 1: '完全遮罩' }" />
                     <div style="margin-top: 8px; font-size: 12px; color: #666;">
-                        调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
+                        添加图片遮罩降低亮度以保护视力
                     </div>
                 </a-form-item>
             </a-form>
@@ -250,7 +250,7 @@ const showBottomNav = ref(false)
 let hideNavTimer = null
 
 // 添加暗色模式图片遮罩配置
-const darkImageMaskOpacity = ref(0.3) // 暗色模式图片遮罩透明度
+const darkImageMaskOpacity = ref(0.8) // 暗色模式图片遮罩透明度，默认值提高
 
 // 使用全局主题状态
 const isDarkMode = computed(() => themeStore.isDarkMode)
@@ -547,7 +547,7 @@ const loadSettings = async () => {
         const config = await loadUIConfig()
         Object.assign(readerConfig, config.reader)
         // 加载暗色模式图片遮罩配置
-        darkImageMaskOpacity.value = config.theme?.darkImageMask || 0.3
+        darkImageMaskOpacity.value = config.theme?.darkImageMask || 0.8
         // console.log('UI配置加载成功:', config)
     } catch (error) {
         console.error('加载UI配置失败:', error)

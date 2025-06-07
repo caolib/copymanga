@@ -5,6 +5,7 @@
     max-width: 1000px;
     margin: 0 auto;
     padding: 20px;
+    padding-top: 0;
 
     &.dark-mode {
         background-color: $dark-bg-primary;
@@ -321,10 +322,23 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, rgba(0, 0, 0, 0.4) 0%, rgba(20, 20, 20, 0.6) 50%, rgba(0, 0, 0, 0.5) 100%);
     pointer-events: none;
     border-radius: $border-radius-small;
     transition: opacity 0.3s ease;
+    backdrop-filter: brightness(0.7) contrast(0.9);
+
+    /* 增强的暗色遮罩效果 */
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(10, 10, 15, 0.3);
+        mix-blend-mode: multiply;
+    }
 }
 
 .reader-footer {
