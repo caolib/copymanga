@@ -2,7 +2,7 @@
   "theme": {
     "isDarkMode": true,
     "fontFamily": "\"Cascadia Code\", \"霞鹜文楷\", \"喵字果汁体\", \"微软雅黑\", \"Courier New\", Courier, monospace",
-    "darkImageMask": 0.8
+    "darkImageMask": 0.5
   },
   "reader": {
     "layout": "rtl",

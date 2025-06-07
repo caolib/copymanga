@@ -89,11 +89,11 @@
                             <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
                                 v-for="(image, colIndex) in chunk" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
-                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper">
+                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper"
+                                    :style="{ width: `${readerConfig.imageSize}%` }">
                                     <img :src="image.url"
                                         :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
-                                        class="manga-image" loading="lazy"
-                                        :style="{ width: `${readerConfig.imageSize}%` }" />
+                                        class="manga-image" loading="lazy" />
                                     <div v-if="isDarkMode" class="dark-image-mask"
                                         :style="{ opacity: darkImageMaskOpacity }"></div>
                                 </div>
@@ -102,13 +102,13 @@
                         </template>
                         <template v-else>
                             <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
-                                v-for="(image, colIndex) in [...chunk].reverse()" :key="colIndex"
+                                v-for="(image, colIndex) in chunk" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
-                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper">
+                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper"
+                                    :style="{ width: `${readerConfig.imageSize}%` }">
                                     <img :src="image.url"
-                                        :alt="`第${rowIndex * readerConfig.columnsPerRow + chunk.length - colIndex}页`"
-                                        class="manga-image" loading="lazy"
-                                        :style="{ width: `${readerConfig.imageSize}%` }" />
+                                        :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
+                                        class="manga-image" loading="lazy" />
                                     <div v-if="isDarkMode" class="dark-image-mask"
                                         :style="{ opacity: darkImageMaskOpacity }"></div>
                                 </div>

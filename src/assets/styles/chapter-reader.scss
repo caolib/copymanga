@@ -259,21 +259,62 @@
 }
 
 /* 漫画列样式 - 支持动态列数 */
-.manga-column {
+.manga-row .manga-column {
     display: flex;
-    justify-content: center;
     align-items: flex-start;
+    min-height: 0;
+
+    /* 默认居中对齐（单列时） */
+    justify-content: center;
+
+    /* 多列布局时的对齐方式 */
+    &:first-child {
+        justify-content: flex-end !important; /* 第一列靠右对齐 */
+    }
+
+    &:last-child {
+        justify-content: flex-start !important; /* 最后一列靠左对齐 */
+    }
+
+    /* 当只有一列时，恢复居中对齐 */
+    &:only-child {
+        justify-content: center !important;
+    }
 }
 
 /* 漫画图片样式 - 支持动态大小配置 */
 .manga-image-wrapper {
     position: relative;
-    display: inline-block;
-    width: 100%;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 第一列和最后一列的wrapper边距调整 - 根据布局方向 */
+/* RTL布局（日漫风格） */
+.manga-row.row-rtl .manga-column:first-child .manga-image-wrapper {
+    margin-left: 0; /* 第一列在右边，消除左边距 */
+}
+
+.manga-row.row-rtl .manga-column:last-child .manga-image-wrapper {
+    margin-right: 0; /* 最后一列在左边，消除右边距 */
+}
+
+/* LTR布局（从左到右） */
+.manga-row.row-ltr .manga-column:first-child .manga-image-wrapper {
+    margin-right: 0; /* 第一列在左边，消除右边距 */
+}
+
+.manga-row.row-ltr .manga-column:last-child .manga-image-wrapper {
+    margin-left: 0; /* 最后一列在右边，消除左边距 */
+}
+
+/* 单列时始终居中 */
+.manga-row .manga-column:only-child .manga-image-wrapper {
+    margin: 0 auto;
 }
 
 .manga-image {
-    max-width: 100%;
+    width: 100%;
     height: auto;
     box-shadow: $shadow-light;
     object-fit: contain;
