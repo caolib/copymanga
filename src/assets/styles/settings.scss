@@ -144,3 +144,43 @@ h1 {
     white-space: pre-wrap;
     word-wrap: break-word;
 }
+
+// 菜单项更新指示器样式
+.menu-item-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.menu-item-content {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.update-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 8px;
+    height: 8px;
+    background-color: #ff4d4f;
+    border-radius: 50%;
+    z-index: 10;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

@@ -332,3 +332,23 @@
         display: none;
     }
 }
+
+// 设置链接更新指示器样式
+.settings-link {
+    position: relative;
+
+    .settings-text {
+        margin-right: 4px;
+    }
+}
+
+.nav-update-indicator {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: #ff4d4f;
+    border-radius: 50%;
+    z-index: 10;
+}

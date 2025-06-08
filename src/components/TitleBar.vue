@@ -30,7 +30,10 @@
                 <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">收藏漫画</router-link>
                 <router-link to="/books" class="nav-link">轻小说</router-link>
                 <router-link to="/my-book-collection" class="nav-link" v-if="isLoggedInComputed">书架</router-link>
-                <router-link to="/settings" class="nav-link">设置</router-link>
+                <router-link to="/settings" class="nav-link settings-link">
+                    <span class="settings-text">设置</span>
+                    <span v-if="hasUpdate" class="nav-update-indicator"></span>
+                </router-link>
                 <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
                     {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
@@ -93,12 +96,17 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { isLoggedIn, logout } from '../utils/auth'
 import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
+import { useAppStore } from '../stores/app'
 import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
+const appStore = useAppStore()
 const isMaximized = ref(false)
+
+// 检查是否有可用更新
+const hasUpdate = computed(() => appStore.hasUpdate)
 const currentWindow = getCurrentWindow()
 
 const isLoggedInComputed = computed(() => isLoggedIn())

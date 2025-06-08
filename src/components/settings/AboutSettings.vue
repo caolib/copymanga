@@ -19,22 +19,13 @@
 
                 <div class="links-section">
                     <a-space wrap>
-                        <a-button type="primary" @click="checkUpdate" :loading="checkingUpdate">
-                            <template #icon>
-                                <SyncOutlined />
-                            </template>
+                        <a-button type="primary" @click="checkUpdate" :loading="checkingUpdate" :icon="h(SyncOutlined)">
                             检查更新
                         </a-button>
-                        <a-button @click="openRepository">
-                            <template #icon>
-                                <GithubOutlined />
-                            </template>
+                        <a-button @click="openRepository" :icon="h(GithubOutlined)">
                             项目仓库
                         </a-button>
-                        <a-button @click="openFeedback">
-                            <template #icon>
-                                <BugOutlined />
-                            </template>
+                        <a-button @click="openFeedback" :icon="h(BugOutlined)">
                             问题反馈
                         </a-button>
                     </a-space>
@@ -73,6 +64,16 @@
         <!-- 版本更新 -->
         <a-card title="版本更新" class="setting-card">
             <div class="update-section">
+                <!-- 自动检查更新设置 -->
+                <a-form layout="vertical" style="margin-bottom: 16px;">
+                    <a-form-item label="自动检查更新">
+                        <a-switch v-model:checked="autoCheckUpdate" @change="onAutoCheckUpdateChange"
+                            checked-children="启用" un-checked-children="禁用" />
+                    </a-form-item>
+                </a-form>
+
+                <a-divider />
+
                 <a-descriptions :column="1" bordered>
                     <a-descriptions-item label="当前版本">
                         <a-tag color="blue">{{ appVersion }}</a-tag>
@@ -98,10 +99,8 @@
 
                 <div style="margin-top: 16px;">
                     <a-space wrap>
-                        <a-button v-if="updateInfo.hasUpdate" @click="openDownloadPage" type="default">
-                            <template #icon>
-                                <DownloadOutlined />
-                            </template>
+                        <a-button v-if="updateInfo.hasUpdate" @click="openDownloadPage" type="default"
+                            :icon="h(DownloadOutlined)">
                             前往下载
                         </a-button>
                     </a-space>
@@ -124,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, h, watch, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import {
     GithubOutlined,
@@ -135,12 +134,17 @@ import {
 import { getVersion } from '@tauri-apps/api/app'
 import { invoke } from '@tauri-apps/api/core'
 import { checkForUpdates } from '@/api/github'
+import { useAppStore } from '@/stores/app'
 
 // 关于页面信息
 const appVersion = ref('')
+const appStore = useAppStore()
 
-// 版本更新相关
-const updateInfo = ref({
+// 自动检查更新设置
+const autoCheckUpdate = ref(appStore.autoCheckUpdate)
+
+// 版本更新相关 - 使用 store 中的数据
+const updateInfo = computed(() => appStore.updateInfo || {
     hasUpdate: false,
     currentVersion: '',
     latestVersion: '',
@@ -148,6 +152,17 @@ const updateInfo = ref({
 })
 const checkingUpdate = ref(false)
 const lastCheckTime = ref('')
+
+// 监听组件挂载，如果有更新信息则清除红点
+onMounted(() => {
+    fetchAppVersion()
+    if (appStore.hasUpdate) {
+        // 用户进入关于页面，清除红点状态
+        setTimeout(() => {
+            appStore.clearUpdateInfo()
+        })
+    }
+})
 
 // 通用打开URL函数
 const openExternalUrl = (url, errorMsg = '打开链接失败') => {
@@ -171,7 +186,6 @@ const openFeedback = () => {
 const fetchAppVersion = () => {
     getVersion().then(version => {
         appVersion.value = version
-        updateInfo.value.currentVersion = version
     }).catch(error => {
         console.error('获取应用版本失败:', error)
         appVersion.value = '未知'
@@ -179,17 +193,13 @@ const fetchAppVersion = () => {
 }
 
 // 检查更新
-const checkUpdate = async () => {
+const checkUpdate = () => {
     checkingUpdate.value = true
     lastCheckTime.value = new Date().toLocaleString()
 
     checkForUpdates(appVersion.value).then(result => {
-        updateInfo.value = {
-            hasUpdate: result.hasUpdate,
-            currentVersion: result.currentVersion,
-            latestVersion: result.latestVersion,
-            release: result.release
-        }
+        // 更新 store 中的状态
+        appStore.setUpdateInfo(result)
 
         if (result.hasUpdate) {
             message.success('发现新版本！')
@@ -202,6 +212,12 @@ const checkUpdate = async () => {
     }).finally(() => {
         checkingUpdate.value = false
     })
+}
+
+// 自动检查更新设置变化
+const onAutoCheckUpdateChange = (checked) => {
+    appStore.setAutoCheckUpdate(checked)
+    message.success(checked ? '已启用启动时自动检查更新' : '已禁用启动时自动检查更新')
 }
 
 // 打开下载页面
@@ -243,10 +259,6 @@ const formatChangeLog = (body) => {
 const formatReleaseDate = (dateString) => {
     return new Date(dateString).toLocaleString()
 }
-
-onMounted(() => {
-    fetchAppVersion()
-})
 </script>
 
 <style src="../../assets/styles/about-settings.scss" lang="scss" scoped></style>

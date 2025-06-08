@@ -24,7 +24,10 @@
                             <template #icon>
                                 <InfoCircleOutlined />
                             </template>
-                            关于
+                            <div class="menu-item-content">
+                                关于
+                                <span v-if="hasUpdate" class="update-indicator"></span>
+                            </div>
                         </a-menu-item>
                     </a-menu>
                 </div>
@@ -46,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import {
     CloudServerOutlined,
     SkinOutlined,
@@ -55,8 +58,13 @@ import {
 import ServerSettings from '@/components/settings/ServerSettings.vue'
 import AppearanceSettings from '@/components/settings/AppearanceSettings.vue'
 import AboutSettings from '@/components/settings/AboutSettings.vue'
+import { useAppStore } from '@/stores/app'
 
 const selectedMenu = ref(['server']) // 当前选中的菜单项
+const appStore = useAppStore()
+
+// 检查是否有可用更新
+const hasUpdate = computed(() => appStore.hasUpdate)
 </script>
 
 <style src="../assets/styles/settings.scss" scoped></style>
