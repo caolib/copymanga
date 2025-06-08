@@ -1,10 +1,11 @@
 ## Commit
 
-- [1d22c6c] 🐳 chore: 发布新版本
-- [b35ac58] 🐛 fix: 修复书架缓存加载异常
-- [2c66b9f] ✨ feat: 阅读界面实现懒加载，新增阅读界面设置
-- [8220bfe] 📄 docs: 更新图片
+- [dc2dbff] 🐛 fix: 修复调整图片大小后中间出现大块空白的问题
+- [8376db6] 🌈 style: 优化漫画阅读界面显示
+- [cbedf14] 🌈 style: 遮罩颜色加深
+- [bd1da99] ✨ feat: 添加作者作品界面；重构scss样式文件命名
+- [d5d81e9] ✨ feat: 添加自动更新检查功能
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.5.1...v0.5.2)
+📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.5.2...v0.5.3)
 

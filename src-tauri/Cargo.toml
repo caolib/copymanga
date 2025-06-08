@@ -1,6 +1,6 @@
 [package]
 name = "copymanga"
-version = "0.5.2"
+version = "0.5.3"
 description = "一个拷贝漫画第三方客户端"
 authors = ["caolib"]
 edition = "2021"
@@ -42,4 +42,3 @@ required-features = []
 
 [package.metadata.tauri.windows]
 windows_subsystem = "windows"
-
