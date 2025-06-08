@@ -6,22 +6,23 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                    }}</a-typography-title>
+                        }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
                     <a-space>
-                        <a-button @click="goBack" size="small" :icon="h(ArrowLeftOutlined)">
+                        <a-button @click="goBack" :icon="h(ArrowLeftOutlined)">
                             返回
                         </a-button>
-                        <a-button @click="prevChapter" :disabled="!hasPrevChapter" size="small" :icon="h(LeftOutlined)">
+                        <a-button @click="prevChapter" type="primary" :disabled="!hasPrevChapter"
+                            :icon="h(LeftOutlined)">
                             上一话
                         </a-button>
-                        <a-button @click="nextChapter" :disabled="!hasNextChapter" size="small">
+                        <a-button @click="nextChapter" type="primary" :disabled="!hasNextChapter">
                             下一话
                             <RightOutlined />
                         </a-button>
-                        <a-button @click="showSettingsDrawer = true" size="small" :icon="h(SettingOutlined)">
+                        <a-button @click="showSettingsDrawer = true" type="dashed" :icon="h(SettingOutlined)">
                             设置
                         </a-button>
                     </a-space>
@@ -136,10 +137,14 @@
                 </div>
                 <div class="reader-footer">
                     <a-space>
-                        <a-button @click="prevChapter" :disabled="!hasPrevChapter" size="large" :icon="h(LeftOutlined)">
+                        <a-button @click="goBack" size="large" :icon="h(ArrowLeftOutlined)">
+                            返回
+                        </a-button>
+                        <a-button @click="prevChapter" type="primary" :disabled="!hasPrevChapter" size="large"
+                            :icon="h(LeftOutlined)">
                             上一话
                         </a-button>
-                        <a-button @click="nextChapter" :disabled="!hasNextChapter" size="large">
+                        <a-button @click="nextChapter" type="primary" :disabled="!hasNextChapter" size="large">
                             下一话
                             <RightOutlined />
                         </a-button>

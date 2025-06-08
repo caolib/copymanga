@@ -247,4 +247,4 @@ onMounted(() => {
 })
 </script>
 
-<style src="../assets/styles/my-book-collection-view.scss" scoped></style>
+<style src="../assets/styles/my-book-collection.scss" scoped></style>

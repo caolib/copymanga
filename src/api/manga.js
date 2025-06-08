@@ -128,6 +128,26 @@ function getHomeIndex() {
     });
 }
 
+/**
+ * 获取作者的漫画列表   
+ * @param {string} author 作者名字的path_word(拼音)
+ * @param {*} limit 每页数量，默认21
+ * @param {*} offset 偏移量，默认0
+ * @param {*} ordering 排序方式，默认'-datetime_updated'
+ * @returns 
+ */
+function getAuthorMangaList(author, limit = 21, offset = 0, ordering = '-datetime_updated') {
+    return request.get(`/api/v3/comics`, {
+        params: {
+            limit,
+            offset,
+            platform: 3,
+            author,
+            ordering
+        }
+    });
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
@@ -136,5 +156,6 @@ export {
     searchManga,
     collectManga,
     getMangaDetail,
-    getHomeIndex
+    getHomeIndex,
+    getAuthorMangaList
 }

@@ -1,0 +1,75 @@
+@use "./variables" as *;
+
+.author-manga-list-container {
+    .manga-card {
+        height: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        .manga-cover {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: $border-radius-medium;
+        }
+        .manga-title {
+            font-size: 14px;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: $spacing-xs;
+        }
+
+        .manga-meta {
+            .popular {
+                margin-bottom: $spacing-xs;
+                font-size: 12px;
+            }
+
+            .update-time {
+                font-size: 12px;
+            }
+        }
+    }
+    .pagination-container {
+        margin-top: $spacing-lg;
+        text-align: center;
+
+        .ant-pagination {
+            display: flex;
+            justify-content: center;
+        }
+    }
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+    .author-manga-list-container {
+        .manga-card {
+            .manga-cover {
+                height: 160px;
+            }
+
+            .manga-title {
+                font-size: 12px;
+            }
+        }
+    }
+}
+
+// 深色主题适配
+[data-theme="dark"] {
+    .author-manga-list-container {
+        .manga-card {
+            &:hover {
+                box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+            }
+        }
+    }
+}

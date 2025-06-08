@@ -250,4 +250,4 @@ onMounted(async () => {
 })
 </script>
 
-<style scoped src="../assets/styles/book-detail-view.scss" lang="scss"></style>
+<style scoped src="../assets/styles/book-detail.scss" lang="scss"></style>

@@ -308,4 +308,4 @@ onMounted(() => {
 })
 </script>
 
-<style src="../assets/styles/home-view.scss" scoped></style>
+<style src="../assets/styles/home.scss" scoped></style>

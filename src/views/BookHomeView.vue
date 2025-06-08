@@ -208,4 +208,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped src="../assets/styles/book-home-view.scss" lang="scss"></style>
+<style scoped src="../assets/styles/book-home.scss" lang="scss"></style>

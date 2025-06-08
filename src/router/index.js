@@ -47,6 +47,12 @@ const routes = [
         meta: { requiresAuth: true }
     },
     {
+        path: '/author/:authorPathWord',
+        name: 'AuthorMangaList',
+        component: () => import('../views/AuthorMangaListView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
         path: '/manga/:pathWord/chapter/:chapterId',
         name: 'ChapterReader',
         component: () => import('../views/ChapterReaderView.vue'),

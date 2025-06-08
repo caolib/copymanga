@@ -104,4 +104,4 @@ const handleRegister = () => {
 
 </script>
 
-<style src="../assets/styles/register-view.scss" scoped></style>
+<style src="../assets/styles/register.scss" scoped></style>

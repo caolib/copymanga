@@ -43,7 +43,10 @@
                     <a-typography-title :level="2">{{ manga.name || '漫画详情' }}</a-typography-title>
                     <a-descriptions :column="1" size="small" bordered>
                         <a-descriptions-item label="作者" v-if="manga.author && manga.author.length">
-                            <a-tag v-for="a in manga.author" :key="a.name">{{ a.name }}</a-tag>
+                            <a-tag v-for="a in manga.author" :key="a.name" @click="goToAuthorPage(a)"
+                                class="author-tag">
+                                {{ a.name }}
+                            </a-tag>
                         </a-descriptions-item>
                         <a-descriptions-item label="题材" v-if="manga.theme && manga.theme.length">
                             <a-tag v-for="t in manga.theme" :key="t.name" color="blue">{{ t.name }}</a-tag>
@@ -286,6 +289,14 @@ const goToChapter = (chapter) => {
     })
 }
 
+const goToAuthorPage = (author) => {
+    router.push({
+        name: 'AuthorMangaList',
+        params: { authorPathWord: author.path_word },
+        query: { name: author.name }
+    })
+}
+
 const startReading = () => {
     if (chapters.value.length > 0) {
         const firstChapter = isAscending.value ? chapters.value[0] : chapters.value[chapters.value.length - 1]
@@ -501,25 +512,20 @@ const handleCommentsToggle = (activeKey) => {
 
 // 获取漫画评论
 const fetchMangaComments = async (page = 1) => {
-    console.log('开始获取评论, uuid:', manga.value.uuid, 'page:', page)
     if (!manga.value.uuid) {
         console.log('没有 manga uuid，退出')
         return
     }
-
     commentsLoading.value = true
     const offset = (page - 1) * commentsPageSize.value
 
     try {
-        console.log('调用 getMangaComments API')
         const res = await getMangaComments(manga.value.uuid, commentsPageSize.value, offset)
-        console.log('API 响应:', res)
         if (res && res.code === 200 && res.results) {
             comments.value = res.results.list || []
             commentsTotal.value = res.results.total || 0
             commentsPage.value = page
             commentsLoaded.value = true
-            console.log('评论加载成功:', comments.value.length, '条评论')
         }
     } catch (error) {
         console.error('获取评论失败:', error)
@@ -553,22 +559,17 @@ const submitComment = async () => {
 
     submitCommentLoading.value = true
 
-    try {
-        const res = await postMangaComment(manga.value.uuid, newComment.value.trim())
-        if (res && res.code === 200) {
-            message.success('评论发表成功')
-            newComment.value = ''
-            // 刷新评论列表
-            await fetchMangaComments(1)
-        } else {
-            throw new Error(res?.message || '发表评论失败')
-        }
-    } catch (error) {
+    await postMangaComment(manga.value.uuid, newComment.value.trim()).then(res => {
+        message.success('评论发表成功')
+        newComment.value = ''
+        fetchMangaComments(1) // 刷新评论列表
+    }).catch(error => {
         console.error('发表评论失败:', error)
         message.error(error.message || '发表评论失败')
-    } finally {
+    }).finally(() => {
         submitCommentLoading.value = false
-    }
+    })
+
 }
 
 onMounted(() => {
@@ -591,4 +592,4 @@ onMounted(() => {
 })
 </script>
 
-<style src="../assets/styles/manga-detail-view.scss" scoped></style>
+<style src="../assets/styles/manga-detail.scss" scoped></style>

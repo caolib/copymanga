@@ -217,4 +217,4 @@ onMounted(() => {
 })
 </script>
 
-<style src="../assets/styles/my-collection-view.scss" scoped></style>
+<style src="../assets/styles/my-collection.scss" scoped></style>

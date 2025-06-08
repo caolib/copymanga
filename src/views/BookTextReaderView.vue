@@ -449,4 +449,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped src="../assets/styles/book-text-reader-view.scss" lang="scss"></style>
+<style scoped src="../assets/styles/book-text-reader.scss" lang="scss"></style>

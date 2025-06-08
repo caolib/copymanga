@@ -299,6 +299,15 @@
     object-fit: contain;
     border-radius: $border-radius-small;
     display: block;
+    transition: box-shadow $transition-normal;
+
+    &:hover {
+        box-shadow: $shadow-heavy;
+
+        @include dark-theme {
+            box-shadow: $shadow-dark-heavy;
+        }
+    }
 
     &.placeholder {
         visibility: hidden;

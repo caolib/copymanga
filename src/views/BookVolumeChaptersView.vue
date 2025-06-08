@@ -243,4 +243,4 @@ watch(
 )
 </script>
 
-<style scoped src="../assets/styles/book-volume-chapters-view.scss" lang="scss"></style>
+<style scoped src="../assets/styles/book-volume-chapters.scss" lang="scss"></style>

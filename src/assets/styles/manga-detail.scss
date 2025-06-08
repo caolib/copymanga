@@ -37,6 +37,34 @@
     font-size: 14px;
 }
 
+/* 作者标签点击样式 */
+.author-tag {
+    cursor: pointer;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background-color: #1890ff !important;
+        border-color: #1890ff !important;
+        color: white !important;
+    }
+
+    &:active {
+        transform: translateY(0);
+    }
+}
+
+// 深色主题适配
+[data-theme="dark"] {
+    .author-tag:hover {
+        background-color: #1890ff !important;
+        border-color: #1890ff !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+    }
+}
+
 /* 上次阅读章节的样式 */
 .last-read-chapter {
     position: relative;
