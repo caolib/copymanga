@@ -12,7 +12,7 @@
                             刷新主页数据
                         </a-button>
                         <span v-if="homeStore.lastUpdateTime" style="margin-left: 12px; color: #999; font-size: 12px;">
-                            上次更新: {{ formatTime(homeStore.lastUpdateTime) }}
+                            上次更新: {{ formatDate(homeStore.lastUpdateTime) }}
                         </span>
                     </div>
                 </a-space>
@@ -96,7 +96,7 @@
                                             <span v-if="topic.period" class="topic-period-mini">{{ topic.period
                                             }}</span>
                                             <span v-if="topic.datetime_created" class="topic-date-mini">
-                                                {{ formatTime(new Date(topic.datetime_created).getTime()) }}
+                                                {{ formatDate(topic.datetime_created) }}
                                             </span>
                                         </div>
                                     </template>
@@ -231,14 +231,13 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { DownOutlined, UpOutlined } from '@ant-design/icons-vue'
 import { searchManga } from '../api/manga'
-import { useMangaStore } from '../stores/manga'
 import { useHomeStore } from '../stores/home'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { getCurrentApiDomain } from '../config/server-config'
 import { openExternalUrl } from '../utils/external-link'
+import { formatDate } from '../utils/date'
 
 const router = useRouter()
-const mangaStore = useMangaStore()
 const homeStore = useHomeStore()
 const { goToMangaDetail } = useMangaNavigation()
 
@@ -259,41 +258,6 @@ const loading = computed(() => homeStore.isLoading)
 const showBanners = ref(false)
 const showRecommended = ref(false)
 const showTopics = ref(false)
-
-// 时间格式化函数 - 显示相对时间
-const formatTime = (timestamp) => {
-    const now = Date.now()
-    const diff = now - timestamp
-
-    const minute = 60 * 1000
-    const hour = 60 * minute
-    const day = 24 * hour
-    const week = 7 * day
-    const month = 30 * day
-    const year = 365 * day
-
-    if (diff < minute) {
-        return '刚刚'
-    } else if (diff < hour) {
-        const minutes = Math.floor(diff / minute)
-        return `${minutes}分钟前`
-    } else if (diff < day) {
-        const hours = Math.floor(diff / hour)
-        return `${hours}小时前`
-    } else if (diff < week) {
-        const days = Math.floor(diff / day)
-        return `${days}天前`
-    } else if (diff < month) {
-        const weeks = Math.floor(diff / week)
-        return `${weeks}周前`
-    } else if (diff < year) {
-        const months = Math.floor(diff / month)
-        return `${months}个月前`
-    } else {
-        const years = Math.floor(diff / year)
-        return `${years}年前`
-    }
-}
 
 // 获取主页数据
 const fetchHomeData = () => {

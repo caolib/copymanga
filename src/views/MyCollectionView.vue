@@ -13,7 +13,7 @@
                         刷新
                     </a-button>
                     <a-typography-text type="secondary" v-if="lastUpdateTime && !loading">
-                        上次更新: {{ formatUpdateTime(lastUpdateTime) }}
+                        上次更新: {{ formatDate(lastUpdateTime) }}
                     </a-typography-text>
                 </div>
             </template>
@@ -58,7 +58,7 @@
                                 更新至: {{ item.comic.last_chapter_name }}
                             </div>
                             <div class="manga-datetime-updated" v-if="item.comic.datetime_updated">
-                                更新时间: {{ formatDatetimeUpdated(item.comic.datetime_updated) }}
+                                更新时间: {{ formatDate(item.comic.datetime_updated) }}
                             </div>
                         </template>
                     </a-card-meta>
@@ -81,7 +81,7 @@ import { useCollectionStore } from '../stores/collection'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { isLoggedIn } from '../utils/auth'
 import { message } from 'ant-design-vue'
-import { formatDatetimeUpdated } from '../utils/date'
+import { formatDate } from '../utils/date'
 
 const router = useRouter()
 const collectionStore = useCollectionStore()
@@ -102,17 +102,6 @@ const totalCount = ref(0)
 const validMangaList = computed(() => {
     return mangaList.value.filter(item => item && item.comic && item.comic.name)
 })
-
-const formatUpdateTime = (timeString) => {
-    const date = new Date(timeString)
-    return date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    })
-}
 
 const goToManga = (item) => {
     // 使用统一的导航逻辑，携带来自书架和上次阅读信息

@@ -5,7 +5,7 @@ import { useAppStore } from './stores/app'
 import { useThemeStore } from './stores/theme'
 import { relaunch } from '@tauri-apps/plugin-process'
 import TitleBar from './components/TitleBar.vue'
-import { Modal, theme } from 'ant-design-vue'
+import { theme } from 'ant-design-vue'
 import { checkUpdateOnStartup } from './utils/auto-update'
 
 const route = useRoute()

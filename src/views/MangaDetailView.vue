@@ -178,7 +178,7 @@
                         <div class="compact-comments-container">
                             <a-comment v-for="comment in comments" :key="comment.id" :author="comment.user_name"
                                 :avatar="comment.user_avatar" :content="comment.comment"
-                                :datetime="formatCommentTime(comment.create_at)" class="compact-comment-item" />
+                                :datetime="formatDate(comment.create_at)" class="compact-comment-item" />
                         </div>
 
                         <!-- 评论分页 -->
@@ -202,6 +202,7 @@ import { getMangaDetail, collectManga, getMangaGroupChapters } from '../api/mang
 import { getMangaComments, postMangaComment } from '../api/comment'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
+import { formatDate } from '../utils/date'
 
 const route = useRoute()
 const router = useRouter()
@@ -249,31 +250,6 @@ const isLoggedIn = computed(() => userStore.isLoggedIn)
 const sortedChapters = computed(() => {
     return [...chapters.value].sort((a, b) => isAscending.value ? a.index - b.index : b.index - a.index)
 })
-
-const formatDate = (dateString) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString('zh-CN')
-}
-
-// 格式化评论时间
-const formatCommentTime = (dateString) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diff = now - date
-    const minutes = Math.floor(diff / 60000)
-    const hours = Math.floor(diff / 3600000)
-    const days = Math.floor(diff / 86400000)
-
-    if (days > 0) {
-        return `${days}天前`
-    } else if (hours > 0) {
-        return `${hours}小时前`
-    } else if (minutes > 0) {
-        return `${minutes}分钟前`
-    } else {
-        return '刚刚'
-    }
-}
 
 const toggleSortOrder = () => {
     isAscending.value = !isAscending.value

@@ -26,7 +26,7 @@
                                     </div>
                                     <div class="update-time">
                                         <a-typography-text type="secondary">
-                                            {{ formatDate(manga.datetime_updated) }}
+                                            {{ manga.datetime_updated }}
                                         </a-typography-text>
                                     </div>
                                 </div>
@@ -53,7 +53,6 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getAuthorMangaList } from '../api/manga'
-import { formatDate } from '../utils/date'
 
 const route = useRoute()
 const router = useRouter()

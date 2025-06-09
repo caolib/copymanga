@@ -49,7 +49,7 @@
                         </div>
                         <div class="meta-item" v-if="bookDetail.datetime_updated">
                             <span class="meta-label">更新时间：</span>
-                            <span class="meta-value">{{ formatDatetimeUpdated(bookDetail.datetime_updated) }}</span>
+                            <span class="meta-value">{{ formatDate(bookDetail.datetime_updated) }}</span>
                         </div>
                     </div>
                     <div class="book-actions">
@@ -123,7 +123,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { getBookDetail, getBookVolumes, collectBook } from '@/api/book'
-import { formatDatetimeUpdated } from '@/utils/date'
+import { formatDate } from '@/utils/date'
 
 const route = useRoute()
 const router = useRouter()

@@ -7,7 +7,7 @@
                     <!-- 更新时间信息 -->
                     <div v-if="lastUpdateTime" class="update-info header-update-info">
                         <a-typography-text type="secondary">
-                            最后更新：{{ formatDatetimeUpdated(lastUpdateTime) }}
+                            最后更新：{{ formatDate(lastUpdateTime) }}
                         </a-typography-text>
                     </div>
                     <a-select v-model:value="ordering" @change="handleOrderingChange" style="width: 120px">
@@ -55,7 +55,7 @@
                                     {{ getBookStatus(item.book) }}
                                 </span>
                                 <span class="book-updated" v-if="item.book.datetime_updated">
-                                    {{ formatDatetimeUpdated(item.book.datetime_updated) }}
+                                    {{ formatDate(item.book.datetime_updated) }}
                                 </span>
                             </div>
                         </div>
@@ -80,7 +80,7 @@ import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useUserStore } from '../stores/user'
 import { useBookCollectionStore } from '../stores/book-collection'
-import { formatDatetimeUpdated } from '../utils/date'
+import { formatDate } from '../utils/date'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -95,9 +95,6 @@ const currentPage = ref(1)
 const pageSize = ref(18)
 const ordering = ref('-datetime_modifier')
 const lastUpdateTime = ref(null)
-
-// 计算属性
-const isLoggedIn = computed(() => userStore.isLoggedIn)
 
 // 过滤有效的轻小说数据，防止渲染错误
 const validBookList = computed(() => {

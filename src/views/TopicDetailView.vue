@@ -57,10 +57,9 @@
                     <div v-if="contentLoading" class="content-loading">
                         <a-skeleton active :paragraph="{ rows: 10 }" />
                     </div> <!-- 漫画列表 -->
-                    <div v-else-if="topicContent.length > 0" class="content-grid">
-                        <a-row :gutter="[24, 24]">
-                            <a-col v-for="item in topicContent" :key="item.path_word" :xs="12" :sm="8" :md="6" :lg="4.8"
-                                :xl="4.8">
+                    <div v-else-if="topicContent.length > 0" class="content-grid"> <a-row :gutter="[24, 24]">
+                            <a-col v-for="item in topicContent" :key="item.path_word" :xs="12" :sm="8" :md="6" :lg="4"
+                                :xl="4" :xxl="4">
                                 <a-card hoverable class="manga-card" @click="goToMangaDetail(item)">
                                     <template #cover>
                                         <div class="manga-cover">
@@ -134,6 +133,7 @@ import { ref, computed, onMounted, watch, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTopicStore } from '../stores/topic'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
+import { formatDate } from '../utils/date'
 import { ArrowLeftOutlined } from '@ant-design/icons-vue'
 
 const route = useRoute()
@@ -214,21 +214,6 @@ const goToPrevTopic = () => {
             name: 'TopicDetail',
             params: { pathWord: currentTopic.value.last.path_word }
         })
-    }
-}
-
-// 格式化日期
-const formatDate = (dateStr) => {
-    if (!dateStr) return ''
-    try {
-        const date = new Date(dateStr)
-        return date.toLocaleDateString('zh-CN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        })
-    } catch (error) {
-        return dateStr
     }
 }
 

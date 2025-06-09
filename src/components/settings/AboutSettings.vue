@@ -90,7 +90,7 @@
                         </a-tag>
                     </a-descriptions-item>
                     <a-descriptions-item label="发布时间" v-if="updateInfo.release?.published_at">
-                        {{ formatReleaseDate(updateInfo.release.published_at) }}
+                        {{ formatDate(updateInfo.release.published_at) }}
                     </a-descriptions-item>
                     <a-descriptions-item label="检查时间" v-if="lastCheckTime">
                         {{ lastCheckTime }}
@@ -123,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, h, watch, computed } from 'vue'
+import { ref, onMounted, h, computed } from 'vue'
 import { message } from 'ant-design-vue'
 import {
     GithubOutlined,
@@ -132,10 +132,10 @@ import {
     SyncOutlined
 } from '@ant-design/icons-vue'
 import { getVersion } from '@tauri-apps/api/app'
-import { invoke } from '@tauri-apps/api/core'
 import { checkForUpdates } from '@/api/github'
 import { useAppStore } from '@/stores/app'
 import { openExternalUrl } from '@/utils/external-link'
+import { formatDate } from '@/utils/date'
 
 // github仓库地址
 const repoUrl = 'https://github.com/caolib/copymanga'
@@ -249,11 +249,6 @@ const formatChangeLog = (body) => {
         })
         .filter(line => line)
         .join('')
-}
-
-// 格式化发布日期
-const formatReleaseDate = (dateString) => {
-    return new Date(dateString).toLocaleString()
 }
 </script>
 

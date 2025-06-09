@@ -8,7 +8,7 @@
                 </a-button>
                 <div v-if="lastUpdateTime" class="update-info">
                     <a-typography-text type="secondary" style="font-size: 12px;">
-                        最后更新：{{ formatUpdateTime(lastUpdateTime) }}
+                        最后更新：{{ formatDate(lastUpdateTime) }}
                     </a-typography-text>
                 </div>
             </div>
@@ -77,6 +77,7 @@ import { useBookStore } from '@/stores/book'
 import { useBookHomeStore } from '@/stores/book-home'
 import { useBookThemeStore } from '@/stores/book-theme'
 import { message } from 'ant-design-vue'
+import { formatDate } from '@/utils/date'
 
 const router = useRouter()
 const bookStore = useBookStore()
@@ -179,25 +180,6 @@ const goToBookDetail = (pathWord) => {
 const getAuthors = (authors) => {
     if (!authors || !authors.length) return '未知作者'
     return authors.map(author => author.name).join(', ')
-}
-
-const formatDate = (dateStr) => {
-    if (!dateStr) return '未知'
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('zh-CN')
-}
-
-// 格式化缓存更新时间
-const formatUpdateTime = (timeString) => {
-    if (!timeString) return ''
-    const date = new Date(timeString)
-    return date.toLocaleString('zh-CN', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    })
 }
 
 onMounted(() => {

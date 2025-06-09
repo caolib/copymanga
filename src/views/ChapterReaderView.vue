@@ -185,7 +185,7 @@
             <a-spin :spinning="loadingComments" tip="加载评论中...">
                 <div v-if="!commentsError && comments.length > 0" class="compact-comments-container">
                     <a-comment v-for="(item, index) in comments" :key="index" :author="item.user_name"
-                        :avatar="item.user_avatar" :content="item.comment" :datetime="formatCommentTime(item.create_at)"
+                        :avatar="item.user_avatar" :content="item.comment" :datetime="formatDate(item.create_at)"
                         class="compact-comment-item" />
                 </div>
                 <a-empty v-else-if="!commentsError && comments.length === 0" description="暂无评论" />
@@ -204,7 +204,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, nextTick, reactive, h } from 'vue'
+import { ref, computed, onMounted, watch, reactive, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
     ArrowLeftOutlined,
@@ -219,7 +219,7 @@ import { useMangaStore } from '../stores/manga'
 import { useThemeStore } from '../stores/theme'
 import { useUserStore } from '../stores/user'
 import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
-import { formatDatetimeUpdated } from '../utils/date'
+import { formatDate } from '../utils/date'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
@@ -482,11 +482,6 @@ const fetchChapterImages = () => {
                 scrollToTop()
             }
         })
-}
-
-// 格式化评论时间 - 使用统一的日期格式化函数
-const formatCommentTime = (timeStr) => {
-    return formatDatetimeUpdated(timeStr)
 }
 
 // 获取章节评论
