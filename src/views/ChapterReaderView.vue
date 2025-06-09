@@ -6,7 +6,7 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                        }}</a-typography-title>
+                    }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
@@ -112,6 +112,8 @@
                                     <img :src="image.url"
                                         :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
                                         class="manga-image" loading="lazy" />
+                                    <div class="page-number">{{ rowIndex * readerConfig.columnsPerRow + colIndex + 1 }}
+                                    </div>
                                     <div v-if="isDarkMode" class="dark-image-mask"
                                         :style="{ opacity: darkImageMaskOpacity }"></div>
                                 </div>
@@ -127,6 +129,8 @@
                                     <img :src="image.url"
                                         :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
                                         class="manga-image" loading="lazy" />
+                                    <div class="page-number">{{ rowIndex * readerConfig.columnsPerRow + colIndex + 1 }}
+                                    </div>
                                     <div v-if="isDarkMode" class="dark-image-mask"
                                         :style="{ opacity: darkImageMaskOpacity }"></div>
                                 </div>
