@@ -158,7 +158,7 @@
                 <!-- 评论输入框 -->
                 <div v-if="commentsActiveKey.includes('comments')" class="comment-input-section"
                     style="margin-bottom: 16px;">
-                    <a-textarea v-model:value="newComment" placeholder="这里是评论区，不是无人区..." :rows="1" :maxlength="500"
+                    <a-textarea v-model:value="newComment" placeholder="这里是评论区，不是无人区..." :rows="1" :maxlength="200"
                         show-count style="margin-bottom: 8px;" />
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <a-button type="primary" @click="submitComment" :loading="submitCommentLoading"
@@ -542,8 +542,21 @@ const handleCommentsPageChange = (page) => {
 
 // 提交评论
 const submitComment = async () => {
-    if (!newComment.value.trim()) {
+    const commentText = newComment.value.trim()
+
+    if (!commentText) {
         message.warning('请输入评论内容')
+        return
+    }
+
+    // 验证评论长度（3-200字符）
+    if (commentText.length < 3) {
+        message.warning('评论内容至少需要3个字符')
+        return
+    }
+
+    if (commentText.length > 200) {
+        message.warning('评论内容不能超过200个字符')
         return
     }
 
@@ -559,7 +572,7 @@ const submitComment = async () => {
 
     submitCommentLoading.value = true
 
-    await postMangaComment(manga.value.uuid, newComment.value.trim()).then(res => {
+    await postMangaComment(manga.value.uuid, commentText).then(res => {
         message.success('评论发表成功')
         newComment.value = ''
         fetchMangaComments(1) // 刷新评论列表

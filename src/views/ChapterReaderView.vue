@@ -6,7 +6,7 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                    }}</a-typography-title>
+                        }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
@@ -163,7 +163,7 @@
 
             <!-- 评论输入框 -->
             <div class="comment-input-section" style="margin-bottom: 16px;">
-                <a-textarea v-model:value="newComment" placeholder="这里是评论区，不是无人区..." :rows="1" :maxlength="500"
+                <a-textarea v-model:value="newComment" placeholder="这里是评论区，不是无人区..." :rows="1" :maxlength="200"
                     show-count style="margin-bottom: 8px;" />
                 <div style="display: flex; justify-content: space-between; align-items: center;">
 
@@ -515,8 +515,21 @@ const fetchComments = (page = 1) => {
 
 // 发送章节评论
 const submitComment = () => {
-    if (!newComment.value.trim()) {
+    const commentText = newComment.value.trim()
+
+    if (!commentText) {
         message.warning('请输入评论内容')
+        return
+    }
+
+    // 验证评论长度（3-200字符）
+    if (commentText.length < 3) {
+        message.warning('评论内容至少需要3个字符')
+        return
+    }
+
+    if (commentText.length > 200) {
+        message.warning('评论内容不能超过200个字符')
         return
     }
 
@@ -532,7 +545,7 @@ const submitComment = () => {
 
     submitCommentLoading.value = true
 
-    postChapterComment(route.params.chapterId, newComment.value.trim()).then(res => {
+    postChapterComment(route.params.chapterId, commentText).then(res => {
         message.success('评论发表成功')
         newComment.value = ''
         // 刷新评论列表，回到第一页

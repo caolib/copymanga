@@ -135,6 +135,10 @@ import { getVersion } from '@tauri-apps/api/app'
 import { invoke } from '@tauri-apps/api/core'
 import { checkForUpdates } from '@/api/github'
 import { useAppStore } from '@/stores/app'
+import { openExternalUrl } from '@/utils/external-link'
+
+// github仓库地址
+const repoUrl = 'https://github.com/caolib/copymanga'
 
 // 关于页面信息
 const appVersion = ref('')
@@ -164,22 +168,14 @@ onMounted(() => {
     }
 })
 
-// 通用打开URL函数
-const openExternalUrl = (url, errorMsg = '打开链接失败') => {
-    invoke('open_browser', { url }).catch(error => {
-        console.error('打开链接失败:', error)
-        message.error(errorMsg)
-    })
-}
-
 // 打开仓库地址
 const openRepository = () => {
-    openExternalUrl('https://github.com/caolib/copymanga', '打开项目仓库失败')
+    openExternalUrl(repoUrl, '打开项目仓库失败')
 }
 
 // 打开反馈页面
 const openFeedback = () => {
-    openExternalUrl('https://github.com/caolib/copymanga/issues', '打开反馈页面失败')
+    openExternalUrl(`${repoUrl}/issues`, '打开反馈页面失败')
 }
 
 // 获取应用版本
@@ -222,7 +218,7 @@ const onAutoCheckUpdateChange = (checked) => {
 
 // 打开下载页面
 const openDownloadPage = () => {
-    openExternalUrl('https://github.com/caolib/copymanga/releases/latest', '打开下载页面失败')
+    openExternalUrl(`${repoUrl}/releases/latest`, '打开下载页面失败')
 }
 
 // 打开完整更新日志

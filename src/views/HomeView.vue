@@ -25,7 +25,7 @@
                         <a-row :gutter="24">
                             <a-col v-for="item in searchResults" :key="item.path_word" :xs="24" :sm="12" :md="8"
                                 :lg="6">
-                                <a-card hoverable class="manga-card" @click="goToDetail(item)">
+                                <a-card hoverable class="manga-card" @click="goToMangaDetail(item)">
                                     <img :src="item.cover" :alt="item.name" class="manga-cover" />
                                     <div class="manga-title">{{ item.name }}</div>
                                     <div class="manga-author" v-if="item.author && item.author.length">
@@ -56,8 +56,8 @@
                 </template>
                 <div v-show="showBanners">
                     <a-carousel autoplay>
-                        <div v-for="banner in homeData.banners" :key="banner.type + banner.out_uuid"
-                            class="banner-item">
+                        <div v-for="banner in homeData.banners" :key="banner.type + banner.out_uuid" class="banner-item"
+                            @click="handleBannerClick(banner)">
                             <img v-if="showBanners" :src="banner.cover" :alt="banner.brief" class="banner-image" />
                             <div class="banner-text">{{ banner.brief }}</div>
                         </div>
@@ -79,7 +79,7 @@
                     <a-row :gutter="16">
                         <a-col v-for="item in homeData.recComics.list" :key="item.comic.path_word" :xs="12" :sm="8"
                             :md="6" :lg="4">
-                            <a-card hoverable class="manga-card" @click="goToDetail(item.comic)">
+                            <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
                                 <img v-if="showRecommended" :src="item.comic.cover" :alt="item.comic.name"
                                     class="manga-cover" />
                                 <div class="manga-title">{{ item.comic.name }}</div>
@@ -96,7 +96,7 @@
                     v-if="homeData.rankDayComics && homeData.rankDayComics.list && homeData.rankDayComics.list.length > 0">
                     <a-card title="日排行榜" style="margin-bottom: 20px;">
                         <div v-for="(item, index) in homeData.rankDayComics.list.slice(0, 10)"
-                            :key="item.comic.path_word" class="rank-item" @click="goToDetail(item.comic)">
+                            :key="item.comic.path_word" class="rank-item" @click="goToMangaDetail(item.comic)">
                             <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
                             <img :src="item.comic.cover" :alt="item.comic.name" class="rank-cover" />
                             <div class="rank-info">
@@ -110,7 +110,7 @@
                     v-if="homeData.rankWeekComics && homeData.rankWeekComics.list && homeData.rankWeekComics.list.length > 0">
                     <a-card title="周排行榜" style="margin-bottom: 20px;">
                         <div v-for="(item, index) in homeData.rankWeekComics.list.slice(0, 10)"
-                            :key="item.comic.path_word" class="rank-item" @click="goToDetail(item.comic)">
+                            :key="item.comic.path_word" class="rank-item" @click="goToMangaDetail(item.comic)">
                             <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
                             <img :src="item.comic.cover" :alt="item.comic.name" class="rank-cover" />
                             <div class="rank-info">
@@ -124,7 +124,7 @@
                     v-if="homeData.rankMonthComics && homeData.rankMonthComics.list && homeData.rankMonthComics.list.length > 0">
                     <a-card title="月排行榜" style="margin-bottom: 20px;">
                         <div v-for="(item, index) in homeData.rankMonthComics.list.slice(0, 10)"
-                            :key="item.comic.path_word" class="rank-item" @click="goToDetail(item.comic)">
+                            :key="item.comic.path_word" class="rank-item" @click="goToMangaDetail(item.comic)">
                             <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
                             <img :src="item.comic.cover" :alt="item.comic.name" class="rank-cover" />
                             <div class="rank-info">
@@ -142,7 +142,7 @@
                 <a-row :gutter="16">
                     <a-col v-for="item in homeData.hotComics" :key="item.comic.path_word" :xs="12" :sm="8" :md="6"
                         :lg="4">
-                        <a-card hoverable class="manga-card" @click="goToDetail(item.comic)">
+                        <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
                             <img :src="item.comic.cover" :alt="item.comic.name" class="manga-cover" />
                             <div class="manga-title">{{ item.comic.name }}</div>
                             <div class="manga-popular">人气: {{ item.comic.popular }}</div>
@@ -157,7 +157,7 @@
                 <a-row :gutter="16">
                     <a-col v-for="item in homeData.newComics" :key="item.comic.path_word" :xs="12" :sm="8" :md="6"
                         :lg="4">
-                        <a-card hoverable class="manga-card" @click="goToDetail(item.comic)">
+                        <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
                             <img :src="item.comic.cover" :alt="item.comic.name" class="manga-cover" />
                             <div class="manga-title">{{ item.comic.name }}</div>
                             <div class="manga-popular">人气: {{ item.comic.popular }}</div>
@@ -172,7 +172,7 @@
                 <a-row :gutter="16">
                     <a-col v-for="comic in homeData.finishComics.list" :key="comic.path_word" :xs="12" :sm="8" :md="6"
                         :lg="4">
-                        <a-card hoverable class="manga-card" @click="goToDetail(comic)">
+                        <a-card hoverable class="manga-card" @click="goToMangaDetail(comic)">
                             <img :src="comic.cover" :alt="comic.name" class="manga-cover" />
                             <div class="manga-title">{{ comic.name }}</div>
                             <div class="manga-popular">人气: {{ comic.popular }}</div>
@@ -191,6 +191,9 @@ import { DownOutlined, UpOutlined } from '@ant-design/icons-vue'
 import { searchManga } from '../api/manga'
 import { useMangaStore } from '../stores/manga'
 import { useHomeStore } from '../stores/home'
+import { getCurrentApiDomain } from '../config/server-config'
+import { openExternalUrl } from '../utils/external-link'
+import { goToMangaDetail } from '@/router/manga-detail'
 
 const router = useRouter()
 const mangaStore = useMangaStore()
@@ -262,23 +265,15 @@ const fetchSearch = () => {
     if (!searchKeyword.value.trim()) return
     searchLoading.value = true
     searchSearched.value = true
-    searchManga(searchKeyword.value, searchPageSize.value, (searchPage.value - 1) * searchPageSize.value)
-        .then(res => {
-            if (res && res.code === 200 && res.results && res.results.list) {
-                searchResults.value = res.results.list
-                searchTotal.value = res.results.total || 0
-            } else {
-                searchResults.value = []
-                searchTotal.value = 0
-            }
-        })
-        .catch(() => {
-            searchResults.value = []
-            searchTotal.value = 0
-        })
-        .finally(() => {
-            searchLoading.value = false
-        })
+    searchManga(searchKeyword.value, searchPageSize.value, (searchPage.value - 1) * searchPageSize.value).then(res => {
+        searchResults.value = res.results.list
+        searchTotal.value = res.results.total || 0
+    }).catch(() => {
+        searchResults.value = []
+        searchTotal.value = 0
+    }).finally(() => {
+        searchLoading.value = false
+    })
 }
 
 const onSearch = () => {
@@ -298,9 +293,28 @@ const onPageSizeChange = (current, size) => {
     fetchSearch()
 }
 
-const goToDetail = (item) => {
-    mangaStore.setCurrentManga(item)
-    router.push(`/manga/${item.path_word}`)
+
+// 处理轮播图点击
+const handleBannerClick = (banner) => {
+    const { type, out_uuid, comic } = banner
+
+    console.log
+
+    if (type === 6 || type === 4) {
+        // 外部链接，使用浏览器打开
+        openExternalUrl(out_uuid)
+    } else if (type === 3) {
+        // 拼接API域名
+        getCurrentApiDomain().then(domain => {
+            const fullUrl = domain + out_uuid
+            openExternalUrl(fullUrl)
+        })
+    } else if (type === 1) {
+        // 跳转到漫画详情页
+        console.log('跳转到漫画详情:', comic);
+
+        goToMangaDetail(comic)
+    }
 }
 
 onMounted(() => {

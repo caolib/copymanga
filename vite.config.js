@@ -13,7 +13,7 @@ export default defineConfig(async () => ({
     Components({
       resolvers: [
         AntDesignVueResolver({
-          importStyle: false, // css in js
+          importStyle: false
         }),
       ],
     }),

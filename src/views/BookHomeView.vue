@@ -48,7 +48,7 @@
         <a-skeleton active v-if="loading" :paragraph="{ rows: 10 }" :loading="loading" />
 
         <div class="books-grid" v-else>
-            <div v-for="book in books" :key="book.path_word" class="book-card" @click="goToDetail(book.path_word)">
+            <div v-for="book in books" :key="book.path_word" class="book-card" @click="goToBookDetail(book.path_word)">
                 <div class="book-cover">
                     <img :src="book.cover" :alt="book.name" />
                     <div class="book-status" :class="{ completed: book.status === 1 }">
@@ -164,7 +164,7 @@ const fetchThemes = async () => {
     await bookThemeStore.fetchThemes()
 }
 
-const goToDetail = (pathWord) => {
+const goToBookDetail = (pathWord) => {
     const book = books.value.find(book => book.path_word === pathWord)
     if (book) {
         bookStore.currentBook = book
