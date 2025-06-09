@@ -31,3 +31,4 @@ coverage
 .github/instructions/
 
 get-commits.ps1
+/data/

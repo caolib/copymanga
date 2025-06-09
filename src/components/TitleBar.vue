@@ -28,6 +28,7 @@
             <nav class="nav" data-tauri-drag-region="true">
                 <router-link to="/" class="nav-link">漫画</router-link>
                 <router-link to="/my-collection" class="nav-link" v-if="isLoggedInComputed">收藏漫画</router-link>
+                <router-link to="/topics" class="nav-link">专题</router-link>
                 <router-link to="/books" class="nav-link">轻小说</router-link>
                 <router-link to="/my-book-collection" class="nav-link" v-if="isLoggedInComputed">书架</router-link>
                 <router-link to="/settings" class="nav-link settings-link">

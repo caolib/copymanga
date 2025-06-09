@@ -105,11 +105,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                            }}
+                                                        }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                            }}</div>
+                                                        }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
@@ -140,7 +140,7 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { useMangaStore } from '../stores/manga'
+import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { message } from 'ant-design-vue'
 import { getUserBrowseList } from '../api/browse'
 import { updateUserNickname } from '../api/user'
@@ -148,7 +148,7 @@ import { UserOutlined, HistoryOutlined, EditOutlined } from '@ant-design/icons-v
 
 const router = useRouter()
 const userStore = useUserStore()
-const mangaStore = useMangaStore()
+const { goToMangaDetail } = useMangaNavigation()
 const userInfo = computed(() => userStore.userInfo)
 
 // 菜单选择相关
@@ -243,14 +243,8 @@ function handleBrowsePageChange(page, pageSize) {
 
 // 跳转到漫画详情页
 const goToManga = (item) => {
-    // 将漫画基本信息保存到Pinia
-    mangaStore.setCurrentManga(item.comic)
-
-    // 跳转到详情页
-    router.push({
-        name: 'MangaDetail',
-        params: { pathWord: item.comic.path_word }
-    })
+    // 使用统一的导航逻辑
+    goToMangaDetail(item.comic)
 }
 
 // 组件挂载时获取最新的用户信息

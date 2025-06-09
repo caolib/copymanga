@@ -78,12 +78,14 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCollectionStore } from '../stores/collection'
+import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { isLoggedIn } from '../utils/auth'
 import { message } from 'ant-design-vue'
 import { formatDatetimeUpdated } from '../utils/date'
 
 const router = useRouter()
 const collectionStore = useCollectionStore()
+const { goToMangaDetail } = useMangaNavigation()
 
 const ordering = ref('-datetime_updated')
 const mangaList = ref([])
@@ -113,19 +115,8 @@ const formatUpdateTime = (timeString) => {
 }
 
 const goToManga = (item) => {
-    // 安全检查：确保数据完整
-    if (!item || !item.comic || !item.comic.path_word) {
-        message.error('漫画数据异常，无法跳转')
-        return
-    }
-
-    // 将漫画基本信息保存到Pinia
-    collectionStore.setCurrentManga(item.comic)
-
-    // 跳转到详情页，携带来自书架和上次阅读信息
-    router.push({
-        name: 'MangaDetail',
-        params: { pathWord: item.comic.path_word },
+    // 使用统一的导航逻辑，携带来自书架和上次阅读信息
+    goToMangaDetail(item.comic, {
         query: {
             from: 'collection',
             lastBrowse: item.last_browse ? JSON.stringify(item.last_browse) : null

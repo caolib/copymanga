@@ -65,6 +65,48 @@
                 </div>
             </a-card>
 
+            <!-- 专题推荐 -->
+            <a-card v-if="homeData.topics && homeData.topics.list && homeData.topics.list.length > 0"
+                style="margin-bottom: 10px;">
+                <template #title>
+                    <a-button type="text" @click="showTopics = !showTopics" style="padding: 0;">
+                        专题推荐
+                        <DownOutlined v-if="!showTopics" />
+                        <UpOutlined v-if="showTopics" />
+                    </a-button>
+                </template>
+                <template #extra>
+                    <router-link to="/topics" class="view-more-link">查看更多</router-link>
+                </template>
+                <div v-show="showTopics">
+                    <a-row :gutter="16">
+                        <a-col v-for="topic in homeData.topics.list.slice(0, 6)" :key="topic.path_word" :xs="24"
+                            :sm="12" :md="8" :lg="4">
+                            <a-card hoverable class="topic-card-mini" @click="goToTopicDetail(topic.path_word)">
+                                <template #cover v-if="topic.cover">
+                                    <img v-if="showTopics" :src="topic.cover" :alt="topic.title"
+                                        class="topic-cover-mini" />
+                                </template>
+                                <a-card-meta>
+                                    <template #title>
+                                        <div class="topic-title-mini" :title="topic.title">{{ topic.title }}</div>
+                                    </template>
+                                    <template #description>
+                                        <div class="topic-meta-mini">
+                                            <span v-if="topic.period" class="topic-period-mini">{{ topic.period
+                                            }}</span>
+                                            <span v-if="topic.datetime_created" class="topic-date-mini">
+                                                {{ formatTime(new Date(topic.datetime_created).getTime()) }}
+                                            </span>
+                                        </div>
+                                    </template>
+                                </a-card-meta>
+                            </a-card>
+                        </a-col>
+                    </a-row>
+                </div>
+            </a-card>
+
             <!-- 推荐漫画 -->
             <a-card v-if="homeData.recComics && homeData.recComics.list && homeData.recComics.list.length > 0"
                 style="margin-bottom: 10px;">
@@ -191,13 +233,14 @@ import { DownOutlined, UpOutlined } from '@ant-design/icons-vue'
 import { searchManga } from '../api/manga'
 import { useMangaStore } from '../stores/manga'
 import { useHomeStore } from '../stores/home'
+import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { getCurrentApiDomain } from '../config/server-config'
 import { openExternalUrl } from '../utils/external-link'
-import { goToMangaDetail } from '@/router/manga-detail'
 
 const router = useRouter()
 const mangaStore = useMangaStore()
 const homeStore = useHomeStore()
+const { goToMangaDetail } = useMangaNavigation()
 
 // 搜索相关
 const searchKeyword = ref('')
@@ -215,6 +258,7 @@ const loading = computed(() => homeStore.isLoading)
 // 折叠状态
 const showBanners = ref(false)
 const showRecommended = ref(false)
+const showTopics = ref(false)
 
 // 时间格式化函数 - 显示相对时间
 const formatTime = (timestamp) => {
@@ -315,6 +359,11 @@ const handleBannerClick = (banner) => {
 
         goToMangaDetail(comic)
     }
+}
+
+// 跳转到专题详情页
+const goToTopicDetail = (pathWord) => {
+    router.push(`/topic/${pathWord}`)
 }
 
 onMounted(() => {

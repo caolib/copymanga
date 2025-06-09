@@ -23,6 +23,16 @@ const routes = [
         component: () => import('../views/SettingsView.vue')
     },
     {
+        path: '/topics',
+        name: 'Topics',
+        component: () => import('../views/TopicsView.vue')
+    },
+    {
+        path: '/topic/:pathWord',
+        name: 'TopicDetail',
+        component: () => import('../views/TopicDetailView.vue')
+    },
+    {
         path: '/my-collection',
         name: 'MyCollection',
         component: () => import('../views/MyCollectionView.vue'),

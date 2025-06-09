@@ -1,0 +1,223 @@
+@use "./variables" as *;
+
+.topics-view {
+    min-height: 100vh;
+    background-color: $bg-color-light;
+    padding: $spacing-lg;
+
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+    }
+}
+
+.topics-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.topics-header {
+    text-align: center;
+    margin-bottom: $spacing-xl;
+    padding: $spacing-xl 0;
+
+    h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: $text-primary;
+        margin-bottom: $spacing-md;
+
+        @include dark-theme {
+            color: $dark-text-primary;
+        }
+    }
+
+    p {
+        font-size: 16px;
+        color: $text-secondary;
+        max-width: 600px;
+        margin: 0 auto;
+
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+}
+
+.loading-container {
+    padding: $spacing-xl;
+}
+
+.topics-grid {
+    .topic-card {
+        height: 100%;
+        transition: $transition-normal;
+        border-radius: $border-radius-large;
+        overflow: hidden;
+        &:hover {
+            transform: translateY(-4px);
+            box-shadow: $shadow-medium;
+        }
+
+        @include dark-theme {
+            background-color: $dark-bg-elevated;
+            border-color: $dark-border-color-light;
+            &:hover {
+                box-shadow: $shadow-dark-medium;
+            }
+        }
+
+        .topic-cover {
+            position: relative;
+            overflow: hidden;
+
+            img {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                transition: $transition-normal;
+            }
+
+            .topic-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(to bottom, transparent 0%, transparent 60%, rgba($black, 0.8) 100%);
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                padding: $spacing-md;
+
+                .topic-meta {
+                    display: flex;
+                    gap: $spacing-xs;
+                    flex-wrap: wrap;
+
+                    .topic-period,
+                    .topic-journal {
+                        color: $white;
+                        background: rgba($white, 0.2);
+                        padding: 2px 6px;
+                        border-radius: $border-radius-small;
+                        font-size: 11px;
+                        font-weight: 500;
+                        backdrop-filter: blur(4px);
+                    }
+                }
+            }
+        }
+
+        .topic-title {
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 1.4;
+            color: $text-primary;
+            margin-bottom: $spacing-xs;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        .topic-brief {
+            color: $text-secondary;
+            font-size: 13px;
+            line-height: 1.5;
+            margin-bottom: $spacing-sm;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+
+        .topic-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: $text-tertiary;
+
+            @include dark-theme {
+                color: $dark-text-tertiary;
+            }
+
+            .topic-date {
+                font-weight: 500;
+            }
+
+            .topic-series {
+                .ant-tag {
+                    margin: 0;
+                    font-size: 11px;
+
+                    @include dark-theme {
+                        color: $white !important;
+                        background-color: var(--ant-primary-color) !important;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.empty-content {
+    text-align: center;
+    padding: $spacing-xl * 2;
+    color: $text-secondary;
+
+    @include dark-theme {
+        color: $dark-text-secondary;
+    }
+}
+
+.error-container {
+    padding: $spacing-xl;
+}
+
+// 响应式设计
+@include responsive($breakpoint-md) {
+    .topics-view {
+        padding: $spacing-md;
+    }
+
+    .topics-header {
+        h1 {
+            font-size: 28px;
+        }
+
+        p {
+            font-size: 14px;
+        }
+    }
+}
+
+@include responsive($breakpoint-sm) {
+    .topics-view {
+        padding: $spacing-sm;
+    }
+
+    .topics-header {
+        h1 {
+            font-size: 24px;
+        }
+
+        .topic-card {
+            .topic-cover {
+                img {
+                    height: 160px;
+                }
+            }
+        }
+    }
+}
