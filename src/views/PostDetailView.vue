@@ -195,6 +195,11 @@ const readChapter = (chapter) => {
         params: {
             postId: route.params.postId,
             chapterId: chapter.id
+        },
+        query: {
+            // 传递来源信息，便于从阅读页返回时正确导航
+            from: 'detail',
+            postId: route.params.postId
         }
     })
 }
@@ -215,12 +220,38 @@ const handleImageError = (event) => {
 
 // 返回上一页
 const goBack = () => {
-    router.go(-1)
+    // 获取来源信息，判断合理的返回位置
+    const from = router.currentRoute.value.query.from || 'home'
+
+    // 根据来源决定返回位置
+    if (from === 'topic') {
+        // 从专题进入的，返回专题页面
+        router.push({ name: 'TopicDetail', params: { topicId: router.currentRoute.value.query.topicId || '' } })
+    } else if (from === 'reader') {
+        // 从阅读页返回时，去写真首页
+        router.push({ name: 'PostHome' })
+    } else {
+        // 默认返回写真首页
+        router.push({ name: 'PostHome' })
+    }
 }
 
 // 组件挂载时获取数据
 onMounted(() => {
     fetchPostData()
+
+    // 如果是从 PostReader 来的，但没有带 from 参数，设置一个默认来源
+    // 这样可以避免无限循环返回问题
+    const fromPath = route.query.from || ''
+    if (!fromPath && route.path.includes('/reader')) {
+        router.replace({
+            ...route,
+            query: {
+                ...route.query,
+                from: 'reader'
+            }
+        })
+    }
 })
 </script>
 
