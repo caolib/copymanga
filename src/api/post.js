@@ -1,8 +1,19 @@
 import request from '../utils/request'
 
 /**
+ * 获取写真首页信息
+ * @returns 
+ */
+function getPostHome() {
+    return request.get('/api/v3/h5/postIndex', {
+        params: { platform: 3 }
+    })
+}
+
+
+/**
  * 获取写真信息
- * @param {number} post_id 写真ID
+ * @param {string} post_id 写真ID
  * @returns 
  */
 function getPostInfo(post_id) {
@@ -13,7 +24,7 @@ function getPostInfo(post_id) {
 
 /**
  * 获取写真章节信息
- * @param {number} post_id 写真ID
+ * @param {string} post_id 写真ID
  * @returns 
  */
 function getPostId(post_id) {
@@ -24,8 +35,8 @@ function getPostId(post_id) {
 
 /**
  * 获取写真图片URL
- * @param {number} post_id 写真ID
- * @param {number} id 写真章节ID
+ * @param {string} post_id 写真ID
+ * @param {string} id 写真章节ID
  * @returns 
  */
 function getPostImg(post_id, id) {
@@ -35,6 +46,7 @@ function getPostImg(post_id, id) {
 }
 
 export {
+    getPostHome,
     getPostInfo,
     getPostId,
     getPostImg

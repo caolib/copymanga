@@ -3,8 +3,7 @@
         <div class="topics-container">
             <!-- 标题区域 -->
             <div class="page-header">
-                <h1>专题推荐</h1>
-                <p class="page-description">发现精彩的漫画专题，探索更多有趣内容</p>
+                <h1>专题</h1>
             </div>
 
             <!-- 加载状态 -->
