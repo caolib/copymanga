@@ -3,7 +3,8 @@
         <!-- 加载状态 -->
         <div v-if="loading" class="loading-container">
             <a-skeleton active :paragraph="{ rows: 8 }" />
-        </div> <!-- 首页内容 -->
+        </div>
+        <!-- 首页内容 -->
         <div v-else class="home-content">
             <div class="header-actions">
                 <a-button type="primary" :size="'small'" :icon="h(ReloadOutlined)" :loading="refreshLoading"
@@ -28,7 +29,8 @@
                         </a-carousel>
                     </a-collapse-panel>
                 </a-collapse>
-            </div> <!-- 最新写真 -->
+            </div>
+            <!-- 最新写真 -->
             <div v-if="newPosts.length > 0" class="section">
                 <div class="section-header">
                     <h2>最新写真</h2>
@@ -57,7 +59,8 @@
                         </a-card>
                     </a-col>
                 </a-row>
-            </div><!-- 排行榜 -->
+            </div>
+            <!-- 排行榜 -->
             <a-row :gutter="[20, 20]">
                 <!-- 周排行榜 -->
                 <a-col :xs="24" :lg="12" v-if="weekRanking.length > 0">

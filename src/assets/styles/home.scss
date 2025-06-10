@@ -7,6 +7,50 @@
     margin: 0 auto;
 }
 
+.search-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.search-input {
+    flex: 1;
+    max-width: 500px;
+    min-width: 240px;
+}
+
+.refresh-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.update-time {
+    color: #999;
+    font-size: 12px;
+}
+
+html.dark .update-time {
+    color: #bbb;
+}
+
+// 折叠面板样式
+.home :deep(.ant-collapse) {
+    margin-bottom: 10px;
+    background-color: transparent;
+}
+
+.home :deep(.ant-collapse-header) {
+    font-weight: 500;
+    font-size: 16px;
+}
+
+.home :deep(.ant-collapse-content-box) {
+    padding: 10px 5px !important;
+}
+
 .home :deep(.ant-card .ant-card-body) {
     padding: 10px 5px !important;
 }
