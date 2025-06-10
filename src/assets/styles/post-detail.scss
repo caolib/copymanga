@@ -1,0 +1,258 @@
+@use "./variables" as *;
+
+.post-detail-view {
+    min-height: 100vh;
+    background: $bg-color;
+    padding: $spacing-md;
+
+    .post-detail-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: $bg-color-white;
+        border-radius: $border-radius-large;
+        box-shadow: $shadow-light;
+        overflow: hidden;
+    }
+
+    .loading-container {
+        padding: $spacing-xl;
+    }
+
+    .post-detail {
+        .post-header {
+            display: flex;
+            gap: $spacing-xl;
+            padding: $spacing-xl;
+            background: $bg-color-white;
+
+            .post-cover-section {
+                flex-shrink: 0;
+
+                .post-cover-large {
+                    width: 200px;
+                    height: 280px;
+                    object-fit: cover;
+                    border-radius: $border-radius-medium;
+                    box-shadow: $shadow-light;
+                }
+            }
+
+            .post-info-section {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: $spacing-md;
+
+                .post-title {
+                    font-size: 28px;
+                    font-weight: 600;
+                    color: $text-primary;
+                    margin: 0;
+                    line-height: 1.3;
+                }
+
+                .post-brief {
+                    color: $text-secondary;
+                    line-height: 1.6;
+                    font-size: 16px;
+                }
+
+                .post-meta {
+                    display: flex;
+                    flex-direction: column;
+                    gap: $spacing-xs;
+
+                    .post-date,
+                    .post-read-times,
+                    .post-popular,
+                    .post-ticket {
+                        color: $text-tertiary;
+                        font-size: 14px;
+                    }
+
+                    .post-ticket {
+                        color: $primary-color;
+                        font-weight: 500;
+                    }
+                }
+
+                .post-tags {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: $spacing-xs;
+                    margin: $spacing-sm 0;
+                }
+
+                .post-actions {
+                    display: flex;
+                    gap: $spacing-sm;
+                    margin-top: auto;
+                }
+            }
+        }
+
+        .chapters-section {
+            padding: 0 $spacing-xl $spacing-xl;
+
+            .section-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: $spacing-lg;
+
+                h2 {
+                    margin: 0;
+                    color: $text-primary;
+                    font-size: 20px;
+                }
+            }
+
+            .chapters-loading {
+                padding: $spacing-lg 0;
+            }
+
+            .chapters-list {
+                .chapter-name {
+                    font-weight: 500;
+                    color: $text-primary;
+                }
+
+                .chapter-info {
+                    display: flex;
+                    gap: $spacing-md;
+                    color: $text-secondary;
+                    font-size: 14px;
+
+                    .chapter-size,
+                    .chapter-sort {
+                        color: $text-tertiary;
+                    }
+                }
+            }
+
+            .empty-chapters {
+                padding: $spacing-xl 0;
+                text-align: center;
+            }
+        }
+    }
+
+    .error-container {
+        padding: $spacing-xl;
+        text-align: center;
+    }
+
+    // 响应式设计
+    @media (max-width: 768px) {
+        padding: $spacing-sm;
+
+        .post-detail {
+            .post-header {
+                flex-direction: column;
+                gap: $spacing-md;
+                padding: $spacing-lg;
+
+                .post-cover-section {
+                    align-self: center;
+
+                    .post-cover-large {
+                        width: 160px;
+                        height: 224px;
+                    }
+                }
+
+                .post-info-section {
+                    .post-title {
+                        font-size: 20px;
+                        text-align: center;
+                    }
+
+                    .post-actions {
+                        justify-content: center;
+                    }
+                }
+            }
+
+            .chapters-section {
+                padding: 0 $spacing-lg $spacing-lg;
+
+                .section-header {
+                    flex-direction: column;
+                    gap: $spacing-sm;
+                    align-items: stretch;
+
+                    h2 {
+                        text-align: center;
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 深色主题
+html.dark {
+    .post-detail-view {
+        background: $dark-bg-primary;
+
+        .post-detail-container {
+            background: $dark-bg-secondary;
+            box-shadow: $shadow-dark-light;
+        }
+
+        .post-detail {
+            .post-header {
+                background: $dark-bg-secondary;
+
+                .post-cover-large {
+                    box-shadow: $shadow-dark-light;
+                }
+
+                .post-info-section {
+                    .post-title {
+                        color: $dark-text-primary;
+                    }
+
+                    .post-brief {
+                        color: $dark-text-secondary;
+                    }
+
+                    .post-meta {
+                        .post-date,
+                        .post-read-times,
+                        .post-popular {
+                            color: $dark-text-tertiary;
+                        }
+
+                        .post-ticket {
+                            color: $primary-color;
+                        }
+                    }
+                }
+            }
+
+            .chapters-section {
+                .section-header {
+                    h2 {
+                        color: $dark-text-primary;
+                    }
+                }
+
+                .chapters-list {
+                    .chapter-name {
+                        color: $dark-text-primary;
+                    }
+
+                    .chapter-info {
+                        color: $dark-text-secondary;
+
+                        .chapter-size,
+                        .chapter-sort {
+                            color: $dark-text-tertiary;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

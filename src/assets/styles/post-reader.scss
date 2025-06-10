@@ -1,0 +1,205 @@
+@use "./variables" as *;
+
+.post-reader-view {
+    min-height: 100vh;
+    background: $bg-color;
+    display: flex;
+    flex-direction: column;
+
+    .post-reader-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        max-width: 100%;
+        margin: 0 auto;
+    }
+
+    .loading-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: $spacing-xl;
+    }
+
+    .post-reader {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+
+        .reader-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: $spacing-sm $spacing-md;
+            background: $bg-color-white;
+            border-bottom: 1px solid $border-color;
+            box-shadow: $shadow-light;
+            z-index: 10;
+
+            .header-left {
+                display: flex;
+                align-items: center;
+                gap: $spacing-sm;
+
+                .post-title {
+                    font-weight: 500;
+                    color: $text-primary;
+                    font-size: 16px;
+                }
+            }
+
+            .header-center {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: $spacing-xs;
+
+                .chapter-name {
+                    font-weight: 500;
+                    color: $text-primary;
+                    font-size: 16px;
+                }
+
+                .progress-text {
+                    color: $text-secondary;
+                    font-size: 14px;
+                }
+            }
+
+            .header-right {
+                display: flex;
+                gap: $spacing-xs;
+            }
+        }
+        .reader-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: $spacing-md;
+            background: $bg-color;
+
+            .images-container {
+                max-width: 800px;
+                margin: 0 auto;
+
+                .image-item {
+                    margin-bottom: $spacing-lg;
+                    text-align: center;
+
+                    :deep(.ant-image) {
+                        max-width: 100%;
+
+                        img {
+                            max-width: 100%;
+                            max-height: 90vh;
+                            object-fit: contain;
+                            border-radius: $border-radius-medium;
+                            box-shadow: $shadow-medium;
+                        }
+                    }
+                }
+            }
+
+            .no-images {
+                flex: 1;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: $spacing-xl;
+            }
+        }
+    }
+
+    .error-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: $spacing-xl;
+        text-align: center;
+    }
+
+    // 响应式设计
+    @media (max-width: 768px) {
+        .post-reader {
+            .reader-header {
+                flex-direction: column;
+                gap: $spacing-xs;
+                padding: $spacing-sm;
+
+                .header-left,
+                .header-center,
+                .header-right {
+                    flex-direction: row;
+                    gap: $spacing-xs;
+                }
+                .header-center {
+                    .chapter-name {
+                        font-size: 14px;
+                    }
+                }
+            }
+            .reader-content {
+                padding: $spacing-sm;
+
+                .images-container {
+                    .image-item {
+                        margin-bottom: $spacing-md;
+
+                        :deep(.ant-image) {
+                            img {
+                                max-height: 80vh;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 深色主题
+html.dark {
+    .post-reader-view {
+        background: $dark-bg-primary;
+
+        .post-reader {
+            .reader-header {
+                background: $dark-bg-secondary;
+                border-bottom-color: $dark-border-color;
+                box-shadow: $shadow-dark-light;
+
+                .header-left {
+                    .post-title {
+                        color: $dark-text-primary;
+                    }
+                }
+
+                .header-center {
+                    .chapter-name {
+                        color: $dark-text-primary;
+                    }
+
+                    .progress-text {
+                        color: $dark-text-secondary;
+                    }
+                }
+            }
+            .reader-content {
+                background: $dark-bg-primary;
+                .images-container {
+                    .image-item {
+                        :deep(.ant-image) {
+                            img {
+                                background: $dark-bg-secondary;
+                                box-shadow: $shadow-dark-medium;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

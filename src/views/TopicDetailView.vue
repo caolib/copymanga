@@ -59,8 +59,7 @@
                     </div> <!-- 漫画列表 -->
                     <div v-else-if="topicContent.length > 0" class="content-grid"> <a-row :gutter="[24, 24]">
                             <a-col v-for="item in topicContent" :key="item.path_word" :xs="12" :sm="8" :md="6" :lg="4"
-                                :xl="4" :xxl="4">
-                                <a-card hoverable class="manga-card" @click="goToMangaDetail(item)">
+                                :xl="4" :xxl="4"> <a-card hoverable class="manga-card" @click="goToDetail(item)">
                                     <template #cover>
                                         <div class="manga-cover">
                                             <img :src="item.cover" :alt="item.name" @error="handleImageError" />
@@ -79,17 +78,33 @@
                                             <div class="manga-title" :title="item.name">
                                                 {{ item.name }}
                                             </div>
-                                        </template>
-                                        <template #description>
+                                        </template> <template #description>
                                             <div class="manga-info">
-                                                <div v-if="item.author && item.author.length > 0" class="manga-author">
-                                                    作者：{{item.author.map(a => a.name).join(', ')}}
+                                                <!-- 写真专题显示不同信息 -->
+                                                <div v-if="currentTopic.type === 4">
+                                                    <div v-if="item.brief" class="post-brief">
+                                                        {{ item.brief }}
+                                                    </div>
+                                                    <div v-if="item.tags && item.tags.length > 0" class="post-tags">
+                                                        <a-tag v-for="tag in item.tags.slice(0, 3)" :key="tag.path_word"
+                                                            size="small">
+                                                            {{ tag.name || tag.path_word }}
+                                                        </a-tag>
+                                                    </div>
                                                 </div>
-                                                <div v-if="item.theme && item.theme.length > 0" class="manga-themes">
-                                                    <a-tag v-for="theme in item.theme.slice(0, 3)"
-                                                        :key="theme.path_word" size="small">
-                                                        {{ theme.name }}
-                                                    </a-tag>
+                                                <!-- 漫画专题显示原有信息 -->
+                                                <div v-else>
+                                                    <div v-if="item.author && item.author.length > 0"
+                                                        class="manga-author">
+                                                        作者：{{item.author.map(a => a.name).join(', ')}}
+                                                    </div>
+                                                    <div v-if="item.theme && item.theme.length > 0"
+                                                        class="manga-themes">
+                                                        <a-tag v-for="theme in item.theme.slice(0, 3)"
+                                                            :key="theme.path_word" size="small">
+                                                            {{ theme.name }}
+                                                        </a-tag>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </template>
@@ -177,7 +192,9 @@ const fetchTopicContent = async () => {
     if (!pathWord) return
 
     const offset = (currentPage.value - 1) * pageSize.value
-    const result = await topicStore.fetchTopicContent(pathWord, 1, offset, pageSize.value)
+    // 根据专题类型决定内容类型：4是写真专题，1是漫画专题
+    const contentType = currentTopic.value?.type === 4 ? 4 : 1
+    const result = await topicStore.fetchTopicContent(pathWord, contentType, offset, pageSize.value)
 
     if (!result.success) {
         console.error('获取专题内容失败:', result.message)
@@ -224,6 +241,20 @@ const formatNumber = (num) => {
         return (num / 10000).toFixed(1) + '万'
     }
     return num.toString()
+}
+
+// 跳转到详情页面（根据专题类型判断）
+const goToDetail = (item) => {
+    // 如果专题类型是4，则是写真专题，跳转到写真详情
+    if (currentTopic.value?.type === 4) {
+        router.push({
+            name: 'PostDetail',
+            params: { postId: item.path_word }
+        })
+    } else {
+        // 否则是漫画专题，跳转到漫画详情
+        goToMangaDetail(item)
+    }
 }
 
 // 处理图片加载错误

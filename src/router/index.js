@@ -85,6 +85,18 @@ const routes = [
         name: 'BookTextReader',
         component: () => import('../views/BookTextReaderView.vue'),
         meta: { requiresAuth: true }
+    },
+    {
+        path: '/post/:postId',
+        name: 'PostDetail',
+        component: () => import('../views/PostDetailView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/post/:postId/reader/:chapterId',
+        name: 'PostReader',
+        component: () => import('../views/PostReaderView.vue'),
+        meta: { requiresAuth: true }
     }
 ]
 
