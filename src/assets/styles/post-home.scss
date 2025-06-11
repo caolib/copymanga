@@ -20,6 +20,31 @@
             }
         }
     }
+
+    // 年龄确认弹窗样式
+    .age-confirm-content {
+        padding: $spacing-md 0;
+
+        .age-confirm-text {
+            margin-top: $spacing-lg;
+            color: $text-secondary;
+            line-height: 1.6;
+
+            p {
+                margin-bottom: $spacing-md;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+            }
+        }
+    }
+
+    .age-confirm-footer {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: $spacing-md;
+    }
 }
 
 .post-home-tab {
@@ -234,6 +259,13 @@ html.dark {
             .ant-tabs {
                 background: $dark-bg-secondary;
                 box-shadow: $shadow-dark-light;
+            }
+        }
+
+        // 年龄确认弹窗深色主题
+        .age-confirm-content {
+            .age-confirm-text {
+                color: $dark-text-secondary;
             }
         }
     }

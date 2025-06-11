@@ -10,7 +10,6 @@ function getPostHome() {
     })
 }
 
-
 /**
  * 获取写真信息
  * @param {string} post_id 写真ID
@@ -45,9 +44,53 @@ function getPostImg(post_id, id) {
     })
 }
 
+
+/**
+ * 写真-发现
+ * @param {*} mannequin 模特
+ * @param {*} tag 标签
+ * @param {*} ordering 排序 -datetime_updated：最近更新 -popular：热度
+ * @param {*} limit 页大小
+ * @param {*} offset 页码-1
+ * @returns 
+ */
+function discoverPost(mannequin = '', tag = '', ordering = '-datetime_updated', limit = 18, offset = 0) {
+    return request.get('/api/v3/posts', {
+        params: {
+            mannequin,
+            tag,
+            ordering,
+            limit,
+            offset,
+            platform: 3
+        }
+    })
+}
+
+
+/**
+ * 获取最新写真信息
+ * @param {*} date 日期
+ * @param {*} limit 页大小
+ * @param {*} offset 页码-1
+ * @returns 
+ */
+function getNewestPost(date = '', limit = 18, offset = 0) {
+    return request.get('/api/v3/update/post/newest', {
+        params: {
+            date,
+            limit,
+            offset,
+            platform: 3
+        }
+    })
+}
+
 export {
     getPostHome,
     getPostInfo,
     getPostId,
-    getPostImg
+    getPostImg,
+    discoverPost,
+    getNewestPost
 }

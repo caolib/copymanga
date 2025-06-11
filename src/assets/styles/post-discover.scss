@@ -1,0 +1,189 @@
+@use "./variables" as *;
+
+.post-discover-tab {
+    .loading-container {
+        padding: $spacing-xl;
+        text-align: center;
+    }
+
+    .discover-content {
+        .filter-section {
+            margin-bottom: $spacing-xl;
+            background-color: $bg-color-white;
+            border-radius: $border-radius-medium;
+            padding: $spacing-md;
+            box-shadow: $shadow-light;
+
+            .filter-group {
+                margin-bottom: $spacing-md;
+
+                &:last-child {
+                    margin-bottom: 0;
+                }
+
+                .filter-label {
+                    font-size: 16px;
+                    font-weight: 500;
+                    margin-bottom: $spacing-sm;
+                    color: $text-primary;
+                }
+
+                .filter-buttons {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: $spacing-sm;
+
+                    .ant-btn {
+                        margin-right: $spacing-sm;
+                        margin-bottom: $spacing-sm;
+                    }
+                }
+            }
+        }
+
+        .posts-grid {
+            margin-bottom: $spacing-xl;
+
+            .post-card {
+                height: 100%;
+                transition: transform 0.2s ease;
+                overflow: hidden;
+
+                &:hover {
+                    transform: translateY(-4px);
+                }
+
+                .ant-card-cover {
+                    overflow: hidden;
+                }
+
+                .post-cover {
+                    position: relative;
+                    height: 0;
+                    padding-top: 129%; // 维持 328x422 的长宽比
+                    overflow: hidden;
+                    border-radius: $border-radius-medium $border-radius-medium 0 0;
+
+                    img {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        object-fit: cover;
+                        transition: transform 0.3s ease;
+                        display: block;
+                    }
+
+                    .ticket-badge {
+                        position: absolute;
+                        top: $spacing-sm;
+                        right: $spacing-sm;
+                        background: $warning-color;
+                        color: white;
+                        padding: 4px 8px;
+                        border-radius: $border-radius-small;
+                        font-size: 12px;
+                        font-weight: 600;
+                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+                    }
+
+                    &:hover img {
+                        transform: scale(1.05);
+                    }
+                }
+
+                .ant-card-meta-title {
+                    margin-bottom: $spacing-sm;
+
+                    .post-title {
+                        font-size: 14px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+
+                .ant-card-meta-description {
+                    .post-info {
+                        .mannequin-info {
+                            font-size: 12px;
+                            margin-bottom: 4px;
+                            color: $primary-color;
+                        }
+
+                        .post-meta {
+                            display: flex;
+                            justify-content: space-between;
+                            font-size: 12px;
+                            color: $text-secondary;
+
+                            .post-date {
+                                color: $text-tertiary;
+                            }
+
+                            .post-popular {
+                                color: $text-secondary;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        .empty-container {
+            padding: $spacing-xl;
+            text-align: center;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            margin-top: $spacing-xl;
+            margin-bottom: $spacing-xl;
+        }
+    }
+}
+
+// 暗色模式适配
+body.dark-theme {
+    .post-discover-tab {
+        .discover-content {
+            .filter-section {
+                background-color: $dark-bg-secondary;
+                box-shadow: none;
+
+                .filter-label {
+                    color: $dark-text-primary;
+                }
+            }
+
+            .posts-grid {
+                .post-card {
+                    background-color: $dark-bg-secondary;
+                    border-color: $dark-border-color;
+
+                    .ant-card-meta-title {
+                        .post-title {
+                            color: $dark-text-primary;
+                        }
+                    }
+
+                    .ant-card-meta-description {
+                        .post-info {
+                            .post-meta {
+                                .post-date {
+                                    color: $dark-text-tertiary;
+                                }
+
+                                .post-popular {
+                                    color: $dark-text-secondary;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

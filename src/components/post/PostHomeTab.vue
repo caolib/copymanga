@@ -16,16 +16,17 @@
             <!-- 轮播图 -->
             <div v-if="banners.length > 0" class="banners-section">
                 <a-collapse v-model:activeKey="activeCollapseKey">
-                    <a-collapse-panel key="1" header="轮播推荐">
-                        <a-carousel autoplay :dots="true">
-                            <div v-for="banner in banners" :key="banner.out_uuid" class="banner-item">
-                                <div class="banner-content" @click="handleBannerClick(banner)">
-                                    <img :src="banner.cover" :alt="banner.brief" />
-                                    <div class="banner-overlay">
-                                        <h3>{{ banner.brief }}</h3>
+                    <a-collapse-panel key="1" header="轮播推荐"> <a-carousel autoplay :dots="true">
+                            <template #default>
+                                <div v-for="banner in banners" :key="banner.out_uuid" class="banner-item">
+                                    <div class="banner-content" @click="handleBannerClick(banner)">
+                                        <img :src="banner.cover" :alt="banner.brief" />
+                                        <div class="banner-overlay">
+                                            <h3>{{ banner.brief }}</h3>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            </template>
                         </a-carousel>
                     </a-collapse-panel>
                 </a-collapse>
