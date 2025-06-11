@@ -28,7 +28,7 @@
             <div class="posts-grid">
                 <a-row :gutter="[16, 16]">
                     <a-col v-for="item in posts" :key="item.uuid" :xs="12" :sm="8" :md="6" :lg="4" :xl="4" :xxl="4">
-                        <a-card hoverable class="post-card" @click="goToPostDetail(item)">
+                        <a-card hoverable class="post-card" @click="goToPostDetail(item.uuid)">
                             <template #cover>
                                 <div class="post-cover">
                                     <img :src="item.cover" :alt="item.name" @error="handleImageError" />
@@ -74,12 +74,11 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { goToPostDetail } from '@/router/post-router'
 import { formatDate } from '../../utils/date'
 import { discoverPost } from '../../api/post'
 import { message } from 'ant-design-vue'
 
-const router = useRouter()
 
 // 状态变量
 const loading = ref(false)
@@ -140,14 +139,6 @@ const handlePageSizeChange = (current, size) => {
     pageSize.value = size
     currentPage.value = 1
     fetchDiscoverData()
-}
-
-// 跳转到写真详情
-const goToPostDetail = (post) => {
-    router.push({
-        name: 'PostDetail',
-        params: { postId: post.uuid }
-    })
 }
 
 // 格式化数字

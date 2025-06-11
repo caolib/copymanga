@@ -1,0 +1,40 @@
+@use "./variables" as *;
+
+.post-ranking-tab {
+    padding: $spacing-md;
+
+    .ranking-header {
+        margin-bottom: $spacing-md;
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            .update-time {
+                color: $text-secondary;
+                font-size: $font-sm;
+            }
+        }
+    }
+
+    // 标签页样式
+    :deep(.ant-tabs) {
+        .ant-tabs-tab {
+            font-weight: 500;
+        }
+
+        .ant-tabs-content-holder {
+            padding-top: $spacing-md;
+        }
+    }
+}
+
+// 暗色模式
+html.dark .post-ranking-tab {
+    .ranking-header {
+        .update-time {
+            color: $dark-text-secondary;
+        }
+    }
+}

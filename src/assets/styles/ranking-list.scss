@@ -1,0 +1,197 @@
+@use "./variables" as *;
+
+.ranking-list {
+    .loading-container,
+    .error-container {
+        padding: $spacing-xl 0;
+    }
+
+    .ranking-content {
+        .ranking-posts {
+            margin-bottom: $spacing-lg;
+        }
+
+        .ranking-card {
+            height: 100%;
+            cursor: pointer;
+            transition: $transition-normal;
+            border-radius: $border-radius-large;
+            overflow: hidden;
+
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: $shadow-medium;
+            }
+
+            .ranking-cover {
+                position: relative;
+                height: 240px;
+                overflow: hidden;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: $transition-normal;
+                }
+
+                &:hover img {
+                    transform: scale(1.05);
+                }
+
+                // 排名徽章
+                .ranking-badge {
+                    position: absolute;
+                    top: 8px;
+                    left: 8px;
+                    width: 32px;
+                    height: 32px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                    font-size: $font-sm;
+                    color: white;
+                    z-index: 2;
+
+                    &.rank-1 {
+                        background: linear-gradient(135deg, #ffd700, #ffed4e);
+                        color: #d68e00;
+                        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+                    }
+
+                    &.rank-2 {
+                        background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+                        color: #666;
+                        box-shadow: 0 2px 8px rgba(192, 192, 192, 0.5);
+                    }
+
+                    &.rank-3 {
+                        background: linear-gradient(135deg, #cd7f32, #daa555);
+                        color: #8b4513;
+                        box-shadow: 0 2px 8px rgba(205, 127, 50, 0.5);
+                    }
+
+                    &.rank-normal {
+                        background: rgba(0, 0, 0, 0.7);
+                        color: white;
+                    }
+                }
+
+                // 人气变化标识
+                .popularity-change {
+                    position: absolute;
+                    top: 8px;
+                    right: 8px;
+                    padding: 2px 6px;
+                    border-radius: $border-radius-small;
+                    font-size: $font-xs;
+                    font-weight: 500;
+                    z-index: 2;
+
+                    &.rise-positive {
+                        background: rgba(82, 196, 26, 0.9);
+                        color: white;
+                    }
+
+                    &.rise-negative {
+                        background: rgba(245, 63, 63, 0.9);
+                        color: white;
+                    }
+
+                    &.rise-neutral {
+                        background: rgba(0, 0, 0, 0.6);
+                        color: white;
+                    }
+                }
+            }
+
+            // 卡片内容
+            :deep(.ant-card-body) {
+                padding: $spacing-sm;
+            }
+
+            .post-title {
+                font-weight: 500;
+                margin-bottom: $spacing-xs;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                line-height: 1.4;
+                height: 2.8em;
+            }
+
+            .post-info {
+                .post-popular {
+                    color: $primary-color;
+                    font-size: $font-sm;
+                    font-weight: 500;
+                    margin-bottom: 4px;
+                }
+
+                .last-rank {
+                    color: $text-secondary;
+                    font-size: $font-xs;
+                }
+            }
+        }
+
+        .empty-container {
+            padding: $spacing-xl 0;
+            text-align: center;
+        }
+
+        .pagination-container {
+            margin-top: $spacing-lg;
+            text-align: center;
+        }
+    }
+}
+
+// 暗色模式适配
+html.dark .ranking-list {
+    .ranking-card {
+        &:hover {
+            box-shadow: $shadow-dark-medium;
+        }
+
+        .ranking-cover {
+            .ranking-badge.rank-normal {
+                background: rgba(255, 255, 255, 0.2);
+                color: #fff;
+            }
+        }
+
+        .post-info {
+            .last-rank {
+                color: $dark-text-secondary;
+            }
+        }
+    }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+    .ranking-list {
+        .ranking-content {
+            .ranking-card {
+                .ranking-cover {
+                    height: 200px;
+
+                    .ranking-badge {
+                        width: 28px;
+                        height: 28px;
+                        font-size: 12px;
+                    }
+                }
+
+                .post-title {
+                    font-size: $font-sm;
+                }
+            }
+        }
+    }
+}

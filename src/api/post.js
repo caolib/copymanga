@@ -86,11 +86,34 @@ function getNewestPost(date = '', limit = 18, offset = 0) {
     })
 }
 
+/**
+ * 获取排行榜信息
+ * @param {*} type 类型 - 6: 写真
+ * @param {*} date_type 日期类型 - week: 周榜 - month: 月榜 - total: 总榜
+ * @param {*} limit 页大小
+ * @param {*} offset 页码-1
+ * @param {*} audience 受众类型 - male: 男性
+ * @returns 
+ */
+function getPostRank(type = 6, date_type, limit = 18, offset = 0, audience = 'male') {
+    return request.get('/api/v3/ranks', {
+        params: {
+            type,
+            date_type,
+            limit,
+            offset,
+            audience,
+            platform: 3
+        }
+    })
+}
+
 export {
     getPostHome,
     getPostInfo,
     getPostId,
     getPostImg,
     discoverPost,
-    getNewestPost
+    getNewestPost,
+    getPostRank
 }

@@ -19,7 +19,7 @@
                     <a-collapse-panel key="1" header="轮播推荐"> <a-carousel autoplay :dots="true">
                             <template #default>
                                 <div v-for="banner in banners" :key="banner.out_uuid" class="banner-item">
-                                    <div class="banner-content" @click="handleBannerClick(banner)">
+                                    <div class="banner-content" @click="goToPostDetail(banner.comic.path_word)">
                                         <img :src="banner.cover" :alt="banner.brief" />
                                         <div class="banner-overlay">
                                             <h3>{{ banner.brief }}</h3>
@@ -107,7 +107,7 @@
                         <a-row :gutter="[16, 16]">
                             <a-col v-for="item in monthRanking.slice(0, 8)" :key="item.post.path_word" :xs="12" :sm="12"
                                 :md="8" :lg="12" :xl="8">
-                                <a-card hoverable class="post-card" @click="goToPostDetail(item.post)">
+                                <a-card hoverable class="post-card" @click="goToPostDetail(item.post.uuid)">
                                     <template #cover>
                                         <div class="post-cover">
                                             <img :src="item.post.cover" :alt="item.post.name"
@@ -145,6 +145,7 @@ import { message } from 'ant-design-vue'
 import { usePostHomeStore } from '../../stores/post-home'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { goToPostDetail } from '@/router/post-router'
 
 const router = useRouter()
 const postHomeStore = usePostHomeStore()
@@ -182,25 +183,6 @@ const refreshData = async () => {
     }).finally(() => {
         refreshLoading.value = false
     })
-}
-
-// 跳转到写真详情
-const goToPostDetail = (post) => {
-    router.push({
-        name: 'PostDetail',
-        params: { postId: post.uuid }
-    })
-}
-
-// 处理轮播图点击
-const handleBannerClick = (banner) => {
-    if (banner.comic?.path_word) {
-        // 轮播图中comic对象使用path_word作为ID
-        router.push({
-            name: 'PostDetail',
-            params: { postId: banner.comic.path_word }
-        })
-    }
 }
 
 // 格式化数字

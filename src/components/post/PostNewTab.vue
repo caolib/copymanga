@@ -20,7 +20,7 @@
                 <a-row :gutter="[16, 16]">
                     <a-col v-for="item in newPosts" :key="item.post.uuid" :xs="12" :sm="8" :md="6" :lg="4" :xl="4"
                         :xxl="4">
-                        <a-card hoverable class="post-card" @click="goToPostDetail(item.post)">
+                        <a-card hoverable class="post-card" @click="goToPostDetail(item.post.uuid)">
                             <template #cover>
                                 <div class="post-cover">
                                     <img :src="item.post.cover" :alt="item.post.name" @error="handleImageError" />
@@ -62,14 +62,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { formatDate } from '../../utils/date'
 import { message } from 'ant-design-vue'
 import { usePostNewStore } from '../../stores/post-new'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { goToPostDetail } from '@/router/post-router'
 
-const router = useRouter()
 const postNewStore = usePostNewStore()
 
 const refreshLoading = ref(false)
@@ -112,14 +111,6 @@ const refreshData = async () => {
 // 处理页码变更
 const handlePageChange = (page) => {
     fetchNewPostsData(page)
-}
-
-// 跳转到写真详情
-const goToPostDetail = (post) => {
-    router.push({
-        name: 'PostDetail',
-        params: { postId: post.uuid }
-    })
 }
 
 // 处理图片加载错误

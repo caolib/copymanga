@@ -98,6 +98,13 @@ $breakpoint-xl: 1600px;
 $font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans",
     sans-serif;
 
+// 字体大小
+$font-xs: 12px;
+$font-sm: 14px;
+$font-base: 16px;
+$font-lg: 18px;
+$font-xl: 20px;
+
 @use "sass:selector";
 
 // 混合器
