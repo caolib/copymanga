@@ -20,6 +20,12 @@
                             </template>
                             界面设置
                         </a-menu-item>
+                        <a-menu-item key="cache">
+                            <template #icon>
+                                <DatabaseOutlined />
+                            </template>
+                            缓存管理
+                        </a-menu-item>
                         <a-menu-item key="about">
                             <template #icon>
                                 <InfoCircleOutlined />
@@ -40,6 +46,9 @@
                     <!-- 界面设置 -->
                     <AppearanceSettings v-if="selectedMenu[0] === 'appearance'" />
 
+                    <!-- 缓存管理 -->
+                    <CacheSettings v-if="selectedMenu[0] === 'cache'" />
+
                     <!-- 关于 -->
                     <AboutSettings v-if="selectedMenu[0] === 'about'" />
                 </div>
@@ -53,11 +62,13 @@ import { ref, computed } from 'vue'
 import {
     CloudServerOutlined,
     SkinOutlined,
-    InfoCircleOutlined
+    InfoCircleOutlined,
+    DatabaseOutlined
 } from '@ant-design/icons-vue'
 import ServerSettings from '@/components/settings/ServerSettings.vue'
 import AppearanceSettings from '@/components/settings/AppearanceSettings.vue'
 import AboutSettings from '@/components/settings/AboutSettings.vue'
+import CacheSettings from '@/components/settings/CacheSettings.vue'
 import { useAppStore } from '@/stores/app'
 
 const selectedMenu = ref(['server']) // 当前选中的菜单项

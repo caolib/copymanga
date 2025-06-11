@@ -18,26 +18,32 @@
 
 这是一个拷贝漫画第三方桌面端应用，目前支持win、mac、linux，只有windows有简单测试过，[前往下载](https://github.com/caolib/copymanga/releases)
 
+功能：
+
+- [x] 漫画
+- [x] 轻小说
+- [x] 写真
+- [ ] 动画
 
 ### 漫画
 
-![image-20250529161957872](https://s2.loli.net/2025/05/29/d1Hyigj9bwhLAPE.png)
+![image-20250611171235202](https://s2.loli.net/2025/06/11/3a7YcMSFtkE46VC.png)
 
-![image-20250530202817836](https://s2.loli.net/2025/05/30/IZoxw6aBgunrJYL.png)
+![image-20250611171319310](https://s2.loli.net/2025/06/11/kNGwQKeCpYniDJI.png)
 
-![image-20250529161929177](https://s2.loli.net/2025/05/29/hSA5YjyLaQXwE8N.png)
+![image-20250611182153968](https://s2.loli.net/2025/06/11/T8jP5cmgdSziquW.png)
 
 ![image-20250529162057214](https://s2.loli.net/2025/05/29/rwYCb5BLvfHKn7X.png)
 
 ![image-20250529162210160](https://s2.loli.net/2025/05/29/aopKubEDILBzkY7.png)
 
-![image-20250529162310278](https://s2.loli.net/2025/05/29/lX4aEtm83hOMI76.png)
+![image-20250611182258241](https://s2.loli.net/2025/06/11/FeVknxADERKHybg.png)
 
-![image-20250530203128206](https://s2.loli.net/2025/05/30/wsdvxOStAh5FKaq.png)
+![image-20250611182347188](https://s2.loli.net/2025/06/11/oY1IlODBPyVH7cj.png)
 
-![image-20250529162327732](https://s2.loli.net/2025/05/29/DNoF7gBPhOyZnf8.png)
+![image-20250611182441206](https://s2.loli.net/2025/06/11/Wc8G129xh43SzbZ.png)
 
-![image-20250529162352675](https://s2.loli.net/2025/05/29/Och2oB54ryxgUfF.png)
+![image-20250611182559524](https://s2.loli.net/2025/06/11/r3s78xnVkwjX6Mf.png)
 
 ### 轻小说
 

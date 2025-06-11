@@ -82,7 +82,7 @@ const isLogin = ref(true) // 默认显示登录表单
 const loginForm = reactive({
     username: '',
     password: '',
-    rememberPassword: false,
+    rememberPassword: true
 })
 
 // 注册表单数据
