@@ -78,7 +78,7 @@
                                 {{ formatDate(userInfo?.createdAt) || '-' }}
                             </a-descriptions-item>
                             <a-descriptions-item label="最后登录">
-                                {{ formatUserProfileDate(userInfo?.lastLoginAt) || '-' }}
+                                {{ formatDate(userInfo?.lastLoginAt) || '-' }}
                             </a-descriptions-item>
                         </a-descriptions>
                     </a-card>
@@ -105,11 +105,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                            }}
+                                                        }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                            }}</div>
+                                                        }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
@@ -141,7 +141,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
-import { formatUserProfileDate } from '../utils/date'
+import { formatDate } from '../utils/date'
 import { message } from 'ant-design-vue'
 import { getUserBrowseList } from '../api/browse'
 import { updateUserNickname } from '../api/user'
