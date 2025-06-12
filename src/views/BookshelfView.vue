@@ -2,7 +2,7 @@
     <div class="bookshelf-container">
         <div class="bookshelf-content">
             <a-tabs v-model:activeKey="activeTab" @change="handleTabChange" type="card" size="default">
-                <template #tabBarExtraContent>
+                <template #rightExtra>
                     <div class="tab-extra-actions">
                         <a-button type="primary" size="small" @click="refreshCurrentTab" :loading="loading">
                             刷新
@@ -53,7 +53,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { isLoggedIn } from '../utils/auth'

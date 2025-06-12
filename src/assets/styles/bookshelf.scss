@@ -43,7 +43,6 @@
     :deep(.ant-tabs) {
         .ant-tabs-nav {
             margin: 0;
-            background: rgba($primary-color, 0.05);
 
             @include dark-theme {
                 background: rgba($primary-color, 0.1);

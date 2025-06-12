@@ -2,6 +2,18 @@ import { pathHelper, CONFIG_FILES } from '@/utils/path-helper'
 
 const DEFAULT_SERVER_PORT = '5001'
 
+// 默认请求头配置
+const DEFAULT_REQUEST_HEADERS = {
+    source: 'copyApp',
+    deviceinfo: 'PGEM10-star2qltechn',
+    webp: '1',
+    platform: '3',
+    version: '2.3.0',
+    region: '1',
+    device: 'PQ3B.190801.05281406',
+    umstring: 'b4c89ca4104ea9a97750314d791520ac'
+}
+
 // 读取服务器配置
 export async function getServerConfig() {
     const config = await pathHelper.readConfig(CONFIG_FILES.SERVER, {
@@ -21,7 +33,8 @@ export async function getAppConfig() {
         apiSources: [],
         currentApiIndex: -1,
         bookApiSources: [],
-        currentBookApiIndex: -1
+        currentBookApiIndex: -1,
+        requestHeaders: DEFAULT_REQUEST_HEADERS
     })
 
     // 确保配置包含所有必要字段
@@ -29,7 +42,8 @@ export async function getAppConfig() {
         apiSources: config.apiSources || [],
         currentApiIndex: config.currentApiIndex || -1,
         bookApiSources: config.bookApiSources || [],
-        currentBookApiIndex: config.currentBookApiIndex || -1
+        currentBookApiIndex: config.currentBookApiIndex || -1,
+        requestHeaders: { ...DEFAULT_REQUEST_HEADERS, ...(config.requestHeaders || {}) }
     }
 
     // 如果当前索引超出范围，重置为-1
@@ -200,6 +214,52 @@ export async function validateApiConfig() {
         message: '配置有效',
         currentSource
     }
+}
+
+// ============ 请求头配置管理 ============
+
+// 获取请求头配置
+export async function getRequestHeaders() {
+    const config = await getAppConfig()
+    return config.requestHeaders || DEFAULT_REQUEST_HEADERS
+}
+
+// 保存请求头配置
+export async function saveRequestHeaders(headers) {
+    const config = await getAppConfig()
+    config.requestHeaders = { ...DEFAULT_REQUEST_HEADERS, ...headers }
+    await saveAppConfig(config)
+    return config.requestHeaders
+}
+
+// 重置请求头为默认值
+export async function resetRequestHeaders() {
+    const config = await getAppConfig()
+    config.requestHeaders = { ...DEFAULT_REQUEST_HEADERS }
+    await saveAppConfig(config)
+    return config.requestHeaders
+}
+
+// 获取默认请求头配置
+export function getDefaultRequestHeaders() {
+    return { ...DEFAULT_REQUEST_HEADERS }
+}
+
+// 验证请求头配置
+export function validateRequestHeaders(headers) {
+    if (!headers || typeof headers !== 'object') {
+        return false
+    }
+
+    // 检查必需的字段
+    const requiredFields = ['source', 'platform', 'version']
+    for (const field of requiredFields) {
+        if (!headers[field]) {
+            return false
+        }
+    }
+
+    return true
 }
 
 // ============ 轻小说源管理 ============

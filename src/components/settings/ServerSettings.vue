@@ -127,6 +127,76 @@
             </a-form>
         </a-card>
 
+        <!-- 请求头配置 -->
+        <a-card title="请求头配置" class="setting-card" id="headers-config">
+            <a-form layout="vertical">
+                <a-alert type="info" show-icon style="margin-bottom: 16px">
+                    <template #message>
+                        配置API请求时的自定义请求头，用于模拟移动端APP访问。dt字段会自动生成当前日期。
+                    </template>
+                </a-alert>
+
+                <a-row :gutter="16">
+                    <a-col :span="12">
+                        <a-form-item label="来源标识 (source)">
+                            <a-input v-model:value="headersForm.source" placeholder="copyApp" size="large" />
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-form-item label="平台标识 (platform)">
+                            <a-input v-model:value="headersForm.platform" placeholder="3" size="large" />
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+
+                <a-row :gutter="16">
+                    <a-col :span="12">
+                        <a-form-item label="应用版本 (version)">
+                            <a-input v-model:value="headersForm.version" placeholder="2.3.0" size="large" />
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-form-item label="地区标识 (region)">
+                            <a-input v-model:value="headersForm.region" placeholder="1" size="large" />
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+
+                <a-form-item label="设备信息 (deviceinfo)">
+                    <a-input v-model:value="headersForm.deviceinfo" placeholder="PGEM10-star2qltechn" size="large" />
+                </a-form-item>
+
+                <a-form-item label="设备标识 (device)">
+                    <a-input v-model:value="headersForm.device" placeholder="PQ3B.190801.05281406" size="large" />
+                </a-form-item>
+
+                <a-row :gutter="16">
+                    <a-col :span="12">
+                        <a-form-item label="WebP支持 (webp)">
+                            <a-input v-model:value="headersForm.webp" placeholder="1" size="large" />
+                        </a-form-item>
+                    </a-col>
+                    <a-col :span="12">
+                        <a-form-item label="统计字符串 (umstring)">
+                            <a-input v-model:value="headersForm.umstring" placeholder="b4c89ca4104ea9a97750314d791520ac"
+                                size="large" />
+                        </a-form-item>
+                    </a-col>
+                </a-row>
+
+                <a-form-item>
+                    <a-space>
+                        <a-button type="primary" @click="saveHeaders" :loading="savingHeaders" size="large">
+                            保存请求头配置
+                        </a-button>
+                        <a-button @click="resetHeaders" size="large">
+                            恢复默认值
+                        </a-button>
+                    </a-space>
+                </a-form-item>
+            </a-form>
+        </a-card>
+
         <a-card title="当前状态" class="setting-card" id="status"> <a-descriptions :column="1">
                 <a-descriptions-item label="转发服务器">
                     http://localhost:{{ currentServerPort }}
@@ -173,7 +243,11 @@ import {
     switchApiSource,
     addBookApiSource,
     removeBookApiSource as removeBookApiSourceConfig,
-    switchBookApiSource
+    switchBookApiSource,
+    getRequestHeaders,
+    saveRequestHeaders,
+    resetRequestHeaders,
+    getDefaultRequestHeaders
 } from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
 import { relaunch } from '@tauri-apps/plugin-process'
@@ -211,6 +285,19 @@ const newBookApiSource = ref({
 })
 const addingBookSource = ref(false)
 const removingBookIndex = ref(-1)
+
+// 请求头配置相关状态
+const headersForm = ref({
+    source: 'copyApp',
+    deviceinfo: 'PGEM10-star2qltechn',
+    webp: '1',
+    platform: '3',
+    version: '2.3.0',
+    region: '1',
+    device: 'PQ3B.190801.05281406',
+    umstring: 'b4c89ca4104ea9a97750314d791520ac'
+})
+const savingHeaders = ref(false)
 
 // 验证端口格式
 const validatePort = (rule, value) => {
@@ -309,6 +396,13 @@ const loadConfig = () => {
         }
     }).catch(error => {
         message.error('加载应用配置失败')
+    })
+
+    // 加载请求头配置
+    getRequestHeaders().then(headers => {
+        headersForm.value = { ...headers }
+    }).catch(error => {
+        console.warn('加载请求头配置失败:', error)
     })
 }
 
@@ -446,6 +540,33 @@ const removeBookApiSource = async (index) => {
         message.error(error.message || '删除轻小说API源失败')
     } finally {
         removingBookIndex.value = -1
+    }
+}
+
+// 保存请求头配置
+const saveHeaders = async () => {
+    savingHeaders.value = true
+    try {
+        await saveRequestHeaders(headersForm.value)
+        message.success('请求头配置保存成功！')
+        appStore.setNeedsRestart(true)
+    } catch (error) {
+        message.error(error.message || '保存请求头配置失败')
+    } finally {
+        savingHeaders.value = false
+    }
+}
+
+// 重置请求头为默认值
+const resetHeaders = async () => {
+    try {
+        const defaultHeaders = getDefaultRequestHeaders()
+        headersForm.value = { ...defaultHeaders }
+        await saveRequestHeaders(defaultHeaders)
+        message.success('已恢复默认请求头配置')
+        appStore.setNeedsRestart(true)
+    } catch (error) {
+        message.error('重置请求头配置失败')
     }
 }
 

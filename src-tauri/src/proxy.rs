@@ -62,7 +62,6 @@ pub fn build_cors_response(origin: &str) -> Result<Response, StatusCode> {
     } else {
         response = response.header("Access-Control-Allow-Origin", "*");
     }
-
     response = response
         .header(
             "Access-Control-Allow-Methods",
@@ -70,7 +69,7 @@ pub fn build_cors_response(origin: &str) -> Result<Response, StatusCode> {
         )
         .header(
             "Access-Control-Allow-Headers",
-            "authorization,content-type,accept,origin,referer,user-agent,platform",
+            "authorization,content-type,accept,origin,referer,user-agent,platform,source,deviceinfo,webp,dt,version,region,device,host,umstring",
         )
         .header("Access-Control-Max-Age", "86400");
 
@@ -112,6 +111,12 @@ pub async fn handle_internal_request(
             headers.insert(k, v.clone());
         }
     }
+
+    // 添加浏览器不允许设置的请求头
+    headers.insert("user-agent", "COPY/2.3.0".parse().unwrap());
+    headers.insert("referer", "com.copymanga.app-2.3.0".parse().unwrap());
+    headers.insert("host", "api.copy2000.online".parse().unwrap());
+
     builder = builder.headers(headers);
 
     // 复制body
