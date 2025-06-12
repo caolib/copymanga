@@ -134,6 +134,14 @@
     flex-shrink: 0; // 防止收缩
     min-width: fit-content; // 最小宽度适应内容
 
+    .nav-icon {
+        margin-right: $spacing-xs;
+    }
+
+    .collection-icon {
+        color: $warning-color;
+    }
+
     &:hover {
         background-color: $bg-color;
         color: $text-primary;

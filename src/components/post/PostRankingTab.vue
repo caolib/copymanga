@@ -3,7 +3,8 @@
         <!-- 头部操作区 -->
         <div class="ranking-header">
             <div class="header-actions">
-                <a-button type="primary" size="small" :loading="refreshLoading" @click="refreshAllData">
+                <a-button type="primary" size="small" :loading="refreshLoading" :icon="h(ReloadOutlined)"
+                    @click="refreshAllData">
                     刷新全部
                 </a-button>
                 <span v-if="rankingStore.lastUpdateTime" class="update-time">
@@ -48,6 +49,8 @@ import { ref, computed, onMounted } from 'vue'
 import { usePostRankingStore } from '../../stores/post-ranking'
 import { formatDate } from '../../utils/date'
 import RankingList from './RankingList.vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 
 const rankingStore = usePostRankingStore()
 

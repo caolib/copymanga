@@ -1,19 +1,5 @@
 <template>
     <div class="book-home-container">
-        <div class="header">
-            <h1>轻小说</h1>
-            <div class="header-actions">
-                <a-button type="primary" @click="refreshBooks" :loading="loading" size="small">
-                    刷新数据
-                </a-button>
-                <div v-if="lastUpdateTime" class="update-info">
-                    <a-typography-text type="secondary" style="font-size: 12px;">
-                        最后更新：{{ formatDate(lastUpdateTime) }}
-                    </a-typography-text>
-                </div>
-            </div>
-        </div>
-
         <div class="filters-section">
             <div class="filter-group">
                 <div class="filter-label">排序方式</div>
@@ -26,6 +12,17 @@
                         @click="changeOrdering('-datetime_updated')">
                         更新时间
                     </a-button>
+                </div>
+                <div class="filter-actions">
+                    <a-button type="primary" @click="refreshBooks" :icon="h(ReloadOutlined)" :loading="loading"
+                        size="small">
+                        刷新
+                    </a-button>
+                    <div v-if="lastUpdateTime" class="update-info">
+                        <a-typography-text type="secondary" style="font-size: 12px;">
+                            最后更新：{{ formatDate(lastUpdateTime) }}
+                        </a-typography-text>
+                    </div>
                 </div>
             </div>
 
@@ -78,6 +75,8 @@ import { useBookHomeStore } from '@/stores/book-home'
 import { useBookThemeStore } from '@/stores/book-theme'
 import { message } from 'ant-design-vue'
 import { formatDate } from '@/utils/date'
+import { ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 
 const router = useRouter()
 const bookStore = useBookStore()

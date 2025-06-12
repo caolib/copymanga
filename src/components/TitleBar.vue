@@ -29,9 +29,12 @@
                 <router-link to="/" class="nav-link">漫画</router-link>
                 <router-link to="/books" class="nav-link">轻小说</router-link>
                 <router-link to="/posts" class="nav-link">写真</router-link>
-                <router-link to="/bookshelf" class="nav-link" v-if="isLoggedInComputed">书架</router-link>
+                <router-link to="/bookshelf" class="nav-link" v-if="isLoggedInComputed">
+                    <StarFilled class="nav-icon collection-icon" />书架
+                </router-link>
                 <router-link to="/topics" class="nav-link">专题</router-link>
                 <router-link to="/settings" class="nav-link settings-link">
+                    <SettingFilled class="nav-icon" />
                     <span class="settings-text">设置</span>
                     <span v-if="hasUpdate" class="nav-update-indicator"></span>
                 </router-link>
@@ -89,7 +92,7 @@ import { isLoggedIn, logout } from '../utils/auth'
 import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
 import { useAppStore } from '../stores/app'
-import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
 const router = useRouter()

@@ -4,11 +4,11 @@
             <!-- 搜索区 -->
             <a-card style="margin-bottom: 10px;">
                 <div class="search-header">
-                    <a-input-search v-model:value="searchKeyword" placeholder="输入漫画名进行搜索" enter-button="搜索" size="large"
-                        @search="onSearch" class="search-input" />
+                    <a-input-search v-model:value="searchKeyword" placeholder="输入漫画名进行搜索" enter-button size="large"
+                        :loading="searchLoading" @search="onSearch" class="search-input" />
                     <div class="refresh-section">
-                        <a-button type="primary" @click="refreshHomeData" :loading="homeStore.isLoading"
-                            :disabled="loading" size="small">
+                        <a-button type="primary" @click="refreshHomeData" :icon="h(ReloadOutlined)"
+                            :loading="homeStore.isLoading" :disabled="loading" size="small">
                             刷新数据
                         </a-button>
                         <span v-if="homeStore.lastUpdateTime" class="update-time">
@@ -201,6 +201,8 @@ import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { getCurrentApiDomain } from '../config/server-config'
 import { openExternalUrl } from '../utils/external-link'
 import { formatDate } from '../utils/date'
+import { ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 
 const router = useRouter()
 const homeStore = useHomeStore()

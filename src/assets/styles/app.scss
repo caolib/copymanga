@@ -41,7 +41,7 @@ body {
 .main-content {
     flex: 1;
     overflow-y: auto;
-    padding: 70px $spacing-lg $spacing-lg $spacing-lg; /* 上边距为标题栏高度 + 20px */
+    padding: 65px $spacing-sm $spacing-sm $spacing-sm; /* 上边距为标题栏高度 + 20px */
     max-width: 1200px;
     margin: 0 auto;
     width: 100%;

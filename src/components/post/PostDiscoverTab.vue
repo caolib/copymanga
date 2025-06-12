@@ -13,11 +13,11 @@
                     <div class="filter-label">排序方式</div>
                     <div class="filter-buttons">
                         <a-button :type="currentOrdering === '-datetime_updated' ? 'primary' : 'default'" size="small"
-                            @click="changeOrdering('-datetime_updated')">
-                            更新时间
+                            :icon="h(FieldTimeOutlined)" @click="changeOrdering('-datetime_updated')">
+                            最新
                         </a-button>
                         <a-button :type="currentOrdering === '-popular' ? 'primary' : 'default'" size="small"
-                            @click="changeOrdering('-popular')">
+                            :icon="h(FireOutlined)" @click="changeOrdering('-popular')">
                             热门
                         </a-button>
                     </div>
@@ -78,6 +78,8 @@ import { goToPostDetail } from '@/router/post-router'
 import { formatDate } from '../../utils/date'
 import { discoverPost } from '../../api/post'
 import { message } from 'ant-design-vue'
+import { h } from 'vue'
+import { FireOutlined, FieldTimeOutlined } from '@ant-design/icons-vue'
 
 
 // 状态变量
