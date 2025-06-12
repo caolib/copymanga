@@ -78,10 +78,8 @@
                 <a-card title="卷列表" size="small">
                     <template #extra>
                         <a-space>
-                            <a-button type="text" size="small" @click="refreshVolumes" :loading="volumesLoading">
-                                <template #icon>
-                                    <ReloadOutlined />
-                                </template>
+                            <a-button type="text" size="small" @click="refreshVolumes" :loading="volumesLoading"
+                                :icon="h(ReloadOutlined)">
                                 刷新
                             </a-button>
                             <a-select v-model:value="sortOrder" style="width: 120px" @change="sortVolumes">
@@ -122,6 +120,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import { getBookDetail, getBookVolumes, collectBook } from '@/api/book'
 import { formatDate } from '@/utils/date'
 

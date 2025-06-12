@@ -13,28 +13,19 @@
         <div v-else-if="volumeDetail" class="volume-detail">
             <!-- 返回按钮和章节导航 -->
             <div class="volume-navigation">
-                <a-button type="default" @click="goBack" size="large">
-                    <template #icon>
-                        <ArrowLeftOutlined />
-                    </template>
+                <a-button type="default" @click="goBack" size="large" :icon="h(ArrowLeftOutlined)">
                     返回轻小说详情
                 </a-button>
 
                 <div class="chapter-navigation">
-                    <a-button v-if="volumeDetail.volume.prev" @click="goToVolume(volumeDetail.volume.prev)"
-                        size="large">
-                        <template #icon>
-                            <LeftOutlined />
-                        </template>
+                    <a-button v-if="volumeDetail.volume.prev" @click="goToVolume(volumeDetail.volume.prev)" size="large"
+                        :icon="h(LeftOutlined)">
                         上一卷
                     </a-button>
 
                     <a-button v-if="volumeDetail.volume.next" @click="goToVolume(volumeDetail.volume.next)" size="large"
-                        type="primary">
+                        type="primary" :icon="h(RightOutlined)">
                         下一卷
-                        <template #icon>
-                            <RightOutlined />
-                        </template>
                     </a-button>
                 </div>
             </div>
@@ -94,19 +85,13 @@
             <!-- 底部章节导航 -->
             <div class="bottom-navigation">
                 <a-button v-if="volumeDetail.volume.prev" @click="goToVolume(volumeDetail.volume.prev)" size="large"
-                    block style="margin-bottom: 8px;">
-                    <template #icon>
-                        <LeftOutlined />
-                    </template>
+                    block style="margin-bottom: 8px;" :icon="h(LeftOutlined)">
                     上一卷
                 </a-button>
 
                 <a-button v-if="volumeDetail.volume.next" @click="goToVolume(volumeDetail.volume.next)" size="large"
-                    type="primary" block>
+                    type="primary" block :icon="h(RightOutlined)">
                     下一卷
-                    <template #icon>
-                        <RightOutlined />
-                    </template>
                 </a-button>
             </div>
 
@@ -126,6 +111,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import { getVolumeDetail } from '@/api/book'
 
 const route = useRoute()

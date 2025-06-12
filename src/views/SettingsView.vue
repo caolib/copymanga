@@ -8,28 +8,16 @@
                         <h1>设置</h1>
                     </div>
                     <a-menu v-model:selectedKeys="selectedMenu" mode="inline" style="border-right: 0">
-                        <a-menu-item key="server">
-                            <template #icon>
-                                <CloudServerOutlined />
-                            </template>
+                        <a-menu-item key="server" :icon="h(CloudServerOutlined)">
                             服务设置
                         </a-menu-item>
-                        <a-menu-item key="appearance">
-                            <template #icon>
-                                <SkinOutlined />
-                            </template>
+                        <a-menu-item key="appearance" :icon="h(SkinOutlined)">
                             界面设置
                         </a-menu-item>
-                        <a-menu-item key="cache">
-                            <template #icon>
-                                <DatabaseOutlined />
-                            </template>
+                        <a-menu-item key="cache" :icon="h(DatabaseOutlined)">
                             缓存管理
                         </a-menu-item>
-                        <a-menu-item key="about">
-                            <template #icon>
-                                <InfoCircleOutlined />
-                            </template>
+                        <a-menu-item key="about" :icon="h(InfoCircleOutlined)">
                             <div class="menu-item-content">
                                 关于
                                 <span v-if="hasUpdate" class="update-indicator"></span>
@@ -65,6 +53,7 @@ import {
     InfoCircleOutlined,
     DatabaseOutlined
 } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import ServerSettings from '@/components/settings/ServerSettings.vue'
 import AppearanceSettings from '@/components/settings/AppearanceSettings.vue'
 import AboutSettings from '@/components/settings/AboutSettings.vue'

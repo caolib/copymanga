@@ -17,12 +17,10 @@
                 </div>
 
                 <a-menu v-model:selectedKeys="selectedMenu" mode="inline" class="user-profile-menu">
-                    <a-menu-item key="profile">
-                        <template #icon><user-outlined /></template>
+                    <a-menu-item key="profile" :icon="h(UserOutlined)">
                         个人信息
                     </a-menu-item>
-                    <a-menu-item key="browse-history">
-                        <template #icon><history-outlined /></template>
+                    <a-menu-item key="browse-history" :icon="h(HistoryOutlined)">
                         浏览记录
                     </a-menu-item>
                 </a-menu>
@@ -55,8 +53,8 @@
                             <a-descriptions-item label="昵称">
                                 <div v-if="!editingNickname" class="nickname-display">
                                     <span>{{ userInfo?.nickname || '-' }}</span>
-                                    <a-button type="text" size="small" @click="startEditNickname" class="edit-btn">
-                                        <template #icon><edit-outlined /></template>
+                                    <a-button type="text" size="small" @click="startEditNickname" class="edit-btn"
+                                        :icon="h(EditOutlined)">
                                         编辑
                                     </a-button>
                                 </div>
@@ -105,11 +103,11 @@
                                                     <div class="browse-card-info">
                                                         <div class="comic-title">{{ item.comic.name }}</div>
                                                         <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                        }}
+                                                            }}
                                                         </div>
                                                         <div class="comic-author">作者: {{item.comic.author.map(a =>
                                                             a.name).join('、')
-                                                        }}</div>
+                                                            }}</div>
                                                         <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
                                                     </div>
                                                 </div>
@@ -146,6 +144,7 @@ import { message } from 'ant-design-vue'
 import { getUserBrowseList } from '../api/browse'
 import { updateUserNickname } from '../api/user'
 import { UserOutlined, HistoryOutlined, EditOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 
 const router = useRouter()
 const userStore = useUserStore()

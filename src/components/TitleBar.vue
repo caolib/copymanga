@@ -40,20 +40,11 @@
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
                     {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
                 </button>
-                <a-button type="text" class="nav-link" @click="goBack" title="后退">
-                    <template #icon>
-                        <ArrowLeftOutlined />
-                    </template>
+                <a-button type="text" class="nav-link" @click="goBack" title="后退" :icon="h(ArrowLeftOutlined)">
                 </a-button>
-                <a-button type="text" class="nav-link" @click="goForward" title="前进">
-                    <template #icon>
-                        <ArrowRightOutlined />
-                    </template>
+                <a-button type="text" class="nav-link" @click="goForward" title="前进" :icon="h(ArrowRightOutlined)">
                 </a-button>
-                <a-button type="text" class="nav-link" @click="refreshPage" title="刷新">
-                    <template #icon>
-                        <ReloadOutlined />
-                    </template>
+                <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)">
                 </a-button>
             </nav>
         </div>
@@ -100,6 +91,7 @@ import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
 import { useAppStore } from '../stores/app'
 import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 
 const router = useRouter()
 const userStore = useUserStore()

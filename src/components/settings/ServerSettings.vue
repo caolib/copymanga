@@ -145,10 +145,8 @@
                 <a-alert v-if="appStore.needsRestart" type="warning" message="配置已更改，需要重启应用以生效" show-icon
                     style="margin-bottom: 16px" />
                 <a-space>
-                    <a-button type="primary" @click="handleRestart" :loading="restarting" size="large" danger>
-                        <template #icon>
-                            <ReloadOutlined />
-                        </template>
+                    <a-button type="primary" @click="handleRestart" :loading="restarting" size="large" danger
+                        :icon="h(ReloadOutlined)">
                         重启应用
                     </a-button>
                     <span class="restart-help">重启应用以应用所有配置更改</span>
@@ -162,6 +160,7 @@
 import { ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import {
     getServerConfig,
     saveServerConfig,
