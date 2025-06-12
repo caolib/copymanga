@@ -1,0 +1,220 @@
+@use "./variables" as *;
+
+// 轻小说收藏组件样式
+.book-collection {
+    .collection-controls {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: $spacing-xl;
+        padding: $spacing-lg;
+        background: rgba($primary-color, 0.05);
+        border-radius: $border-radius-medium;
+
+        @include dark-theme {
+            background: rgba($primary-color, 0.1);
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: $spacing-md;
+        }
+
+        .controls-right {
+            .total-info {
+                color: $text-secondary;
+                font-size: 14px;
+                font-weight: 500;
+
+                @include dark-theme {
+                    color: $dark-text-secondary;
+                }
+            }
+        }
+
+        @include responsive($breakpoint-sm) {
+            flex-direction: column;
+            gap: $spacing-md;
+            align-items: stretch;
+
+            .controls-left,
+            .controls-right {
+                justify-content: center;
+                text-align: center;
+            }
+        }
+    }
+}
+
+// 轻小说卡片样式
+.book-card {
+    height: 100%;
+    cursor: pointer;
+    border-radius: $border-radius-large;
+    border: 1px solid $border-color-light;
+    overflow: hidden;
+    transition: all $transition-normal cubic-bezier(0.25, 0.8, 0.25, 1);
+
+    &:hover {
+        border-color: $primary-color;
+        box-shadow: $shadow-heavy;
+        transform: translateY(-2px);
+    }
+
+    @include dark-theme {
+        background: $dark-bg-secondary;
+        border-color: $dark-border-color;
+
+        &:hover {
+            border-color: $primary-hover;
+            box-shadow: $shadow-dark-heavy;
+        }
+    }
+}
+
+.book-cover-container {
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+    background: $bg-color-light;
+
+    @include dark-theme {
+        background: $dark-bg-elevated;
+    }
+
+    .book-cover {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform $transition-normal;
+    }
+
+    .reading-progress {
+        position: absolute;
+        bottom: $spacing-sm;
+        left: $spacing-sm;
+        z-index: 2;
+    }
+
+    &:hover .book-cover {
+        transform: scale(1.05);
+    }
+}
+
+.book-info {
+    padding: $spacing-lg;
+    background: $bg-color-white;
+
+    @include dark-theme {
+        background: $dark-bg-secondary;
+    }
+
+    .book-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: $spacing-sm;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: $text-primary;
+
+        @include dark-theme {
+            color: $dark-text-primary;
+        }
+    }
+
+    .book-author {
+        font-size: 13px;
+        color: $text-secondary;
+        margin-bottom: $spacing-sm;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+
+    .book-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+
+        .book-status {
+            padding: 2px $spacing-xs;
+            background: rgba($success-color, 0.1);
+            color: $success-color;
+            border-radius: $border-radius-small;
+            font-weight: 500;
+
+            @include dark-theme {
+                background: rgba($success-color, 0.2);
+            }
+        }
+
+        .book-updated {
+            color: $text-tertiary;
+            font-size: 11px;
+
+            @include dark-theme {
+                color: $dark-text-tertiary;
+            }
+        }
+    }
+}
+
+// 分页样式
+.pagination-container {
+    margin-top: $spacing-xl;
+    padding: $spacing-xl 0;
+    text-align: center;
+    background: rgba($bg-color-white, 0.8);
+    border-radius: $border-radius-large;
+    backdrop-filter: blur(10px);
+
+    @include dark-theme {
+        background: rgba($dark-bg-secondary, 0.8);
+    }
+}
+
+// 响应式设计
+@include responsive($breakpoint-lg) {
+    .book-cover-container {
+        height: 280px;
+    }
+}
+
+@include responsive($breakpoint-md) {
+    .book-cover-container {
+        height: 260px;
+    }
+
+    .book-info {
+        padding: $spacing-md;
+
+        .book-title {
+            font-size: 15px;
+        }
+    }
+}
+
+@include responsive($breakpoint-sm) {
+    .book-cover-container {
+        height: 240px;
+    }
+
+    .book-info {
+        padding: $spacing-sm;
+
+        .book-title {
+            font-size: 14px;
+        }
+
+        .book-author {
+            font-size: 12px;
+        }
+    }
+}

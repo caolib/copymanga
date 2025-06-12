@@ -38,15 +38,15 @@ const routes = [
         component: () => import('../views/TopicDetailView.vue')
     },
     {
-        path: '/my-collection',
-        name: 'MyCollection',
-        component: () => import('../views/MyCollectionView.vue'),
+        path: '/bookshelf',
+        name: 'Bookshelf',
+        component: () => import('../views/BookshelfView.vue'),
         meta: { requiresAuth: true }
     },
     {
-        path: '/my-book-collection',
-        name: 'MyBookCollection',
-        component: () => import('../views/MyBookCollectionView.vue'),
+        path: '/my-collection',
+        name: 'MyCollection',
+        component: () => import('../views/MyCollectionView.vue'),
         meta: { requiresAuth: true }
     },
     {

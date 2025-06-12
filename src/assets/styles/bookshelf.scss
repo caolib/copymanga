@@ -1,0 +1,232 @@
+@use "./variables" as *;
+
+// 书架容器样式
+.bookshelf-container {
+    padding: 0 !important;
+    max-width: 1600px;
+    margin: 0 auto;
+
+    @include responsive($breakpoint-sm) {
+        padding: $spacing-md;
+    }
+}
+
+.bookshelf-header {
+    margin-bottom: $spacing-xl;
+    padding: $spacing-lg 0;
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: $spacing-lg;
+
+        .ant-typography {
+            margin: 0;
+        }
+    }
+}
+
+.bookshelf-content {
+    background: $bg-color-white;
+    border: 1px solid $border-color-light;
+    box-shadow: $shadow-light;
+    border-radius: $border-radius-large;
+    overflow: hidden;
+
+    @include dark-theme {
+        background: $dark-bg-container;
+        border-color: $dark-border-color;
+        box-shadow: $shadow-dark-light;
+    }
+
+    // Tabs 样式定制
+    :deep(.ant-tabs) {
+        .ant-tabs-nav {
+            margin: 0;
+            background: rgba($primary-color, 0.05);
+
+            @include dark-theme {
+                background: rgba($primary-color, 0.1);
+            }
+
+            .ant-tabs-tab {
+                border-radius: $border-radius-medium $border-radius-medium 0 0;
+                transition: all $transition-normal;
+
+                &:hover {
+                    background: rgba($primary-color, 0.1);
+                }
+
+                &.ant-tabs-tab-active {
+                    background: $bg-color-white;
+                    border-bottom-color: $bg-color-white;
+
+                    @include dark-theme {
+                        background: $dark-bg-container;
+                        border-bottom-color: $dark-bg-container;
+                    }
+                }
+
+                .ant-tabs-tab-btn {
+                    font-weight: 500;
+                    font-size: 16px;
+
+                    .anticon {
+                        margin-right: $spacing-sm;
+                    }
+                }
+            }
+        }
+
+        .ant-tabs-content-holder {
+            background: $bg-color-white;
+            min-height: 500px;
+
+            @include dark-theme {
+                background: $dark-bg-container;
+            }
+        }
+
+        .ant-tabs-tabpane {
+            padding: $spacing-xl;
+        }
+
+        .ant-tabs-ink-bar {
+            display: none; // 隐藏默认的指示器
+        }
+    }
+}
+
+// 收藏控制栏样式
+.collection-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xl;
+    padding: $spacing-lg;
+    background: rgba($primary-color, 0.05);
+    border-radius: $border-radius-medium;
+    border: 1px solid rgba($primary-color, 0.1);
+
+    @include dark-theme {
+        background: rgba($primary-color, 0.1);
+        border-color: rgba($primary-color, 0.2);
+    }
+
+    .controls-left {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+    }
+
+    .controls-right {
+        .total-info {
+            color: $text-secondary;
+            font-size: 14px;
+            font-weight: 500;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+    }
+
+    @include responsive($breakpoint-sm) {
+        flex-direction: column;
+        gap: $spacing-md;
+        align-items: stretch;
+
+        .controls-left,
+        .controls-right {
+            justify-content: center;
+            text-align: center;
+        }
+    }
+}
+
+// 标签页徽章样式
+.ant-badge {
+    :deep(.ant-badge-count) {
+        font-size: 10px;
+        min-width: 16px;
+        height: 16px;
+        line-height: 16px;
+        padding: 0 4px;
+        border-radius: 8px;
+        background: $success-color;
+        box-shadow: 0 0 0 1px $bg-color-white;
+
+        @include dark-theme {
+            box-shadow: 0 0 0 1px $dark-bg-container;
+        }
+    }
+}
+
+// 响应式设计
+@include responsive($breakpoint-lg) {
+    .bookshelf-container {
+        padding: $spacing-md;
+    }
+
+    .bookshelf-content {
+        :deep(.ant-tabs) {
+            .ant-tabs-tabpane {
+                padding: $spacing-lg;
+            }
+        }
+    }
+}
+
+@include responsive($breakpoint-md) {
+    .bookshelf-content {
+        :deep(.ant-tabs) {
+            .ant-tabs-nav {
+                .ant-tabs-tab {
+                    padding: $spacing-md $spacing-lg;
+                    margin-right: $spacing-xs;
+
+                    .ant-tabs-tab-btn {
+                        font-size: 14px;
+                    }
+                }
+            }
+
+            .ant-tabs-tabpane {
+                padding: $spacing-md;
+            }
+        }
+    }
+}
+
+@include responsive($breakpoint-sm) {
+    .bookshelf-content {
+        border-radius: $border-radius-medium;
+
+        :deep(.ant-tabs) {
+            .ant-tabs-nav {
+                .ant-tabs-tab {
+                    padding: $spacing-sm $spacing-md;
+                    margin-right: 2px;
+
+                    .ant-tabs-tab-btn {
+                        font-size: 13px;
+                    }
+                }
+            }
+
+            .ant-tabs-tabpane {
+                padding: $spacing-sm;
+            }
+        }
+    }
+
+    .header-actions {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: $spacing-sm !important;
+    }
+}
+
+.update-time {
+    margin: 0 $spacing-sm;
+}
