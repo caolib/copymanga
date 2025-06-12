@@ -15,16 +15,14 @@
         </div>
 
         <!-- 错误信息 -->
-        <a-alert v-if="error" type="error" :message="error" show-icon style="margin-bottom: 16px" />
-
-        <!-- 空状态 -->
-        <a-empty v-if="!loading && validPostList.length === 0" description="还没有收藏任何写真">
+        <a-alert v-if="error" type="error" :message="error" show-icon style="margin-bottom: 16px" /> <!-- 空状态 -->
+        <a-empty v-if="!loading && postList.length === 0" description="还没有收藏任何写真">
             <a-button type="primary" @click="$router.push('/posts')">去看写真</a-button>
         </a-empty>
 
         <!-- 写真列表 -->
         <a-row v-else :gutter="[20, 20]">
-            <a-col v-for="item in validPostList" :key="item.uuid" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" :xxl="4">
+            <a-col v-for="item in postList" :key="item.uuid" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" :xxl="4">
                 <a-card hoverable class="post-card" @click="goToPost(item)">
                     <div class="post-cover-container">
                         <img :src="item.post.cover" :alt="item.post.name" class="post-cover"
@@ -95,11 +93,6 @@ const lastUpdateTime = ref(null)
 
 // 缓存数据
 const postCache = ref({})
-
-// 过滤有效的写真数据，防止渲染错误
-const validPostList = computed(() => {
-    return postList.value.filter(item => item && item.post && item.post.name)
-})
 
 const getPostStatus = (post) => {
     if (!post) return '未知'

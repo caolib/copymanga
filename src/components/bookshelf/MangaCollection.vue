@@ -15,10 +15,8 @@
         </div>
 
         <!-- 错误信息 -->
-        <a-alert v-if="error" type="error" :message="error" show-icon banner style="margin-bottom: 20px" />
-
-        <!-- 空状态 -->
-        <a-empty v-if="!loading && !error && validMangaList.length === 0" description="您还没有收藏任何漫画">
+        <a-alert v-if="error" type="error" :message="error" show-icon banner style="margin-bottom: 20px" /> <!-- 空状态 -->
+        <a-empty v-if="!loading && !error && mangaList.length === 0" description="您还没有收藏任何漫画">
             <a-button type="primary" @click="$router.push('/')">去首页看看</a-button>
         </a-empty>
 
@@ -31,12 +29,10 @@
                     </template>
                 </a-skeleton>
             </a-card>
-        </div>
-
-        <!-- 实际内容 -->
-        <div v-else-if="!error && validMangaList.length > 0">
+        </div> <!-- 实际内容 -->
+        <div v-else-if="!error && mangaList.length > 0">
             <div class="manga-grid">
-                <a-card v-for="item in validMangaList" :key="item.uuid || item.id" hoverable class="manga-card"
+                <a-card v-for="item in mangaList" :key="item.uuid || item.id" hoverable class="manga-card"
                     @click="goToManga(item)">
                     <div class="manga-cover">
                         <img :src="item.comic.cover" :alt="item.comic.name" />
@@ -74,15 +70,13 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed, onMounted } from 'vue'
 import { useCollectionStore } from '../../stores/collection'
 import { useMangaNavigation } from '../../composables/useMangaNavigation'
 import { isLoggedIn } from '../../utils/auth'
 import { message } from 'ant-design-vue'
 import { formatDate } from '../../utils/date'
 
-const router = useRouter()
 const collectionStore = useCollectionStore()
 const { goToMangaDetail } = useMangaNavigation()
 
@@ -104,11 +98,6 @@ const lastUpdateTime = ref(null)
 const currentPage = ref(1)
 const pageSize = ref(12)
 const totalCount = ref(0)
-
-// 过滤有效的漫画数据，防止渲染错误
-const validMangaList = computed(() => {
-    return mangaList.value.filter(item => item && item.comic && item.comic.name)
-})
 
 const goToManga = (item) => {
     // 使用统一的导航逻辑，携带来自书架和上次阅读信息
@@ -215,4 +204,4 @@ onMounted(() => {
 })
 </script>
 
-<style scoped src="../../assets/styles/my-collection.scss"></style>
+<style scoped src="../../assets/styles/manga-collection.scss"></style>

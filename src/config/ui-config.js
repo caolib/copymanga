@@ -11,7 +11,14 @@ const DEFAULT_UI_CONFIG = {
         layout: 'rtl', // 从右到左（默认，日漫风格）
         columnsPerRow: 2, // 一行显示的列数
         imageSize: 100, // 图片大小百分比
-        imageGap: 8 // 图片间距，单位px
+        imageGap: 0, // 图片间距，单位px
+        blankPagePosition: 'start' // 空白页位置：'start' 开头，'end' 末尾
+    },
+    textReader: {
+        fontFamily: 'var(--font-family)', // 使用main.scss中定义的默认字体
+        fontSize: 16, // 字体大小(px)
+        lineHeight: 1.8, // 行高倍数
+        addedFonts: [] // 用户添加的自定义字体列表
     }
 }
 
@@ -46,6 +53,19 @@ async function updateReaderConfig(readerConfig) {
     return await saveUIConfig(updatedConfig)
 }
 
+// 更新文本阅读器配置
+async function updateTextReaderConfig(textReaderConfig) {
+    const currentConfig = await loadUIConfig()
+    const updatedConfig = {
+        ...currentConfig,
+        textReader: {
+            ...currentConfig.textReader,
+            ...textReaderConfig
+        }
+    }
+    return await saveUIConfig(updatedConfig)
+}
+
 // 更新主题配置
 async function updateThemeConfig(themeConfig) {
     const currentConfig = await loadUIConfig()
@@ -64,6 +84,7 @@ export {
     saveUIConfig,
     updateUIConfig,
     updateReaderConfig,
+    updateTextReaderConfig,
     updateThemeConfig,
     DEFAULT_UI_CONFIG
 }

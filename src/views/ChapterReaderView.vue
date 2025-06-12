@@ -59,6 +59,16 @@
                         :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
                 </a-form-item>
 
+                <a-form-item label="空白页位置">
+                    <a-radio-group v-model:value="readerConfig.blankPagePosition">
+                        <a-radio value="start">开头</a-radio>
+                        <a-radio value="end">末尾</a-radio>
+                    </a-radio-group>
+                    <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                        当图片数量为奇数时，在开头还是末尾添加空白页
+                    </div>
+                </a-form-item>
+
                 <a-form-item label="暗色模式图片遮罩" v-if="isDarkMode">
                     <a-slider v-model:value="darkImageMaskOpacity" :min="0" :max="1" :step="0.1"
                         :marks="{ 0: '无遮罩', 0.5: '50%', 1: '完全遮罩' }" />
@@ -109,10 +119,10 @@
                                 v-for="(image, colIndex) in chunk" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
                                 <div v-if="!image.isPlaceholder"
-                                    :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
+                                    :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)"
                                     :style="{ width: `${readerConfig.imageSize}%` }">
                                     <LazyImg :src="image.url"
-                                        :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
+                                        :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)"
                                         :image-size="readerConfig.imageSize" :is-dark-mode="isDarkMode"
                                         :dark-image-mask-opacity="darkImageMaskOpacity"
                                         :placeholder-height="calculateImageHeight(image)" />
@@ -125,10 +135,10 @@
                                 v-for="(image, colIndex) in chunk" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
                                 <div v-if="!image.isPlaceholder"
-                                    :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
+                                    :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)"
                                     :style="{ width: `${readerConfig.imageSize}%` }">
                                     <LazyImg :src="image.url"
-                                        :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
+                                        :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)"
                                         :image-size="readerConfig.imageSize" :is-dark-mode="isDarkMode"
                                         :dark-image-mask-opacity="darkImageMaskOpacity"
                                         :placeholder-height="calculateImageHeight(image)" />
@@ -295,19 +305,38 @@ const imageChunks = computed(() => {
     const arr = [...images.value];
     const columnsPerRow = readerConfig.columnsPerRow;
 
-    // 如果图片数量不能被列数整除，补充空白占位符
+    // 计算需要添加的空白页数量
+    let placeholdersNeeded = 0;
     const remainder = arr.length % columnsPerRow;
     if (remainder !== 0) {
-        const placeholdersNeeded = columnsPerRow - remainder;
+        placeholdersNeeded = columnsPerRow - remainder;
+        const placeholders = [];
         for (let i = 0; i < placeholdersNeeded; i++) {
-            arr.push({ url: '', isPlaceholder: true });
+            placeholders.push({ url: '', isPlaceholder: true });
+        }
+
+        // 根据配置决定在开头还是末尾添加空白页
+        if (readerConfig.blankPagePosition === 'start') {
+            arr.unshift(...placeholders); // 在开头添加
+        } else {
+            arr.push(...placeholders); // 在末尾添加（默认）
         }
     }
 
-    // 按照列数分组
+    // 按照列数分组，并为每个项目添加页码偏移信息
     const chunks = [];
     for (let i = 0; i < arr.length; i += columnsPerRow) {
-        chunks.push(arr.slice(i, i + columnsPerRow));
+        const chunk = arr.slice(i, i + columnsPerRow);
+        // 为每个项目添加页码偏移信息
+        chunk.forEach((item, index) => {
+            if (!item.isPlaceholder) {
+                // 计算正确的页码：当空白页在开头时需要减去空白页数量
+                const globalIndex = i + index;
+                const isBlankPageAtStart = readerConfig.blankPagePosition === 'start' && remainder !== 0;
+                item.pageOffset = isBlankPageAtStart ? placeholdersNeeded : 0;
+            }
+        });
+        chunks.push(chunk);
     }
 
     return chunks;

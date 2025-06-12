@@ -15,16 +15,14 @@
         </div>
 
         <!-- 错误信息 -->
-        <a-alert v-if="error" :message="error" type="error" show-icon style="margin-bottom: 16px" />
-
-        <!-- 空状态 -->
-        <a-empty v-if="!loading && validBookList.length === 0" description="还没有收藏任何轻小说">
+        <a-alert v-if="error" :message="error" type="error" show-icon style="margin-bottom: 16px" /> <!-- 空状态 -->
+        <a-empty v-if="!loading && bookList.length === 0" description="还没有收藏任何轻小说">
             <a-button type="primary" @click="$router.push('/books')">去看轻小说</a-button>
         </a-empty>
 
         <!-- 轻小说列表 -->
         <a-row v-else :gutter="[20, 20]">
-            <a-col v-for="item in validBookList" :key="item.uuid" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" :xxl="4">
+            <a-col v-for="item in bookList" :key="item.uuid" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" :xxl="4">
                 <a-card hoverable class="book-card" @click="goToBook(item)">
                     <div class="book-cover-container">
                         <img :src="item.book.cover" :alt="item.book.name" class="book-cover"
@@ -96,11 +94,6 @@ const pageSize = ref(18)
 const ordering = ref('-datetime_modifier')
 const lastUpdateTime = ref(null)
 
-// 过滤有效的轻小说数据，防止渲染错误
-const validBookList = computed(() => {
-    return bookList.value.filter(item => item && item.book && item.book.name)
-})
-
 const getBookStatus = (book) => {
     if (!book) return '未知'
 
@@ -117,12 +110,6 @@ const getBookStatus = (book) => {
 }
 
 const goToBook = (item) => {
-    // 安全检查：确保数据完整
-    if (!item || !item.book || !item.book.path_word) {
-        message.error('轻小说数据异常，无法跳转')
-        return
-    }
-
     // 将轻小说基本信息保存到Pinia
     bookCollectionStore.setCurrentBook(item.book)
 
@@ -138,11 +125,6 @@ const goToBook = (item) => {
 }
 
 const fetchCollection = async (forceRefresh = false) => {
-    if (!isLoggedIn()) {
-        error.value = '请先登录'
-        return
-    }
-
     loading.value = true
     error.value = ''
 

@@ -47,7 +47,7 @@ const props = defineProps({
         default: 0.8
     }, placeholderHeight: {
         type: Number,
-        default: 672  // 根据图片宽高比 800:1169，宽度460px 对应的高度
+        default: 672
     },
     useOverlayMask: {
         type: Boolean,

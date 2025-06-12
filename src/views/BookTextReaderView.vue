@@ -121,7 +121,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { ArrowLeftOutlined, SettingOutlined } from '@ant-design/icons-vue'
 import { getBookTextContent } from '@/api/book'
-import { loadUIConfig, updateTextReaderConfig } from '@/utils/ui-config'
+import { loadUIConfig, updateTextReaderConfig } from '@/config/ui-config'
 
 const route = useRoute()
 const router = useRouter()

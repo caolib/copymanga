@@ -52,11 +52,19 @@
                 <a-form-item label="图片大小">
                     <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="100" :step="10"
                         :marks="{ 50: '50%', 100: '100%' }" />
-                </a-form-item>
-
-                <a-form-item label="图片间距">
+                </a-form-item> <a-form-item label="图片间距">
                     <a-slider v-model:value="uiConfig.imageGap" :min="0" :max="30" :step="1"
                         :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
+                </a-form-item>
+
+                <a-form-item label="空白页位置">
+                    <a-radio-group v-model:value="uiConfig.blankPagePosition">
+                        <a-radio value="start">开头</a-radio>
+                        <a-radio value="end">末尾</a-radio>
+                    </a-radio-group>
+                    <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                        当图片数量为奇数时，决定在开头还是末尾添加空白页
+                    </div>
                 </a-form-item>
 
                 <a-form-item>

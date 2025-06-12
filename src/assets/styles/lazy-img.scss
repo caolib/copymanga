@@ -123,7 +123,6 @@
     border-radius: $border-radius-small;
     display: block;
     transition: all $transition-normal;
-    border: 1px solid transparent;
     animation: fadeIn 0.3s ease-in-out;
 
     &:hover {
@@ -154,7 +153,7 @@
         position: absolute;
         top: 0px;
         right: 0px;
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(0, 0, 0, 0.5);
         color: $white;
         font-size: 12px;
         line-height: 1;
@@ -168,12 +167,6 @@
         backdrop-filter: blur(2px);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
         transition: all $transition-normal;
-
-        @include dark-theme {
-            background: rgba(255, 255, 255, 0.8);
-            color: $dark-bg-primary;
-            box-shadow: 0 1px 3px rgba(255, 255, 255, 0.2);
-        }
     }
 
     // 备选方案：简单的黑色半透明遮罩
