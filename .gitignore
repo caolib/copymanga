@@ -30,5 +30,5 @@ coverage
 
 .github/instructions/
 
-get-commits.ps1
+*.ps1
 /data/
