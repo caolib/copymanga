@@ -6,7 +6,7 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                    }}</a-typography-title>
+                        }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
@@ -103,36 +103,35 @@
                     <a-row v-for="(chunk, rowIndex) in imageChunks" :key="rowIndex" :gutter="16"
                         :class="['manga-row', { 'row-rtl': readerConfig.layout === 'rtl', 'row-ltr': readerConfig.layout === 'ltr' }]"
                         justify="center" align="middle">
+
                         <template v-if="readerConfig.layout === 'rtl'">
                             <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
                                 v-for="(image, colIndex) in chunk" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
-                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper"
+                                <div v-if="!image.isPlaceholder"
+                                    :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
                                     :style="{ width: `${readerConfig.imageSize}%` }">
-                                    <img :src="image.url"
-                                        :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
-                                        class="manga-image" loading="lazy" />
-                                    <div class="page-number">{{ rowIndex * readerConfig.columnsPerRow + colIndex + 1 }}
-                                    </div>
-                                    <div v-if="isDarkMode" class="dark-image-mask"
-                                        :style="{ opacity: darkImageMaskOpacity }"></div>
+                                    <LazyImg :src="image.url"
+                                        :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
+                                        :image-size="readerConfig.imageSize" :is-dark-mode="isDarkMode"
+                                        :dark-image-mask-opacity="darkImageMaskOpacity"
+                                        :placeholder-height="calculateImageHeight(image)" />
                                 </div>
-                                <div v-else class="manga-image placeholder"></div>
+                                <div v-else class="manga-image placeholder">PLACEHOLDER</div>
                             </a-col>
                         </template>
                         <template v-else>
                             <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column"
                                 v-for="(image, colIndex) in chunk" :key="colIndex"
                                 :style="{ paddingLeft: `${readerConfig.imageGap / 2}px`, paddingRight: `${readerConfig.imageGap / 2}px` }">
-                                <div v-if="!image.isPlaceholder" class="manga-image-wrapper"
+                                <div v-if="!image.isPlaceholder"
+                                    :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
                                     :style="{ width: `${readerConfig.imageSize}%` }">
-                                    <img :src="image.url"
-                                        :alt="`第${rowIndex * readerConfig.columnsPerRow + colIndex + 1}页`"
-                                        class="manga-image" loading="lazy" />
-                                    <div class="page-number">{{ rowIndex * readerConfig.columnsPerRow + colIndex + 1 }}
-                                    </div>
-                                    <div v-if="isDarkMode" class="dark-image-mask"
-                                        :style="{ opacity: darkImageMaskOpacity }"></div>
+                                    <LazyImg :src="image.url"
+                                        :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1"
+                                        :image-size="readerConfig.imageSize" :is-dark-mode="isDarkMode"
+                                        :dark-image-mask-opacity="darkImageMaskOpacity"
+                                        :placeholder-height="calculateImageHeight(image)" />
                                 </div>
                                 <div v-else class="manga-image placeholder"></div>
                             </a-col>
@@ -204,7 +203,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, reactive, h } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, reactive, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
     ArrowLeftOutlined,
@@ -221,6 +220,7 @@ import { useUserStore } from '../stores/user'
 import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
 import { formatDate } from '../utils/date'
 import { message } from 'ant-design-vue'
+import LazyImg from '@/components/LazyImg.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -264,6 +264,16 @@ const darkImageMaskOpacity = ref(0.8) // 暗色模式图片遮罩透明度，默
 // 使用全局主题状态
 const isDarkMode = computed(() => themeStore.isDarkMode)
 
+// 计算图片占位符高度的函数
+const calculateImageHeight = (image) => {
+    console.log('calculateImageHeight called for image:', image)
+
+    // 简化计算，先返回固定值进行测试
+    const result = 400
+    console.log('calculateImageHeight returning:', result)
+    return result
+}
+
 // 滚动到顶部的工具函数
 const scrollToTop = () => {
     // 首先尝试找到主内容滚动容器
@@ -285,6 +295,7 @@ const scrollToTop = () => {
 
 // 计算属性：将图片分组，根据配置的每行列数
 const imageChunks = computed(() => {
+    console.log('Computing imageChunks, images count:', images.value.length)
     const arr = [...images.value];
     const columnsPerRow = readerConfig.columnsPerRow;
 
@@ -302,6 +313,8 @@ const imageChunks = computed(() => {
     for (let i = 0; i < arr.length; i += columnsPerRow) {
         chunks.push(arr.slice(i, i + columnsPerRow));
     }
+
+    console.log('Image chunks computed:', chunks.length, 'chunks')
     return chunks;
 })
 
@@ -461,12 +474,19 @@ const fetchChapterImages = () => {
                 }
 
                 // 保存图片数据
-                images.value = chapterData.contents.map(image => {
-                    // 直接使用原始URL
-                    return {
-                        url: image.url
-                    };
-                });
+                images.value = chapterData.contents.map((image, index) => {
+                    // 直接使用原始URL，并添加索引信息
+                    const imageData = {
+                        url: image.url,
+                        index: index,
+                        width: image.width || null,
+                        height: image.height || null
+                    }
+                    console.log(`Processing image ${index + 1}:`, imageData)
+                    return imageData
+                })
+
+                console.log('Total images loaded:', images.value.length)
             } else {
                 throw new Error('获取章节图片失败')
             }
@@ -613,6 +633,22 @@ onMounted(() => {
     // 初始显示底部导航栏，1秒后自动隐藏
     showBottomNav.value = true
     hideNavAfterDelay()
+
+    // 监听窗口大小变化，重新计算图片高度
+    const handleResize = () => {
+        // 触发重新计算（通过更新一个依赖项）
+        if (readerConfig) {
+            // 强制触发计算属性更新
+            readerConfig.imageSize = readerConfig.imageSize
+        }
+    }
+
+    window.addEventListener('resize', handleResize)
+
+    // 组件销毁时移除监听器
+    onUnmounted(() => {
+        window.removeEventListener('resize', handleResize)
+    })
 })
 
 // 监听路由参数 chapterId 的变化 - 完全独立的两个监听器

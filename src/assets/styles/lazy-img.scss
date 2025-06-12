@@ -1,0 +1,149 @@
+@use "./variables" as *;
+
+.lazy-img-container {
+    position: relative;
+    width: 100%;
+    min-height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: $border-radius-small;
+    overflow: hidden;
+}
+
+.img-placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $bg-color-light;
+    border-radius: $border-radius-small;
+    border: 1px solid $border-color;
+
+    @include dark-theme {
+        background: $dark-bg-secondary;
+        border-color: $dark-border-color;
+    }
+
+    .loading-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: $text-secondary;
+        font-size: 14px;
+        z-index: 2;
+
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+
+        span:first-child {
+            font-size: 20px;
+        }
+
+        span:last-child {
+            font-weight: 500;
+        }
+    }
+}
+
+.error-placeholder {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: $bg-color-light;
+    border-radius: $border-radius-small;
+    border: 1px solid $error-color;
+
+    @include dark-theme {
+        background: $dark-bg-secondary;
+        border-color: #ff6b6b;
+    }
+
+    .error-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        color: $error-color;
+
+        @include dark-theme {
+            color: #ff6b6b;
+        }
+
+        span:first-child {
+            font-size: 24px;
+        }
+
+        span:nth-child(2) {
+            font-size: 14px;
+            font-weight: 500;
+        }
+    }
+}
+
+.manga-img {
+    width: 100%;
+    height: auto;
+    box-shadow: $shadow-light;
+    object-fit: contain;
+    border-radius: $border-radius-small;
+    display: block;
+    transition: all $transition-normal;
+    border: 1px solid transparent;
+    animation: fadeIn 0.3s ease-in-out;
+
+    &:hover {
+        box-shadow: $shadow-heavy;
+        border-color: rgba($black, 0.2);
+
+        @include dark-theme {
+            box-shadow: $shadow-dark-heavy;
+            border-color: rgba($white, 0.3);
+        }
+    }
+}
+
+// 图片容器，用于添加遮罩
+.img-with-mask {
+    position: relative;
+    display: inline-block;
+    width: 100%; // 简单的变暗效果，只调节亮度
+    img {
+        filter: brightness(calc(1 - var(--dark-mask-opacity, 0) * 0.5));
+        transition: filter $transition-normal;
+    } // 备选方案：简单的黑色半透明遮罩
+    &.use-overlay::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, calc(var(--dark-mask-opacity, 0) * 0.5));
+        pointer-events: none;
+        border-radius: $border-radius-small;
+        transition: background $transition-normal;
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
