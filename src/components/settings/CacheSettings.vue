@@ -14,7 +14,7 @@
                         </a-spin>
                     </a-descriptions-item>
                     <a-descriptions-item label="上次清理时间">
-                        {{ lastClearTime || '从未清理' }}
+                        {{ lastClearTime || '上次' }}
                     </a-descriptions-item>
                 </a-descriptions>
 

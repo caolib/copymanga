@@ -38,6 +38,11 @@ const routes = [
         component: () => import('../views/TopicDetailView.vue')
     },
     {
+        path: '/search',
+        name: 'Search',
+        component: () => import('../views/SearchView.vue')
+    },
+    {
         path: '/bookshelf',
         name: 'Bookshelf',
         component: () => import('../views/BookshelfView.vue'),

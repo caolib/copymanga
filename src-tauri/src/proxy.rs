@@ -24,18 +24,13 @@ pub async fn proxy_handler(
         return build_cors_response(origin);
     }
     let path = uri.path().trim_start_matches("/proxy");
-    let query = uri.query().unwrap_or("");
-
-    // 检查是否是外部URL请求 (/proxy?url=...)
+    let query = uri.query().unwrap_or(""); // 检查是否是外部URL请求 (/proxy?url=...)
     if path.is_empty() && query.starts_with("url=") {
         let url_param = &query[4..]; // 去掉 "url=" 前缀
-                                     // 简单的URL解码，只处理基本情况
-        let decoded_url = url_param
-            .replace("%3A", ":")
-            .replace("%2F", "/")
-            .replace("%3F", "?")
-            .replace("%3D", "=")
-            .replace("%26", "&");
+        let decoded_url = match urlencoding::decode(url_param) {
+            Ok(decoded) => decoded.to_string(),
+            Err(_) => url_param.to_string(), // 如果解码失败，使用原始字符串
+        };
         return handle_external_request(&client, &decoded_url, origin).await;
     }
 
@@ -75,7 +70,7 @@ pub fn build_cors_response(origin: &str) -> Result<Response, StatusCode> {
         )
         .header(
             "Access-Control-Allow-Headers",
-            "authorization,content-type,accept,origin,referer,user-agent",
+            "authorization,content-type,accept,origin,referer,user-agent,platform",
         )
         .header("Access-Control-Max-Age", "86400");
 

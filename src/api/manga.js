@@ -61,16 +61,39 @@ function getChapterImages(pathWord, chapterId) {
  * @param {number} offset 偏移量
  * @returns {Promise} 搜索结果
  */
-function searchManga(keyword, limit = 12, offset = 0) {
-    return request.get('/api/kb/web/searchbd/comics', {
+// function searchManga(keyword, limit = 12, offset = 0, q_type = '') {
+//     return request.get('/api/kb/web/searchbd/comics', {
+//         params: {
+//             q: keyword,
+//             q_type,
+//             offset,
+//             platform: 2,
+//             limit
+//         }
+//     })
+// }
+
+/**
+ * 搜索漫画
+ * @param {*} q 搜索关键词
+ * @param {*} limit 每页数量
+ * @param {*} offset 偏移量
+ * @param {*} q_type 搜索类型 '' - 全部, 'name' - 名称, 'author' - 作者, 'local' - 汉化组
+ * @returns 
+ */
+function searchManga(q, limit = 18, offset = 0, q_type = '') {
+    return request.get('/api/v3/search/comic', {
         params: {
-            q: keyword,
-            q_type: '',
+            limit,
             offset,
-            platform: 2,
-            limit
+            q_type,
+            q,
+            platform: 3
+        },
+        headers: {
+            'platform': '3'
         }
-    })
+    });
 }
 
 /**

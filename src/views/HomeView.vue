@@ -5,7 +5,7 @@
             <a-card style="margin-bottom: 10px;">
                 <div class="search-header">
                     <a-input-search v-model:value="searchKeyword" placeholder="输入漫画名进行搜索" enter-button size="large"
-                        :loading="searchLoading" @search="onSearch" class="search-input" />
+                        @search="onSearch" class="search-input" />
                     <div class="refresh-section">
                         <a-button type="primary" @click="refreshHomeData" :icon="h(ReloadOutlined)"
                             :loading="homeStore.isLoading" :disabled="loading" size="small">
@@ -16,33 +16,6 @@
                         </span>
                     </div>
                 </div>
-            </a-card>
-
-            <!-- 搜索结果 -->
-            <a-card v-if="searchResults.length > 0 || (searchSearched && searchLoading)" style="margin-bottom: 20px;">
-                <a-spin :spinning="searchLoading" style="width:100%">
-                    <div v-if="searchResults.length > 0" class="search-grid">
-                        <a-row :gutter="24">
-                            <a-col v-for="item in searchResults" :key="item.path_word" :xs="24" :sm="12" :md="8"
-                                :lg="6">
-                                <a-card hoverable class="manga-card" @click="goToMangaDetail(item)">
-                                    <img :src="item.cover" :alt="item.name" class="manga-cover" />
-                                    <div class="manga-title">{{ item.name }}</div>
-                                    <div class="manga-author" v-if="item.author && item.author.length">
-                                        作者: {{item.author.map(a => a.name).join(', ')}}
-                                    </div>
-                                    <div class="manga-popular">人气: {{ item.popular }}</div>
-                                </a-card>
-                            </a-col>
-                        </a-row>
-                    </div>
-                    <a-pagination v-if="searchTotal > searchPageSize" :current="searchPage" :page-size="searchPageSize"
-                        :total="searchTotal" show-size-changer :page-size-options="['12', '24', '36', '48']"
-                        @change="onPageChange" @showSizeChange="onPageSizeChange"
-                        style="margin: 16px 0; text-align: center;" />
-                    <a-empty v-else-if="searchSearched && !searchLoading && searchResults.length === 0"
-                        description="暂无搜索结果" style="margin-top: 16px;" />
-                </a-spin>
             </a-card>
 
             <!-- 排行榜 -->
@@ -120,7 +93,7 @@
                                     <template #description>
                                         <div class="topic-meta-mini">
                                             <span v-if="topic.period" class="topic-period-mini">{{ topic.period
-                                            }}</span>
+                                                }}</span>
                                             <span v-if="topic.datetime_created" class="topic-date-mini">
                                                 {{ formatDate(topic.datetime_created) }}
                                             </span>
@@ -195,7 +168,6 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { searchManga } from '../api/manga'
 import { useHomeStore } from '../stores/home'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { getCurrentApiDomain } from '../config/server-config'
@@ -210,12 +182,6 @@ const { goToMangaDetail } = useMangaNavigation()
 
 // 搜索相关
 const searchKeyword = ref('')
-const searchResults = ref([])
-const searchLoading = ref(false)
-const searchSearched = ref(false)
-const searchPage = ref(1)
-const searchPageSize = ref(12)
-const searchTotal = ref(0)
 
 // 主页数据使用 store
 const homeData = computed(() => homeStore.homeData)
@@ -234,36 +200,16 @@ const refreshHomeData = () => {
     homeStore.fetchHomeData(true)
 }
 
-const fetchSearch = () => {
-    if (!searchKeyword.value.trim()) return
-    searchLoading.value = true
-    searchSearched.value = true
-    searchManga(searchKeyword.value, searchPageSize.value, (searchPage.value - 1) * searchPageSize.value).then(res => {
-        searchResults.value = res.results.list
-        searchTotal.value = res.results.total || 0
-    }).catch(() => {
-        searchResults.value = []
-        searchTotal.value = 0
-    }).finally(() => {
-        searchLoading.value = false
-    })
-}
-
+// 处理搜索 - 跳转到搜索页面
 const onSearch = () => {
-    searchPage.value = 1
-    fetchSearch()
-}
+    if (!searchKeyword.value.trim()) return
 
-const onPageChange = (page, pageSize) => {
-    searchPage.value = page
-    searchPageSize.value = pageSize
-    fetchSearch()
-}
-
-const onPageSizeChange = (current, size) => {
-    searchPage.value = 1
-    searchPageSize.value = size
-    fetchSearch()
+    router.push({
+        name: 'Search',
+        query: {
+            q: searchKeyword.value
+        }
+    })
 }
 
 

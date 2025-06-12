@@ -1,0 +1,263 @@
+@use "./variables" as *;
+
+.search-container {
+    padding: $spacing-lg;
+    max-width: 1600px;
+    margin: 0 auto;
+
+    @include responsive($breakpoint-sm) {
+        padding: $spacing-md;
+    }
+}
+
+.search-section {
+    margin-bottom: $spacing-xl;
+
+    .search-form {
+        .search-input-group {
+            display: flex;
+            justify-content: center;
+            margin-bottom: $spacing-lg;
+
+            :deep(.ant-input-search) {
+                max-width: 600px;
+            }
+        }
+
+        .search-filters {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: $spacing-md;
+            background: $bg-color-light;
+            border-radius: $border-radius-medium;
+
+            @include dark-theme {
+                background: $dark-bg-secondary;
+            }
+
+            .filter-group {
+                display: flex;
+                align-items: center;
+                gap: $spacing-sm;
+
+                .filter-label {
+                    font-weight: 500;
+                    color: $text-primary;
+
+                    @include dark-theme {
+                        color: $dark-text-primary;
+                    }
+                }
+            }
+
+            .search-stats {
+                color: $text-secondary;
+                font-size: 14px;
+
+                @include dark-theme {
+                    color: $dark-text-secondary;
+                }
+            }
+        }
+    }
+}
+
+.search-results {
+    .loading-state {
+        margin-bottom: $spacing-xl;
+    }
+
+    .results-grid {
+        margin-bottom: $spacing-xl;
+
+        .manga-card {
+            height: 100%;
+            cursor: pointer;
+            border-radius: $border-radius-large;
+            overflow: hidden;
+            transition: all $transition-normal;
+
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: $shadow-heavy;
+            }
+
+            @include dark-theme {
+                background: $dark-bg-secondary;
+                border-color: $dark-border-color;
+
+                &:hover {
+                    box-shadow: $shadow-dark-heavy;
+                }
+            }
+
+            :deep(.ant-card-body) {
+                padding: $spacing-md;
+            }
+
+            :deep(.ant-card-meta-title) {
+                font-size: 16px;
+                font-weight: 500;
+                margin-bottom: $spacing-xs;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                line-height: 1.4;
+            }
+
+            .manga-cover {
+                position: relative;
+                width: 100%;
+                padding-top: 140%;
+                overflow: hidden;
+                border-radius: $border-radius-medium;
+                margin-bottom: $spacing-sm;
+
+                img {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform $transition-normal;
+                }
+
+                .manga-popular {
+                    position: absolute;
+                    top: $spacing-xs;
+                    right: $spacing-xs;
+                    background: rgba($primary-color, 0.9);
+                    color: $white;
+                    padding: 2px $spacing-xs;
+                    border-radius: $border-radius-small;
+                    font-size: 12px;
+                    font-weight: 500;
+                    backdrop-filter: blur(4px);
+                }
+
+                &:hover img {
+                    transform: scale(1.05);
+                }
+            }
+
+            .manga-info {
+                .manga-alias {
+                    font-size: 12px;
+                    color: $text-secondary;
+                    margin-bottom: 2px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+
+                    @include dark-theme {
+                        color: $dark-text-secondary;
+                    }
+                }
+
+                .manga-author {
+                    font-size: 12px;
+                    color: $text-tertiary;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+
+                    @include dark-theme {
+                        color: $dark-text-tertiary;
+                    }
+                }
+            }
+        }
+    }
+
+    .pagination-section {
+        display: flex;
+        justify-content: center;
+        padding: $spacing-lg 0;
+        background: rgba($white, 0.8);
+        border-radius: $border-radius-large;
+        backdrop-filter: blur(10px);
+
+        @include dark-theme {
+            background: rgba($dark-bg-secondary, 0.8);
+        }
+    }
+}
+
+.initial-state {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+// 骨架屏样式
+.skeleton-card {
+    .skeleton-cover {
+        width: 100%;
+        height: 200px;
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: skeleton-loading 1.5s infinite;
+        border-radius: $border-radius-medium;
+
+        @include dark-theme {
+            background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+            background-size: 200% 100%;
+        }
+    }
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
+}
+
+// 响应式设计
+@include responsive($breakpoint-md) {
+    .search-section {
+        .search-form .search-filters {
+            flex-direction: column;
+            gap: $spacing-md;
+
+            .filter-group {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .search-stats {
+                text-align: center;
+            }
+        }
+    }
+}
+
+@include responsive($breakpoint-sm) {
+    .search-section {
+        .search-form {
+            .search-input-group {
+                :deep(.ant-input-search) {
+                    max-width: 100%;
+                }
+            }
+
+            .search-filters {
+                .filter-group {
+                    :deep(.ant-radio-group) {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: $spacing-xs;
+                    }
+                }
+            }
+        }
+    }
+}
