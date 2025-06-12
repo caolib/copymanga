@@ -32,15 +32,14 @@ function Update-CargoVersion {
         # 只替换 [package] 部分中的 version 行
         $inPackageSection = $false
         $versionReplaced = $false
-        
-        for ($i = 0; $i -lt $cargoLines.Length; $i++) {
-            if ($cargoLines[$i] -match '^\\[package\\]') {
+          for ($i = 0; $i -lt $cargoLines.Length; $i++) {
+            if ($cargoLines[$i] -match '^\[package\]') {
                 $inPackageSection = $true
             }
-            elseif ($cargoLines[$i] -match '^\\[') {
+            elseif ($cargoLines[$i] -match '^\[') {
                 $inPackageSection = $false
             }
-            elseif ($inPackageSection -and $cargoLines[$i] -match '^version\\s*=' -and -not $versionReplaced) {
+            elseif ($inPackageSection -and $cargoLines[$i] -match '^version\s*=' -and -not $versionReplaced) {
                 $cargoLines[$i] = "version = `"$VersionNumber`""
                 $versionReplaced = $true
                 break
@@ -62,9 +61,8 @@ function Update-TauriConfig {
     Write-Host "正在更新 tauri.conf.json 版本号..." -ForegroundColor Green
     try {
         $tauriConfPath = "src-tauri\\tauri.conf.json"
-        $tauriContent = Get-Content $tauriConfPath -Raw
-        # 只替换文件开头的 version 字段，避免影响其他地方的版本号
-        $tauriContent = $tauriContent -replace '("productName": ".*",\\r?\\n\\s*)"version": "[\\d\\.]+"', "`$1`"version`": `"$VersionNumber`""
+        $tauriContent = Get-Content $tauriConfPath -Raw        # 只替换文件开头的 version 字段，避免影响其他地方的版本号
+        $tauriContent = $tauriContent -replace '("productName": ".*",\r?\n\s*)"version": "[\d\.]+"', "`$1`"version`": `"$VersionNumber`""
         $tauriContent | Set-Content $tauriConfPath -Encoding UTF8
         Write-Host "✅ tauri.conf.json 版本号已更新为: $VersionNumber" -ForegroundColor Green
     }
@@ -80,7 +78,7 @@ function Get-GitTags {
         if ($LASTEXITCODE -ne 0) {
             throw "无法获取 Git 标签"
         }
-        return $tags | Where-Object { $_ -match '^v?\\d+\\.\\d+\\.\\d+' }
+        return $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' }
     }
     catch {
         Write-Error "错误: $_"
@@ -105,8 +103,7 @@ function Get-CommitsBetweenTags {
         $commitList = @()
         foreach ($commit in $commits) {
             if ([string]::IsNullOrWhiteSpace($commit)) { continue }
-            
-            $parts = $commit -split '\\|', 5
+              $parts = $commit -split '\|', 5
             if ($parts.Length -eq 5) {
                 $commitObj = @{
                     ShortHash = $parts[1]
@@ -115,7 +112,7 @@ function Get-CommitsBetweenTags {
                 
                 # 过滤合并提交和文档提交
                 if ($commitObj.Message -match "^Merge (branch|pull request)" -or 
-                    $commitObj.Message -match "^(docs?:|README|\\.md)") {
+                    $commitObj.Message -match "^(docs?:|README|\.md)") {
                     continue
                 }
                 
@@ -165,11 +162,17 @@ try {
     if ($LASTEXITCODE -ne 0) {
         Write-Host "错误: 创建临时标签 $Version 失败" -ForegroundColor Red
         throw "创建临时标签 $Version 失败"
+    }    $allTags = Get-GitTags
+    
+    # 检查是否有标签
+    if (-not $allTags -or $allTags.Count -eq 0) {
+        Write-Warning "未找到任何有效的版本标签，将生成所有提交的发布说明"
+        $currentVersionTagForCommits = $Version
+        $previousActualTag = $null
+    } else {
+        $currentVersionTagForCommits = $allTags[0] # This is $Version
+        $previousActualTag = if ($allTags.Count -gt 1) { $allTags[1] } else { $null }
     }
-
-    $allTags = Get-GitTags
-    $currentVersionTagForCommits = $allTags[0] # This is $Version
-    $previousActualTag = if ($allTags.Count -gt 1) { $allTags[1] } else { $null }
 
     Write-Host "🏷️  当前版本 (用于提交收集): $currentVersionTagForCommits" -ForegroundColor Cyan
     if ($previousActualTag) {
