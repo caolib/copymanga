@@ -108,6 +108,43 @@ function getPostRank(type = 6, date_type, limit = 18, offset = 0, audience = 'ma
     })
 }
 
+/**
+ * 获取用户收藏的写真列表
+ * @param {*} offset 
+ * @param {*} limit 
+ * @param {*} free_type 
+ * @param {*} ordering -datetime_updated: 最近更新 -datetime_modifier: 最近加入书架时间 -datetime_browse: 最近浏览时间
+ * @returns 
+ */
+function getPostCollection(offset = 0, limit = 10, free_type = 1, ordering = '-datetime_updated') {
+    return request.get('/api/v3/member/collect/posts', {
+        params: {
+            limit,
+            offset,
+            free_type,
+            ordering,
+            platform: 3
+        }
+    })
+}
+
+/**
+ * 收藏或取消收藏写真
+ * @param {*} post_id 写真ID
+ * @param {*} isCollect 是否收藏    
+ * @returns 
+ */
+function collectPost(post_id, isCollect = true) {
+    const data = new URLSearchParams();
+    data.append('post_id', post_id);
+    data.append('is_collect', isCollect ? '1' : '0');
+    return request.post('/api/v3/member/collect/post', data, {
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        }
+    });
+}
+
 export {
     getPostHome,
     getPostInfo,
@@ -115,5 +152,7 @@ export {
     getPostImg,
     discoverPost,
     getNewestPost,
-    getPostRank
+    getPostRank,
+    getPostCollection,
+    collectPost
 }

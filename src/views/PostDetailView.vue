@@ -39,12 +39,17 @@
                             <a-tag v-for="tag in postInfo.tags.slice(0, 6)" :key="tag.path_word" size="small">
                                 {{ tag.name || tag.path_word }}
                             </a-tag>
-                        </div>
-
-                        <!-- 操作按钮 -->
+                        </div> <!-- 操作按钮 -->
                         <div class="post-actions">
                             <a-button @click="goBack" :icon="h(ArrowLeftOutlined)">
                                 返回
+                            </a-button> <a-button @click="() => toggleCollect(true)" :loading="collectLoading"
+                                type="primary" ghost :icon="h(HeartOutlined)">
+                                收藏
+                            </a-button>
+                            <a-button @click="() => toggleCollect(false)" :loading="collectLoading" danger
+                                :icon="h(HeartFilled)">
+                                取消收藏
                             </a-button>
                             <a-button v-if="chapters.length > 0" type="primary" @click="startReading">
                                 开始阅读
@@ -120,9 +125,9 @@
 <script setup>
 import { ref, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getPostInfo, getPostId } from '../api/post'
+import { getPostInfo, getPostId, collectPost } from '../api/post'
 import { formatDate } from '../utils/date'
-import { ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { ArrowLeftOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 
 const route = useRoute()
@@ -130,6 +135,7 @@ const router = useRouter()
 
 const loading = ref(false)
 const chaptersLoading = ref(false)
+const collectLoading = ref(false)
 const postInfo = ref(null)
 const chapters = ref([])
 
@@ -211,6 +217,23 @@ const formatNumber = (num) => {
         return (num / 10000).toFixed(1) + '万'
     }
     return num.toString()
+}
+
+// 收藏或取消收藏写真
+const toggleCollect = async (isCollect) => {
+    const postId = route.params.postId
+    if (!postId) return
+
+    collectLoading.value = true
+
+    await collectPost(postId, isCollect).then(response => {
+        message.success(isCollect ? '收藏成功' : '取消收藏成功')
+    }).catch(err => {
+        console.error('操作失败:', err)
+        message.error('操作失败')
+    }).finally(() => {
+        collectLoading.value = false
+    })
 }
 
 // 处理图片加载错误

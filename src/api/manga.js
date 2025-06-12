@@ -14,23 +14,6 @@ function getMyCollectionRaw(params = {}) {
             ordering: '-datetime_updated',
             ...params
         }
-    }).then(response => {
-        // 确保返回的数据结构正确
-        if (!response) {
-            return { results: { list: [], total: 0 } }
-        }
-
-        if (!response.results) {
-            console.warn('API返回数据缺少results字段:', response)
-            return { results: { list: [], total: 0 } }
-        }
-
-        if (!Array.isArray(response.results.list)) {
-            console.warn('API返回的list不是数组:', response.results)
-            response.results.list = []
-        }
-
-        return response
     })
 }
 

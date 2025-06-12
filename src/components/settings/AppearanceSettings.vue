@@ -50,8 +50,8 @@
                 </a-form-item>
 
                 <a-form-item label="图片大小">
-                    <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="150" :step="10"
-                        :marks="{ 50: '50%', 100: '100%', 150: '150%' }" />
+                    <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="100" :step="10"
+                        :marks="{ 50: '50%', 100: '100%' }" />
                 </a-form-item>
 
                 <a-form-item label="图片间距">

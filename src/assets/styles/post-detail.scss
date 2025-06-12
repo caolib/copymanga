@@ -82,11 +82,18 @@
                     gap: $spacing-xs;
                     margin: $spacing-sm 0;
                 }
-
                 .post-actions {
                     display: flex;
                     gap: $spacing-sm;
                     margin-top: auto;
+                    flex-wrap: wrap;
+
+                    .ant-btn {
+                        &:hover {
+                            transform: translateY(-1px);
+                            transition: all 0.2s ease;
+                        }
+                    }
                 }
             }
         }
