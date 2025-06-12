@@ -6,7 +6,7 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                        }}</a-typography-title>
+                    }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
@@ -266,11 +266,8 @@ const isDarkMode = computed(() => themeStore.isDarkMode)
 
 // 计算图片占位符高度的函数
 const calculateImageHeight = (image) => {
-    console.log('calculateImageHeight called for image:', image)
-
     // 简化计算，先返回固定值进行测试
     const result = 400
-    console.log('calculateImageHeight returning:', result)
     return result
 }
 
@@ -295,7 +292,6 @@ const scrollToTop = () => {
 
 // 计算属性：将图片分组，根据配置的每行列数
 const imageChunks = computed(() => {
-    console.log('Computing imageChunks, images count:', images.value.length)
     const arr = [...images.value];
     const columnsPerRow = readerConfig.columnsPerRow;
 
@@ -314,7 +310,6 @@ const imageChunks = computed(() => {
         chunks.push(arr.slice(i, i + columnsPerRow));
     }
 
-    console.log('Image chunks computed:', chunks.length, 'chunks')
     return chunks;
 })
 
@@ -387,7 +382,6 @@ const nextChapter = () => navigateToChapter('next')
 
 // 底部导航栏控制方法
 const showNavigation = () => {
-    // console.log('鼠标进入底部触发区域')
     showBottomNav.value = true
     // 清除之前的隐藏定时器
     if (hideNavTimer) {
@@ -482,11 +476,9 @@ const fetchChapterImages = () => {
                         width: image.width || null,
                         height: image.height || null
                     }
-                    console.log(`Processing image ${index + 1}:`, imageData)
                     return imageData
                 })
 
-                console.log('Total images loaded:', images.value.length)
             } else {
                 throw new Error('获取章节图片失败')
             }
@@ -585,7 +577,6 @@ const loadSettings = async () => {
         Object.assign(readerConfig, config.reader)
         // 加载暗色模式图片遮罩配置
         darkImageMaskOpacity.value = config.theme?.darkImageMask || 0.8
-        // console.log('UI配置加载成功:', config)
     } catch (error) {
         console.error('加载UI配置失败:', error)
         message.error('加载配置失败')
@@ -604,7 +595,6 @@ const saveSettings = async () => {
         })
 
         if (readerSuccess && themeSuccess) {
-            console.log('UI配置保存成功')
             message.success('配置保存成功')
             showSettingsDrawer.value = false // 保存成功后关闭抽屉
         } else {

@@ -1,23 +1,15 @@
 <template>
-    <div ref="containerRef" class="lazy-img-container" :style="{ height: `${placeholderHeight}px` }"
-        :data-page="pageNumber">
+    <div ref="containerRef" :class="['lazy-img-container', { 'loaded': loaded }]"
+        :style="{ height: loaded ? 'auto' : `${placeholderHeight}px` }" :data-page="pageNumber">
         <!-- 加载状态骨架屏 -->
         <div v-if="!loaded && !error" class="img-placeholder">
             <a-skeleton-image active :style="{ width: '100%', height: '100%' }" />
-            <div class="loading-text">
-                <span>🖼️</span>
-                <span>第 {{ pageNumber }} 页</span>
-            </div>
         </div>
 
         <!-- 错误状态 -->
         <div v-else-if="error" class="error-placeholder">
             <div class="error-content">
-                <span>⚠️</span>
-                <span>图片加载失败</span>
-                <a-button @click="retryLoad" size="small" type="primary">
-                    🔄 重试
-                </a-button>
+                <a-button @click="retryLoad" size="small" type="primary">重试</a-button>
             </div>
         </div> <!-- 实际图片 -->
         <div v-else :class="[
@@ -26,6 +18,8 @@
         ]" :style="{ '--dark-mask-opacity': isDarkMode ? darkImageMaskOpacity : 0 }">
             <img :src="src" :alt="`第 ${pageNumber} 页`" class="manga-img" @error="handleImageError"
                 @load="handleImageLoad" />
+            <!-- 页码标志 -->
+            <div class="page-number">{{ pageNumber }}</div>
         </div>
     </div>
 </template>
@@ -41,10 +35,9 @@ const props = defineProps({
     pageNumber: {
         type: Number,
         required: true
-    },
-    imageSize: {
-        type: Object,
-        default: () => ({ width: 0, height: 0 })
+    }, imageSize: {
+        type: Number,
+        default: 100
     },
     isDarkMode: {
         type: Boolean,
@@ -52,10 +45,9 @@ const props = defineProps({
     }, darkImageMaskOpacity: {
         type: Number,
         default: 0.8
-    },
-    placeholderHeight: {
+    }, placeholderHeight: {
         type: Number,
-        default: 400
+        default: 672  // 根据图片宽高比 800:1169，宽度460px 对应的高度
     },
     useOverlayMask: {
         type: Boolean,
