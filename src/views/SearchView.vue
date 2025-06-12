@@ -106,6 +106,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { searchManga } from '../api/manga'
+import { formatNumber } from '@/utils/number'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
 
 const route = useRoute()
@@ -133,14 +134,6 @@ const validResults = computed(() => {
     })
 })
 
-// 格式化人气数字
-const formatPopular = (popular) => {
-    if (!popular) return '0'
-    if (popular >= 10000) {
-        return (popular / 10000).toFixed(1) + '万'
-    }
-    return popular.toLocaleString()
-}
 
 // 截断文本
 const truncateText = (text, maxLength) => {

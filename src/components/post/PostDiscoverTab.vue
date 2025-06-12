@@ -79,6 +79,7 @@ import { formatDate } from '../../utils/date'
 import { discoverPost } from '../../api/post'
 import { message } from 'ant-design-vue'
 import { h } from 'vue'
+import { formatNumber } from '@/utils/number'
 import { FireOutlined, FieldTimeOutlined } from '@ant-design/icons-vue'
 
 
@@ -141,15 +142,6 @@ const handlePageSizeChange = (current, size) => {
     pageSize.value = size
     currentPage.value = 1
     fetchDiscoverData()
-}
-
-// 格式化数字
-const formatNumber = (num) => {
-    if (!num) return '0'
-    if (num >= 10000) {
-        return (num / 10000).toFixed(1) + '万'
-    }
-    return num.toString()
 }
 
 // 处理图片加载错误

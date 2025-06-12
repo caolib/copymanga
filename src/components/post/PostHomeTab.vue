@@ -145,6 +145,7 @@ import { message } from 'ant-design-vue'
 import { usePostHomeStore } from '../../stores/post-home'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { formatNumber } from '@/utils/number'
 import { goToPostDetail } from '@/router/post-router'
 
 const router = useRouter()
@@ -183,15 +184,6 @@ const refreshData = async () => {
     }).finally(() => {
         refreshLoading.value = false
     })
-}
-
-// 格式化数字
-const formatNumber = (num) => {
-    if (!num) return '0'
-    if (num >= 10000) {
-        return (num / 10000).toFixed(1) + '万'
-    }
-    return num.toString()
 }
 
 // 处理图片加载错误

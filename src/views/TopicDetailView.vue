@@ -150,6 +150,7 @@ import { useTopicStore } from '../stores/topic'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { formatDate } from '../utils/date'
 import { ArrowLeftOutlined } from '@ant-design/icons-vue'
+import { formatNumber } from '@/utils/number'
 
 const route = useRoute()
 const router = useRouter()
@@ -234,14 +235,6 @@ const goToPrevTopic = () => {
     }
 }
 
-// 格式化数字
-const formatNumber = (num) => {
-    if (!num) return '0'
-    if (num >= 10000) {
-        return (num / 10000).toFixed(1) + '万'
-    }
-    return num.toString()
-}
 
 // 跳转到详情页面（根据专题类型判断）
 const goToDetail = (item) => {

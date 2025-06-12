@@ -55,7 +55,7 @@
                             <a-tag color="green">{{ manga.status.display }}</a-tag>
                         </a-descriptions-item>
                         <a-descriptions-item label="人气" v-if="manga.popular">
-                            {{ manga.popular }}
+                            {{ formatNumber(manga.popular) }}
                         </a-descriptions-item>
                         <a-descriptions-item label="最新章节" v-if="manga.last_chapter && manga.last_chapter.name">
                             {{ manga.last_chapter.name }}
@@ -203,6 +203,7 @@ import { getMangaComments, postMangaComment } from '../api/comment'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 import { formatDate } from '../utils/date'
+import { formatNumber } from '@/utils/number'
 
 const route = useRoute()
 const router = useRouter()

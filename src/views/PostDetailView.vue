@@ -129,6 +129,7 @@ import { getPostInfo, getPostId, collectPost } from '../api/post'
 import { formatDate } from '../utils/date'
 import { ArrowLeftOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
+import { formatNumber } from '@/utils/number'
 
 const route = useRoute()
 const router = useRouter()
@@ -208,15 +209,6 @@ const readChapter = (chapter) => {
             postId: route.params.postId
         }
     })
-}
-
-// 格式化数字
-const formatNumber = (num) => {
-    if (!num) return '0'
-    if (num >= 10000) {
-        return (num / 10000).toFixed(1) + '万'
-    }
-    return num.toString()
 }
 
 // 收藏或取消收藏写真

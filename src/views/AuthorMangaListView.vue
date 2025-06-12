@@ -53,6 +53,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getAuthorMangaList } from '../api/manga'
+import { formatNumber } from '@/utils/number'
 
 const route = useRoute()
 const router = useRouter()
@@ -66,12 +67,6 @@ const pageSize = 12
 const authorPathWord = computed(() => route.params.authorPathWord)
 const authorName = computed(() => route.query.name || '')
 
-const formatPopular = (popular) => {
-    if (popular >= 10000) {
-        return `${(popular / 10000).toFixed(1)}万`
-    }
-    return popular?.toString() || '0'
-}
 
 const loadMangaList = async (page = 1) => {
     loading.value = true

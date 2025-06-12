@@ -78,6 +78,7 @@
 
 <script setup>
 import { goToPostDetail } from '@/router/post-router'
+import { formatNumber } from '@/utils/number'
 
 // 定义 props
 const props = defineProps({
@@ -110,15 +111,6 @@ const props = defineProps({
 // 定义 emits
 const emit = defineEmits(['page-change', 'refresh'])
 
-
-// 格式化数字
-const formatNumber = (num) => {
-    if (!num) return '0'
-    if (num >= 10000) {
-        return (num / 10000).toFixed(1) + '万'
-    }
-    return num.toString()
-}
 
 // 获取排名徽章样式类
 const getRankingBadgeClass = (rank) => {
