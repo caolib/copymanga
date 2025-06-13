@@ -26,12 +26,12 @@ export const useCollectionStore = defineStore('collection', {
             return Object.keys(state.collectionCache).length > 0 && state.lastUpdateTime
         },
 
-        // 检查缓存是否过期（30分钟）
+        // 检查缓存是否过期（1天）
         isCacheExpired: (state) => {
             if (!state.lastUpdateTime) return true
             const now = Date.now()
-            const thirtyMinutes = 30 * 60 * 1000
-            return now - state.lastUpdateTime > thirtyMinutes
+            const oneDay = 24 * 60 * 60 * 1000
+            return now - state.lastUpdateTime > oneDay
         },
 
         // 获取指定页的缓存数据

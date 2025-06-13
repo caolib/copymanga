@@ -11,12 +11,12 @@ export const useHomeStore = defineStore('home', {
         hasCache: (state) => {
             return Object.keys(state.homeData).length > 0 && state.lastUpdateTime
         },
-        // 检查缓存是否过期（1小时）
+        // 检查缓存是否过期（1天）
         isCacheExpired: (state) => {
             if (!state.lastUpdateTime) return true
             const now = Date.now()
-            const oneHour = 60 * 60 * 1000
-            return now - state.lastUpdateTime > oneHour
+            const oneDay = 24 * 60 * 60 * 1000
+            return now - state.lastUpdateTime > oneDay
         }
     }, actions: {
         async fetchHomeData(forceRefresh = false) {

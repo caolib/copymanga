@@ -28,15 +28,13 @@ export const useCartoonStore = defineStore('cartoon', {
         hasCache: (state) => (ordering) => {
             const data = state.cartoonData[ordering]
             return data && data.list.length > 0 && data.lastUpdateTime
-        },
-
-        // 检查缓存是否过期（30分钟）
+        },        // 检查缓存是否过期（1天）
         isCacheExpired: (state) => (ordering) => {
             const data = state.cartoonData[ordering]
             if (!data || !data.lastUpdateTime) return true
             const now = Date.now()
-            const thirtyMinutes = 30 * 60 * 1000
-            return now - data.lastUpdateTime > thirtyMinutes
+            const oneDay = 24 * 60 * 60 * 1000
+            return now - data.lastUpdateTime > oneDay
         },
 
         // 获取指定排序的数据

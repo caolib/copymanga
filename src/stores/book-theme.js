@@ -17,12 +17,12 @@ export const useBookThemeStore = defineStore('bookTheme', {
             return state.themes.length > 0 && state.lastUpdateTime
         },
 
-        // 检查缓存是否过期（7天）
+        // 检查缓存是否过期（1天）
         isCacheExpired: (state) => {
             if (!state.lastUpdateTime) return true
             const now = Date.now()
-            const sevenDays = 7 * 24 * 60 * 60 * 1000
-            return now - state.lastUpdateTime > sevenDays
+            const oneDay = 24 * 60 * 60 * 1000
+            return now - state.lastUpdateTime > oneDay
         }
     },
 

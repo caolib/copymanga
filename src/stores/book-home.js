@@ -19,12 +19,12 @@ export const useBookHomeStore = defineStore('bookHome', {
             return Object.keys(state.cache).length > 0 && state.lastUpdateTime
         },
 
-        // 检查缓存是否过期（30分钟）
+        // 检查缓存是否过期（1天）
         isCacheExpired: (state) => {
             if (!state.lastUpdateTime) return true
             const now = Date.now()
-            const thirtyMinutes = 30 * 60 * 1000
-            return now - state.lastUpdateTime > thirtyMinutes
+            const oneDay = 24 * 60 * 60 * 1000
+            return now - state.lastUpdateTime > oneDay
         },
 
         // 生成缓存键
