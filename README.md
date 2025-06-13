@@ -20,12 +20,15 @@
 
 功能：
 
-- [x] 漫画
-- [x] 轻小说
-- [x] 写真
-- [ ] 动画
+✅ 漫画
 
-### 漫画
+✅ 轻小说
+
+✅ 写真
+
+✅ 动画
+
+### 1.漫画
 
 ![image-20250611171235202](https://s2.loli.net/2025/06/11/3a7YcMSFtkE46VC.png)
 
@@ -37,15 +40,15 @@
 
 ![image-20250529162210160](https://s2.loli.net/2025/05/29/aopKubEDILBzkY7.png)
 
-![image-20250611182258241](https://s2.loli.net/2025/06/11/FeVknxADERKHybg.png)
+![image-20250613161311903](https://s2.loli.net/2025/06/13/5qZMzt1ivDNge92.png)
 
-![image-20250611182347188](https://s2.loli.net/2025/06/11/oY1IlODBPyVH7cj.png)
+![image-20250613161440084](https://s2.loli.net/2025/06/13/Mpd9Tz7j3kWr6hL.png)
 
 ![image-20250611182441206](https://s2.loli.net/2025/06/11/Wc8G129xh43SzbZ.png)
 
 ![image-20250611182559524](https://s2.loli.net/2025/06/11/r3s78xnVkwjX6Mf.png)
 
-### 轻小说
+### 2.轻小说
 
 ![image-20250602164731951](https://s2.loli.net/2025/06/02/D5jpQv89Idc4wsm.png)
 
@@ -53,7 +56,15 @@
 
 ![image-20250602193020756](https://s2.loli.net/2025/06/02/MtHREhCqiTZK9pN.png)
 
+### 3.动画
 
+![image-20250613160040740](https://s2.loli.net/2025/06/13/udFeXIhRViKJblW.png)
+
+![image-20250613160307708](https://s2.loli.net/2025/06/13/4eGRoafHv371l86.png)
+
+### 4.写真
+
+> 这部分可以自己去探索
 
 ## 2 开发
 
@@ -63,7 +74,7 @@
 
 ### 2.1 克隆仓库
 
-在一个合适位置克隆该仓库，最好有30GB左右的存储空间（桌面应用是这样的）
+在一个合适位置克隆该仓库，最好有25GB左右的存储空间（时间长了就会占用很多空间，建议只在本地开发而不构建，可以用github actions构建发布）
 
 ### 2.2 Tauri，启动！
 
