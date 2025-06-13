@@ -35,6 +35,9 @@ importers:
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
+      dplayer:
+        specifier: ^1.27.1
+        version: 1.27.1
       express:
         specifier: ^5.1.0
         version: 5.1.0
@@ -994,11 +997,17 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
+  axios@1.2.3:
+    resolution: {integrity: sha512-pdDkMYJeuXLZ6Xj/Q5J3Phpe+jbGdsSzlQaFVkMQzRUL05+6+tetX8TV3p4HrU4kzuO9bt+io/yGQxuyxA/xcw==}
+
   axios@1.9.0:
     resolution: {integrity: sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
+
+  balloon-css@1.2.0:
+    resolution: {integrity: sha512-urXwkHgwp6GsXVF+it01485Z2Cj4pnW02ICnM0TemOlkKmCNnDLmyy+ZZiRXBpwldUXO+aRNr7Hdia4CBvXJ5A==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -1205,6 +1214,9 @@ packages:
   dotenv@16.5.0:
     resolution: {integrity: sha512-m/C+AwOAr9/W1UOIZUo232ejMNnJAJtYQjUbHoNTBNTJSvqzzDh7vnrei3o3r3m9blf6ZoDkvcw0VmozNRFJxg==}
     engines: {node: '>=12'}
+
+  dplayer@1.27.1:
+    resolution: {integrity: sha512-2laBMXs5V1B9zPwJ7eAIw/OBo+Xjvy03i4GHTk3Cg+IWbrq8rKMFO0fFr6ClAYotYOCcFGOvaJDkOZcgKllsCA==}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -1954,6 +1966,9 @@ packages:
   pretty-ms@9.2.0:
     resolution: {integrity: sha512-4yf0QO/sllf/1zbZWYnvWw3NxCQwLXKzIj0G849LSufP15BXKM0rbD2Z3wVnkMfjdn/CB0Dpp444gYAACdsplg==}
     engines: {node: '>=18'}
+
+  promise-polyfill@8.3.0:
+    resolution: {integrity: sha512-H5oELycFml5yto/atYqmjyigJoAo3+OXwolYiH7OfQuYlAqhxNvTfiNMbV9hsC6Yp83yE5r2KTVmtrG6R9i6Pg==}
 
   proxy-addr@2.0.7:
     resolution: {integrity: sha512-llQsMLSUDUPT44jdrU/O37qlnifitDP+ZwrmmZcoSKyLKvtZxpyV0n2/bD/N4tBAAZ/gJEdZU7KMraoK1+XYAg==}
@@ -3197,6 +3212,14 @@ snapshots:
 
   asynckit@0.4.0: {}
 
+  axios@1.2.3:
+    dependencies:
+      follow-redirects: 1.15.9
+      form-data: 4.0.2
+      proxy-from-env: 1.1.0
+    transitivePeerDependencies:
+      - debug
+
   axios@1.9.0:
     dependencies:
       follow-redirects: 1.15.9
@@ -3206,6 +3229,8 @@ snapshots:
       - debug
 
   balanced-match@1.0.2: {}
+
+  balloon-css@1.2.0: {}
 
   binary-extensions@2.3.0: {}
 
@@ -3399,6 +3424,14 @@ snapshots:
   dom-scroll-into-view@2.0.1: {}
 
   dotenv@16.5.0: {}
+
+  dplayer@1.27.1:
+    dependencies:
+      axios: 1.2.3
+      balloon-css: 1.2.0
+      promise-polyfill: 8.3.0
+    transitivePeerDependencies:
+      - debug
 
   dunder-proto@1.0.1:
     dependencies:
@@ -4144,6 +4177,8 @@ snapshots:
   pretty-ms@9.2.0:
     dependencies:
       parse-ms: 4.0.0
+
+  promise-polyfill@8.3.0: {}
 
   proxy-addr@2.0.7:
     dependencies:

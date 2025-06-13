@@ -12,10 +12,7 @@
                     </div>
                 </template> <!-- 视频播放器 -->
                 <div class="video-container" v-if="!loading">
-                    <video ref="videoElement" controls :poster="videoData.v_cover" class="video-player"
-                        @loadstart="onVideoLoadStart" @canplay="onVideoCanPlay" @error="onVideoError">
-                        您的浏览器不支持视频播放
-                    </video>
+                    <div ref="dplayerRef" class="dplayer-container"></div>
                 </div>
 
                 <!-- 视频信息 -->
@@ -53,15 +50,17 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import Hls from 'hls.js'
+import DPlayer from 'dplayer'
 import { getVideoByChapterId } from '../api/cartoon'
 
 const route = useRoute()
 const router = useRouter()
 
-const videoElement = ref(null)
+const dplayerRef = ref(null)
 const loading = ref(false)
 const error = ref('')
 const hls = ref(null)
+const dp = ref(null)
 const currentLine = ref('')
 const playStatus = ref(null)
 
@@ -102,7 +101,7 @@ const fetchVideoData = (line) => {
 }
 
 const initializePlayer = async () => {
-    if (!videoElement.value) {
+    if (!dplayerRef.value) {
         error.value = '视频播放器初始化失败'
         return
     }
@@ -113,51 +112,82 @@ const initializePlayer = async () => {
     }
 
     // 清理之前的播放器
+    if (dp.value) {
+        dp.value.destroy()
+        dp.value = null
+    }
     if (hls.value) {
         hls.value.destroy()
         hls.value = null
-    } const originalVideoUrl = videoData.value.video
+    }
+
+    const originalVideoUrl = videoData.value.video
     let videoUrl = originalVideoUrl
 
-    // 直接使用HLS.js播放，无需检查浏览器支持
-    hls.value = new Hls({
-        enableWorker: true,
-        lowLatencyMode: false,
-        backBufferLength: 90,
-        maxBufferLength: 30,
-        maxMaxBufferLength: 600,
-        maxBufferSize: 60 * 1000 * 1000,
-        maxBufferHole: 0.5,
-        startFragPrefetch: true,
-        testBandwidth: false
-    })
+    // 使用 DPlayer 配合 HLS.js
+    dp.value = new DPlayer({
+        container: dplayerRef.value,
+        video: {
+            url: videoUrl,
+            pic: videoData.value.v_cover,
+            type: 'customHls',
+            customType: {
+                customHls: function (video, player) {
+                    hls.value = new Hls({
+                        enableWorker: true,
+                        lowLatencyMode: false,
+                        backBufferLength: 90,
+                        maxBufferLength: 30,
+                        maxMaxBufferLength: 600,
+                        maxBufferSize: 60 * 1000 * 1000,
+                        maxBufferHole: 0.5,
+                        startFragPrefetch: true,
+                        testBandwidth: false
+                    })
+                    hls.value.loadSource(video.src)
+                    hls.value.attachMedia(video)
 
-    hls.value.loadSource(videoUrl)
-    hls.value.attachMedia(videoElement.value)
+                    hls.value.on(Hls.Events.MANIFEST_PARSED, () => {
+                        playStatus.value = { text: '准备就绪', color: 'success' }
+                        error.value = ''
+                    })
 
-    hls.value.on(Hls.Events.MANIFEST_PARSED, () => {
-        playStatus.value = { text: '准备就绪', color: 'success' }
-        error.value = ''
-    })
-
-    hls.value.on(Hls.Events.ERROR, (event, data) => {
-        if (data.fatal) {
-            switch (data.type) {
-                case Hls.ErrorTypes.NETWORK_ERROR:
-                    if (!tryNextLine()) {
-                        error.value = '网络错误，所有线路都无法访问'
-                        playStatus.value = { text: '播放失败', color: 'error' }
-                    }
-                    break
-                case Hls.ErrorTypes.MEDIA_ERROR:
-                    hls.value.recoverMediaError()
-                    break
-                default:
-                    error.value = '播放器错误'
-                    playStatus.value = { text: '播放错误', color: 'error' }
-                    break
+                    hls.value.on(Hls.Events.ERROR, (event, data) => {
+                        if (data.fatal) {
+                            switch (data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    if (!tryNextLine()) {
+                                        error.value = '网络错误，所有线路都无法访问'
+                                        playStatus.value = { text: '播放失败', color: 'error' }
+                                    }
+                                    break
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    hls.value.recoverMediaError()
+                                    break
+                                default:
+                                    error.value = '播放器错误'
+                                    playStatus.value = { text: '播放错误', color: 'error' }
+                                    break
+                            }
+                        }
+                    })
+                }
             }
-        }
+        },
+        autoplay: false,
+        theme: '#1890ff',
+        lang: 'zh-cn',
+        screenshot: true,
+        hotkey: true,
+        preload: 'auto',
+        volume: 0.7,
+        mutex: true,
+        contextmenu: [
+            {
+                text: '动画播放器',
+                link: '#'
+            }
+        ]
     })
 }
 
@@ -204,19 +234,6 @@ const tryNextLine = () => {
     return false
 }
 
-const onVideoLoadStart = () => {
-    playStatus.value = { text: '加载中...', color: 'processing' }
-}
-
-const onVideoCanPlay = () => {
-    playStatus.value = { text: '可以播放', color: 'success' }
-}
-
-const onVideoError = (e) => {
-    error.value = '视频播放失败'
-    playStatus.value = { text: '播放失败', color: 'error' }
-}
-
 const retryLoad = () => {
     error.value = ''
     fetchVideoData(currentLine.value)
@@ -227,6 +244,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+    if (dp.value) {
+        dp.value.destroy()
+        dp.value = null
+    }
     if (hls.value) {
         hls.value.destroy()
         hls.value = null

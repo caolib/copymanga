@@ -55,47 +55,31 @@
                 border-radius: 0 !important;
                 background: #000;
             }
-
-            .video-player {
+            .dplayer-container {
                 width: 100%;
                 height: auto;
                 min-height: 400px;
-                max-height: 70vh;
+                border-radius: 8px;
+                overflow: hidden;
                 background: #000;
-                outline: none;
-                display: block;
 
-                // 全屏样式
-                &:fullscreen {
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    max-height: none !important;
-                    object-fit: cover;
-                    border-radius: 0;
+                // DPlayer 全屏样式
+                :global(.dplayer) {
+                    border-radius: 8px;
+                    overflow: hidden;
+
+                    &.dplayer-fulled {
+                        border-radius: 0 !important;
+                    }
                 }
 
-                &:-webkit-full-screen {
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    max-height: none !important;
-                    object-fit: cover;
-                    border-radius: 0;
+                :global(.dplayer-video-wrap) {
+                    border-radius: 8px;
+                    overflow: hidden;
                 }
 
-                &:-moz-full-screen {
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    max-height: none !important;
-                    object-fit: cover;
-                    border-radius: 0;
-                }
-
-                &:-ms-fullscreen {
-                    width: 100vw !important;
-                    height: 100vh !important;
-                    max-height: none !important;
-                    object-fit: cover;
-                    border-radius: 0;
+                :global(.dplayer-video) {
+                    border-radius: 8px;
                 }
             }
         }
