@@ -145,6 +145,4 @@ onMounted(() => {
 })
 </script>
 
-<style lang="scss" scoped>
-@import '../../assets/styles/cartoon-home-tab.scss';
-</style>
+<style lang="scss" src="../../assets/styles/cartoon-home-tab.scss" scoped></style>
