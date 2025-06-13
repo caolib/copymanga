@@ -16,9 +16,38 @@
 }
 
 .topics-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @include dark-theme {
+        border-bottom-color: $dark-border-color;
+    }
+
+    .header-left {
+        .topics-count {
+            font-size: 16px;
+            color: $text-secondary;
+            font-weight: 500;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+    }
+
+    .header-right {
+        .ant-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    }
+}
+
+.topics-header {
     text-align: center;
-    margin-bottom: $spacing-xl;
-    padding: $spacing-xl 0;
+    margin-bottom: $spacing-sm;
 
     h1 {
         font-size: 32px;

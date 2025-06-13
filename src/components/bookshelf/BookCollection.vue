@@ -63,16 +63,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { useUserStore } from '../../stores/user'
 import { useBookCollectionStore } from '../../stores/book-collection'
 import { formatDate } from '../../utils/date'
 import { isLoggedIn } from '../../utils/auth'
 
 const router = useRouter()
-const userStore = useUserStore()
+
 const bookCollectionStore = useBookCollectionStore()
 
 const props = defineProps({
@@ -219,11 +218,8 @@ defineExpose({
 })
 
 onMounted(() => {
-    if (!isLoggedIn()) {
-        error.value = '请先登录'
-        return
-    }
-
+    loading.value = true
+    error.value = ''
     // 优先使用缓存数据
     if (bookCollectionStore.hasCache) {
         const cacheKey = bookCollectionStore.getCacheKey(
@@ -234,7 +230,7 @@ onMounted(() => {
         const cachedData = bookCollectionStore.collectionCache[cacheKey]
 
         if (cachedData) {
-            // 从缓存加载数据，即使过期也优先使用（提升用户体验）
+            // 从缓存加载数据，即使过期也优先使用
             bookList.value = cachedData
             totalCount.value = bookCollectionStore.totalCount
             lastUpdateTime.value = bookCollectionStore.lastUpdateTime
@@ -244,6 +240,7 @@ onMounted(() => {
             if (lastUpdateTime.value) {
                 emit('update-time', lastUpdateTime.value)
             }
+            loading.value = false
             return
         }
     }

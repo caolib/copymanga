@@ -1,9 +1,9 @@
 <template>
-    <div class="manga-collection">
-        <!-- 操作栏 -->
-        <div class="collection-controls" v-if="!loading || mangaList.length > 0">
+    <div class="manga-collection"> <!-- 操作栏 -->
+        <div class="collection-controls" v-if="(!loading && !internalLoading) || mangaList.length > 0">
             <div class="controls-left">
-                <a-select v-model:value="ordering" @change="onOrderingChange" style="width: 180px;">
+                <a-select v-model:value="ordering" @change="onOrderingChange" style="width: 180px;"
+                    :disabled="internalLoading">
                     <a-select-option value="-datetime_updated">按漫画更新时间排序</a-select-option>
                     <a-select-option value="-datetime_modifier">按加入书架时间排序</a-select-option>
                     <a-select-option value="-datetime_browse">按阅读时间排序</a-select-option>
@@ -16,12 +16,10 @@
 
         <!-- 错误信息 -->
         <a-alert v-if="error" type="error" :message="error" show-icon banner style="margin-bottom: 20px" /> <!-- 空状态 -->
-        <a-empty v-if="!loading && !error && mangaList.length === 0" description="您还没有收藏任何漫画">
+        <a-empty v-if="!loading && !internalLoading && !error && mangaList.length === 0" description="您还没有收藏任何漫画">
             <a-button type="primary" @click="$router.push('/')">去首页看看</a-button>
-        </a-empty>
-
-        <!-- 骨架屏加载状态 -->
-        <div v-if="loading" class="manga-grid">
+        </a-empty><!-- 骨架屏加载状态 -->
+        <div v-if="loading || internalLoading" class="manga-grid">
             <a-card v-for="n in 8" :key="n" class="manga-card skeleton-card">
                 <a-skeleton :loading="true" active :paragraph="{ rows: 2 }">
                     <template #avatar>
@@ -36,18 +34,18 @@
                     @click="goToManga(item)">
                     <div class="manga-cover">
                         <img :src="item.comic.cover" :alt="item.comic.name" />
-                        <div class="last-read" v-if="item.last_browse && item.last_browse.last_browse_name">
-                            上次阅读: {{ item.last_browse.last_browse_name }}
-                        </div>
                         <a-badge
                             v-if="item.last_browse && item.last_browse.last_browse_name && item.comic.last_chapter_name && item.last_browse.last_browse_name !== item.comic.last_chapter_name"
                             count="有更新"
                             style="position: absolute; top: 8px; right: 8px; z-index: 2; background: #ff4d4f; color: #fff; font-size: 12px; border-radius: 8px; padding: 0 8px;" />
                     </div>
-                    <a-card-meta :title="item.comic.name">
+                    <a-card-meta :title="item.comic.name" style="margin-top: 5px;">
                         <template #description>
                             <div class="manga-author" v-if="item.comic.author && item.comic.author.length">
                                 {{item.comic.author.map(a => a.name).join(', ')}}
+                            </div>
+                            <div class="last-read" v-if="item.last_browse && item.last_browse.last_browse_name">
+                                上次阅读: {{ item.last_browse.last_browse_name }}
                             </div>
                             <div class="manga-update">
                                 更新至: {{ item.comic.last_chapter_name }}
@@ -64,13 +62,14 @@
             <a-pagination v-if="totalCount > pageSize" :current="currentPage" :page-size="pageSize" :total="totalCount"
                 :show-size-changer="true" :page-size-options="['12', '24', '36', '48']" :show-quick-jumper="true"
                 :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`" @change="onPageChange"
-                @showSizeChange="onPageSizeChange" style="margin-top: 24px; text-align: center;" />
+                @showSizeChange="onPageSizeChange" style="margin-top: 24px; text-align: center;"
+                :disabled="internalLoading" />
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useCollectionStore } from '../../stores/collection'
 import { useMangaNavigation } from '../../composables/useMangaNavigation'
 import { isLoggedIn } from '../../utils/auth'
@@ -93,6 +92,7 @@ const ordering = ref('-datetime_updated')
 const mangaList = ref([])
 const error = ref('')
 const lastUpdateTime = ref(null)
+const internalLoading = ref(false)
 
 // 分页相关
 const currentPage = ref(1)
@@ -110,11 +110,7 @@ const goToManga = (item) => {
 }
 
 const fetchCollection = async (forceRefresh = false) => {
-    if (!isLoggedIn()) {
-        error.value = '请先登录'
-        return
-    }
-
+    internalLoading.value = true
     error.value = ''
 
     // 使用 store 获取数据
@@ -149,6 +145,8 @@ const fetchCollection = async (forceRefresh = false) => {
         mangaList.value = []
         emit('update-count', 0)
     }
+
+    internalLoading.value = false
 }
 
 const refreshCollection = () => {
@@ -196,10 +194,6 @@ defineExpose({
 })
 
 onMounted(() => {
-    if (!isLoggedIn()) {
-        error.value = '请先登录'
-        return
-    }
     fetchCollection()
 })
 </script>

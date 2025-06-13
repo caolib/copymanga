@@ -1,9 +1,13 @@
 <template>
     <div class="topics-view">
-        <div class="topics-container">
-            <!-- 标题区域 -->
-            <div class="page-header">
-                <h1>专题</h1>
+        <div class="topics-container"> <!-- 页面头部 -->
+            <div class="topics-header" v-if="!loading">
+                <div class="header-left">
+                    <span class="topics-count">共 {{ topicsList.length }} 个专题</span>
+                </div>
+                <div class="header-right">
+                    <a-button type="primary" :icon="h(ReloadOutlined)" :loading="loading" @click="refreshData" />
+                </div>
             </div>
 
             <!-- 加载状态 -->
@@ -69,6 +73,8 @@
 <script setup>
 import { ref, computed, onMounted, h } from 'vue'
 import { useRouter } from 'vue-router'
+import { message } from 'ant-design-vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 import { useHomeStore } from '../stores/home'
 import { useTopicStore } from '../stores/topic'
 
@@ -118,33 +124,40 @@ const formatDate = (dateStr) => {
 }
 
 // 刷新数据
-const refreshData = async () => {
+const refreshData = () => {
     loading.value = true
-    try {
-        await homeStore.fetchHomeData(true)
-    } catch (error) {
+
+    homeStore.fetchHomeData(true).then(() => {
+        // 更新专题store数据
+        topicStore.setTopicsList(topicsList.value)
+        message.success('专题数据已刷新')
+    }).catch(error => {
         console.error('刷新专题数据失败:', error)
-    } finally {
+        message.error('刷新失败，请稍后重试')
+    }).finally(() => {
         loading.value = false
-    }
+    })
 }
 
 // 初始化数据
-onMounted(async () => {
+onMounted(() => {
     // 如果主页数据为空或过期，重新获取
     if (!homeStore.hasCache || homeStore.isCacheExpired) {
         loading.value = true
-        try {
-            await homeStore.fetchHomeData()
-        } catch (error) {
-            console.error('获取主页数据失败:', error)
-        } finally {
-            loading.value = false
-        }
-    }
 
-    // 将专题数据设置到专题store中
-    topicStore.setTopicsList(topicsList.value)
+        homeStore.fetchHomeData().then(() => {
+            // 将专题数据设置到专题store中
+            topicStore.setTopicsList(topicsList.value)
+        }).catch(error => {
+            console.error('获取主页数据失败:', error)
+            message.error('获取专题数据失败')
+        }).finally(() => {
+            loading.value = false
+        })
+    } else {
+        // 使用缓存数据更新专题store
+        topicStore.setTopicsList(topicsList.value)
+    }
 })
 </script>
 
