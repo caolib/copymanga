@@ -1,4 +1,5 @@
 @use "./variables" as *;
+@use "./skeleton-dark" as *;
 
 .cartoon-home-tab {
     padding: 20px;
@@ -84,7 +85,7 @@
         cursor: pointer;
         border: 1px solid $border-color-light;
 
-        [data-theme="dark"] & {
+        @include dark-theme {
             background: $dark-bg-container;
             border-color: $dark-border-color;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -95,7 +96,7 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             border-color: $primary-color;
 
-            [data-theme="dark"] & {
+            @include dark-theme {
                 box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
             }
         }
@@ -127,7 +128,7 @@
                 text-overflow: ellipsis;
                 white-space: nowrap;
 
-                [data-theme="dark"] & {
+                @include dark-theme {
                     color: $dark-text-primary;
                 }
             }
@@ -140,14 +141,14 @@
                 font-size: 11px;
                 color: $text-secondary;
 
-                [data-theme="dark"] & {
+                @include dark-theme {
                     color: $dark-text-secondary;
                 }
 
                 .cartoon-date {
                     color: $text-tertiary;
 
-                    [data-theme="dark"] & {
+                    @include dark-theme {
                         color: $dark-text-tertiary;
                     }
                 }
@@ -162,15 +163,14 @@
                 flex-wrap: wrap;
                 gap: 4px;
             }
-        }
-
-        // 骨架加载样式
+        } // 骨架加载样式
         .skeleton-cover {
             aspect-ratio: 3/4;
             width: 100%;
             overflow: hidden;
             border-radius: 8px 8px 0 0;
         }
+
         .skeleton-info {
             padding: 8px;
         }
@@ -184,7 +184,7 @@
         text-align: center;
         color: $text-tertiary;
 
-        [data-theme="dark"] & {
+        @include dark-theme {
             color: $dark-text-tertiary;
         }
     }

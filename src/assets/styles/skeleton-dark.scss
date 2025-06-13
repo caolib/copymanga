@@ -1,0 +1,98 @@
+@use "./variables" as *;
+
+// 骨架组件暗色主题适配
+@include dark-theme {
+    .ant-skeleton {
+        .ant-skeleton-content {
+            .ant-skeleton-title {
+                background: linear-gradient(
+                    90deg,
+                    $dark-fill-secondary 25%,
+                    $dark-fill-primary 50%,
+                    $dark-fill-secondary 75%
+                );
+                background-size: 400% 100%;
+            }
+
+            .ant-skeleton-paragraph > li {
+                background: linear-gradient(
+                    90deg,
+                    $dark-fill-secondary 25%,
+                    $dark-fill-primary 50%,
+                    $dark-fill-secondary 75%
+                );
+                background-size: 400% 100%;
+            }
+        }
+
+        .ant-skeleton-header {
+            .ant-skeleton-avatar {
+                background: linear-gradient(
+                    90deg,
+                    $dark-fill-secondary 25%,
+                    $dark-fill-primary 50%,
+                    $dark-fill-secondary 75%
+                );
+                background-size: 400% 100%;
+            }
+        }
+
+        .ant-skeleton-input {
+            background: linear-gradient(
+                90deg,
+                $dark-fill-secondary 25%,
+                $dark-fill-primary 50%,
+                $dark-fill-secondary 75%
+            );
+            background-size: 400% 100%;
+        }
+
+        .ant-skeleton-button {
+            background: linear-gradient(
+                90deg,
+                $dark-fill-secondary 25%,
+                $dark-fill-primary 50%,
+                $dark-fill-secondary 75%
+            );
+            background-size: 400% 100%;
+        }
+
+        .ant-skeleton-image {
+            background: $dark-fill-secondary;
+
+            .ant-skeleton-image-svg {
+                fill: $dark-fill-primary;
+                opacity: 0.3;
+            }
+        }
+
+        &.ant-skeleton-active {
+            .ant-skeleton-content {
+                .ant-skeleton-title,
+                .ant-skeleton-paragraph > li {
+                    animation: ant-skeleton-loading 1.4s ease-in-out infinite;
+                }
+            }
+
+            .ant-skeleton-header {
+                .ant-skeleton-avatar {
+                    animation: ant-skeleton-loading 1.4s ease-in-out infinite;
+                }
+            }
+
+            .ant-skeleton-input,
+            .ant-skeleton-button {
+                animation: ant-skeleton-loading 1.4s ease-in-out infinite;
+            }
+        }
+    }
+}
+
+@keyframes ant-skeleton-loading {
+    0% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0 50%;
+    }
+}

@@ -28,6 +28,4 @@ const handleTabChange = (key) => {
 }
 </script>
 
-<style lang="scss" scoped>
-@import '../assets/styles/cartoon-home.scss';
-</style>
+<style lang="scss" src="../assets/styles/cartoon-home.scss" scoped></style>
