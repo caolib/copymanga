@@ -251,30 +251,36 @@
 }
 
 // 深色主题
-html.dark {
-    .post-home-view {
+.post-home-view {
+    @include dark-theme {
         background: $dark-bg-primary;
+    }
+}
 
-        .post-home-container {
-            .ant-tabs {
-                background: $dark-bg-secondary;
-                box-shadow: $shadow-dark-light;
-            }
-        }
-
-        // 年龄确认弹窗深色主题
-        .age-confirm-content {
-            .age-confirm-text {
-                color: $dark-text-secondary;
-            }
+.post-home-container {
+    .ant-tabs {
+        @include dark-theme {
+            background: $dark-bg-secondary;
+            box-shadow: $shadow-dark-light;
         }
     }
+}
 
-    .post-home-tab {
-        .home-content {
-            .section {
-                .section-header {
-                    h2 {
+// 年龄确认弹窗深色主题
+.age-confirm-content {
+    .age-confirm-text {
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+}
+
+.post-home-tab {
+    .home-content {
+        .section {
+            .section-header {
+                h2 {
+                    @include dark-theme {
                         color: $dark-text-primary;
                     }
                 }

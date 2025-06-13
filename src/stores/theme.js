@@ -29,12 +29,14 @@ export const useThemeStore = defineStore('theme', () => {    // 主题状态
         isDarkMode.value = dark
         updateThemeClass()
         await saveThemeConfig()
-    }    // 设置字体系列
+    }
+    // 设置字体系列
     const setFontFamily = async (font) => {
         fontFamily.value = font
         updateFontFamily()
         await saveThemeConfig()
-    }    // 保存主题配置
+    }
+    // 保存主题配置
     const saveThemeConfig = async () => {
         await updateThemeConfig({
             isDarkMode: isDarkMode.value,
@@ -42,7 +44,8 @@ export const useThemeStore = defineStore('theme', () => {    // 主题状态
         }).catch(error => {
             console.error('保存主题配置失败:', error)
         })
-    }// 更新HTML根元素的主题类
+    }
+    // 更新HTML根元素的主题类
     const updateThemeClass = () => {
         const html = document.documentElement
         if (isDarkMode.value) {
@@ -50,10 +53,12 @@ export const useThemeStore = defineStore('theme', () => {    // 主题状态
         } else {
             html.classList.remove('dark')
         }
-    }    // 更新字体系列
+    }
+    // 更新字体系列
     const updateFontFamily = () => {
         document.documentElement.style.setProperty('--font-family', fontFamily.value)
-    }// 初始化主题
+    }
+    // 初始化主题
     const initTheme = async () => {
         try {
             const config = await loadUIConfig()

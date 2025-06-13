@@ -85,23 +85,29 @@
 }
 
 // 暗黑模式适配
-html.dark {
-    .post-new-tab {
-        .post-card {
+.post-new-tab {
+    .post-card {
+        @include dark-theme {
             &:hover {
                 box-shadow: $shadow-dark-medium;
             }
+        }
 
-            .post-info {
+        .post-info {
+            @include dark-theme {
                 color: $dark-text-secondary;
-            }
-
-            .ticket-badge {
-                background-color: $primary-color;
             }
         }
 
-        .update-time {
+        .ticket-badge {
+            @include dark-theme {
+                background-color: $primary-color;
+            }
+        }
+    }
+
+    .update-time {
+        @include dark-theme {
             color: $dark-text-secondary;
         }
     }

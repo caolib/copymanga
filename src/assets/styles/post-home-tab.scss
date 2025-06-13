@@ -189,32 +189,38 @@
 }
 
 // 深色主题
-html.dark {
-    .post-home-tab {
-        .home-content {
-            .header-actions {
-                .update-time {
+.post-home-tab {
+    .home-content {
+        .header-actions {
+            .update-time {
+                @include dark-theme {
                     color: $dark-text-secondary;
                 }
             }
+        }
 
-            .banners-section {
-                .ant-collapse-header {
+        .banners-section {
+            .ant-collapse-header {
+                @include dark-theme {
                     color: $dark-text-primary;
                 }
             }
+        }
 
-            .section {
-                .section-header {
-                    h2 {
+        .section {
+            .section-header {
+                h2 {
+                    @include dark-theme {
                         color: $dark-text-primary;
                     }
                 }
+            }
 
-                .post-card {
-                    .post-info {
-                        .post-date,
-                        .post-popular {
+            .post-card {
+                .post-info {
+                    .post-date,
+                    .post-popular {
+                        @include dark-theme {
                             color: $dark-text-secondary;
                         }
                     }

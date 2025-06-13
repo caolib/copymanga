@@ -64,9 +64,9 @@
 }
 
 // 深色主题适配
-[data-theme="dark"] {
-    .author-manga-list-container {
-        .manga-card {
+.author-manga-list-container {
+    .manga-card {
+        @include dark-theme {
             &:hover {
                 box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
             }

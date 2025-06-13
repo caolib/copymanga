@@ -146,37 +146,47 @@
 }
 
 // 暗色模式适配
-body.dark-theme {
-    .post-discover-tab {
-        .discover-content {
-            .filter-section {
+.post-discover-tab {
+    .discover-content {
+        .filter-section {
+            @include dark-theme {
                 background-color: $dark-bg-secondary;
                 box-shadow: none;
+            }
 
-                .filter-label {
+            .filter-label {
+                @include dark-theme {
                     color: $dark-text-primary;
                 }
             }
+        }
 
-            .posts-grid {
-                .post-card {
+        .posts-grid {
+            .post-card {
+                @include dark-theme {
                     background-color: $dark-bg-secondary;
                     border-color: $dark-border-color;
+                }
 
-                    .ant-card-meta-title {
-                        .post-title {
+                .ant-card-meta-title {
+                    .post-title {
+                        @include dark-theme {
                             color: $dark-text-primary;
                         }
                     }
+                }
 
-                    .ant-card-meta-description {
-                        .post-info {
-                            .post-meta {
-                                .post-date {
+                .ant-card-meta-description {
+                    .post-info {
+                        .post-meta {
+                            .post-date {
+                                @include dark-theme {
                                     color: $dark-text-tertiary;
                                 }
+                            }
 
-                                .post-popular {
+                            .post-popular {
+                                @include dark-theme {
                                     color: $dark-text-secondary;
                                 }
                             }

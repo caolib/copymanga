@@ -4,7 +4,7 @@
     min-height: calc(100vh - 120px);
     background: $bg-color;
 
-    [data-theme="dark"] & {
+    @include dark-theme {
         background: $dark-bg-tertiary;
     }
 
@@ -15,7 +15,7 @@
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         color: $text-primary;
 
-        [data-theme="dark"] & {
+        @include dark-theme {
             background: $dark-bg-container;
             color: $dark-text-primary;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);

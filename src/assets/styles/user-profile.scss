@@ -195,26 +195,34 @@
 }
 
 // 暗色主题样式
-html.dark {
-    .user-profile-container {
+.user-profile-container {
+    @include dark-theme {
         background-color: var(--dark-bg-custom, $dark-bg-primary);
     }
+}
 
-    .user-profile-content {
+.user-profile-content {
+    @include dark-theme {
         background-color: var(--dark-bg-custom, $dark-bg-primary);
     }
+}
 
-    .user-profile-sider {
+.user-profile-sider {
+    @include dark-theme {
         background: var(--dark-bg-custom, $dark-bg-primary) !important;
         border-right: 1px solid $dark-border-color !important;
     }
+}
 
-    .user-sider-header {
+.user-sider-header {
+    @include dark-theme {
         border-bottom: 1px solid $dark-border-color !important;
         color: $dark-text-primary;
     }
+}
 
-    .browse-card {
+.browse-card {
+    @include dark-theme {
         background: $dark-bg-primary;
         border: 1px solid $dark-border-color;
 
@@ -223,18 +231,25 @@ html.dark {
             box-shadow: $shadow-dark-medium;
         }
     }
+}
 
-    .comic-chapter,
-    .comic-author,
-    .read-chapter {
+.comic-chapter,
+.comic-author {
+    @include dark-theme {
         color: $dark-text-secondary;
     }
+}
 
-    .comic-title {
+.comic-title {
+    @include dark-theme {
         color: $dark-text-primary;
     }
+}
 
-    .read-chapter {
+.read-chapter {
+    color: $primary-color;
+
+    @include dark-theme {
         color: $primary-hover;
     }
 }

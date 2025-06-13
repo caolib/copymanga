@@ -31,10 +31,12 @@
 }
 
 // 暗色模式
-html.dark .post-ranking-tab {
+.post-ranking-tab {
     .ranking-header {
         .update-time {
-            color: $dark-text-secondary;
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
         }
     }
 }

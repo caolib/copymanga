@@ -57,12 +57,14 @@
 }
 
 // 深色主题适配
-[data-theme="dark"] {
-    .author-tag:hover {
-        background-color: #1890ff !important;
-        border-color: #1890ff !important;
-        color: white !important;
-        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+.author-tag {
+    @include dark-theme {
+        &:hover {
+            background-color: #1890ff !important;
+            border-color: #1890ff !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+        }
     }
 }
 
@@ -71,22 +73,21 @@
     position: relative;
     border: 2px solid #1890ff !important;
     background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%) !important;
-}
 
-.last-read-chapter:hover {
-    border-color: #40a9ff !important;
-    box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
-}
+    &:hover {
+        border-color: #40a9ff !important;
+        box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3) !important;
+    }
 
-/* 暗色模式下的上次阅读章节样式 */
-html.dark .last-read-chapter {
-    border: 2px solid #40a9ff !important;
-    background: linear-gradient(135deg, #1a3a5c 0%, #2a4a6c 100%) !important;
-}
+    @include dark-theme {
+        border: 2px solid #40a9ff !important;
+        background: linear-gradient(135deg, #1a3a5c 0%, #2a4a6c 100%) !important;
 
-html.dark .last-read-chapter:hover {
-    border-color: #69c0ff !important;
-    box-shadow: 0 4px 12px rgba(64, 169, 255, 0.3) !important;
+        &:hover {
+            border-color: #69c0ff !important;
+            box-shadow: 0 4px 12px rgba(64, 169, 255, 0.3) !important;
+        }
+    }
 }
 
 .last-read-tag {
@@ -158,12 +159,11 @@ html.dark .last-read-chapter:hover {
     .ant-btn {
         border-radius: 6px;
     }
-}
 
-/* 暗色模式下的评论输入框样式 */
-html.dark .comment-input-section {
-    background-color: var(--dark-primary-bg) !important;
-    border-color: #303030 !important;
+    @include dark-theme {
+        background-color: var(--dark-primary-bg) !important;
+        border-color: #303030 !important;
+    }
 }
 
 /* 原有的评论样式（保留作为备用） */
@@ -209,23 +209,33 @@ html.dark .comment-input-section {
 }
 
 /* 暗色模式下的评论样式 */
-html.dark .compact-comment-item {
-    background-color: var(--dark-primary-bg) !important;
-    border: 1px solid var(--dark-border-color);
+.compact-comment-item {
+    @include dark-theme {
+        background-color: var(--dark-primary-bg) !important;
+        border: 1px solid var(--dark-border-color);
+    }
 }
 
-html.dark .comment-item {
-    border-bottom-color: #303030;
+.comment-item {
+    @include dark-theme {
+        border-bottom-color: #303030;
+    }
 }
 
-html.dark .comment-user {
-    color: #f0f0f0;
+.comment-user {
+    @include dark-theme {
+        color: #f0f0f0;
+    }
 }
 
-html.dark .comment-time {
-    color: #8c8c8c;
+.comment-time {
+    @include dark-theme {
+        color: #8c8c8c;
+    }
 }
 
-html.dark .comment-content {
-    color: #d9d9d9;
+.comment-content {
+    @include dark-theme {
+        color: #d9d9d9;
+    }
 }

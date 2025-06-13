@@ -154,69 +154,85 @@
 }
 
 // 深色主题适配
-html.dark {
-    .cartoon-player-container {
+.cartoon-player-container {
+    @include dark-theme {
         background: $dark-bg-primary;
+    }
+}
 
-        .player-card {
-            background: $dark-bg-secondary;
-            box-shadow: $shadow-dark-medium;
+.player-card {
+    @include dark-theme {
+        background: $dark-bg-secondary;
+        box-shadow: $shadow-dark-medium;
+    }
 
-            .video-container {
-                .video-player {
-                    &::-webkit-media-controls-panel {
-                        background: rgba(255, 255, 255, 0.1);
-                    }
+    .video-container {
+        .video-player {
+            @include dark-theme {
+                &::-webkit-media-controls-panel {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+            }
+        }
+    }
+
+    .video-info {
+        .ant-typography-title {
+            @include dark-theme {
+                color: $dark-text-primary !important;
+            }
+        }
+
+        .line-selector {
+            @include dark-theme {
+                border-color: $dark-border-color;
+            }
+
+            .ant-typography-text {
+                @include dark-theme {
+                    color: $dark-text-primary;
                 }
             }
 
-            .video-info {
-                .ant-typography-title {
-                    color: $dark-text-primary !important;
-                }
-
-                .line-selector {
-                    border-color: $dark-border-color;
-
-                    .ant-typography-text {
+            .ant-radio-group {
+                .ant-radio-button-wrapper {
+                    @include dark-theme {
+                        border-color: $dark-border-color;
                         color: $dark-text-primary;
-                    }
+                        background: $dark-bg-primary;
 
-                    .ant-radio-group {
-                        .ant-radio-button-wrapper {
+                        &:hover {
+                            border-color: $primary-color;
+                            color: $primary-color;
+                        }
+
+                        &.ant-radio-button-wrapper-checked {
+                            background: $primary-color;
+                            border-color: $primary-color;
+                            color: #fff;
+                        }
+
+                        &.ant-radio-button-wrapper-disabled {
+                            background: $dark-fill-tertiary;
                             border-color: $dark-border-color;
-                            color: $dark-text-primary;
-                            background: $dark-bg-primary;
-
-                            &:hover {
-                                border-color: $primary-color;
-                                color: $primary-color;
-                            }
-
-                            &.ant-radio-button-wrapper-checked {
-                                background: $primary-color;
-                                border-color: $primary-color;
-                                color: #fff;
-                            }
-
-                            &.ant-radio-button-wrapper-disabled {
-                                background: $dark-fill-tertiary;
-                                border-color: $dark-border-color;
-                                color: $dark-text-tertiary;
-                            }
+                            color: $dark-text-tertiary;
                         }
                     }
                 }
             }
+        }
+    }
 
-            .ant-result {
-                .ant-result-title {
-                    color: $dark-text-primary;
-                }
+    .ant-result {
+        .ant-result-title {
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
 
-                .ant-result-subtitle {
-                    color: $dark-text-secondary;
-                }
+        .ant-result-subtitle {
+            @include dark-theme {
+                color: $dark-text-secondary;
             }
         }
     }

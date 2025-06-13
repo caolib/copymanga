@@ -578,84 +578,67 @@
     margin: 12px 0;
 }
 
-/* 回到顶部按钮样式 */
-.back-to-top-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 50px;
-    height: 50px;
-    background-color: rgba($primary-color, 0.9);
-    color: $white;
-    border-radius: 50%;
-    box-shadow: $shadow-light;
-    transition: $transition-normal;
-    cursor: pointer;
-    font-size: 12px;
-    line-height: 1;
-    backdrop-filter: blur(10px);
-
-    &:hover {
-        background-color: rgba($primary-active, 0.9);
-        transform: scale(1.05);
-        box-shadow: $shadow-medium;
-    }
-
-    .arrow-up {
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 2px;
-    }
-
-    span:last-child {
-        font-size: 10px;
-    }
-
-    @include dark-theme {
-        background-color: rgba($primary-color, 0.8);
-
-        &:hover {
-            background-color: rgba($primary-active, 0.9);
-        }
-    }
-}
-
 /* 暗色模式下的抽屉样式 */
-html.dark :deep(.ant-drawer .ant-drawer-content) {
-    background-color: $dark-bg-primary;
-    color: $dark-text-primary;
+:deep(.ant-drawer .ant-drawer-content) {
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
 }
-html.dark :deep(.ant-drawer .ant-drawer-header) {
-    background-color: $dark-bg-primary;
-    border-bottom: 1px solid $dark-border-color;
-    color: $dark-text-primary;
+
+:deep(.ant-drawer .ant-drawer-header) {
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+        border-bottom: 1px solid $dark-border-color;
+        color: $dark-text-primary;
+    }
 }
-html.dark :deep(.ant-drawer .ant-drawer-body) {
-    background-color: $dark-bg-primary;
-    color: $dark-text-primary;
+
+:deep(.ant-drawer .ant-drawer-body) {
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+        color: $dark-text-primary;
+    }
 }
-html.dark :deep(.ant-form-item-label > label) {
-    color: $dark-text-primary;
+
+:deep(.ant-form-item-label > label) {
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
 }
-html.dark :deep(.ant-radio-wrapper) {
-    color: $dark-text-primary;
+
+:deep(.ant-radio-wrapper) {
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
 }
-html.dark :deep(.ant-radio-button-wrapper) {
-    background-color: $dark-bg-primary;
-    border-color: $dark-border-color-light;
-    color: $dark-text-primary;
+
+:deep(.ant-radio-button-wrapper) {
+    @include dark-theme {
+        background-color: $dark-bg-primary;
+        border-color: $dark-border-color-light;
+        color: $dark-text-primary;
+    }
 }
-html.dark :deep(.ant-radio-button-wrapper-checked) {
-    background-color: $primary-color;
-    border-color: $primary-color;
-    color: $white;
+
+:deep(.ant-radio-button-wrapper-checked) {
+    @include dark-theme {
+        background-color: $primary-color;
+        border-color: $primary-color;
+        color: $white;
+    }
 }
-html.dark :deep(.ant-slider-track) {
-    background-color: $primary-color;
+
+:deep(.ant-slider-track) {
+    @include dark-theme {
+        background-color: $primary-color;
+    }
 }
-html.dark :deep(.ant-slider-rail) {
-    background-color: $dark-border-color-light;
+
+:deep(.ant-slider-rail) {
+    @include dark-theme {
+        background-color: $dark-border-color-light;
+    }
 }
 
 /* 响应式样式 */

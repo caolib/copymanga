@@ -7,7 +7,7 @@
     background: $bg-color-white;
     color: $text-primary;
 
-    [data-theme="dark"] & {
+    @include dark-theme {
         background: $dark-bg-container;
         color: $dark-text-primary;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -21,12 +21,11 @@
         background: $bg-color-light;
         color: $text-secondary;
 
-        [data-theme="dark"] & {
+        @include dark-theme {
             background: $dark-bg-secondary;
             color: $dark-text-secondary;
         }
     }
-
     .image-error {
         display: flex;
         flex-direction: column;
@@ -36,7 +35,7 @@
         background: $bg-color-light;
         color: $text-secondary;
 
-        [data-theme="dark"] & {
+        @include dark-theme {
             background: $dark-bg-secondary;
             color: $dark-text-secondary;
         }
@@ -65,17 +64,16 @@
             transition: all 0.3s ease;
             cursor: pointer;
 
-            [data-theme="dark"] & {
+            @include dark-theme {
                 background: $dark-bg-container;
                 border-color: $dark-border-color;
             }
-
             &:hover {
                 transform: translateY(-2px);
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
                 border-color: $primary-color;
 
-                [data-theme="dark"] & {
+                @include dark-theme {
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 }
 
@@ -83,14 +81,13 @@
                     opacity: 1;
                 }
             }
-
             .chapter-cover {
                 position: relative;
                 aspect-ratio: 16/9;
                 overflow: hidden;
                 background: $bg-color-light;
 
-                [data-theme="dark"] & {
+                @include dark-theme {
                     background: $dark-bg-secondary;
                 }
 
@@ -118,7 +115,7 @@
                     text-overflow: ellipsis;
                     white-space: nowrap;
 
-                    [data-theme="dark"] & {
+                    @include dark-theme {
                         color: $dark-text-primary;
                     }
                 }

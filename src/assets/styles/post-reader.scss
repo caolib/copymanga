@@ -162,41 +162,55 @@
 }
 
 // 深色主题
-html.dark {
-    .post-reader-view {
+.post-reader-view {
+    @include dark-theme {
         background: $dark-bg-primary;
+    }
+}
 
-        .post-reader {
-            .reader-header {
-                background: $dark-bg-secondary;
-                border-bottom-color: $dark-border-color;
-                box-shadow: $shadow-dark-light;
+.post-reader {
+    .reader-header {
+        @include dark-theme {
+            background: $dark-bg-secondary;
+            border-bottom-color: $dark-border-color;
+            box-shadow: $shadow-dark-light;
+        }
 
-                .header-left {
-                    .post-title {
-                        color: $dark-text-primary;
-                    }
-                }
-
-                .header-center {
-                    .chapter-name {
-                        color: $dark-text-primary;
-                    }
-
-                    .progress-text {
-                        color: $dark-text-secondary;
-                    }
+        .header-left {
+            .post-title {
+                @include dark-theme {
+                    color: $dark-text-primary;
                 }
             }
-            .reader-content {
-                background: $dark-bg-primary;
-                .images-container {
-                    .image-item {
-                        :deep(.ant-image) {
-                            img {
-                                background: $dark-bg-secondary;
-                                box-shadow: $shadow-dark-medium;
-                            }
+        }
+
+        .header-center {
+            .chapter-name {
+                @include dark-theme {
+                    color: $dark-text-primary;
+                }
+            }
+
+            .progress-text {
+                @include dark-theme {
+                    color: $dark-text-secondary;
+                }
+            }
+        }
+    }
+
+    .reader-content {
+        @include dark-theme {
+            background: $dark-bg-primary;
+        }
+
+        .images-container {
+            .image-item {
+                :deep(.ant-image) {
+                    img {
+                        @include dark-theme {
+                            background: $dark-bg-secondary;
+                            box-shadow: $shadow-dark-medium;
                         }
                     }
                 }

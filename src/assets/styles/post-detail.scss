@@ -199,65 +199,87 @@
 }
 
 // 深色主题
-html.dark {
-    .post-detail-view {
+.post-detail-view {
+    @include dark-theme {
         background: $dark-bg-primary;
+    }
+}
 
-        .post-detail-container {
+.post-detail-container {
+    @include dark-theme {
+        background: $dark-bg-secondary;
+        box-shadow: $shadow-dark-light;
+    }
+}
+
+.post-detail {
+    .post-header {
+        @include dark-theme {
             background: $dark-bg-secondary;
-            box-shadow: $shadow-dark-light;
         }
 
-        .post-detail {
-            .post-header {
-                background: $dark-bg-secondary;
+        .post-cover-large {
+            @include dark-theme {
+                box-shadow: $shadow-dark-light;
+            }
+        }
 
-                .post-cover-large {
-                    box-shadow: $shadow-dark-light;
-                }
-
-                .post-info-section {
-                    .post-title {
-                        color: $dark-text-primary;
-                    }
-
-                    .post-brief {
-                        color: $dark-text-secondary;
-                    }
-
-                    .post-meta {
-                        .post-date,
-                        .post-read-times,
-                        .post-popular {
-                            color: $dark-text-tertiary;
-                        }
-
-                        .post-ticket {
-                            color: $primary-color;
-                        }
-                    }
+        .post-info-section {
+            .post-title {
+                @include dark-theme {
+                    color: $dark-text-primary;
                 }
             }
 
-            .chapters-section {
-                .section-header {
-                    h2 {
-                        color: $dark-text-primary;
+            .post-brief {
+                @include dark-theme {
+                    color: $dark-text-secondary;
+                }
+            }
+
+            .post-meta {
+                .post-date,
+                .post-read-times,
+                .post-popular {
+                    @include dark-theme {
+                        color: $dark-text-tertiary;
                     }
                 }
 
-                .chapters-list {
-                    .chapter-name {
-                        color: $dark-text-primary;
+                .post-ticket {
+                    @include dark-theme {
+                        color: $primary-color;
                     }
+                }
+            }
+        }
+    }
 
-                    .chapter-info {
-                        color: $dark-text-secondary;
+    .chapters-section {
+        .section-header {
+            h2 {
+                @include dark-theme {
+                    color: $dark-text-primary;
+                }
+            }
+        }
 
-                        .chapter-size,
-                        .chapter-sort {
-                            color: $dark-text-tertiary;
-                        }
+        .chapters-list {
+            .chapter-name {
+                @include dark-theme {
+                    color: $dark-text-primary;
+                }
+            }
+
+            .chapter-info {
+                @include dark-theme {
+                    color: $dark-text-secondary;
+                }
+
+                .chapter-size,
+                .chapter-sort {
+                    @include dark-theme {
+                        color: $dark-text-tertiary;
                     }
                 }
             }
