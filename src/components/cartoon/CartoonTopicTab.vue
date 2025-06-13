@@ -28,11 +28,10 @@
                         </template>
                     </a-skeleton>
                 </div>
-            </div>
-
-            <!-- 实际数据 -->
+            </div> <!-- 实际数据 -->
             <div v-else-if="topics.length" class="topic-grid">
-                <div v-for="topic in topics" :key="topic.path_word" class="topic-card">
+                <div v-for="topic in topics" :key="topic.path_word" class="topic-card"
+                    @click="goToTopicDetail(topic.path_word, topic.type)">
                     <div class="topic-cover">
                         <a-image :src="topic.cover" :alt="topic.title" :preview="false"
                             style="width: 100%; height: 100px; object-fit: cover;" />
@@ -67,9 +66,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getCartoonTopics } from '../../api/cartoon'
 import { formatDate } from '../../utils/date'
+
+const router = useRouter()
 
 // 缓存key
 const CACHE_KEY = 'cartoon_topics_cache'
@@ -181,6 +183,15 @@ const refreshTopics = () => {
         } else if (result.error) {
             console.error('刷新失败:', result.error)
         }
+    })
+}
+
+// 跳转到专题详情
+const goToTopicDetail = (pathWord, type) => {
+    console.log('跳转到专题详情:', { pathWord, type })
+    router.push({
+        path: `/topic/${pathWord}`,
+        query: { type }
     })
 }
 

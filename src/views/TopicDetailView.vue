@@ -193,8 +193,9 @@ const fetchTopicContent = async () => {
     if (!pathWord) return
 
     const offset = (currentPage.value - 1) * pageSize.value
-    // 根据专题类型决定内容类型：4是写真专题，1是漫画专题
-    const contentType = currentTopic.value?.type === 4 ? 4 : 1
+    // 优先使用query参数中的type，如果没有则根据专题详情中的type决定
+    const queryType = route.query.type ? parseInt(route.query.type) : null
+    const contentType = queryType || (currentTopic.value?.type === 4 ? 4 : 1)
     const result = await topicStore.fetchTopicContent(pathWord, contentType, offset, pageSize.value)
 
     if (!result.success) {
@@ -238,14 +239,29 @@ const goToPrevTopic = () => {
 
 // 跳转到详情页面（根据专题类型判断）
 const goToDetail = (item) => {
+    // 优先使用query参数中的type，如果没有则使用专题详情中的type
+    const queryType = route.query.type ? parseInt(route.query.type) : null
+    const topicType = queryType || currentTopic.value?.type
+
+    console.log('专题类型:', topicType, '跳转项目:', item.path_word)
+
     // 如果专题类型是4，则是写真专题，跳转到写真详情
-    if (currentTopic.value?.type === 4) {
+    if (topicType === 4) {
+        console.log('跳转到写真详情')
         router.push({
             name: 'PostDetail',
             params: { postId: item.path_word }
         })
+    } else if (topicType === 2) {
+        // 如果专题类型是2，则是动画专题，跳转到动画详情
+        console.log('跳转到动画详情')
+        router.push({
+            name: 'CartoonDetail',
+            params: { pathWord: item.path_word }
+        })
     } else {
         // 否则是漫画专题，跳转到漫画详情
+        console.log('跳转到漫画详情')
         goToMangaDetail(item)
     }
 }
