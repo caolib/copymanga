@@ -63,11 +63,9 @@
 
             <!-- 空状态 -->
             <a-empty v-else description="暂无动画数据" />
-        </div>
-
-        <!-- 加载更多 -->
+        </div> <!-- 加载更多 -->
         <div class="load-more" v-if="cartoons.length && hasMore">
-            <a-button @click="loadMore" :loading="loadingMore" type="default" block>
+            <a-button @mouseenter="loadMore" :loading="loadingMore" type="default" block>
                 加载更多
             </a-button>
         </div>
