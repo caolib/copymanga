@@ -18,6 +18,11 @@ const routes = [
         component: () => import('../views/PostHomeView.vue')
     },
     {
+        path: '/cartoons',
+        name: 'CartoonHome',
+        component: () => import('../views/CartoonHomeView.vue')
+    },
+    {
         path: '/login',
         name: 'Login',
         component: () => import('../views/LoginView.vue')
@@ -58,6 +63,18 @@ const routes = [
         path: '/manga/:pathWord',
         name: 'MangaDetail',
         component: () => import('../views/MangaDetailView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/cartoon/:pathWord',
+        name: 'CartoonDetail',
+        component: () => import('../views/CartoonDetailView.vue'),
+        meta: { requiresAuth: true }
+    },
+    {
+        path: '/cartoon/:pathWord/player/:chapterId',
+        name: 'CartoonPlayer',
+        component: () => import('../views/CartoonPlayerView.vue'),
         meta: { requiresAuth: true }
     },
     {

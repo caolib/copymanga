@@ -1,0 +1,25 @@
+@use "./variables" as *;
+
+.cartoon-home-view {
+    padding: 24px;
+    min-height: calc(100vh - 120px);
+    background: $bg-color;
+
+    [data-theme="dark"] & {
+        background: $dark-bg-tertiary;
+    }
+
+    .cartoon-home-container {
+        background: $bg-color-white;
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        color: $text-primary;
+
+        [data-theme="dark"] & {
+            background: $dark-bg-container;
+            color: $dark-text-primary;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        }
+    }
+}

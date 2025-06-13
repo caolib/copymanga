@@ -1,0 +1,134 @@
+@use "./variables" as *;
+
+.cartoon-detail-container {
+    margin: 24px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    background: $bg-color-white;
+    color: $text-primary;
+
+    [data-theme="dark"] & {
+        background: $dark-bg-container;
+        color: $dark-text-primary;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .image-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: $bg-color-light;
+        color: $text-secondary;
+
+        [data-theme="dark"] & {
+            background: $dark-bg-secondary;
+            color: $dark-text-secondary;
+        }
+    }
+
+    .image-error {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        background: $bg-color-light;
+        color: $text-secondary;
+
+        [data-theme="dark"] & {
+            background: $dark-bg-secondary;
+            color: $dark-text-secondary;
+        }
+
+        .error-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .error-text {
+            font-size: 14px;
+        }
+    }
+
+    .chapters-section {
+        .chapters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 16px;
+        }
+        .chapter-card {
+            background: $bg-color-white;
+            border: 1px solid $border-color-light;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+
+            [data-theme="dark"] & {
+                background: $dark-bg-container;
+                border-color: $dark-border-color;
+            }
+
+            &:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                border-color: $primary-color;
+
+                [data-theme="dark"] & {
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                }
+
+                .play-icon {
+                    opacity: 1;
+                }
+            }
+
+            .chapter-cover {
+                position: relative;
+                aspect-ratio: 16/9;
+                overflow: hidden;
+                background: $bg-color-light;
+
+                [data-theme="dark"] & {
+                    background: $dark-bg-secondary;
+                }
+
+                .play-icon {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    font-size: 32px;
+                    color: white;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+                }
+            }
+
+            .chapter-info {
+                padding: 12px;
+                .chapter-name {
+                    margin: 0 0 8px 0;
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: $text-primary;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+
+                    [data-theme="dark"] & {
+                        color: $dark-text-primary;
+                    }
+                }
+
+                .chapter-lines {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 4px;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,115 @@
+// 全局主题变量
+:root {
+    // 浅色主题
+    --bg-color-light: #f5f5f5;
+    --bg-color-container: #ffffff;
+    --bg-color-card: #ffffff;
+    --text-color: #333333;
+    --text-color-secondary: #666666;
+    --text-color-tertiary: #999999;
+    --border-color: #f0f0f0;
+    --border-color-light: #e8e8e8;
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+    --primary-color: #1890ff;
+    --success-color: #52c41a;
+    --warning-color: #faad14;
+    --error-color: #ff4d4f;
+}
+
+[data-theme="dark"] {
+    // 暗色主题
+    --bg-color-light: #141414;
+    --bg-color-container: #1f1f1f;
+    --bg-color-card: #262626;
+    --text-color: #ffffff;
+    --text-color-secondary: #cccccc;
+    --text-color-tertiary: #999999;
+    --border-color: #303030;
+    --border-color-light: #434343;
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3);
+    --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.5);
+    --primary-color: #177ddc;
+    --success-color: #49aa19;
+    --warning-color: #d89614;
+    --error-color: #d32029;
+}
+
+// 通用样式覆盖
+body {
+    background-color: var(--bg-color-light);
+    color: var(--text-color);
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease;
+}
+
+// Ant Design 组件暗色适配
+[data-theme="dark"] {
+    .ant-card {
+        background-color: var(--bg-color-card);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .ant-typography {
+        color: var(--text-color);
+    }
+
+    .ant-descriptions-item-label {
+        color: var(--text-color-secondary);
+    }
+
+    .ant-descriptions-item-content {
+        color: var(--text-color);
+    }
+
+    .ant-empty-description {
+        color: var(--text-color-secondary);
+    }
+
+    .ant-divider-inner-text {
+        color: var(--text-color-secondary);
+    }
+
+    .ant-tabs-content-holder {
+        background-color: transparent;
+    }
+
+    .ant-tabs-tab {
+        color: var(--text-color-secondary);
+
+        &.ant-tabs-tab-active {
+            color: var(--primary-color);
+        }
+    }
+
+    .ant-select-selector {
+        background-color: var(--bg-color-card);
+        border-color: var(--border-color);
+        color: var(--text-color);
+    }
+
+    .ant-btn-default {
+        background-color: var(--bg-color-card);
+        border-color: var(--border-color);
+        color: var(--text-color);
+
+        &:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+    }
+
+    .ant-spin-text {
+        color: var(--text-color-secondary);
+    }
+}
+
+// 动画和过渡效果
+* {
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease;
+}
