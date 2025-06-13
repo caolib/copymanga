@@ -1,4 +1,5 @@
 @use "./variables" as *;
+@use "./skeleton-dark" as *;
 
 .post-collection {
     .collection-controls {
@@ -7,8 +8,14 @@
         align-items: center;
         margin-bottom: 20px;
         padding: 16px;
-        background: #fafafa;
+        background: $bg-color-light;
         border-radius: 8px;
+        border: 1px solid $border-color;
+
+        @include dark-theme {
+            background: $dark-bg-elevated;
+            border-color: $dark-border-color;
+        }
 
         .controls-left {
             display: flex;
@@ -18,22 +25,39 @@
 
         .controls-right {
             .total-info {
-                color: #666;
+                color: $text-secondary;
                 font-size: 14px;
+
+                @include dark-theme {
+                    color: $dark-text-secondary;
+                }
             }
         }
     }
-
     .post-card {
         height: 100%;
         cursor: pointer;
         border-radius: 8px;
         overflow: hidden;
         transition: all 0.3s ease;
+        background: $bg-color-white;
+        border: 1px solid $border-color-light;
+        box-shadow: $shadow-light;
+
+        @include dark-theme {
+            background: $dark-bg-container;
+            border-color: $dark-border-color;
+            box-shadow: $shadow-dark-light;
+        }
 
         &:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: $shadow-medium;
             transform: translateY(-2px);
+            border-color: $primary-color;
+
+            @include dark-theme {
+                box-shadow: $shadow-dark-medium;
+            }
         }
     }
 
@@ -61,7 +85,6 @@
             transform: scale(1.05);
         }
     }
-
     .post-info {
         padding: 16px;
 
@@ -72,12 +95,21 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: $text-primary;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
         }
 
         .post-author {
             font-size: 12px;
-            color: #666;
+            color: $text-secondary;
             margin-bottom: 8px;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
         }
 
         .post-meta {
@@ -85,36 +117,63 @@
             justify-content: space-between;
             align-items: center;
             font-size: 12px;
-            color: #999;
+            color: $text-tertiary;
+
+            @include dark-theme {
+                color: $dark-text-tertiary;
+            }
 
             .post-status {
                 padding: 2px 6px;
-                background: #f0f0f0;
+                background: $bg-color-light;
                 border-radius: 4px;
+                color: $text-secondary;
+
+                @include dark-theme {
+                    background: $dark-fill-secondary;
+                    color: $dark-text-secondary;
+                }
             }
         }
     }
-
     .pagination-container {
         margin-top: 24px;
         text-align: center;
         padding: 20px 0;
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba($bg-color-white, 0.8);
         border-radius: 8px;
-    }
+        border: 1px solid $border-color-light;
 
-    // 骨架屏样式
+        @include dark-theme {
+            background: rgba($dark-bg-container, 0.8);
+            border-color: $dark-border-color;
+        }
+    } // 骨架屏样式
     .skeleton-card {
+        background: $bg-color-white;
+        border: 1px solid $border-color-light;
+        border-radius: 8px;
+
+        @include dark-theme {
+            background: $dark-bg-container;
+            border-color: $dark-border-color;
+        }
+
         .skeleton-cover {
             width: 100%;
             height: 280px;
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background: linear-gradient(90deg, $border-color-light 25%, $border-color 50%, $border-color-light 75%);
             background-size: 200% 100%;
             animation: skeleton-loading 1.5s infinite;
             border-radius: 8px;
 
             @include dark-theme {
-                background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+                background: linear-gradient(
+                    90deg,
+                    $dark-fill-secondary 25%,
+                    $dark-fill-primary 50%,
+                    $dark-fill-secondary 75%
+                );
                 background-size: 200% 100%;
             }
         }
@@ -127,49 +186,5 @@
         100% {
             background-position: -200% 0;
         }
-    }
-}
-
-// 暗色主题适配
-html[data-theme="dark"] .post-collection {
-    .collection-controls {
-        background: #3a3f4b;
-
-        .total-info {
-            color: #ccc;
-        }
-    }
-
-    .post-card {
-        background: #282c34;
-        border-color: #444;
-
-        &:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-    }
-
-    .post-info {
-        .post-author {
-            color: #ccc;
-        }
-
-        .post-meta {
-            color: #aaa;
-
-            .post-status {
-                background: #444;
-                color: #ccc;
-            }
-        }
-    }
-
-    .pagination-container {
-        background: rgba(40, 44, 52, 0.8);
-    }
-
-    .skeleton-card {
-        background: #282c34;
-        border-color: #444;
     }
 }

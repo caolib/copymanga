@@ -8,12 +8,7 @@
         align-items: center;
         margin-bottom: $spacing-xl;
         padding: $spacing-lg;
-        background: rgba($primary-color, 0.05);
         border-radius: $border-radius-medium;
-
-        @include dark-theme {
-            background: rgba($primary-color, 0.1);
-        }
 
         .controls-left {
             display: flex;

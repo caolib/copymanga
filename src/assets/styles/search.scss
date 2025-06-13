@@ -1,4 +1,5 @@
 @use "./variables" as *;
+@use "./skeleton-dark" as *;
 
 .search-container {
     padding: $spacing-lg;
