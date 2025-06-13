@@ -143,6 +143,29 @@ function getCartoonThemes() {
     });
 }
 
+
+/**
+ * 动画搜索
+ * @param {*} q 搜索关键词
+ * @param {*} limit 页大小
+ * @param {*} offset 页码-1
+ * @returns 
+ */
+function searchCartoon(q, limit = 18, offset = 0) {
+    return request.get('/api/v3/search/cartoons', {
+        params: {
+            q,
+            limit,
+            offset,
+            q_type: '',
+            platform: 3
+        },
+        headers: {
+            'platform': '3'
+        }
+    });
+}
+
 export {
     getCartoonHome,
     getCartoonInfo,
@@ -151,5 +174,6 @@ export {
     collectCartoon,
     getCollectCartoonList,
     getCartoonTopics,
-    getCartoonThemes
+    getCartoonThemes,
+    searchCartoon
 }

@@ -28,8 +28,8 @@
             <nav class="nav" data-tauri-drag-region="true">
                 <router-link to="/" class="nav-link">漫画</router-link>
                 <router-link to="/books" class="nav-link">轻小说</router-link>
-                <router-link to="/posts" class="nav-link">写真</router-link>
                 <router-link to="/cartoons" class="nav-link">动画</router-link>
+                <router-link to="/posts" class="nav-link">写真</router-link>
                 <router-link to="/bookshelf" class="nav-link" v-if="isLoggedInComputed">
                     <StarFilled class="nav-icon collection-icon" />书架
                 </router-link>
