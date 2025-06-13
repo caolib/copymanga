@@ -1,5 +1,16 @@
 <template>
     <div class="cartoon-topic-tab">
+        <!-- 筛选和刷新区域 -->
+        <div class="filter-section">
+            <a-row :gutter="16" align="middle">
+                <a-col :span="24" style="text-align: right;">
+                    <a-button @click="refreshTopics" :loading="loading" type="primary">
+                        刷新
+                    </a-button>
+                </a-col>
+            </a-row>
+        </div>
+
         <!-- 动画专题列表 -->
         <div class="topic-content">
             <!-- 骨架加载 -->
@@ -60,6 +71,10 @@ import { message } from 'ant-design-vue'
 import { getCartoonTopics } from '../../api/cartoon'
 import { formatDate } from '../../utils/date'
 
+// 缓存key
+const CACHE_KEY = 'cartoon_topics_cache'
+const CACHE_DURATION = 5 * 60 * 1000 // 5分钟缓存
+
 const topics = ref([])
 const total = ref(0)
 const loading = ref(false)
@@ -69,14 +84,52 @@ const offset = ref(0)
 
 const hasMore = computed(() => topics.value.length < total.value)
 
-const loadTopics = (isLoadMore = false) => {
+// 获取缓存数据
+const getCachedData = () => {
+    const cached = localStorage.getItem(CACHE_KEY)
+    if (!cached) return null
+
+    const { data, timestamp } = JSON.parse(cached)
+    const now = Date.now()
+
+    if (now - timestamp > CACHE_DURATION) {
+        localStorage.removeItem(CACHE_KEY)
+        return null
+    }
+
+    return data
+}
+
+// 设置缓存数据
+const setCachedData = (data) => {
+    const cacheData = {
+        data,
+        timestamp: Date.now()
+    }
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cacheData))
+}
+
+const loadTopics = (isLoadMore = false, forceRefresh = false) => {
+    // 如果不是加载更多且不是强制刷新，先尝试从缓存获取数据
+    if (!isLoadMore && !forceRefresh) {
+        const cachedData = getCachedData()
+        if (cachedData) {
+            topics.value = cachedData.topics
+            total.value = cachedData.total
+            console.log('从缓存加载动画专题数据')
+            return Promise.resolve({ success: true, fromCache: true })
+        }
+    }
+
     if (isLoadMore) {
         loadingMore.value = true
         offset.value = topics.value.length
     } else {
         loading.value = true
         offset.value = 0
-    } getCartoonTopics(limit.value, offset.value).then(response => {
+    }
+
+    return getCartoonTopics(limit.value, offset.value).then(response => {
         console.log('动画专题API响应:', response)
 
         // 处理响应数据结构
@@ -91,16 +144,24 @@ const loadTopics = (isLoadMore = false) => {
                 topics.value.push(...newTopics)
             } else {
                 topics.value = newTopics
+                // 只在首次加载时缓存数据
+                setCachedData({
+                    topics: newTopics,
+                    total: responseData.results.total || 0
+                })
             }
 
             total.value = responseData.results.total || 0
             console.log('专题总数:', total.value, '当前专题数量:', topics.value.length)
+            return { success: true, fromCache: false }
         } else {
             console.warn('响应数据格式不正确:', responseData)
+            return { success: false, error: { message: '数据格式错误' } }
         }
     }).catch(err => {
         console.error('获取动画专题失败:', err)
         message.error('获取动画专题失败')
+        return { success: false, error: err }
     }).finally(() => {
         loading.value = false
         loadingMore.value = false
@@ -110,6 +171,17 @@ const loadTopics = (isLoadMore = false) => {
 const loadMore = () => {
     if (!hasMore.value || loadingMore.value) return
     loadTopics(true)
+}
+
+// 刷新数据
+const refreshTopics = () => {
+    loadTopics(false, true).then(result => {
+        if (result.success && !result.fromCache) {
+            message.success('刷新成功')
+        } else if (result.error) {
+            console.error('刷新失败:', result.error)
+        }
+    })
 }
 
 onMounted(() => {

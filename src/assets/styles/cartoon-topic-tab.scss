@@ -3,6 +3,15 @@
 .cartoon-topic-tab {
     padding: 16px;
 
+    .filter-section {
+        margin-bottom: 16px;
+        padding: 12px 0;
+
+        .ant-btn {
+            min-width: 80px;
+        }
+    }
+
     .topic-content {
         margin-bottom: 24px;
     }
