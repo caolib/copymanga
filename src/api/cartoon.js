@@ -106,11 +106,34 @@ function getCollectCartoonList(limit = 18, offset = 0, free_type = 1, ordering =
     });
 }
 
+
+/**
+ * 获取动画专题
+ * @param {*} type 专题类型，默认21 
+ * @param {*} limit 页大小，默认18
+ * @param {*} offset 页码-1，默认0
+ * @returns 
+ */
+function getCartoonTopics(limit = 18, offset = 0, type = 21) {
+    return request.get('/api/v3/topics', {
+        params: {
+            type,
+            limit,
+            offset,
+            platform: 3
+        },
+        headers: {
+            'platform': '3'
+        }
+    });
+}
+
 export {
     getCartoonHome,
     getCartoonInfo,
     getCartoonChapters,
     getVideoByChapterId,
     collectCartoon,
-    getCollectCartoonList
+    getCollectCartoonList,
+    getCartoonTopics
 }

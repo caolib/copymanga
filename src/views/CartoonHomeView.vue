@@ -9,11 +9,8 @@
                     <div style="padding: 40px; text-align: center; color: #999;">
                         搜索功能即将推出...
                     </div>
-                </a-tab-pane>
-                <a-tab-pane key="topics" tab="专题">
-                    <div style="padding: 40px; text-align: center; color: #999;">
-                        专题功能即将推出...
-                    </div>
+                </a-tab-pane> <a-tab-pane key="topics" tab="专题">
+                    <CartoonTopicTab />
                 </a-tab-pane>
                 <a-tab-pane key="ranking" tab="排行榜">
                     <div style="padding: 40px; text-align: center; color: #999;">
@@ -28,6 +25,7 @@
 <script setup>
 import { ref } from 'vue'
 import CartoonHomeTab from '../components/cartoon/CartoonHomeTab.vue'
+import CartoonTopicTab from '../components/cartoon/CartoonTopicTab.vue'
 
 const activeTab = ref('home')
 
