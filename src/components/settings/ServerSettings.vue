@@ -132,7 +132,7 @@
             <a-form layout="vertical">
                 <a-alert type="info" show-icon style="margin-bottom: 16px">
                     <template #message>
-                        配置API请求时的自定义请求头，用于模拟移动端APP访问。dt字段会自动生成当前日期。
+                        配置API请求时的自定义请求头，用于模拟移动端APP访问
                     </template>
                 </a-alert>
 

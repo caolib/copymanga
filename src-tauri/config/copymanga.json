@@ -1,7 +1,7 @@
 {
   "apiSources": [
-    "https://copy20.com",
-    "https://api.copy2000.online"
+    "https://api.copy2000.online",
+    "https://copy20.com"
   ],
   "currentApiIndex": 0
 }
