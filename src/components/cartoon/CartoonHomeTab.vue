@@ -1,21 +1,43 @@
 <template>
     <div class="cartoon-home-tab">
-        <!-- 排序和筛选 -->
-        <div class="filter-section">
-            <a-row :gutter="16" align="middle">
-                <a-col :span="12">
-                    <a-select v-model:value="ordering" placeholder="排序方式" style="width: 200px;" @change="resetAndLoad">
-                        <a-select-option value="-datetime_updated">最新</a-select-option>
-                        <a-select-option value="-popular">热度</a-select-option>
-                    </a-select>
-                </a-col> <a-col :span="12" style="text-align: right;">
-                    <a-button @click="refreshCartoons" :loading="loading" type="primary">
+        <!-- 筛选区域 -->
+        <div class="filters-section">
+            <div class="filter-group">
+                <div class="filter-label">排序方式</div>
+                <div class="filter-buttons">
+                    <a-button :type="ordering === '-datetime_updated' ? 'primary' : 'default'" size="small"
+                        @click="changeOrdering('-datetime_updated')">
+                        最新更新
+                    </a-button>
+                    <a-button :type="ordering === '-popular' ? 'primary' : 'default'" size="small"
+                        @click="changeOrdering('-popular')">
+                        人气排序
+                    </a-button>
+                </div>
+                <div class="filter-actions">
+                    <a-button type="primary" @click="refreshCartoons" :icon="h(ReloadOutlined)" :loading="loading"
+                        size="small">
                         刷新
                     </a-button>
-                </a-col>
-            </a-row>
+                </div>
+            </div>
+            <div class="filter-group">
+                <div class="filter-label">主题分类</div>
+                <div class="filter-buttons">
+                    <a-button :type="selectedTheme === '' ? 'primary' : 'default'" size="small"
+                        @click="handleThemeChange('')">
+                        全部主题
+                    </a-button>
+                    <a-button v-for="theme in themes" :key="theme.path_word"
+                        :type="selectedTheme === theme.path_word ? 'primary' : 'default'" size="small"
+                        @click="handleThemeChange(theme.path_word)">
+                        {{ theme.name }} ({{ theme.count }})
+                    </a-button>
+                </div>
+            </div>
         </div> <!-- 动画列表 -->
         <div class="cartoon-content">
+
             <!-- 骨架加载 -->
             <div v-if="loading && !cartoons.length" class="cartoon-grid">
                 <div v-for="i in 18" :key="`skeleton-${i}`" class="cartoon-card">
@@ -78,37 +100,117 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, watch } from 'vue'
+import { ref, onMounted, computed, watch, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { useCartoonStore } from '../../stores/cartoon'
+import { getCartoonHome, getCartoonThemes } from '../../api/cartoon'
 import { formatDate } from '../../utils/date'
 import { formatNumber } from '../../utils/number'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
-const cartoonStore = useCartoonStore()
 
 const ordering = ref('-datetime_updated')
+const selectedTheme = ref('')
+const themes = ref([])
+const cartoons = ref([])
+const total = ref(0)
+const loading = ref(false)
+const loadingMore = ref(false)
 const limit = ref(18)
+const offset = ref(0)
 
-// 从store获取数据
-const cartoons = computed(() => cartoonStore.getCartoonList(ordering.value).list)
-const total = computed(() => cartoonStore.getCartoonList(ordering.value).total)
-const hasMore = computed(() => cartoonStore.getCartoonList(ordering.value).hasMore)
-const nextOffset = computed(() => cartoonStore.getCartoonList(ordering.value).nextOffset)
+const hasMore = computed(() => cartoons.value.length < total.value)
 
-const loading = computed(() => cartoonStore.isLoading)
-const loadingMore = computed(() => cartoonStore.isLoadingMore)
+// 缓存相关
+const THEME_CACHE_KEY = 'cartoon_themes_cache'
+const THEME_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7天缓存
 
-const loadCartoons = (isLoadMore = false) => {
-    const offset = isLoadMore ? nextOffset.value : 0
+// 获取主题缓存数据
+const getThemeCachedData = () => {
+    const cached = localStorage.getItem(THEME_CACHE_KEY)
+    if (!cached) return null
 
-    cartoonStore.fetchCartoonHome(ordering.value, limit.value, offset, !isLoadMore).then(result => {
-        if (!result.success && result.error) {
-            message.error(result.error.message || '获取动画列表失败')
-        } else if (result.fromCache) {
-            console.log('从缓存加载动画数据')
+    const { data, timestamp } = JSON.parse(cached)
+    const now = Date.now()
+
+    if (now - timestamp > THEME_CACHE_DURATION) {
+        localStorage.removeItem(THEME_CACHE_KEY)
+        return null
+    }
+
+    return data
+}
+
+// 设置主题缓存数据
+const setThemeCachedData = (data) => {
+    const cacheData = {
+        data,
+        timestamp: Date.now()
+    }
+    localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(cacheData))
+}
+
+// 获取动画主题列表
+const loadThemes = () => {
+    // 先尝试从缓存获取数据
+    const cachedData = getThemeCachedData()
+    if (cachedData) {
+        themes.value = cachedData
+        return
+    }
+
+    getCartoonThemes().then(response => {
+        const responseData = response.data || response
+
+        if (responseData && responseData.results && responseData.results.list) {
+            // 过滤掉count为0的主题
+            const filteredThemes = responseData.results.list.filter(theme => theme.count > 0)
+            themes.value = filteredThemes
+
+            // 缓存数据
+            setThemeCachedData(filteredThemes)
+        } else {
+            console.warn('主题响应数据格式不正确:', responseData)
         }
+    }).catch(err => {
+        console.error('获取动画主题失败:', err)
+        message.error('获取动画主题失败')
+    })
+}
+
+// 加载动画列表
+const loadCartoons = (isLoadMore = false) => {
+    if (isLoadMore) {
+        loadingMore.value = true
+        offset.value = cartoons.value.length
+    } else {
+        loading.value = true
+        offset.value = 0
+    }
+
+    getCartoonHome(limit.value, offset.value, ordering.value, selectedTheme.value).then(response => {
+        const responseData = response.data || response
+
+        if (responseData && responseData.results && responseData.results.list) {
+            const newCartoons = responseData.results.list || []
+
+            if (isLoadMore) {
+                cartoons.value.push(...newCartoons)
+            } else {
+                cartoons.value = newCartoons
+            }
+
+            total.value = responseData.results.total || 0
+        } else {
+            console.error('响应数据格式不正确:', responseData)
+        }
+    }).catch(err => {
+        console.error('获取动画列表失败:', err)
+        message.error('获取动画列表失败')
+    }).finally(() => {
+        loading.value = false
+        loadingMore.value = false
     })
 }
 
@@ -117,28 +219,32 @@ const loadMore = () => {
     loadCartoons(true)
 }
 
-// 刷新数据
 const refreshCartoons = () => {
-    loading.value = true
-    cartoonStore.fetchCartoonHome(ordering.value, limit.value, 0, true).finally(() => {
-        loading.value = false
-    })
+    // 同时刷新主题和动画数据
+    localStorage.removeItem(THEME_CACHE_KEY) // 清除主题缓存
+    loadThemes() // 重新加载主题
+    loadCartoons(false) // 重新加载动画
 }
 
-const resetAndLoad = () => {
-    loadCartoons(false)
+const changeOrdering = (newOrdering) => {
+    ordering.value = newOrdering
+}
+
+const handleThemeChange = (themePathWord) => {
+    selectedTheme.value = themePathWord
 }
 
 const goToDetail = (pathWord) => {
     router.push(`/cartoon/${pathWord}`)
 }
 
-// 监听排序方式变化
-watch(ordering, () => {
+// 监听排序方式和主题变化
+watch([ordering, selectedTheme], () => {
     loadCartoons(false)
 })
 
 onMounted(() => {
+    loadThemes()
     loadCartoons(false)
 })
 </script>

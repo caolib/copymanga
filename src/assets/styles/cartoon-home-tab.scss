@@ -1,30 +1,77 @@
 @use "./variables" as *;
 
 .cartoon-home-tab {
-    .filter-section {
-        margin-bottom: 24px;
-        padding: 16px;
-        background: $bg-color-light;
-        border-radius: 6px;
-        border: 1px solid $border-color-light;
+    padding: 20px;
 
-        [data-theme="dark"] & {
-            background: $dark-bg-secondary;
+    .filters-section {
+        background: $bg-color-light;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 20px;
+        border: 1px solid $border-color;
+
+        @include dark-theme {
+            background: $dark-bg-elevated;
             border-color: $dark-border-color;
+        }
+
+        .filter-group {
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .filter-label {
+                font-size: 14px;
+                font-weight: 600;
+                color: $text-primary;
+                margin-bottom: 0;
+                margin-right: 12px;
+
+                @include dark-theme {
+                    color: $dark-text-primary;
+                }
+            }
+
+            .filter-buttons {
+                display: flex;
+                gap: 8px;
+                flex-wrap: wrap;
+                flex: 1;
+
+                .ant-btn {
+                    margin: 0;
+                    transition: all 0.2s;
+
+                    &:hover {
+                        transform: translateY(-1px);
+                    }
+                }
+            }
+
+            .filter-actions {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
         }
     }
     .cartoon-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 16px;
         margin-bottom: 32px;
     }
 
     .cartoon-content {
         .cartoon-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
             margin-bottom: 32px;
         }
     }
@@ -69,12 +116,11 @@
                 font-size: 12px;
             }
         }
-
         .cartoon-info {
-            padding: 12px;
+            padding: 8px;
             .cartoon-title {
-                margin: 0 0 8px 0;
-                font-size: 14px;
+                margin: 0 0 6px 0;
+                font-size: 13px;
                 font-weight: 600;
                 color: $text-primary;
                 overflow: hidden;
@@ -90,8 +136,8 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                margin-bottom: 8px;
-                font-size: 12px;
+                margin-bottom: 6px;
+                font-size: 11px;
                 color: $text-secondary;
 
                 [data-theme="dark"] & {
@@ -125,9 +171,8 @@
             overflow: hidden;
             border-radius: 8px 8px 0 0;
         }
-
         .skeleton-info {
-            padding: 12px;
+            padding: 8px;
         }
     }
 
@@ -141,6 +186,64 @@
 
         [data-theme="dark"] & {
             color: $dark-text-tertiary;
+        }
+    }
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+    .cartoon-home-tab {
+        padding: 10px;
+
+        .filters-section {
+            padding: 12px;
+
+            .filter-group {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+
+                .filter-label {
+                    margin-right: 0;
+                    margin-bottom: 4px;
+                }
+
+                .filter-buttons {
+                    width: 100%;
+
+                    .ant-btn {
+                        font-size: 12px;
+                        padding: 2px 8px;
+                    }
+                }
+
+                .filter-actions {
+                    width: 100%;
+                    justify-content: flex-end;
+                }
+            }
+        }
+        .cartoon-grid {
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .cartoon-home-tab {
+        .filters-section {
+            .filter-group {
+                .filter-buttons {
+                    .ant-btn {
+                        flex: 1;
+                        min-width: 0;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
+                }
+            }
         }
     }
 }

@@ -1,12 +1,12 @@
 import request from '../utils/request'
 
 /**
- * 获取漫画首页数据
+ * 获取动画首页数据
  * @param {number} limit - 页大小
  * @param {number} offset - 页码-1
  * @param {string} ordering - 排序方式 -datetime_updated 最新更新 -popular 热度
  * @param {string} theme - 主题
- * @return {Promise} - 返回漫画首页数据 /data/cartoon/动画首页.json
+ * @return {Promise} - 返回动画首页数据 /data/cartoon/动画首页.json
  */
 function getCartoonHome(limit = 18, offset = 0, ordering = '-datetime_updated', theme = '') {
     return request.get('/api/v3/cartoons', {
@@ -22,9 +22,9 @@ function getCartoonHome(limit = 18, offset = 0, ordering = '-datetime_updated', 
 }
 
 /**
- * 获取漫画详情
- * @param {string} path_word - 漫画拼音
- * @return {Promise} - 返回漫画详情  /data/cartoon/动画详情.json
+ * 获取动画详情
+ * @param {string} path_word - 动画拼音
+ * @return {Promise} - 返回动画详情  /data/cartoon/动画详情.json
  */
 function getCartoonInfo(path_word) {
     return request.get(`/api/v3/cartoon/${path_word}`, {
@@ -36,9 +36,9 @@ function getCartoonInfo(path_word) {
 }
 
 /**
- * 获取漫画章节列表
- * @param {string} path_word - 漫画拼音
- * @returns {Promise} - 返回漫画章节列表 /data/cartoon/动画章节列表.json
+ * 获取动画章节列表
+ * @param {string} path_word - 动画拼音
+ * @returns {Promise} - 返回动画章节列表 /data/cartoon/动画章节列表.json
  */
 function getCartoonChapters(path_word) {
     return request.get(`/api/v3/cartoon/${path_word}/chapters`, {
@@ -65,7 +65,7 @@ function getVideoByChapterId(path_word, chapter_id, line) {
 }
 
 /**
- * 收藏或取消收藏漫画
+ * 收藏或取消收藏动画
  * @param {*} cartoonId 动画uuid
  * @param {*} isCollect 是否收藏，默认true
  * @returns 
@@ -84,7 +84,7 @@ function collectCartoon(cartoonId, isCollect = true) {
 
 
 /**
- * 获取收藏的漫画列表
+ * 获取收藏的动画列表
  * @param {*} limit 页大小
  * @param {*} offset 页码-1
  * @param {*} free_type 免费类型
@@ -128,6 +128,21 @@ function getCartoonTopics(limit = 18, offset = 0, type = 21) {
     });
 }
 
+/**
+ * 获取动画主题列表
+ * @returns {Promise} - 返回动画主题列表
+ */
+function getCartoonThemes() {
+    return request.get('/api/v3/theme/cartoon/count', {
+        params: {
+            limit: 500,
+            offset: 0,
+            free_type: 1,
+            platform: 3
+        }
+    });
+}
+
 export {
     getCartoonHome,
     getCartoonInfo,
@@ -135,5 +150,6 @@ export {
     getVideoByChapterId,
     collectCartoon,
     getCollectCartoonList,
-    getCartoonTopics
+    getCartoonTopics,
+    getCartoonThemes
 }
