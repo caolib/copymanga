@@ -22,9 +22,7 @@
                     </template>
                     <MangaCollection :loading="loading && activeTab === 'manga'" @update-count="handleMangaCountUpdate"
                         @update-time="handleUpdateTime" ref="mangaCollectionRef" />
-                </a-tab-pane>
-
-                <!-- 轻小说收藏标签页 -->
+                </a-tab-pane> <!-- 轻小说收藏标签页 -->
                 <a-tab-pane key="book" tab="轻小说收藏">
                     <template #tab>
                         <span>
@@ -34,6 +32,19 @@
                     </template>
                     <BookCollection :loading="loading && activeTab === 'book'" @update-count="handleBookCountUpdate"
                         @update-time="handleUpdateTime" ref="bookCollectionRef" />
+                </a-tab-pane>
+
+                <!-- 动画收藏标签页 -->
+                <a-tab-pane key="cartoon" tab="动画收藏">
+                    <template #tab>
+                        <span>
+                            🎬 动画收藏
+                            <a-badge v-if="cartoonCount > 0" :count="cartoonCount" :offset="[10, -5]" />
+                        </span>
+                    </template>
+                    <CartoonCollection :loading="loading && activeTab === 'cartoon'"
+                        @update-count="handleCartoonCountUpdate" @update-time="handleUpdateTime"
+                        ref="cartoonCollectionRef" />
                 </a-tab-pane>
 
                 <!-- 写真收藏标签页 -->
@@ -60,6 +71,7 @@ import { isLoggedIn } from '../utils/auth'
 import { formatDate } from '../utils/date'
 import MangaCollection from '../components/bookshelf/MangaCollection.vue'
 import BookCollection from '../components/bookshelf/BookCollection.vue'
+import CartoonCollection from '../components/bookshelf/CartoonCollection.vue'
 import PostCollection from '../components/bookshelf/PostCollection.vue'
 
 const router = useRouter()
@@ -72,11 +84,13 @@ const lastUpdateTime = ref(null)
 // 各个收藏类型的数量
 const mangaCount = ref(0)
 const bookCount = ref(0)
+const cartoonCount = ref(0)
 const postCount = ref(0)
 
 // 子组件引用
 const mangaCollectionRef = ref(null)
 const bookCollectionRef = ref(null)
+const cartoonCollectionRef = ref(null)
 const postCollectionRef = ref(null)
 
 // 处理标签页切换
@@ -96,6 +110,9 @@ const refreshCurrentTab = () => {
         case 'book':
             bookCollectionRef.value?.refresh()
             break
+        case 'cartoon':
+            cartoonCollectionRef.value?.refresh()
+            break
         case 'post':
             postCollectionRef.value?.refresh()
             break
@@ -114,6 +131,11 @@ const handleMangaCountUpdate = (count) => {
 // 处理轻小说数量更新
 const handleBookCountUpdate = (count) => {
     bookCount.value = count
+}
+
+// 处理动画数量更新
+const handleCartoonCountUpdate = (count) => {
+    cartoonCount.value = count
 }
 
 // 处理写真数量更新

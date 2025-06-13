@@ -73,6 +73,19 @@
                         <a-button type="primary" @click="startWatching" :disabled="!chapters.length"
                             style="margin-right: 10px">
                             开始观看
+                        </a-button> <a-button type="default" @click="handleCollect" :loading="collectLoading"
+                            style="margin-right: 10px; color: #ff4d4f; border-color: #ff4d4f;">
+                            <template #icon>
+                                <HeartFilled />
+                            </template>
+                            收藏
+                        </a-button>
+                        <a-button type="default" @click="handleCancelCollect" :loading="cancelCollectLoading"
+                            style="margin-right: 10px">
+                            <template #icon>
+                                <HeartOutlined />
+                            </template>
+                            取消收藏
                         </a-button>
                         <a-button @click="fetchCartoonData" :loading="detailLoading">刷新数据</a-button>
                     </div>
@@ -128,8 +141,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { PlayCircleOutlined } from '@ant-design/icons-vue'
-import { getCartoonInfo, getCartoonChapters } from '../api/cartoon'
+import { PlayCircleOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons-vue'
+import { getCartoonInfo, getCartoonChapters, collectCartoon } from '../api/cartoon'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
 
@@ -141,6 +154,8 @@ const chapters = ref([])
 const popular = ref(0)
 const detailLoading = ref(false)
 const chaptersLoading = ref(false)
+const collectLoading = ref(false)
+const cancelCollectLoading = ref(false)
 
 const fetchCartoonData = () => {
     const pathWord = route.params.pathWord
@@ -209,6 +224,42 @@ const playChapter = (chapter) => {
         query: {
             line: defaultLine
         }
+    })
+}
+
+const handleCollect = () => {
+    if (!cartoon.value.uuid) {
+        message.warning('动画信息异常，无法收藏')
+        return
+    }
+
+    collectLoading.value = true
+
+    collectCartoon(cartoon.value.uuid, true).then(() => {
+        message.success('收藏成功')
+    }).catch(err => {
+        console.error('收藏失败:', err)
+        message.error(err.message || '收藏失败')
+    }).finally(() => {
+        collectLoading.value = false
+    })
+}
+
+const handleCancelCollect = () => {
+    if (!cartoon.value.uuid) {
+        message.warning('动画信息异常，无法取消收藏')
+        return
+    }
+
+    cancelCollectLoading.value = true
+
+    collectCartoon(cartoon.value.uuid, false).then(() => {
+        message.success('取消收藏成功')
+    }).catch(err => {
+        console.error('取消收藏失败:', err)
+        message.error(err.message || '取消收藏失败')
+    }).finally(() => {
+        cancelCollectLoading.value = false
     })
 }
 

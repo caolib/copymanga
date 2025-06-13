@@ -56,25 +56,6 @@ function getChapterImages(pathWord, chapterId) {
 
 /**
  * 搜索漫画
- * @param {string} keyword 关键词
- * @param {number} limit 每页数量
- * @param {number} offset 偏移量
- * @returns {Promise} 搜索结果
- */
-// function searchManga(keyword, limit = 12, offset = 0, q_type = '') {
-//     return request.get('/api/kb/web/searchbd/comics', {
-//         params: {
-//             q: keyword,
-//             q_type,
-//             offset,
-//             platform: 2,
-//             limit
-//         }
-//     })
-// }
-
-/**
- * 搜索漫画
  * @param {*} q 搜索关键词
  * @param {*} limit 每页数量
  * @param {*} offset 偏移量

@@ -64,10 +64,53 @@ function getVideoByChapterId(path_word, chapter_id, line) {
     })
 }
 
+/**
+ * 收藏或取消收藏漫画
+ * @param {*} cartoonId 动画uuid
+ * @param {*} isCollect 是否收藏，默认true
+ * @returns 
+ */
+function collectCartoon(cartoonId, isCollect = true) {
+    const data = new URLSearchParams();
+    data.append('cartoon_id', cartoonId);
+    data.append('is_collect', isCollect ? '1' : '0');
+    return request.post('/api/v3/member/collect/cartoon', data, {
+        headers: {
+            'platform': '3'
+        }
+    });
+}
+
+
+
+/**
+ * 获取收藏的漫画列表
+ * @param {*} limit 页大小
+ * @param {*} offset 页码-1
+ * @param {*} free_type 免费类型
+ * @param {*} ordering 排序方式 -datetime_updated: 最近更新 -datetime_modifier: 最近加入书架时间 -datetime_browse: 最近浏览时间
+ * @returns 
+ */
+function getCollectCartoonList(limit = 18, offset = 0, free_type = 1, ordering = '-datetime_modifier') {
+    return request.get('/api/v3/member/collect/cartoons', {
+        params: {
+            limit,
+            offset,
+            free_type,
+            ordering,
+            platform: 3
+        },
+        headers: {
+            'platform': '3'
+        }
+    });
+}
 
 export {
     getCartoonHome,
     getCartoonInfo,
     getCartoonChapters,
-    getVideoByChapterId
+    getVideoByChapterId,
+    collectCartoon,
+    getCollectCartoonList
 }
