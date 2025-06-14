@@ -256,8 +256,9 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMangaDetail, collectManga, getMangaGroupChapters, downloadChapter as downloadChapterAPI, isChapterDownloaded } from '../api/manga'
+import { getMangaDetail, collectManga, getMangaGroupChapters, downloadChapter as downloadChapterAPI } from '../api/manga'
 import { getMangaComments, postMangaComment } from '../api/comment'
+import { downloadManager } from '../utils/download-manager'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 import { formatDate } from '../utils/date'
@@ -417,6 +418,7 @@ const loadGroupChapters = async (groupPathWord, page = 1) => {
             const chapterList = res.results.list || []
             chapters.value = chapterList.map((chapter, index) => ({
                 id: chapter.uuid,
+                uuid: chapter.uuid, // 保留 uuid 字段用于下载检查
                 name: chapter.name,
                 index: chapter.index,
                 comic_path_word: chapter.comic_path_word,
@@ -639,7 +641,7 @@ const downloadChapter = async (chapter, forceRedownload = false) => {
     }
 
     // 调用下载API
-    await downloadChapterAPI(
+    return downloadChapterAPI(
         route.params.pathWord,
         chapter.id,
         chapterInfo,
@@ -651,13 +653,17 @@ const downloadChapter = async (chapter, forceRedownload = false) => {
                 console.error('下载进度错误:', progressInfo.error)
             }
         }
-    )
-
-    // 下载完成
-    chapterDownloadStatus.value[chapter.id] = 'downloaded'
-    chapterDownloadProgress.value[chapter.id] = 100
-    message.success(`章节 "${chapter.name}" 下载完成`)
-
+    ).then(() => {
+        // 下载完成
+        chapterDownloadStatus.value[chapter.id] = 'downloaded'
+        chapterDownloadProgress.value[chapter.id] = 100
+        message.success(`章节 "${chapter.name}" 下载完成`)
+    }).catch(error => {
+        console.error('下载章节失败:', error)
+        chapterDownloadStatus.value[chapter.id] = 'error'
+        chapterDownloadProgress.value[chapter.id] = 0
+        message.error(`下载失败: ${error.message || '未知错误'}`)
+    })
 }
 
 // 批量下载功能
@@ -704,23 +710,40 @@ const downloadNotDownloadedChapters = async () => {
 
 // 检查章节下载状态
 const checkChapterDownloadStatus = async (chapters) => {
-    if (!manga.value.uuid) return
+    if (!manga.value?.uuid) {
+        console.warn('漫画UUID为空，无法检查下载状态')
+        return
+    }
 
-    for (const chapter of chapters) {
+    console.log('开始检查章节下载状态，漫画UUID:', manga.value.uuid, '章节数量:', chapters.length)
+
+    // 使用 Promise.all 并行检查所有章节的下载状态
+    const checkPromises = chapters.map(async (chapter) => {
         try {
-            const isDownloaded = await isChapterDownloaded(
+            console.log('检查章节:', chapter.name, 'UUID:', chapter.uuid, 'ID:', chapter.id)
+
+            const isDownloaded = await downloadManager.isChapterDownloaded(
                 manga.value.uuid,
                 chapter.group_path_word || 'default',
-                chapter.id
+                chapter.uuid
             )
+
+            console.log('章节下载状态:', chapter.name, '已下载:', isDownloaded)
 
             if (isDownloaded) {
                 chapterDownloadStatus.value[chapter.id] = 'downloaded'
+                console.log('设置章节状态为已下载:', chapter.name, 'ID:', chapter.id)
             }
+
+            return isDownloaded
         } catch (error) {
-            console.error('检查下载状态失败:', error)
+            console.error('检查章节下载状态失败:', chapter.name, error)
+            return false
         }
-    }
+    })
+
+    await Promise.all(checkPromises)
+    console.log('章节下载状态检查完成，当前状态:', chapterDownloadStatus.value)
 }
 
 onMounted(() => {

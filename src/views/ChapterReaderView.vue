@@ -224,6 +224,7 @@ import {
 } from '@ant-design/icons-vue'
 import { getChapterImages } from '../api/manga'
 import { getChapterComments, postChapterComment } from '../api/comment'
+import { downloadManager } from '../utils/download-manager'
 import { useMangaStore } from '../stores/manga'
 import { useThemeStore } from '../stores/theme'
 import { useUserStore } from '../stores/user'
@@ -442,7 +443,7 @@ const keepNavVisible = () => {
 }
 
 // 获取章节图片数据 - 独立加载流程
-const fetchChapterImages = () => {
+const fetchChapterImages = async () => {
     loading.value = true
     error.value = ''
 
@@ -463,66 +464,107 @@ const fetchChapterImages = () => {
         }
     }
 
-    getChapterImages(route.params.pathWord, route.params.chapterId)
-        .then(response => {
-            if (response && response.code === 200 && response.results) {
-                const chapterData = response.results.chapter
-                const comicData = response.results.comic                // 保存章节相关信息
-                chapterInfo.value = {
-                    comic_name: comicData.name,
-                    name: chapterData.name,
-                    datetime_created: chapterData.datetime_created,
-                    count: chapterData.size || chapterData.contents.length
-                }
+    try {
+        // 首先尝试加载本地图片
+        let localImages = []
+        if (mangaStore.currentManga && mangaStore.currentManga.uuid) {
+            try {
+                const localImagePaths = await downloadManager.getLocalChapterImages(
+                    mangaStore.currentManga.uuid,
+                    'default', // 使用默认分组
+                    route.params.chapterId
+                )
 
-                // 保存导航相关ID
-                currentPrevChapterId.value = chapterData.prev
-                currentNextChapterId.value = chapterData.next
-
-                // 如果pinia中的漫画名称为空，则更新
-                if (mangaStore.currentManga === null || !mangaStore.currentManga.name) {
-                    mangaStore.setCurrentManga({
-                        name: comicData.name,
-                        pathWord: route.params.pathWord
-                    })
-                }
-
-                // 将当前章节ID对应的索引更新到pinia
-                const chapterId = route.params.chapterId
-                if (chapterId) {
-                    const index = mangaStore.findChapterIndex(chapterId)
-                    if (index !== -1 && index !== mangaStore.currentChapterIndex) {
-                        mangaStore.setCurrentChapterIndex(index)
-                    }
-                }
-
-                // 保存图片数据
-                images.value = chapterData.contents.map((image, index) => {
-                    // 直接使用原始URL，并添加索引信息
-                    const imageData = {
-                        url: image.url,
+                if (localImagePaths && localImagePaths.length > 0) {
+                    console.log('找到本地图片:', localImagePaths.length, '张')
+                    localImages = localImagePaths.map((imagePath, index) => ({
+                        url: downloadManager.convertLocalFileToUrl(imagePath),
                         index: index,
-                        width: image.width || null,
-                        height: image.height || null
-                    }
-                    return imageData
-                })
+                        width: null,
+                        height: null,
+                        isLocal: true
+                    }))
 
-            } else {
-                throw new Error('获取章节图片失败')
+                    // 使用本地图片
+                    images.value = localImages
+
+                    // 设置章节信息（从本地或缓存获取）
+                    if (mangaStore.currentManga.name) {
+                        chapterInfo.value = {
+                            comic_name: mangaStore.currentManga.name,
+                            name: '本地章节',
+                            datetime_created: '',
+                            count: localImages.length
+                        }
+                    }
+
+                    loading.value = false
+                    return // 使用本地图片，不需要再请求API
+                }
+            } catch (error) {
+                console.log('获取本地图片失败，将使用在线图片:', error)
             }
-        })
-        .catch(err => {
-            console.error('获取章节图片失败', err)
-            error.value = '获取章节图片失败，请稍后重试'
-        })
-        .finally(() => {
-            loading.value = false
-            // 首次加载时滚动到顶部
-            if (!route.params.chapterId || !images.value.length) {
-                scrollToTop()
+        }
+
+        // 如果没有本地图片，从API获取
+        const response = await getChapterImages(route.params.pathWord, route.params.chapterId)
+
+        if (response && response.code === 200 && response.results) {
+            const chapterData = response.results.chapter
+            const comicData = response.results.comic
+
+            // 保存章节相关信息
+            chapterInfo.value = {
+                comic_name: comicData.name,
+                name: chapterData.name,
+                datetime_created: chapterData.datetime_created,
+                count: chapterData.size || chapterData.contents.length
             }
-        })
+
+            // 保存导航相关ID
+            currentPrevChapterId.value = chapterData.prev
+            currentNextChapterId.value = chapterData.next
+
+            // 如果pinia中的漫画名称为空，则更新
+            if (mangaStore.currentManga === null || !mangaStore.currentManga.name) {
+                mangaStore.setCurrentManga({
+                    name: comicData.name,
+                    pathWord: route.params.pathWord,
+                    uuid: comicData.uuid || mangaStore.currentManga?.uuid
+                })
+            }
+
+            // 将当前章节ID对应的索引更新到pinia
+            const chapterId = route.params.chapterId
+            if (chapterId) {
+                const index = mangaStore.findChapterIndex(chapterId)
+                if (index !== -1 && index !== mangaStore.currentChapterIndex) {
+                    mangaStore.setCurrentChapterIndex(index)
+                }
+            }
+
+            // 保存在线图片数据
+            images.value = chapterData.contents.map((image, index) => ({
+                url: image.url,
+                index: index,
+                width: image.width || null,
+                height: image.height || null,
+                isLocal: false
+            }))
+
+        } else {
+            throw new Error('获取章节图片失败')
+        }
+    } catch (err) {
+        console.error('获取章节图片失败', err)
+        error.value = '获取章节图片失败，请稍后重试'
+    } finally {
+        loading.value = false
+        // 首次加载时滚动到顶部
+        if (!route.params.chapterId || !images.value.length) {
+            scrollToTop()
+        }
+    }
 }
 
 // 获取章节评论

@@ -145,10 +145,7 @@ function getAuthorMangaList(author, limit = 21, offset = 0, ordering = '-datetim
  * @returns {Promise}
  */
 async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
-    try {
-        // 先获取章节图片数据
-        const response = await getChapterImages(pathWord, chapterId)
-
+    return getChapterImages(pathWord, chapterId).then(response => {
         if (response && response.code === 200 && response.results) {
             const chapterData = response.results.chapter
             const comicData = response.results.comic
@@ -169,23 +166,25 @@ async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
             }
 
             // 开始下载
-            return await downloadManager.downloadChapter(downloadInfo, onProgress)
+            return downloadManager.downloadChapter(downloadInfo, onProgress)
         } else {
             throw new Error('获取章节数据失败：服务器返回错误响应')
         }
-    } catch (error) {
-        // 检查是否是网络错误
-        if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+    }).catch(error => {
+        console.error('下载章节失败:', error)
+        // 检查错误类型并提供更有意义的错误信息
+        if (error.message && error.message.includes('invoke')) {
+            throw new Error('文件系统操作失败，请检查应用权限')
+        } else if (error.message && error.message.includes('fetch')) {
+            throw new Error('网络请求失败，请检查网络连接')
+        } else if (error.code === 'ERR_NETWORK') {
             throw new Error('网络连接失败，请检查代理服务器是否正常运行')
         } else if (error.response && error.response.status === 502) {
             throw new Error('代理服务器错误(502)，请稍后重试')
-        } else if (error.message.includes('CORS')) {
-            throw new Error('跨域请求失败，请检查代理服务器配置')
+        } else {
+            throw error
         }
-
-        // 其他错误直接抛出
-        throw error
-    }
+    })
 }
 
 /**

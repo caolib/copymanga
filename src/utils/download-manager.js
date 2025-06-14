@@ -1,20 +1,38 @@
 import { invoke } from '@tauri-apps/api/core'
+import { convertFileSrc } from '@tauri-apps/api/core'
 import { message } from 'ant-design-vue'
 
 /**
- * 下载管理器类 - 使用 Tauri 后端处理下载
+ * 安全的文件路径转换函数 - 处理Windows路径问题
+ * @param {string} path 本地文件路径
+ * @returns {string} 转换后的URL
+ */
+function safeConvertFileSrc(path) {
+    // 规范化路径：替换反斜杠为正斜杠
+    const normalizedPath = path.replace(/\\/g, '/')
+
+    // 移除Windows路径中的UNC前缀（如果有）
+    const cleanPath = normalizedPath.replace(/^\/\?\//, '')
+
+    return convertFileSrc(cleanPath)
+}
+
+/**
+ * 下载管理器类 - 只通过 Tauri 后端处理下载
  */
 export class DownloadManager {
     constructor() {
         this.downloadQueue = []
         this.activeDownloads = new Map()
-        this.progressCallbacks = new Map()    }
+        this.maxConcurrentDownloads = 3
+    }
 
     /**
-     * 下载章节 - 使用 Tauri 后端
+     * 下载章节的所有图片 - 通过 Tauri 后端处理
      * @param {Object} chapterInfo 章节信息
      * @param {Function} onProgress 进度回调
-     */    async downloadChapter(chapterInfo, onProgress) {
+     */
+    async downloadChapter(chapterInfo, onProgress) {
         const {
             mangaUuid,
             mangaName,
@@ -24,85 +42,158 @@ export class DownloadManager {
             images
         } = chapterInfo
 
-        // 构建下载信息
-        const downloadInfo = {
-            manga_uuid: mangaUuid,
-            manga_name: mangaName,
-            group_path_word: groupPathWord,
-            chapter_uuid: chapterUuid,
-            chapter_name: chapterName,
-            images: images.map((image, index) => ({
-                url: image.url,
-                index: index,
-                filename: `${String(index + 1).padStart(3, '0')}.jpg`
-            }))
-        }
+        console.log('开始下载章节:', chapterName, '图片数量:', images.length)
 
-        // 保存进度回调
-        const downloadId = `${mangaUuid}_${chapterUuid}`
-        this.progressCallbacks.set(downloadId, onProgress)
+        try {
+            // 调用 Rust 后端下载命令
+            await invoke('download_chapter', {
+                mangaUuid,
+                mangaName,
+                groupPathWord,
+                chapterUuid,
+                chapterName,
+                images: images.map((img, index) => ({
+                    url: img.url,
+                    index: index,
+                    filename: `${String(index + 1).padStart(3, '0')}.jpg`
+                }))
+            })
 
-        return invoke('download_chapter', { downloadInfo }).then(result => {
-            // 清理回调
-            this.progressCallbacks.delete(downloadId)
-            
+            // 下载完成后的进度回调
+            if (onProgress) {
+                onProgress({
+                    completed: images.length,
+                    total: images.length,
+                    percent: 100,
+                    currentImage: '下载完成',
+                    status: 'completed'
+                })
+            }
+
             return {
                 success: true,
-                chapterDir: result.chapter_path,
                 totalImages: images.length,
                 message: `章节 "${chapterName}" 下载完成`
             }
-        }).catch(error => {
+        } catch (error) {
             console.error('下载章节失败:', error)
-            this.progressCallbacks.delete(downloadId)
-            throw new Error(`下载失败: ${error}`)
-        })
-    }
-
-    /**
-     * 处理下载进度更新 - 由 Tauri 后端调用
+            if (onProgress) {
+                onProgress({
+                    completed: 0,
+                    total: images.length,
+                    percent: 0,
+                    currentImage: '下载失败',
+                    status: 'error',
+                    error: error.message
+                })
+            }
+            throw error
+        }
+    }    /**
+     * 检查章节是否已下载 - 通过 Tauri 后端检查
+     * @param {string} mangaUuid 漫画UUID
+     * @param {string} groupPathWord 分组路径
+     * @param {string} chapterUuid 章节UUID
      */
-    handleProgressUpdate(downloadId, progress) {
-        const callback = this.progressCallbacks.get(downloadId)
-        if (callback) {
-            callback(progress)
+    async isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid) {
+        try {
+            console.log('检查章节下载状态 - 漫画UUID:', mangaUuid, '分组:', groupPathWord, '章节UUID:', chapterUuid)
+
+            const result = await invoke('check_chapter_downloaded', {
+                mangaUuid,
+                groupPathWord,
+                chapterUuid
+            })
+
+            console.log('后端返回结果:', result)
+
+            const isDownloaded = result.is_downloaded || false
+            console.log('章节是否已下载:', isDownloaded)
+
+            return isDownloaded
+        } catch (error) {
+            console.error('检查章节下载状态失败:', error)
+            return false
+        }
+    }/**
+     * 获取本地章节图片列表 - 通过 Tauri 后端获取
+     * @param {string} mangaUuid 漫画UUID
+     * @param {string} groupPathWord 分组路径
+     * @param {string} chapterUuid 章节UUID
+     */
+    async getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid) {
+        try {
+            const result = await invoke('get_local_chapter_images', {
+                mangaUuid,
+                groupPathWord,
+                chapterUuid
+            })
+            return result.images || []
+        } catch (error) {
+            console.error('获取本地章节图片失败:', error)
+            return []
         }
     }
 
     /**
-     * 检查章节是否已下载
-     * @param {string} mangaUuid 漫画UUID
-     * @param {string} groupPathWord 分组路径
-     * @param {string} chapterUuid 章节UUID
-     */    async isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid) {
-        return invoke('check_chapter_downloaded', {
-            mangaUuid,
-            groupPathWord,
-            chapterUuid
-        }).then(result => {
-            return result.is_downloaded
-        }).catch(error => {
-            console.error('检查下载状态失败:', error)
-            return false
-        })
+     * 转换本地文件路径为 Tauri 可访问的 URL
+     * @param {string} filePath 本地文件路径
+     * @returns {string} 转换后的 URL
+     */
+    convertLocalFileToUrl(filePath) {
+        console.log('原始路径:', filePath)
+        const result = safeConvertFileSrc(filePath)
+        console.log('转换后URL:', result)
+        return result
     }
 
     /**
-     * 获取已下载的章节信息
+     * 删除已下载的章节 - 通过 Tauri 后端删除
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径
      * @param {string} chapterUuid 章节UUID
-     */    async getDownloadedChapterInfo(mangaUuid, groupPathWord, chapterUuid) {
-        return invoke('get_downloaded_chapter_info', {
-            mangaUuid,
-            groupPathWord,
-            chapterUuid
-        }).then(result => {
-            return result.chapter_info
-        }).catch(error => {
-            console.error('获取下载信息失败:', error)
-            return null
-        })
+     */
+    async deleteChapter(mangaUuid, groupPathWord, chapterUuid) {
+        try {
+            await invoke('delete_chapter', {
+                mangaUuid,
+                groupPathWord,
+                chapterUuid
+            })
+            return true
+        } catch (error) {
+            console.error('删除章节失败:', error)
+            throw error
+        }
+    }
+
+    /**
+     * 获取下载统计信息 - 通过 Tauri 后端获取
+     */
+    async getDownloadStats() {
+        try {
+            return await invoke('get_download_stats')
+        } catch (error) {
+            console.error('获取下载统计失败:', error)
+            return {
+                totalMangas: 0,
+                totalChapters: 0,
+                totalImages: 0,
+                totalSize: 0
+            }
+        }
+    }
+
+    /**
+     * 清理无效的下载数据 - 通过 Tauri 后端清理
+     */
+    async cleanupDownloads() {
+        try {
+            return await invoke('cleanup_downloads')
+        } catch (error) {
+            console.error('清理下载数据失败:', error)
+            throw error
+        }
     }
 }
 

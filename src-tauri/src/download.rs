@@ -58,12 +58,32 @@ pub struct ChapterInfoResult {
     pub chapter_info: Option<ChapterInfo>,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct LocalChapterImages {
+    pub images: Vec<String>, // 本地图片的绝对路径列表
+    pub total_count: usize,
+}
+
 #[tauri::command]
 pub async fn download_chapter(
-    download_info: DownloadInfo,
+    manga_uuid: String,
+    manga_name: String,
+    group_path_word: String,
+    chapter_uuid: String,
+    chapter_name: String,
+    images: Vec<ImageInfo>,
     app_handle: AppHandle,
 ) -> Result<DownloadResult, String> {
-    println!("开始下载章节: {}", download_info.chapter_name);
+    println!("开始下载章节: {}", chapter_name);
+    
+    let download_info = DownloadInfo {
+        manga_uuid: manga_uuid.clone(),
+        manga_name: manga_name.clone(),
+        group_path_word: group_path_word.clone(),
+        chapter_uuid: chapter_uuid.clone(),
+        chapter_name: chapter_name.clone(),
+        images,
+    };
     
     // 获取应用资源目录
     let resource_dir = app_handle
@@ -125,7 +145,7 @@ pub async fn download_chapter(
             completed_images += 1;
             
             // 发送进度更新（可选，如果需要实时进度）
-            let progress = DownloadProgress {
+            let _progress = DownloadProgress {
                 completed: completed_images,
                 total: total_images,
                 percent: (completed_images as f64 / total_images as f64) * 100.0,
@@ -143,7 +163,7 @@ pub async fn download_chapter(
                 completed_images += 1;
                 println!("下载成功: {}", image_info.filename);
                 
-                let progress = DownloadProgress {
+                let _progress = DownloadProgress {
                     completed: completed_images,
                     total: total_images,
                     percent: (completed_images as f64 / total_images as f64) * 100.0,
@@ -157,7 +177,7 @@ pub async fn download_chapter(
                 completed_images += 1;
                 println!("下载失败: {} - {}", image_info.filename, e);
                 
-                let progress = DownloadProgress {
+                let _progress = DownloadProgress {
                     completed: completed_images,
                     total: total_images,
                     percent: (completed_images as f64 / total_images as f64) * 100.0,
@@ -264,5 +284,64 @@ pub async fn get_downloaded_chapter_info(
     
     Ok(ChapterInfoResult {
         chapter_info: Some(chapter_info),
+    })
+}
+
+#[tauri::command]
+pub async fn get_local_chapter_images(
+    manga_uuid: String,
+    group_path_word: String,
+    chapter_uuid: String,
+    app_handle: AppHandle,
+) -> Result<LocalChapterImages, String> {
+    // 获取应用资源目录
+    let resource_dir = app_handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("获取资源目录失败: {}", e))?;
+    
+    let chapter_path = resource_dir
+        .join("downloads")
+        .join("manga")
+        .join(&manga_uuid)
+        .join(&group_path_word)
+        .join(&chapter_uuid);
+    
+    // 检查章节目录是否存在
+    if !chapter_path.exists() {
+        return Ok(LocalChapterImages {
+            images: Vec::new(),
+            total_count: 0,
+        });
+    }
+    
+    // 读取目录中的所有图片文件
+    let mut image_paths = Vec::new();
+    
+    let mut entries = fs::read_dir(&chapter_path).await
+        .map_err(|e| format!("读取目录失败: {}", e))?;
+    
+    while let Some(entry) = entries.next_entry().await
+        .map_err(|e| format!("读取目录项失败: {}", e))? {
+        
+        let path = entry.path();
+        
+        // 只处理图片文件，跳过 info.json
+        if let Some(extension) = path.extension() {
+            let ext = extension.to_string_lossy().to_lowercase();
+            if matches!(ext.as_str(), "jpg" | "jpeg" | "png" | "gif" | "webp" | "bmp") {
+                if let Some(path_str) = path.to_str() {
+                    image_paths.push(path_str.to_string());
+                }
+            }
+        }
+    }
+    
+    // 按文件名排序（通常图片文件名包含索引）
+    image_paths.sort();
+    
+    Ok(LocalChapterImages {
+        total_count: image_paths.len(),
+        images: image_paths,
     })
 }

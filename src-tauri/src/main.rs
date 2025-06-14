@@ -53,7 +53,8 @@ fn main() {
             cache::force_clear_webview_cache,
             download::download_chapter,
             download::check_chapter_downloaded,
-            download::get_downloaded_chapter_info
+            download::get_downloaded_chapter_info,
+            download::get_local_chapter_images
         ])
         .setup(|_app| {
             // 不在这里自动启动代理服务器，等待前端初始化完成后手动启动
