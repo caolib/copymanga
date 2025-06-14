@@ -1,109 +1,97 @@
 @use "./variables" as *;
 
-.manga-collection {
-    .collection-controls {
+.manga-collection {    .collection-controls {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-        padding: 16px;
-        background: #fafafa;
-        border-radius: 8px;
+        margin-bottom: $spacing-xs;
+        background: $bg-color-light;
+        border-radius: $border-radius-medium;
 
         @include dark-theme {
-            background: #3a3f4b;
-        }
-
-        .controls-left {
+            background: $dark-bg-elevated;
+        }        .controls-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: $spacing-sm;
         }
 
         .controls-right {
             .total-info {
-                color: #666;
-                font-size: 14px;
+                color: $text-secondary;
+                font-size: $font-sm;
 
                 @include dark-theme {
-                    color: #ccc;
+                    color: $dark-text-secondary;
                 }
             }
         }
-    }
-
-    .manga-grid {
+    }    .manga-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-    }
-
-    .manga-card {
+        gap: $spacing-lg;
+    }    .manga-card {
         height: 100%;
         cursor: pointer;
-        border-radius: 8px;
+        border-radius: $border-radius-medium;
         overflow: hidden;
-        transition: all 0.3s ease;
+        transition: all $transition-normal;
 
         &:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: $shadow-medium;
             transform: translateY(-2px);
 
             @include dark-theme {
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                box-shadow: $shadow-dark-medium;
             }
         }
 
         @include dark-theme {
-            background: #282c34;
-            border-color: #444;
+            background: $dark-bg-secondary;
+            border-color: $dark-border-color;
         }
-    }
-
-    .manga-cover {
+    }    .manga-cover {
         position: relative;
         height: 280px;
         overflow: hidden;
-        border-radius: 8px 8px 0 0;
+        border-radius: $border-radius-medium $border-radius-medium 0 0;
 
         img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform $transition-normal;
         }
 
         .last-read {
             position: absolute;
-            bottom: 8px;
-            left: 8px;
+            bottom: $spacing-sm;
+            left: $spacing-sm;
             z-index: 2;
         }
 
         &:hover img {
             transform: scale(1.05);
         }
-    }
-
-    .manga-info {
-        padding: 16px;
+    }    .manga-info {
+        padding: $spacing-md;
 
         .manga-title {
-            font-size: 16px;
+            font-size: $font-base;
             font-weight: 500;
-            margin-bottom: 8px;
+            margin-bottom: $spacing-sm;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
         .manga-author {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 8px;
+            font-size: $font-xs;
+            color: $text-secondary;
+            margin-bottom: $spacing-sm;
 
             @include dark-theme {
-                color: #ccc;
+                color: $dark-text-secondary;
             }
         }
 
@@ -111,35 +99,33 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12px;
-            color: #999;
+            font-size: $font-xs;
+            color: $text-tertiary;
 
             @include dark-theme {
-                color: #aaa;
+                color: $dark-text-tertiary;
             }
 
             .manga-status {
                 padding: 2px 6px;
-                background: #f0f0f0;
-                border-radius: 4px;
+                background: $bg-color-light;
+                border-radius: $border-radius-small;
 
                 @include dark-theme {
-                    background: #444;
-                    color: #ccc;
+                    background: $dark-border-color;
+                    color: $dark-text-secondary;
                 }
             }
         }
-    }
-
-    .pagination-container {
-        margin-top: 24px;
+    }    .pagination-container {
+        margin-top: $spacing-xl;
         text-align: center;
-        padding: 20px 0;
-        background: rgba(255, 255, 255, 0.8);
-        border-radius: 8px;
+        padding: $spacing-lg 0;
+        background: rgba($bg-color-white, 0.8);
+        border-radius: $border-radius-medium;
 
         @include dark-theme {
-            background: rgba(40, 44, 52, 0.8);
+            background: rgba($dark-bg-secondary, 0.8);
         }
     }
 }

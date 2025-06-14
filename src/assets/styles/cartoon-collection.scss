@@ -1,108 +1,96 @@
 @use "./variables" as *;
 
-.cartoon-collection {
-    .collection-controls {
+.cartoon-collection {    .collection-controls {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 20px;
-        padding: 16px;
-        background: #fafafa;
-        border-radius: 8px;
+        margin-bottom: $spacing-xs;
+        background: $bg-color-light;
+        border-radius: $border-radius-medium;
 
         @include dark-theme {
-            background: #3a3f4b;
-        }
-
-        .controls-left {
+            background: $dark-bg-elevated;
+        }        .controls-left {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: $spacing-sm;
         }
 
         .controls-right {
             .total-info {
-                color: #666;
-                font-size: 14px;
+                color: $text-secondary;
+                font-size: $font-sm;
 
                 @include dark-theme {
-                    color: #ccc;
+                    color: $dark-text-secondary;
                 }
             }
         }
-    }
-
-    .cartoon-grid {
+    }    .cartoon-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-    }
-
-    .cartoon-card {
+        gap: $spacing-lg;
+    }    .cartoon-card {
         height: 100%;
         cursor: pointer;
-        border-radius: 8px;
+        border-radius: $border-radius-medium;
         overflow: hidden;
-        transition: all 0.3s ease;
+        transition: all $transition-normal;
 
         &:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: $shadow-medium;
             transform: translateY(-2px);
 
             @include dark-theme {
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                box-shadow: $shadow-dark-medium;
             }
-        }
-
-        .cartoon-cover {
+        }        .cartoon-cover {
             width: 100%;
             height: 280px;
             position: relative;
             overflow: hidden;
-            border-radius: 6px;
+            border-radius: $border-radius-small;
 
             img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: transform 0.3s ease;
+                transition: transform $transition-normal;
             }
 
             &:hover img {
                 transform: scale(1.05);
             }
-        }
-
-        .cartoon-company {
-            color: #666;
-            font-size: 12px;
-            margin-bottom: 4px;
+        }        .cartoon-company {
+            color: $text-secondary;
+            font-size: $font-xs;
+            margin-bottom: $spacing-xs;
 
             @include dark-theme {
-                color: #ccc;
+                color: $dark-text-secondary;
             }
         }
 
         .cartoon-update {
-            font-size: 12px;
-            margin-bottom: 4px;
+            font-size: $font-xs;
+            margin-bottom: $spacing-xs;
         }
 
         .browse-time {
-            color: #999;
-            font-size: 12px;
+            color: $text-tertiary;
+            font-size: $font-xs;
 
             @include dark-theme {
-                color: #666;
+                color: $dark-text-tertiary;
             }
         }
 
         .update-time {
-            color: #999;
-            font-size: 12px;
+            color: $text-tertiary;
+            font-size: $font-xs;
 
             @include dark-theme {
-                color: #666;
+                color: $dark-text-tertiary;
             }
         }
 
@@ -112,43 +100,39 @@
             &:hover {
                 transform: none;
                 box-shadow: none;
-            }
-
-            .skeleton-cover {
+            }            .skeleton-cover {
                 width: 100%;
                 height: 280px;
-                background: #f0f0f0;
-                border-radius: 6px;
+                background: $bg-color-light;
+                border-radius: $border-radius-small;
 
                 @include dark-theme {
-                    background: #424242;
+                    background: $dark-border-color;
                 }
             }
         }
-    }
-
-    .pagination-container {
+    }    .pagination-container {
         display: flex;
         justify-content: center;
-        margin-top: 32px;
-        padding: 20px 0;
+        margin-top: $spacing-xl;
+        padding: $spacing-lg 0;
     }
 }
 
 // 响应式设计
-@media (max-width: 1200px) {
+@media (max-width: $breakpoint-lg) {
     .cartoon-collection .cartoon-grid {
         grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 16px;
+        gap: $spacing-md;
     }
 }
 
-@media (max-width: 768px) {
+@media (max-width: $breakpoint-sm) {
     .cartoon-collection {
         .collection-controls {
             flex-direction: column;
             align-items: stretch;
-            gap: 12px;
+            gap: $spacing-sm;
 
             .controls-left,
             .controls-right {
@@ -158,7 +142,7 @@
 
         .cartoon-grid {
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 12px;
+            gap: $spacing-sm;
         }
 
         .cartoon-card .cartoon-cover {
@@ -167,7 +151,7 @@
     }
 }
 
-@media (max-width: 480px) {
+@media (max-width: $breakpoint-xs) {
     .cartoon-collection {
         .cartoon-grid {
             grid-template-columns: repeat(2, 1fr);
