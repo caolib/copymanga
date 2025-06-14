@@ -1,7 +1,0 @@
-## Commit
-
-- [1dfb53b] 🦄 refactor: 统一样式格式
-
----
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.7.1...v0.8.0)
-

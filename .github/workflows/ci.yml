@@ -16,10 +16,10 @@ jobs:
       - id: release_notes
         continue-on-error: true
         run: |
-          if [ -f "./docs/release.txt" ]; then
+          if [ -f "./docs/RELEASE.md" ]; then
             {
               echo 'release_body<<EOF'
-              cat "./docs/release.txt"
+              cat "./docs/RELEASE.md"
               echo 'EOF'
             } >> "$GITHUB_OUTPUT"
           else

@@ -5,6 +5,129 @@ param(
 )
 
 #region 参数验证
+# 交互式菜单选择函数
+function Show-InteractiveMenu {
+    param(
+        [string[]]$Options,
+        [string]$Title = "请选择选项"
+    )
+    
+    $selectedIndex = 0
+    $lastSelectedIndex = -1
+    
+    # 初始显示
+    Clear-Host
+    Write-Host $Title -ForegroundColor Cyan
+    Write-Host ""
+    
+    # 记录菜单开始的行位置
+    $menuStartRow = [Console]::CursorTop
+    
+    for ($i = 0; $i -lt $Options.Length; $i++) {
+        if ($i -eq $selectedIndex) {
+            Write-Host "→ $($Options[$i])" -ForegroundColor Green
+        } else {
+            Write-Host "  $($Options[$i])" -ForegroundColor White
+        }
+    }
+    
+    Write-Host ""
+    Write-Host "使用 ↑↓ 选择，回车确认，ESC 退出" -ForegroundColor Yellow
+    
+    while ($true) {
+        $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        
+        switch ($key.VirtualKeyCode) {
+            38 { # 上箭头
+                $selectedIndex = if ($selectedIndex -eq 0) { $Options.Length - 1 } else { $selectedIndex - 1 }
+            }
+            40 { # 下箭头
+                $selectedIndex = if ($selectedIndex -eq $Options.Length - 1) { 0 } else { $selectedIndex + 1 }
+            }
+            13 { # 回车
+                return $selectedIndex
+            }
+            27 { # ESC
+                return -1
+            }
+            default {
+                continue # 忽略其他按键，不重绘
+            }
+        }
+        
+        # 只在选择发生变化时重绘菜单选项
+        if ($selectedIndex -ne $lastSelectedIndex) {
+            # 移动光标到菜单开始位置
+            [Console]::SetCursorPosition(0, $menuStartRow)
+            
+            # 重绘菜单选项
+            for ($i = 0; $i -lt $Options.Length; $i++) {
+                if ($i -eq $selectedIndex) {
+                    Write-Host "→ $($Options[$i])" -ForegroundColor Green
+                } else {
+                    Write-Host "  $($Options[$i])" -ForegroundColor White
+                }
+            }
+            
+            $lastSelectedIndex = $selectedIndex
+        }
+    }
+}
+
+# 显示最新的tag并生成预设选项
+try {
+    $latestTag = git describe --tags --abbrev=0 2>$null
+    if ($LASTEXITCODE -eq 0 -and $latestTag) {
+        Write-Host "当前最新的标签: $latestTag" -ForegroundColor Green
+        
+        # 解析版本号 (支持 v1.2.3 格式)
+        if ($latestTag -match '^v?(\d+)\.(\d+)\.(\d+)') {
+            $major = [int]$matches[1]
+            $minor = [int]$matches[2]
+            $patch = [int]$matches[3]
+            
+            # 生成预设版本选项
+            $patchVersion = "v$major.$minor.$($patch + 1)"
+            $minorVersion = "v$major.$($minor + 1).0"
+            $majorVersion = "v$($major + 1).0.0"
+            
+            $options = @(
+                "$patchVersion (补丁版本 - bug修复)",
+                "$minorVersion (次要版本 - 新功能)",
+                "$majorVersion (主要版本 - 重大更新)",
+                "手动输入版本号"
+            )
+            
+            $choice = Show-InteractiveMenu -Options $options -Title "选择版本类型 (当前: $latestTag)"
+            
+            if ($choice -eq -1) {
+                Write-Host "已取消操作" -ForegroundColor Yellow
+                exit 0
+            }
+            
+            switch ($choice) {
+                0 { $Version = $patchVersion }
+                1 { $Version = $minorVersion }
+                2 { $Version = $majorVersion }
+                3 { 
+                    Clear-Host
+                    $Version = Read-Host "请手动输入版本号"
+                }
+            }
+        } else {
+            Write-Host "无法解析当前标签格式，请手动输入版本号" -ForegroundColor Yellow
+            $Version = Read-Host "请输入版本号"
+        }
+    } else {
+        Write-Host "未找到任何标签，这可能是第一个版本" -ForegroundColor Yellow
+        Write-Host "建议使用 v1.0.0 作为第一个版本" -ForegroundColor Cyan
+        $Version = Read-Host "请输入版本号 (建议: v1.0.0)"
+    }
+} catch {
+    Write-Host "获取标签信息失败，请手动输入版本号" -ForegroundColor Yellow
+    $Version = Read-Host "请输入版本号"
+}
+
 # 如果没有提供版本号参数，则提示用户输入
 if (-not $Version) {
     $Version = Read-Host "请输入版本号"
@@ -20,234 +143,53 @@ if (-not $Version) {
 $VersionNumber = $Version -replace '^v', ''
 #endregion
 
-#region 辅助函数
-function Update-CargoVersion {
-    param([string]$VersionNumber)
-    
-    Write-Host "正在更新 Cargo.toml 版本号..." -ForegroundColor Green
-    try {
-        $cargoPath = "src-tauri\\Cargo.toml"
-        $cargoLines = Get-Content $cargoPath
-        
-        # 只替换 [package] 部分中的 version 行
-        $inPackageSection = $false
-        $versionReplaced = $false
-          for ($i = 0; $i -lt $cargoLines.Length; $i++) {
-            if ($cargoLines[$i] -match '^\[package\]') {
-                $inPackageSection = $true
-            }
-            elseif ($cargoLines[$i] -match '^\[') {
-                $inPackageSection = $false
-            }
-            elseif ($inPackageSection -and $cargoLines[$i] -match '^version\s*=' -and -not $versionReplaced) {
-                $cargoLines[$i] = "version = `"$VersionNumber`""
-                $versionReplaced = $true
-                break
-            }
-        }
-        
-        $cargoLines | Set-Content $cargoPath -Encoding UTF8
-        Write-Host "✅ Cargo.toml 版本号已更新为: $VersionNumber" -ForegroundColor Green
-    }
-    catch {
-        Write-Error "更新 Cargo.toml 失败: $_"
-        exit 1
-    }
-}
+#region 模块导入
+# 导入所有发布相关的模块
+. "$PSScriptRoot\scripts\version-manager.ps1"
+. "$PSScriptRoot\scripts\git-manager.ps1"
+. "$PSScriptRoot\scripts\release-generator.ps1"
+. "$PSScriptRoot\scripts\release-workflow.ps1"
+#endregion
 
-function Update-TauriConfig {
-    param([string]$VersionNumber)
-    
-    Write-Host "正在更新 tauri.conf.json 版本号..." -ForegroundColor Green
-    try {
-        $tauriConfPath = "src-tauri\\tauri.conf.json"
-        $tauriContent = Get-Content $tauriConfPath -Raw        # 只替换文件开头的 version 字段，避免影响其他地方的版本号
-        $tauriContent = $tauriContent -replace '("productName": ".*",\r?\n\s*)"version": "[\d\.]+"', "`$1`"version`": `"$VersionNumber`""
-        $tauriContent | Set-Content $tauriConfPath -Encoding UTF8
-        Write-Host "✅ tauri.conf.json 版本号已更新为: $VersionNumber" -ForegroundColor Green
-    }
-    catch {
-        Write-Error "更新 tauri.conf.json 失败: $_"
-        exit 1
-    }
-}
+#region 主执行流程
+# 发布流程菜单选择
+$workflowOptions = @(
+    "执行完整发布流程",
+    "1. 版本号准备与更新",
+    "2. 生成发布信息", 
+    "3. 提交更改",
+    "4. 推送代码",
+    "5. 打标签并推送"
+)
 
-function Get-GitTags {
-    try {
-        $tags = git tag --sort=-version:refname
-        if ($LASTEXITCODE -ne 0) {
-            throw "无法获取 Git 标签"
-        }
-        return $tags | Where-Object { $_ -match '^v?\d+\.\d+\.\d+' }
-    }
-    catch {
-        Write-Error "错误: $_"
-        exit 1
-    }
-}
+$workflowChoice = Show-InteractiveMenu -Options $workflowOptions -Title "发布流程菜单 - 版本: $Version"
 
-function Get-CommitsBetweenTags {
-    param($LatestTag, $PreviousTag)
-    
-    try {
-        if ($PreviousTag) {
-            $commits = git log "$PreviousTag..$LatestTag" --pretty=format:'%H|%h|%s|%an|%ad' --date=short --reverse
-        } else {
-            $commits = git log $LatestTag --pretty=format:'%H|%h|%s|%an|%ad' --date=short --reverse
-        }
-        
-        if ($LASTEXITCODE -ne 0) {
-            throw "无法获取提交记录"
-        }
-        
-        $commitList = @()
-        foreach ($commit in $commits) {
-            if ([string]::IsNullOrWhiteSpace($commit)) { continue }
-              $parts = $commit -split '\|', 5
-            if ($parts.Length -eq 5) {
-                $commitObj = @{
-                    ShortHash = $parts[1]
-                    Message = $parts[2]
-                }
-                
-                # 过滤合并提交和文档提交
-                if ($commitObj.Message -match "^Merge (branch|pull request)" -or 
-                    $commitObj.Message -match "^(docs?:|README|\.md)") {
-                    continue
-                }
-                
-                $commitList += $commitObj
-            }
-        }
-        
-        return $commitList
-    }
-    catch {
-        Write-Error "错误: $_"
-        exit 1
-    }
-}
-
-function Generate-ReleaseInfo {
-    param($LatestTag, $PreviousTag, $Commits)
-    
-    $output = "## Commit`n`n"
-    foreach ($commit in $Commits) {
-        $output += "- [$($commit.ShortHash)] $($commit.Message)`n"
-    }
-    
-    $output += "`n---`n"
-    $output += "📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/$PreviousTag...$LatestTag)`n"
-      try {
-        # 脚本现在在项目根目录，直接使用 docs 路径
-        $outputPath = "docs\\release.txt"
-        $output | Out-File -FilePath $outputPath -Encoding UTF8
-        Write-Host "✅ 发布信息已保存到: $outputPath" -ForegroundColor Green
-    }
-    catch {
-        Write-Error "无法写入文件: $_"
-    }
+if ($workflowChoice -eq -1) {
+    Write-Host "已取消发布流程。" -ForegroundColor Yellow
+    exit 0
 }
 
 try {
-    # == Phase 1: Preparation and Version Bumping ==
-    Write-Host "Phase 1: Preparation and Version Bumping" -ForegroundColor Magenta
-    Update-CargoVersion -VersionNumber $VersionNumber
-    Update-TauriConfig -VersionNumber $VersionNumber
-
-    # == Phase 2: Generate Release Information ==
-    Write-Host "Phase 2: Generate Release Information" -ForegroundColor Magenta
-    Write-Host "创建临时标签 $Version 以收集提交记录..." -ForegroundColor Green
-    git tag $Version # Create $Version tag temporarily on current HEAD
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "错误: 创建临时标签 $Version 失败" -ForegroundColor Red
-        throw "创建临时标签 $Version 失败"
-    }    $allTags = Get-GitTags
-    
-    # 检查是否有标签
-    if (-not $allTags -or $allTags.Count -eq 0) {
-        Write-Warning "未找到任何有效的版本标签，将生成所有提交的发布说明"
-        $currentVersionTagForCommits = $Version
-        $previousActualTag = $null
-    } else {
-        $currentVersionTagForCommits = $allTags[0] # This is $Version
-        $previousActualTag = if ($allTags.Count -gt 1) { $allTags[1] } else { $null }
-    }
-
-    Write-Host "🏷️  当前版本 (用于提交收集): $currentVersionTagForCommits" -ForegroundColor Cyan
-    if ($previousActualTag) {
-        Write-Host "🏷️  上一个实际版本: $previousActualTag" -ForegroundColor Cyan
-    } else {
-        Write-Host "🏷️  这是第一个可识别的标签" -ForegroundColor Cyan
-    }
-
-    $commits = Get-CommitsBetweenTags -LatestTag $currentVersionTagForCommits -PreviousTag $previousActualTag
-
-    if ($commits.Count -eq 0) {
-        Write-Warning "在 $previousActualTag 和 $currentVersionTagForCommits 之间未找到任何提交记录用于生成发布说明"
-    } else {
-        Write-Host "✅ 找到 $($commits.Count) 个提交用于发布说明" -ForegroundColor Green
-        Generate-ReleaseInfo -LatestTag $currentVersionTagForCommits -PreviousTag $previousActualTag -Commits $commits
-    }
-
-    Write-Host "正在删除临时标签 $Version..." -ForegroundColor Green
-    git tag -d $Version # Delete the temporary $Version tag
-    if ($LASTEXITCODE -ne 0) {
-        Write-Warning "警告: 删除临时标签 $Version 失败。如果后续步骤失败，可能需要手动清理。"
-    }
-
-    # == Phase 3: Commit Changes (Version Bumps & Release Notes) ==
-    Write-Host "Phase 3: Commit Changes" -ForegroundColor Magenta
-    Write-Host "正在暂存所有更改 (版本文件, release.txt)..." -ForegroundColor Green
-    git add .
-    
-    $gitStatus = git status --porcelain
-    if (-not [string]::IsNullOrWhiteSpace($gitStatus)) {
-        Write-Host "正在提交版本更新和发布说明..." -ForegroundColor Green
-        git commit -m "🐳 chore: 发布新版本 $Version"
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "错误: 提交版本更新失败" -ForegroundColor Red
-            throw "提交版本更新失败"
+    switch ($workflowChoice) {
+        0 {
+            # 执行完整流程
+            Invoke-PreparationAndVersionBumping -VersionNumber $VersionNumber
+            Invoke-ReleaseInformationGeneration -Version $Version
+            Invoke-CommitChanges -Version $Version
+            Invoke-PushCodeChanges
+            Invoke-TaggingAndPushTag -Version $Version
+            Write-Host "🎉 所有操作执行完成！版本 $Version 已发布" -ForegroundColor Green
         }
-    } else {
-        Write-Host "没有需要提交的更改。" -ForegroundColor Yellow
+        1 { Invoke-PreparationAndVersionBumping -VersionNumber $VersionNumber }
+        2 { Invoke-ReleaseInformationGeneration -Version $Version }
+        3 { Invoke-CommitChanges -Version $Version }
+        4 { Invoke-PushCodeChanges }
+        5 { Invoke-TaggingAndPushTag -Version $Version }
     }
-
-    # == Phase 4: Push Code Changes ==
-    Write-Host "Phase 4: Push Code Changes" -ForegroundColor Magenta
-    Write-Host "正在推送代码..." -ForegroundColor Green
-    git push
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "错误: 推送代码失败" -ForegroundColor Red
-        throw "推送代码失败"
-    }
-    Write-Host "代码推送成功！" -ForegroundColor Green
-
-    # == Phase 5: Tagging and Pushing Tag ==
-    Write-Host "Phase 5: Tagging and Pushing Tag" -ForegroundColor Magenta
-    # Ensure no local tag with $Version exists from a failed previous run or the temp tag process
-    Write-Host "清理可能存在的旧本地标签 $Version (以防万一)..." -ForegroundColor Yellow
-    git tag -d $Version 2>$null # Suppress error if tag doesn't exist
-
-    Write-Host "正在创建最终标签 $Version..." -ForegroundColor Green
-    git tag $Version # Create the final $Version tag on the new commit
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "错误: 创建最终标签 $Version 失败" -ForegroundColor Red
-        throw "创建最终标签 $Version 失败"
-    }
-
-    Write-Host "正在推送标签 $Version..." -ForegroundColor Green
-    git push origin $Version
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "错误: 推送标签 $Version 失败" -ForegroundColor Red
-        throw "推送标签 $Version 失败"
-    }
-
-    Write-Host "🎉 所有操作执行完成！版本 $Version 已发布" -ForegroundColor Green
 }
 catch {
     Write-Host "执行过程中发生错误: $($_.Exception.Message)" -ForegroundColor Red
-    Write-Host "正在清理可能存在的标签 $Version 由于错误..." -ForegroundColor Yellow
-    git tag -d $Version 2>$null # Attempt to clean up the specific $Version tag if it exists
+    Invoke-CleanupOnError -Version $Version
     exit 1
 }
+#endregion
