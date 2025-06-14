@@ -23,3 +23,51 @@
 .ant-list-item-meta-title {
     margin-bottom: 4px !important;
 }
+
+// 请求头配置样式
+.headers-list {
+    .header-item {
+        padding: 8px 0;
+        border-bottom: 1px solid #f0f0f0;
+
+        &:last-child {
+            border-bottom: none;
+        }
+
+        .ant-row {
+            align-items: center;
+        }
+    }
+}
+
+.empty-headers {
+    text-align: center;
+    padding: 20px;
+    background-color: #fafafa;
+    border-radius: 6px;
+    border: 1px dashed #d9d9d9;
+}
+
+.json-editor-container {
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    overflow: hidden;
+
+    :deep(.jsoneditor) {
+        border: none;
+
+        .jsoneditor-menu {
+            background-color: #fafafa;
+            border-bottom: 1px solid #d9d9d9;
+        }
+
+        .jsoneditor-tree,
+        .ace_editor {
+            background-color: #fff;
+        }
+
+        .ace_gutter {
+            background-color: #fafafa;
+        }
+    }
+}

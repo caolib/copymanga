@@ -1,12 +1,12 @@
 import axios from 'axios'
 import { getToken } from './auth'
 import { message } from 'ant-design-vue'
-import { getServerConfig, getRequestHeaders } from '@/config/server-config'
+import { getServerConfig } from '@/config/server-config'
 import router from '@/router'
 
 // 创建 axios 实例
 const request = axios.create({
-    timeout: 40000,
+    timeout: 30000,
     withCredentials: true
 })
 
@@ -43,14 +43,6 @@ request.interceptors.request.use(
         if (token) {
             config.headers['Authorization'] = `Token ${token}`
         }
-
-        // 添加拷贝漫画APP的通用请求头 (从配置文件读取)
-        const requestHeaders = await getRequestHeaders()
-
-        // 设置配置的请求头
-        Object.keys(requestHeaders).forEach(key => {
-            config.headers[key] = requestHeaders[key]
-        })
 
         // 动态生成 dt 字段 (日期)
         config.headers['dt'] = getCurrentDate()

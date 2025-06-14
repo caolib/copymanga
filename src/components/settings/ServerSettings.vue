@@ -2,17 +2,14 @@
     <div>
         <a-card title="转发服务配置" class="setting-card" id="server-config">
             <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
-                <a-form-item label="服务器端口（1-65535）" name="serverPort" :rules="[
-                    { required: true, message: '请输入服务器端口' },
-                    { validator: validatePort, trigger: 'blur' }
-                ]">
+                <a-form-item label="服务器端口（1-65535）" name="serverPort">
                     <a-input-number v-model:value="serverForm.serverPort" placeholder="输入一个端口号" :min="1" :max="65535"
                         style="width: 50%" />
                 </a-form-item>
 
                 <a-form-item>
                     <a-space>
-                        <a-button type="primary" html-type="submit" :loading="savingServer" size="large">
+                        <a-button type="primary" html-type="submit" :loading="savingServer">
                             保存设置
                         </a-button>
                     </a-space>
@@ -21,8 +18,7 @@
         </a-card> <a-card title="API 域名配置" class="setting-card" id="api-config">
             <a-form layout="vertical"> <!-- 当前API源选择 -->
                 <a-form-item label="当前API源">
-                    <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" size="large"
-                        style="width: 100%">
+                    <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" style="width: 100%">
                         <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
                             {{ source }}
                         </a-select-option>
@@ -36,9 +32,8 @@
                 <a-form-item label="添加新API源">
                     <a-input-group compact>
                         <a-input v-model:value="newApiSource.url" placeholder="API域名 (如: https://copy20.com)"
-                            style="width: 80%" size="large" />
-                        <a-button type="primary" @click="addNewApiSource" :loading="addingSource" style="width: 20%"
-                            size="large">
+                            style="width: 80%" />
+                        <a-button type="primary" @click="addNewApiSource" :loading="addingSource" style="width: 20%">
                             添加
                         </a-button>
                     </a-input-group>
@@ -73,8 +68,7 @@
             <a-form layout="vertical">
                 <!-- 当前轻小说API源选择 -->
                 <a-form-item label="当前轻小说API源">
-                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange" size="large"
-                        style="width: 100%">
+                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange" style="width: 100%">
                         <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
                             {{ source }}
                         </a-select-option>
@@ -88,9 +82,9 @@
                 <a-form-item label="添加新轻小说API源">
                     <a-input-group compact>
                         <a-input v-model:value="newBookApiSource.url"
-                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: 80%" size="large" />
+                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: 80%" />
                         <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
-                            style="width: 20%" size="large">
+                            style="width: 20%">
                             添加
                         </a-button>
                     </a-input-group>
@@ -128,65 +122,65 @@
             <a-form layout="vertical">
                 <a-alert type="info" show-icon style="margin-bottom: 16px">
                     <template #message>
-                        配置API请求时的自定义请求头，用于模拟移动端APP访问
+                        配置API请求时的自定义请求头，用于模拟移动端APP访问。可以添加、修改或删除任意请求头。
                     </template>
                 </a-alert>
 
-                <a-row :gutter="16">
-                    <a-col :span="12">
-                        <a-form-item label="来源标识 (source)">
-                            <a-input v-model:value="headersForm.source" placeholder="copyApp" size="large" />
-                        </a-form-item>
-                    </a-col>
-                    <a-col :span="12">
-                        <a-form-item label="平台标识 (platform)">
-                            <a-input v-model:value="headersForm.platform" placeholder="3" size="large" />
-                        </a-form-item>
-                    </a-col>
-                </a-row>
-
-                <a-row :gutter="16">
-                    <a-col :span="12">
-                        <a-form-item label="应用版本 (version)">
-                            <a-input v-model:value="headersForm.version" placeholder="2.3.0" size="large" />
-                        </a-form-item>
-                    </a-col>
-                    <a-col :span="12">
-                        <a-form-item label="地区标识 (region)">
-                            <a-input v-model:value="headersForm.region" placeholder="1" size="large" />
-                        </a-form-item>
-                    </a-col>
-                </a-row>
-
-                <a-form-item label="设备信息 (deviceinfo)">
-                    <a-input v-model:value="headersForm.deviceinfo" placeholder="PGEM10-star2qltechn" size="large" />
+                <!-- 添加新请求头 -->
+                <a-form-item label="添加新请求头">
+                    <a-row :gutter="16">
+                        <a-col :span="8">
+                            <a-input v-model:value="newHeader.key" placeholder="请求头名称 (如: User-Agent)"
+                                @keyup.enter="addNewHeader" />
+                        </a-col>
+                        <a-col :span="12">
+                            <a-input v-model:value="newHeader.value" placeholder="请求头值" @keyup.enter="addNewHeader" />
+                        </a-col>
+                        <a-col :span="4">
+                            <a-button type="primary" @click="addNewHeader"
+                                :disabled="!newHeader.key || !newHeader.value" block>
+                                添加
+                            </a-button>
+                        </a-col>
+                    </a-row>
                 </a-form-item>
 
-                <a-form-item label="设备标识 (device)">
-                    <a-input v-model:value="headersForm.device" placeholder="PQ3B.190801.05281406" size="large" />
+                <!-- 现有请求头列表 -->
+                <a-form-item label="当前请求头配置">
+                    <div v-if="headersList.length === 0" class="empty-headers">
+                        <a-empty description="暂无请求头配置" :image="false" />
+                    </div>
+                    <div v-else class="headers-list">
+                        <div v-for="(header, index) in headersList" :key="index" class="header-item">
+                            <a-row :gutter="16" align="middle">
+                                <a-col :span="8">
+                                    <a-input v-model:value="header.key" placeholder="请求头名称"
+                                        @change="onHeaderChange(index)" />
+                                </a-col>
+                                <a-col :span="12">
+                                    <a-input v-model:value="header.value" placeholder="请求头值"
+                                        @change="onHeaderChange(index)" />
+                                </a-col>
+                                <a-col :span="4">
+                                    <a-button type="text" danger @click="removeHeader(index)" block>
+                                        删除
+                                    </a-button>
+                                </a-col>
+                            </a-row>
+                        </div>
+                    </div>
                 </a-form-item>
-
-                <a-row :gutter="16">
-                    <a-col :span="12">
-                        <a-form-item label="WebP支持 (webp)">
-                            <a-input v-model:value="headersForm.webp" placeholder="1" size="large" />
-                        </a-form-item>
-                    </a-col>
-                    <a-col :span="12">
-                        <a-form-item label="统计字符串 (umstring)">
-                            <a-input v-model:value="headersForm.umstring" placeholder="b4c89ca4104ea9a97750314d791520ac"
-                                size="large" />
-                        </a-form-item>
-                    </a-col>
-                </a-row>
 
                 <a-form-item>
                     <a-space>
-                        <a-button type="primary" @click="saveHeaders" :loading="savingHeaders" size="large">
+                        <a-button type="primary" @click="saveAllHeaders" :loading="savingHeaders">
                             保存请求头配置
                         </a-button>
-                        <a-button @click="resetHeaders" size="large">
-                            恢复默认值
+                        <a-button @click="resetHeaders">
+                            恢复默认配置
+                        </a-button>
+                        <a-button @click="clearAllHeaders" danger>
+                            清空所有请求头
                         </a-button>
                     </a-space>
                 </a-form-item>
@@ -198,9 +192,12 @@
                 <a-alert v-if="appStore.needsRestart" type="warning" message="配置已更改，需要重启应用以生效" show-icon
                     style="margin-bottom: 16px" />
                 <a-space>
-                    <a-button type="primary" @click="handleRestart" :loading="restarting" size="large" danger
+                    <a-button type="primary" @click="handleRestart" :loading="restarting" danger
                         :icon="h(ReloadOutlined)">
                         重启应用
+                    </a-button>
+                    <a-button @click="openConfigDirectory" :loading="openingDirectory">
+                        打开配置目录
                     </a-button>
                     <span class="restart-help">重启应用以应用所有配置更改</span>
                 </a-space>
@@ -229,32 +226,30 @@ import {
     switchBookApiSource,
     getRequestHeaders,
     saveRequestHeaders,
-    resetRequestHeaders,
     getDefaultRequestHeaders
 } from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
 import { relaunch } from '@tauri-apps/plugin-process'
+import { invoke } from '@tauri-apps/api/core'
+import { appDataDir } from '@tauri-apps/api/path'
 
 const serverForm = ref({
     serverPort: 5001
 })
 
-const appForm = ref({
-    apiDomain: 'https://copy20.com'
-})
+const appForm = ref({ apiDomain: '' })
 
-const currentServerPort = ref('5001')
-const currentApiDomain = ref('https://copy20.com')
+const currentServerPort = ref('')
+const currentApiDomain = ref('')
 const savingServer = ref(false)
 const restarting = ref(false)
+const openingDirectory = ref(false)
 const appStore = useAppStore()
 
 // 新增：API源管理相关状态
 const apiSources = ref([])
 const currentApiIndex = ref(0)
-const newApiSource = ref({
-    url: ''
-})
+const newApiSource = ref({ url: '' })
 const addingSource = ref(false)
 const removingIndex = ref(-1)
 
@@ -262,46 +257,14 @@ const removingIndex = ref(-1)
 const bookApiSources = ref([])
 const currentBookApiIndex = ref(0)
 const currentBookApiDomain = ref('未配置')
-const newBookApiSource = ref({
-    url: ''
-})
+const newBookApiSource = ref({ url: '' })
 const addingBookSource = ref(false)
 const removingBookIndex = ref(-1)
 
 // 请求头配置相关状态
-const headersForm = ref({
-    source: 'copyApp',
-    deviceinfo: 'PGEM10-star2qltechn',
-    webp: '1',
-    platform: '3',
-    version: '2.3.0',
-    region: '1',
-    device: 'PQ3B.190801.05281406',
-    umstring: 'b4c89ca4104ea9a97750314d791520ac'
-})
+const headersList = ref([])
+const newHeader = ref({ key: '', value: '' })
 const savingHeaders = ref(false)
-
-// 验证端口格式
-const validatePort = (rule, value) => {
-    if (!value) {
-        return Promise.reject(new Error('请输入服务器端口'))
-    }
-    if (!validateServerPort(value)) {
-        return Promise.reject(new Error('端口号必须是1-65535之间的数字'))
-    }
-    return Promise.resolve()
-}
-
-// 验证域名格式
-const validateDomain = (rule, value) => {
-    if (!value) {
-        return Promise.reject(new Error('请输入 API 域名'))
-    }
-    if (!validateApiDomain(value)) {
-        return Promise.reject(new Error('请输入有效的域名格式（如：https://example.com）'))
-    }
-    return Promise.resolve()
-}
 
 // 加载当前配置
 const loadConfig = () => {
@@ -382,9 +345,14 @@ const loadConfig = () => {
 
     // 加载请求头配置
     getRequestHeaders().then(headers => {
-        headersForm.value = { ...headers }
+        // 将对象转换为键值对数组
+        headersList.value = Object.entries(headers || {}).map(([key, value]) => ({
+            key,
+            value
+        }))
     }).catch(error => {
         console.warn('加载请求头配置失败:', error)
+        headersList.value = []
     })
 }
 
@@ -521,11 +489,74 @@ const removeBookApiSource = async (index) => {
     }
 }
 
-// 保存请求头配置
-const saveHeaders = async () => {
+// 添加新请求头
+const addNewHeader = () => {
+    if (!newHeader.value.key || !newHeader.value.value) {
+        message.error('请输入完整的请求头名称和值')
+        return
+    }
+
+    // 检查是否已存在相同的键
+    const existingIndex = headersList.value.findIndex(header => header.key === newHeader.value.key)
+    if (existingIndex !== -1) {
+        message.error('该请求头已存在，请使用不同的名称')
+        return
+    }
+
+    headersList.value.push({
+        key: newHeader.value.key,
+        value: newHeader.value.value
+    })
+
+    // 清空输入框
+    newHeader.value = { key: '', value: '' }
+    message.success('请求头已添加')
+}
+
+// 删除请求头
+const removeHeader = (index) => {
+    headersList.value.splice(index, 1)
+    message.success('请求头已删除')
+}
+
+// 请求头值变化时的处理
+const onHeaderChange = (index) => {
+    // 这里可以添加实时验证逻辑
+    const header = headersList.value[index]
+    if (!header.key || !header.value) {
+        console.warn(`请求头 ${index} 的键或值为空`)
+    }
+}
+
+// 保存所有请求头配置
+const saveAllHeaders = async () => {
     savingHeaders.value = true
+
     try {
-        await saveRequestHeaders(headersForm.value)
+        // 验证所有请求头
+        const invalidHeaders = headersList.value.filter(header => !header.key || !header.value)
+        if (invalidHeaders.length > 0) {
+            message.error('存在空的请求头键或值，请检查配置')
+            savingHeaders.value = false
+            return
+        }
+
+        // 检查重复的键
+        const keys = headersList.value.map(header => header.key)
+        const uniqueKeys = new Set(keys)
+        if (keys.length !== uniqueKeys.size) {
+            message.error('存在重复的请求头键，请检查配置')
+            savingHeaders.value = false
+            return
+        }
+
+        // 转换为对象格式保存
+        const headersObject = {}
+        headersList.value.forEach(header => {
+            headersObject[header.key] = header.value
+        })
+
+        await saveRequestHeaders(headersObject)
         message.success('请求头配置保存成功！')
         appStore.setNeedsRestart(true)
     } catch (error) {
@@ -539,13 +570,46 @@ const saveHeaders = async () => {
 const resetHeaders = async () => {
     try {
         const defaultHeaders = getDefaultRequestHeaders()
-        headersForm.value = { ...defaultHeaders }
+        headersList.value = Object.entries(defaultHeaders).map(([key, value]) => ({
+            key,
+            value
+        }))
         await saveRequestHeaders(defaultHeaders)
         message.success('已恢复默认请求头配置')
         appStore.setNeedsRestart(true)
     } catch (error) {
         message.error('重置请求头配置失败')
     }
+}
+
+// 清空所有请求头
+const clearAllHeaders = async () => {
+    try {
+        headersList.value = []
+        await saveRequestHeaders({})
+        message.success('已清空所有请求头配置')
+        appStore.setNeedsRestart(true)
+    } catch (error) {
+        message.error('清空请求头配置失败')
+    }
+}
+
+// 打开配置目录
+const openConfigDirectory = async () => {
+    openingDirectory.value = true
+
+    await appDataDir().then(appDataPath => {
+        const configDir = appDataPath + '\\config'
+        // console.log('配置目录:', configDir)
+        return invoke('open_file_explorer', { path: configDir })
+    }).then(() => {
+        message.success('已打开配置文件目录')
+    }).catch(error => {
+        message.error('打开配置目录失败: ' + (error.message || error))
+        console.error('打开配置目录失败:', error)
+    }).finally(() => {
+        openingDirectory.value = false
+    })
 }
 
 onMounted(() => {

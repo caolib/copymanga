@@ -271,15 +271,7 @@ export async function getRequestHeaders() {
 // 保存请求头配置
 export async function saveRequestHeaders(headers) {
     const serverConfig = await pathHelper.readConfig(CONFIG_FILES.SERVER, DEFAULT_SERVER_CONFIG)
-    serverConfig.requestHeaders = { ...serverConfig.requestHeaders, ...headers }
-    await pathHelper.saveConfig(CONFIG_FILES.SERVER, serverConfig)
-    return serverConfig.requestHeaders
-}
-
-// 重置请求头为默认值
-export async function resetRequestHeaders() {
-    const serverConfig = await pathHelper.readConfig(CONFIG_FILES.SERVER, DEFAULT_SERVER_CONFIG)
-    serverConfig.requestHeaders = { ...DEFAULT_REQUEST_HEADERS }
+    serverConfig.requestHeaders = { ...headers }
     await pathHelper.saveConfig(CONFIG_FILES.SERVER, serverConfig)
     return serverConfig.requestHeaders
 }
@@ -295,10 +287,14 @@ export function validateRequestHeaders(headers) {
         return false
     }
 
-    // 检查必需的字段
-    const requiredFields = ['source', 'platform', 'version']
-    for (const field of requiredFields) {
-        if (!headers[field]) {
+    // 检查是否是有效的键值对对象
+    for (const [key, value] of Object.entries(headers)) {
+        // 键必须是非空字符串
+        if (typeof key !== 'string' || key.trim() === '') {
+            return false
+        }
+        // 值必须是字符串
+        if (typeof value !== 'string') {
             return false
         }
     }
