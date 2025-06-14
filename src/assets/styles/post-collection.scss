@@ -1,7 +1,8 @@
 @use "./variables" as *;
 @use "./skeleton-dark" as *;
 
-.post-collection {    .collection-controls {
+.post-collection {
+    .collection-controls {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -13,7 +14,8 @@
         @include dark-theme {
             background: $dark-bg-elevated;
             border-color: $dark-border-color;
-        }        .controls-left {
+        }
+        .controls-left {
             display: flex;
             align-items: center;
             gap: $spacing-sm;

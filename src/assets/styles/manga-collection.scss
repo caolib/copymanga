@@ -1,6 +1,7 @@
 @use "./variables" as *;
 
-.manga-collection {    .collection-controls {
+.manga-collection {
+    .collection-controls {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -10,7 +11,8 @@
 
         @include dark-theme {
             background: $dark-bg-elevated;
-        }        .controls-left {
+        }
+        .controls-left {
             display: flex;
             align-items: center;
             gap: $spacing-sm;
@@ -26,11 +28,13 @@
                 }
             }
         }
-    }    .manga-grid {
+    }
+    .manga-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: $spacing-lg;
-    }    .manga-card {
+    }
+    .manga-card {
         height: 100%;
         cursor: pointer;
         border-radius: $border-radius-medium;
@@ -50,7 +54,8 @@
             background: $dark-bg-secondary;
             border-color: $dark-border-color;
         }
-    }    .manga-cover {
+    }
+    .manga-cover {
         position: relative;
         height: 280px;
         overflow: hidden;
@@ -73,7 +78,8 @@
         &:hover img {
             transform: scale(1.05);
         }
-    }    .manga-info {
+    }
+    .manga-info {
         padding: $spacing-md;
 
         .manga-title {
@@ -117,7 +123,8 @@
                 }
             }
         }
-    }    .pagination-container {
+    }
+    .pagination-container {
         margin-top: $spacing-xl;
         text-align: center;
         padding: $spacing-lg 0;
