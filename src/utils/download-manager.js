@@ -1,6 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
 import { convertFileSrc } from '@tauri-apps/api/core'
-import { message } from 'ant-design-vue'
 
 /**
  * 安全的文件路径转换函数 - 处理Windows路径问题
@@ -8,13 +7,21 @@ import { message } from 'ant-design-vue'
  * @returns {string} 转换后的URL
  */
 function safeConvertFileSrc(path) {
-    // 规范化路径：替换反斜杠为正斜杠
-    const normalizedPath = path.replace(/\\/g, '/')
+    // console.log('safeConvertFileSrc 输入路径:', path)
 
-    // 移除Windows路径中的UNC前缀（如果有）
-    const cleanPath = normalizedPath.replace(/^\/\?\//, '')
+    // 移除 Windows UNC 前缀 \\?\
+    let cleanPath = path.replace(/^\\\\\?\\/, '')
 
-    return convertFileSrc(cleanPath)
+    // 规范化路径分隔符为正斜杠
+    cleanPath = cleanPath.replace(/\\/g, '/')
+
+    // console.log('清理后的路径:', cleanPath)
+
+    // 使用默认的 asset 协议
+    const result = convertFileSrc(cleanPath)
+    console.log('safeConvertFileSrc 输出URL:', result)
+
+    return result
 }
 
 /**
@@ -97,7 +104,7 @@ export class DownloadManager {
      */
     async isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid) {
         try {
-            console.log('检查章节下载状态 - 漫画UUID:', mangaUuid, '分组:', groupPathWord, '章节UUID:', chapterUuid)
+            // console.log('检查章节下载状态 - 漫画UUID:', mangaUuid, '分组:', groupPathWord, '章节UUID:', chapterUuid)
 
             const result = await invoke('check_chapter_downloaded', {
                 mangaUuid,
@@ -105,17 +112,17 @@ export class DownloadManager {
                 chapterUuid
             })
 
-            console.log('后端返回结果:', result)
+            // console.log('后端返回结果:', result)
 
             const isDownloaded = result.is_downloaded || false
-            console.log('章节是否已下载:', isDownloaded)
+            // console.log('章节是否已下载:', isDownloaded)
 
             return isDownloaded
         } catch (error) {
             console.error('检查章节下载状态失败:', error)
             return false
         }
-    }/**
+    }    /**
      * 获取本地章节图片列表 - 通过 Tauri 后端获取
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径
@@ -123,11 +130,17 @@ export class DownloadManager {
      */
     async getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid) {
         try {
+            console.log('获取本地图片 - 漫画UUID:', mangaUuid, '分组:', groupPathWord, '章节UUID:', chapterUuid)
+
             const result = await invoke('get_local_chapter_images', {
                 mangaUuid,
                 groupPathWord,
                 chapterUuid
             })
+
+            console.log('后端返回的本地图片结果:', result)
+            console.log('图片路径列表:', result.images)
+
             return result.images || []
         } catch (error) {
             console.error('获取本地章节图片失败:', error)
@@ -148,7 +161,7 @@ export class DownloadManager {
     }
 
     /**
-     * 删除已下载的章节 - 通过 Tauri 后端删除
+     * 删除已下载的章节
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径
      * @param {string} chapterUuid 章节UUID
@@ -168,7 +181,7 @@ export class DownloadManager {
     }
 
     /**
-     * 获取下载统计信息 - 通过 Tauri 后端获取
+     * 获取下载统计信息
      */
     async getDownloadStats() {
         try {
@@ -185,7 +198,7 @@ export class DownloadManager {
     }
 
     /**
-     * 清理无效的下载数据 - 通过 Tauri 后端清理
+     * 清理无效的下载数据
      */
     async cleanupDownloads() {
         try {

@@ -512,7 +512,7 @@ const handlePageChange = async (page, size) => {
 
 // 处理分组切换
 const handleGroupChange = async (groupPathWord) => {
-    console.log('切换分组到:', groupPathWord)
+    // console.log('切换分组到:', groupPathWord)
     currentGroup.value = groupPathWord
     currentPage.value = 1 // 重置页码
     groupLoading.value = true
@@ -715,12 +715,12 @@ const checkChapterDownloadStatus = async (chapters) => {
         return
     }
 
-    console.log('开始检查章节下载状态，漫画UUID:', manga.value.uuid, '章节数量:', chapters.length)
+    // console.log('开始检查章节下载状态，漫画UUID:', manga.value.uuid, '章节数量:', chapters.length)
 
     // 使用 Promise.all 并行检查所有章节的下载状态
     const checkPromises = chapters.map(async (chapter) => {
         try {
-            console.log('检查章节:', chapter.name, 'UUID:', chapter.uuid, 'ID:', chapter.id)
+            // console.log('检查章节:', chapter.name, 'UUID:', chapter.uuid, 'ID:', chapter.id)
 
             const isDownloaded = await downloadManager.isChapterDownloaded(
                 manga.value.uuid,
@@ -728,7 +728,7 @@ const checkChapterDownloadStatus = async (chapters) => {
                 chapter.uuid
             )
 
-            console.log('章节下载状态:', chapter.name, '已下载:', isDownloaded)
+            // console.log('章节下载状态:', chapter.name, '已下载:', isDownloaded)
 
             if (isDownloaded) {
                 chapterDownloadStatus.value[chapter.id] = 'downloaded'
@@ -743,7 +743,7 @@ const checkChapterDownloadStatus = async (chapters) => {
     })
 
     await Promise.all(checkPromises)
-    console.log('章节下载状态检查完成，当前状态:', chapterDownloadStatus.value)
+    // console.log('章节下载状态检查完成，当前状态:', chapterDownloadStatus.value)
 }
 
 onMounted(() => {

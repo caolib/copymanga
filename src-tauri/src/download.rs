@@ -309,6 +309,7 @@ pub async fn get_local_chapter_images(
     
     // 检查章节目录是否存在
     if !chapter_path.exists() {
+        println!("章节目录不存在: {}", chapter_path.display());
         return Ok(LocalChapterImages {
             images: Vec::new(),
             total_count: 0,
@@ -340,8 +341,14 @@ pub async fn get_local_chapter_images(
     // 按文件名排序（通常图片文件名包含索引）
     image_paths.sort();
     
+    let total_count = image_paths.len();
+    println!("找到本地图片文件 {} 张:", total_count);
+    for (i, path) in image_paths.iter().enumerate() {
+        println!("  图片 {}: {}", i + 1, path);
+    }
+    
     Ok(LocalChapterImages {
-        total_count: image_paths.len(),
         images: image_paths,
+        total_count,
     })
 }
