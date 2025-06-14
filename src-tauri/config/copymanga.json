@@ -3,5 +3,9 @@
     "https://api.copy2000.online",
     "https://copy20.com"
   ],
-  "currentApiIndex": 0
+  "currentApiIndex": 0,
+  "bookApiSources": [
+    "https://api.copy-manga.com"
+  ],
+  "currentBookApiIndex": 0
 }

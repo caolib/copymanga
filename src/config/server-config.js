@@ -1,66 +1,148 @@
 import { pathHelper, CONFIG_FILES } from '@/utils/path-helper'
 
-const DEFAULT_SERVER_PORT = '5001'
+// ============ 默认配置常量 ============
 
-// 默认请求头配置
-const DEFAULT_REQUEST_HEADERS = {
-    source: 'copyApp',
-    deviceinfo: 'PGEM10-star2qltechn',
-    webp: '1',
-    platform: '3',
-    version: '2.3.0',
-    region: '1',
-    device: 'PQ3B.190801.05281406',
-    umstring: 'b4c89ca4104ea9a97750314d791520ac'
+// 默认服务器配置
+const DEFAULT_SERVER_CONFIG = {
+    serverPort: 12121,
+    requestHeaders: {
+        "user-agent": "COPY/2.3.1",
+        "source": "copyApp",
+        "deviceinfo": "PGEM10-star2qltechn",
+        "webp": "1",
+        "platform": "3",
+        "referer": "com.copymanga.app-2.3.1",
+        "version": "2.3.1",
+        "region": "1",
+        "device": "PQ3B.190801.05281406",
+        "pseudoid": "eQcnVQUDUW08t8iH",
+        "host": "api.copy2000.online",
+        "umstring": "b4c89ca4104ea9a97750314d791520ac"
+    }
 }
+
+// 默认请求头
+const DEFAULT_REQUEST_HEADERS = DEFAULT_SERVER_CONFIG.requestHeaders
+
+// 默认API源
+const DEFAULT_API_SOURCES = [
+    "https://api.copy2000.online",
+    "https://copy20.com"
+]
+
+// 默认轻小说API源
+const DEFAULT_BOOK_API_SOURCE = "https://api.copy-manga.com"
+
+// 默认应用配置
+const DEFAULT_APP_CONFIG = {
+    apiSources: [...DEFAULT_API_SOURCES],
+    currentApiIndex: 0,
+    bookApiSources: [DEFAULT_BOOK_API_SOURCE],
+    currentBookApiIndex: 0
+}
+
+// ============ 初始化函数 ============
+
+// 初始化所有配置文件
+export async function initializeAllConfigs() {
+    // 确保配置目录存在
+    await pathHelper.ensureConfigDir()
+
+    // 初始化服务器配置
+    const serverExists = await pathHelper.configExists(CONFIG_FILES.SERVER)
+    if (!serverExists) {
+        await pathHelper.saveConfig(CONFIG_FILES.SERVER, DEFAULT_SERVER_CONFIG)
+        console.log('已创建默认服务器配置文件')
+    }
+
+    // 初始化应用配置
+    const appExists = await pathHelper.configExists(CONFIG_FILES.APP)
+    if (!appExists) {
+        await pathHelper.saveConfig(CONFIG_FILES.APP, DEFAULT_APP_CONFIG)
+        console.log('已创建默认应用配置文件')
+    }
+}
+
+// ============ 配置读取和保存 ============
 
 // 读取服务器配置
 export async function getServerConfig() {
-    const config = await pathHelper.readConfig(CONFIG_FILES.SERVER, {
-        serverPort: DEFAULT_SERVER_PORT
-    })
+    // 等待配置初始化完成
+    const { useConfigStore } = await import('../stores/config')
+    const configStore = useConfigStore()
+    await configStore.waitForInit()
 
-    const port = config.serverPort || DEFAULT_SERVER_PORT
+    const config = await pathHelper.readConfig(CONFIG_FILES.SERVER)
+
+    if (!config) {
+        throw new Error('服务器配置文件不存在或读取失败')
+    }
+
+    if (!config.serverPort) {
+        throw new Error('服务器配置缺少端口号')
+    }
+
     return {
-        serverPort: port,
-        serverUrl: `http://localhost:${port}`
+        serverPort: config.serverPort,
+        serverUrl: `http://localhost:${config.serverPort}`,
+        requestHeaders: config.requestHeaders
     }
 }
 
 // 读取应用配置
 export async function getAppConfig() {
-    const config = await pathHelper.readConfig(CONFIG_FILES.APP, {
-        apiSources: [],
-        currentApiIndex: -1,
-        bookApiSources: [],
-        currentBookApiIndex: -1,
-        requestHeaders: DEFAULT_REQUEST_HEADERS
-    })
+    // 等待配置初始化完成
+    const { useConfigStore } = await import('../stores/config')
+    const configStore = useConfigStore()
+    await configStore.waitForInit()
 
-    // 确保配置包含所有必要字段
+    const config = await pathHelper.readConfig(CONFIG_FILES.APP)
+
+    if (!config) {
+        throw new Error('应用配置文件不存在或读取失败')
+    }
+
+    if (!config.apiSources || !Array.isArray(config.apiSources) || config.apiSources.length === 0) {
+        throw new Error('应用配置缺少API源或API源为空')
+    }
+
     const result = {
-        apiSources: config.apiSources || [],
-        currentApiIndex: config.currentApiIndex || -1,
+        apiSources: config.apiSources,
+        currentApiIndex: config.currentApiIndex !== undefined ? config.currentApiIndex : 0,
         bookApiSources: config.bookApiSources || [],
-        currentBookApiIndex: config.currentBookApiIndex || -1,
-        requestHeaders: { ...DEFAULT_REQUEST_HEADERS, ...(config.requestHeaders || {}) }
+        currentBookApiIndex: config.currentBookApiIndex !== undefined ? config.currentBookApiIndex : 0
     }
 
-    // 如果当前索引超出范围，重置为-1
-    if (result.currentApiIndex >= result.apiSources.length || result.currentApiIndex < -1) {
-        result.currentApiIndex = -1
+    // 如果当前索引超出范围，重置为0
+    if (result.currentApiIndex >= result.apiSources.length || result.currentApiIndex < 0) {
+        result.currentApiIndex = 0
     }
 
-    if (result.currentBookApiIndex >= result.bookApiSources.length || result.currentBookApiIndex < -1) {
-        result.currentBookApiIndex = -1
+    if (result.bookApiSources.length > 0 && (result.currentBookApiIndex >= result.bookApiSources.length || result.currentBookApiIndex < 0)) {
+        result.currentBookApiIndex = 0
     }
 
     return result
 }
 
 // 保存服务器配置
-export async function saveServerConfig(serverPort) {
-    return await pathHelper.saveConfig(CONFIG_FILES.SERVER, { serverPort })
+export async function saveServerConfig(serverPort, requestHeaders = null) {
+    const currentConfig = await pathHelper.readConfig(CONFIG_FILES.SERVER)
+
+    if (!currentConfig) {
+        throw new Error('无法读取当前服务器配置')
+    }
+
+    const newConfig = {
+        ...currentConfig,
+        serverPort
+    }
+
+    if (requestHeaders) {
+        newConfig.requestHeaders = requestHeaders
+    }
+
+    return await pathHelper.saveConfig(CONFIG_FILES.SERVER, newConfig)
 }
 
 // 保存应用配置
@@ -154,6 +236,11 @@ export async function switchApiSource(index) {
 
 // 获取当前API源
 export async function getCurrentApiSource() {
+    // 等待配置初始化完成
+    const { useConfigStore } = await import('../stores/config')
+    const configStore = useConfigStore()
+    await configStore.waitForInit()
+
     const config = await getAppConfig()
 
     if (config.apiSources.length === 0 || config.currentApiIndex < 0) {
@@ -168,76 +255,33 @@ export async function getCurrentApiSource() {
     return config.apiSources[config.currentApiIndex]
 }
 
-// 获取当前API域名
-export async function getCurrentApiDomain() {
-    const currentSource = await getCurrentApiSource()
-    return currentSource || null
-}
-
-// 获取所有API源
-export async function getApiSources() {
-    const config = await getAppConfig()
-    return config.apiSources || []
-}
-
-// 验证API源配置
-export async function validateApiConfig() {
-    const config = await getAppConfig()
-
-    // 检查是否有API源
-    if (!config.apiSources || config.apiSources.length === 0) {
-        return {
-            valid: false,
-            message: '没有配置API源'
-        }
-    }
-
-    // 检查当前索引是否有效
-    if (config.currentApiIndex < 0 || config.currentApiIndex >= config.apiSources.length) {
-        return {
-            valid: false,
-            message: '当前API源索引无效'
-        }
-    }
-
-    // 检查当前API源的URL是否有效
-    const currentSource = config.apiSources[config.currentApiIndex]
-    if (!validateApiDomain(currentSource)) {
-        return {
-            valid: false,
-            message: `当前API源URL无效: ${currentSource}`
-        }
-    }
-
-    return {
-        valid: true,
-        message: '配置有效',
-        currentSource
-    }
-}
-
 // ============ 请求头配置管理 ============
 
 // 获取请求头配置
 export async function getRequestHeaders() {
-    const config = await getAppConfig()
-    return config.requestHeaders || DEFAULT_REQUEST_HEADERS
+    // 等待配置初始化完成
+    const { useConfigStore } = await import('../stores/config')
+    const configStore = useConfigStore()
+    await configStore.waitForInit()
+
+    const config = await getServerConfig()
+    return config.requestHeaders
 }
 
 // 保存请求头配置
 export async function saveRequestHeaders(headers) {
-    const config = await getAppConfig()
-    config.requestHeaders = { ...DEFAULT_REQUEST_HEADERS, ...headers }
-    await saveAppConfig(config)
-    return config.requestHeaders
+    const serverConfig = await pathHelper.readConfig(CONFIG_FILES.SERVER, DEFAULT_SERVER_CONFIG)
+    serverConfig.requestHeaders = { ...serverConfig.requestHeaders, ...headers }
+    await pathHelper.saveConfig(CONFIG_FILES.SERVER, serverConfig)
+    return serverConfig.requestHeaders
 }
 
 // 重置请求头为默认值
 export async function resetRequestHeaders() {
-    const config = await getAppConfig()
-    config.requestHeaders = { ...DEFAULT_REQUEST_HEADERS }
-    await saveAppConfig(config)
-    return config.requestHeaders
+    const serverConfig = await pathHelper.readConfig(CONFIG_FILES.SERVER, DEFAULT_SERVER_CONFIG)
+    serverConfig.requestHeaders = { ...DEFAULT_REQUEST_HEADERS }
+    await pathHelper.saveConfig(CONFIG_FILES.SERVER, serverConfig)
+    return serverConfig.requestHeaders
 }
 
 // 获取默认请求头配置
@@ -348,28 +392,60 @@ export async function getCurrentBookApiSource() {
     return config.bookApiSources[config.currentBookApiIndex]
 }
 
+// 初始化默认API源
+export async function initializeDefaultApiSources() {
+    // 直接读取配置文件，不等待初始化完成（避免死锁）
+    const config = await pathHelper.readConfig(CONFIG_FILES.APP)
+
+    if (!config) {
+        throw new Error('应用配置文件不存在，无法初始化默认API源')
+    }
+
+    // 如果API源为空，添加默认源
+    if (!config.apiSources || config.apiSources.length === 0) {
+        config.apiSources = [...DEFAULT_API_SOURCES]
+        config.currentApiIndex = 0
+
+        await saveAppConfig(config).then(() => {
+            console.log('已初始化默认API源:', DEFAULT_API_SOURCES)
+        }).catch(error => {
+            console.error('初始化默认API源失败:', error)
+            throw error
+        })
+
+        return true
+    }
+
+    console.log('API源已存在，无需初始化')
+    return false // 已存在API源，无需初始化
+}
+
 // 初始化默认轻小说API源
 export async function initializeDefaultBookApiSources() {
-    try {
-        const config = await getAppConfig()
+    // 直接读取配置文件，不等待初始化完成（避免死锁）
+    const config = await pathHelper.readConfig(CONFIG_FILES.APP)
 
-        // 如果轻小说API源为空，添加默认源
-        if (!config.bookApiSources || config.bookApiSources.length === 0) {
-            const defaultBookApiSource = 'https://api.copy-manga.com'
-
-            config.bookApiSources = [defaultBookApiSource]
-            config.currentBookApiIndex = 0
-
-            await saveAppConfig(config)
-            console.log('已初始化默认轻小说API源:', defaultBookApiSource)
-            return true
-        }
-
-        return false // 已存在API源，无需初始化
-    } catch (error) {
-        console.error('初始化默认轻小说API源失败:', error)
-        throw error
+    if (!config) {
+        throw new Error('应用配置文件不存在，无法初始化默认轻小说API源')
     }
+
+    // 如果轻小说API源为空，添加默认源
+    if (!config.bookApiSources || config.bookApiSources.length === 0) {
+        config.bookApiSources = [DEFAULT_BOOK_API_SOURCE]
+        config.currentBookApiIndex = 0
+
+        await saveAppConfig(config).then(() => {
+            console.log('已初始化默认轻小说API源:', DEFAULT_BOOK_API_SOURCE)
+        }).catch(error => {
+            console.error('初始化默认轻小说API源失败:', error)
+            throw error
+        })
+
+        return true
+    }
+
+    console.log('轻小说API源已存在，无需初始化')
+    return false // 已存在API源，无需初始化
 }
 
 // 获取当前轻小说API域名
@@ -380,16 +456,16 @@ export async function getCurrentBookApiDomain() {
         // 如果没有配置，先初始化默认源
         await initializeDefaultBookApiSources()
         const newConfig = await getAppConfig()
-        return newConfig.bookApiSources[newConfig.currentBookApiIndex] || 'https://api.copy-manga.com'
+        return newConfig.bookApiSources[newConfig.currentBookApiIndex]
     }
 
-    return config.bookApiSources[config.currentBookApiIndex] || 'https://api.copy-manga.com'
+    return config.bookApiSources[config.currentBookApiIndex]
 }
 
 // 获取所有轻小说源
 export async function getBookApiSources() {
     const config = await getAppConfig()
-    return config.bookApiSources || []
+    return config.bookApiSources
 }
 
 // 验证轻小说源配置

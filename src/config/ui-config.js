@@ -22,10 +22,26 @@ const DEFAULT_UI_CONFIG = {
     }
 }
 
+// 初始化UI配置
+async function initializeUIConfig() {
+    const configExists = await pathHelper.configExists(CONFIG_FILES.UI)
+
+    if (!configExists) {
+        await pathHelper.saveConfig(CONFIG_FILES.UI, DEFAULT_UI_CONFIG).then(() => {
+            // console.log('已初始化UI配置')
+        }).catch(error => {
+            console.error('初始化UI配置失败:', error)
+            throw error
+        })
+        return true
+    }
+
+    return false
+}
+
 // 加载UI配置
 async function loadUIConfig() {
-    const config = await pathHelper.readConfig(CONFIG_FILES.UI, DEFAULT_UI_CONFIG)
-    return { ...DEFAULT_UI_CONFIG, ...config }
+    return await pathHelper.readConfig(CONFIG_FILES.UI, DEFAULT_UI_CONFIG)
 }
 
 // 保存UI配置
@@ -86,5 +102,6 @@ export {
     updateReaderConfig,
     updateTextReaderConfig,
     updateThemeConfig,
-    DEFAULT_UI_CONFIG
+    DEFAULT_UI_CONFIG,
+    initializeUIConfig
 }

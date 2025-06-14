@@ -36,7 +36,7 @@
                     <a-alert message="使用声明" type="warning" show-icon style="margin-bottom: 12px;">
                         <template #description>
                             <div>
-                                <p>本应用是基于拷贝漫画官方API的第三方客户端，仅供学习交流使用。所有漫画内容版权归原作者和平台所有。</p>
+                                <p>本应用是基于拷贝漫画官方API的第三方客户端，免费无广告，仅供学习交流使用。所有漫画内容版权归原作者和平台所有。</p>
                                 <p style="margin-bottom: 0; color: #d46b08; font-weight: 500;">
                                     <strong>⚠️
                                         重要提醒：</strong>本应用可能包含不适宜未成年人观看的内容，请用户自行判断并承担相应责任。使用本应用即表示您已年满18周岁，并同意遵守当地法律法规。

@@ -1,13 +1,19 @@
 {
   "theme": {
-    "isDarkMode": true,
+    "isDarkMode": false,
     "fontFamily": "\"Cascadia Code\", \"霞鹜文楷\", \"喵字果汁体\", \"微软雅黑\", \"Courier New\", Courier, monospace",
-    "darkImageMask": 0.5
+    "darkImageMask": 0.3
   },
   "reader": {
     "layout": "rtl",
     "columnsPerRow": 2,
     "imageSize": 100,
-    "imageGap": 8
+    "imageGap": 0
+  },
+  "textReader": {
+    "fontFamily": "var(--font-family)",
+    "fontSize": 16,
+    "lineHeight": 1.8,
+    "addedFonts": []
   }
 }

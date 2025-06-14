@@ -1,23 +1,19 @@
 <template>
     <div>
-        <h2 class="settings-section-title">服务设置</h2>
         <a-card title="转发服务配置" class="setting-card" id="server-config">
             <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
                 <a-form-item label="服务器端口（1-65535）" name="serverPort" :rules="[
                     { required: true, message: '请输入服务器端口' },
                     { validator: validatePort, trigger: 'blur' }
                 ]">
-                    <a-input-number v-model:value="serverForm.serverPort" placeholder="5001" size="large" :min="1"
-                        :max="65535" style="width: 100%" />
+                    <a-input-number v-model:value="serverForm.serverPort" placeholder="输入一个端口号" :min="1" :max="65535"
+                        style="width: 50%" />
                 </a-form-item>
 
                 <a-form-item>
                     <a-space>
                         <a-button type="primary" html-type="submit" :loading="savingServer" size="large">
                             保存设置
-                        </a-button>
-                        <a-button @click="resetServerToDefault" size="large">
-                            恢复默认
                         </a-button>
                     </a-space>
                 </a-form-item>
@@ -197,20 +193,7 @@
             </a-form>
         </a-card>
 
-        <a-card title="当前状态" class="setting-card" id="status"> <a-descriptions :column="1">
-                <a-descriptions-item label="转发服务器">
-                    http://localhost:{{ currentServerPort }}
-                </a-descriptions-item>
-                <a-descriptions-item label="漫画API域名">
-                    {{ currentApiDomain }}
-                </a-descriptions-item>
-                <a-descriptions-item label="轻小说API域名">
-                    {{ currentBookApiDomain }}
-                </a-descriptions-item>
-            </a-descriptions>
-
-            <a-divider />
-
+        <a-card title="当前状态" class="setting-card" id="status">
             <div class="restart-section">
                 <a-alert v-if="appStore.needsRestart" type="warning" message="配置已更改，需要重启应用以生效" show-icon
                     style="margin-bottom: 16px" />
@@ -263,7 +246,6 @@ const appForm = ref({
 const currentServerPort = ref('5001')
 const currentApiDomain = ref('https://copy20.com')
 const savingServer = ref(false)
-const savingApp = ref(false)
 const restarting = ref(false)
 const appStore = useAppStore()
 
@@ -412,17 +394,13 @@ const onSubmitServer = () => {
 
     saveServerConfig(serverForm.value.serverPort.toString()).then(() => {
         message.success('服务器配置保存成功！')
+        appStore.setNeedsRestart(true)
         loadConfig()
     }).catch(error => {
         message.error(error.message || '保存服务器配置失败')
     }).finally(() => {
         savingServer.value = false
     })
-}
-
-// 重置为默认值
-const resetServerToDefault = () => {
-    serverForm.value.serverPort = 5001
 }
 
 // 处理重启应用

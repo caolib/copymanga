@@ -93,7 +93,7 @@
                                 <template #description>
                                     <div class="topic-meta-mini">
                                         <span v-if="topic.period" class="topic-period-mini">{{ topic.period
-                                        }}</span>
+                                            }}</span>
                                         <span v-if="topic.datetime_created" class="topic-date-mini">
                                             {{ formatDate(topic.datetime_created) }}
                                         </span>
@@ -169,7 +169,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHomeStore } from '../stores/home'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
-import { getCurrentApiDomain } from '../config/server-config'
+import { getCurrentApiSource } from '../config/server-config'
 import { openExternalUrl } from '../utils/external-link'
 import { formatDate } from '../utils/date'
 import { ReloadOutlined } from '@ant-design/icons-vue'
@@ -225,7 +225,7 @@ const handleBannerClick = (banner) => {
         openExternalUrl(out_uuid)
     } else if (type === 3) {
         // 拼接API域名
-        getCurrentApiDomain().then(domain => {
+        getCurrentApiSource().then(domain => {
             const fullUrl = domain + out_uuid
             openExternalUrl(fullUrl)
         })

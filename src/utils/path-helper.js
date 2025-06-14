@@ -1,5 +1,6 @@
 import { writeTextFile, readTextFile, exists, mkdir } from '@tauri-apps/plugin-fs'
-import { join, resolveResource } from '@tauri-apps/api/path'
+import { appDataDir } from '@tauri-apps/api/path'
+import { join } from '@tauri-apps/api/path'
 
 /**
  * 路径工具类
@@ -8,16 +9,14 @@ import { join, resolveResource } from '@tauri-apps/api/path'
 class PathHelper {
     constructor() {
         this._configDirPath = null
-    }
-
-    /**
+    }    /**
      * 获取配置目录路径
      * @returns {Promise<string>}
      */
     async getConfigDirPath() {
         if (!this._configDirPath) {
-            const resourceRoot = await resolveResource('.')
-            this._configDirPath = await join(resourceRoot, 'config')
+            const appDataPath = await appDataDir()
+            this._configDirPath = await join(appDataPath, 'config')
         }
         return this._configDirPath
     }
@@ -42,9 +41,7 @@ class PathHelper {
         if (!dirExists) {
             await mkdir(configDir, { recursive: true })
         }
-    }
-
-    /**
+    }    /**
      * 读取配置文件
      * @param {string} filename - 配置文件名
      * @param {any} defaultConfig - 默认配置
@@ -57,13 +54,27 @@ class PathHelper {
             const fileExists = await exists(configPath)
 
             if (!fileExists) {
-                return defaultConfig
+                // 如果配置文件不存在且提供了默认配置，则创建配置文件
+                if (defaultConfig !== null) {
+                    await this.saveConfig(filename, defaultConfig)
+                    return defaultConfig
+                }
+                return null
             }
 
             const content = await readTextFile(configPath)
             return JSON.parse(content)
         } catch (error) {
             console.error(`读取配置文件 ${filename} 失败:`, error)
+            // 如果读取失败且提供了默认配置，尝试创建配置文件
+            if (defaultConfig !== null) {
+                try {
+                    await this.saveConfig(filename, defaultConfig)
+                    return defaultConfig
+                } catch (saveError) {
+                    console.error(`创建默认配置文件 ${filename} 失败:`, saveError)
+                }
+            }
             return defaultConfig
         }
     }
@@ -105,7 +116,7 @@ class PathHelper {
 // 导出单例实例
 export const pathHelper = new PathHelper()
 
-// 配置文件名常量
+// 配置文件名常量 - 与 Rust 后端保持一致
 export const CONFIG_FILES = {
     SERVER: 'server.json',
     APP: 'copymanga.json',

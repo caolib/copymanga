@@ -22,9 +22,8 @@
     "fs:allow-exists",
     "fs:allow-mkdir",
     "fs:default",
-    "fs:scope-appconfig-recursive",
-    "fs:scope-appconfig",
-    "process:default",
-    "fs:allow-resource-read-recursive"
+    "fs:scope-appdata-recursive",
+    "fs:scope-appdata",
+    "process:default"
   ]
 }
