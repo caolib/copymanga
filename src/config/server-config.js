@@ -52,14 +52,14 @@ export async function initializeAllConfigs() {
     const serverExists = await pathHelper.configExists(CONFIG_FILES.SERVER)
     if (!serverExists) {
         await pathHelper.saveConfig(CONFIG_FILES.SERVER, DEFAULT_SERVER_CONFIG)
-        console.log('已创建默认服务器配置文件')
+        // console.log('已创建默认服务器配置文件')
     }
 
     // 初始化应用配置
     const appExists = await pathHelper.configExists(CONFIG_FILES.APP)
     if (!appExists) {
         await pathHelper.saveConfig(CONFIG_FILES.APP, DEFAULT_APP_CONFIG)
-        console.log('已创建默认应用配置文件')
+        // console.log('已创建默认应用配置文件')
     }
 }
 
@@ -133,9 +133,12 @@ export async function saveServerConfig(serverPort, requestHeaders = null) {
         throw new Error('无法读取当前服务器配置')
     }
 
+    // 确保端口是数字类型
+    const portNumber = typeof serverPort === 'string' ? parseInt(serverPort) : serverPort
+
     const newConfig = {
         ...currentConfig,
-        serverPort
+        serverPort: portNumber
     }
 
     if (requestHeaders) {
@@ -403,7 +406,7 @@ export async function initializeDefaultApiSources() {
         config.currentApiIndex = 0
 
         await saveAppConfig(config).then(() => {
-            console.log('已初始化默认API源:', DEFAULT_API_SOURCES)
+            // console.log('已初始化默认API源:', DEFAULT_API_SOURCES)
         }).catch(error => {
             console.error('初始化默认API源失败:', error)
             throw error
@@ -412,7 +415,7 @@ export async function initializeDefaultApiSources() {
         return true
     }
 
-    console.log('API源已存在，无需初始化')
+    // console.log('API源已存在，无需初始化')
     return false // 已存在API源，无需初始化
 }
 
@@ -431,7 +434,7 @@ export async function initializeDefaultBookApiSources() {
         config.currentBookApiIndex = 0
 
         await saveAppConfig(config).then(() => {
-            console.log('已初始化默认轻小说API源:', DEFAULT_BOOK_API_SOURCE)
+            // console.log('已初始化默认轻小说API源:', DEFAULT_BOOK_API_SOURCE)
         }).catch(error => {
             console.error('初始化默认轻小说API源失败:', error)
             throw error
@@ -440,8 +443,8 @@ export async function initializeDefaultBookApiSources() {
         return true
     }
 
-    console.log('轻小说API源已存在，无需初始化')
-    return false // 已存在API源，无需初始化
+    // console.log('轻小说API源已存在，无需初始化')
+    return false
 }
 
 // 获取当前轻小说API域名

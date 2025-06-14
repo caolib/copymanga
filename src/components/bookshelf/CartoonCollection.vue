@@ -75,7 +75,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, defineExpose, defineEmits } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { useCartoonCollectionStore } from '../../stores/cartoon-collection'

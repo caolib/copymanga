@@ -360,7 +360,7 @@ const loadConfig = () => {
 const onSubmitServer = () => {
     savingServer.value = true
 
-    saveServerConfig(serverForm.value.serverPort.toString()).then(() => {
+    saveServerConfig(serverForm.value.serverPort).then(() => {
         message.success('服务器配置保存成功！')
         appStore.setNeedsRestart(true)
         loadConfig()
