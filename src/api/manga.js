@@ -1,4 +1,5 @@
 import request from '../utils/request'
+import { downloadManager } from '../utils/download-manager'
 
 /**
  * 查询个人书架
@@ -135,6 +136,80 @@ function getAuthorMangaList(author, limit = 21, offset = 0, ordering = '-datetim
     });
 }
 
+/**
+ * 下载章节
+ * @param {string} pathWord 漫画路径标识
+ * @param {string} chapterId 章节ID
+ * @param {Object} chapterInfo 章节基本信息
+ * @param {Function} onProgress 进度回调
+ * @returns {Promise}
+ */
+async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
+    try {
+        // 先获取章节图片数据
+        const response = await getChapterImages(pathWord, chapterId)
+
+        if (response && response.code === 200 && response.results) {
+            const chapterData = response.results.chapter
+            const comicData = response.results.comic
+
+            // 构建下载信息
+            const downloadInfo = {
+                mangaUuid: comicData.uuid,
+                mangaName: comicData.name,
+                groupPathWord: chapterInfo.group_path_word || 'default',
+                chapterUuid: chapterData.uuid,
+                chapterName: chapterData.name,
+                images: chapterData.contents.map((image, index) => ({
+                    url: image.url,
+                    index: index,
+                    width: image.width || null,
+                    height: image.height || null
+                }))
+            }
+
+            // 开始下载
+            return await downloadManager.downloadChapter(downloadInfo, onProgress)
+        } else {
+            throw new Error('获取章节数据失败：服务器返回错误响应')
+        }
+    } catch (error) {
+        // 检查是否是网络错误
+        if (error.code === 'ERR_NETWORK' || error.message.includes('Network Error')) {
+            throw new Error('网络连接失败，请检查代理服务器是否正常运行')
+        } else if (error.response && error.response.status === 502) {
+            throw new Error('代理服务器错误(502)，请稍后重试')
+        } else if (error.message.includes('CORS')) {
+            throw new Error('跨域请求失败，请检查代理服务器配置')
+        }
+
+        // 其他错误直接抛出
+        throw error
+    }
+}
+
+/**
+ * 检查章节是否已下载
+ * @param {string} mangaUuid 漫画UUID
+ * @param {string} groupPathWord 分组路径
+ * @param {string} chapterUuid 章节UUID
+ * @returns {Promise<boolean>}
+ */
+async function isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid) {
+    return await downloadManager.isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid)
+}
+
+/**
+ * 获取已下载的章节信息
+ * @param {string} mangaUuid 漫画UUID
+ * @param {string} groupPathWord 分组路径
+ * @param {string} chapterUuid 章节UUID
+ * @returns {Promise<Object|null>}
+ */
+async function getDownloadedChapterInfo(mangaUuid, groupPathWord, chapterUuid) {
+    return await downloadManager.getDownloadedChapterInfo(mangaUuid, groupPathWord, chapterUuid)
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
@@ -144,5 +219,8 @@ export {
     collectManga,
     getMangaDetail,
     getHomeIndex,
-    getAuthorMangaList
+    getAuthorMangaList,
+    downloadChapter,
+    isChapterDownloaded,
+    getDownloadedChapterInfo
 }

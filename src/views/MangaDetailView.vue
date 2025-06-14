@@ -116,6 +116,27 @@
                     <a-button @click="toggleSortOrder" size="small">
                         {{ isAscending ? '正序' : '倒序' }}
                     </a-button>
+
+                    <!-- 批量下载按钮 -->
+                    <a-dropdown>
+                        <template #overlay>
+                            <a-menu>
+                                <a-menu-item key="download-current-page" @click="downloadCurrentPage">
+                                    下载当前页章节
+                                </a-menu-item>
+                                <a-menu-item key="download-all" @click="downloadAllChapters">
+                                    下载全部章节
+                                </a-menu-item>
+                                <a-menu-item key="download-not-downloaded" @click="downloadNotDownloadedChapters">
+                                    下载未下载章节
+                                </a-menu-item>
+                            </a-menu>
+                        </template>
+                        <a-button size="small">
+                            批量下载
+                            <DownOutlined />
+                        </a-button>
+                    </a-dropdown>
                 </a-space>
             </a-col>
         </a-row>
@@ -129,14 +150,51 @@
         <a-skeleton :loading="loading || groupLoading" active>
             <a-row :gutter="[12, 12]">
                 <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in sortedChapters" :key="chapter.id">
-                    <a-card :hoverable="true" @click="goToChapter(chapter)"
-                        style="cursor:pointer; text-align:center; padding:0;" size="small"
+                    <a-card :hoverable="true" style="text-align:center; padding:0;" size="small"
                         :body-style="{ padding: '12px 6px' }"
                         :class="{ 'last-read-chapter': isLastReadChapter(chapter) }">
-                        <span style="font-size:14px;">{{ chapter.name }}</span>
-                        <!-- 显示"上次阅读"标记 -->
-                        <div v-if="isLastReadChapter(chapter)" class="last-read-tag">
-                            上次阅读
+
+                        <!-- 章节名称 -->
+                        <div @click="goToChapter(chapter)" style="cursor:pointer; margin-bottom: 8px;">
+                            <span style="font-size:14px;">{{ chapter.name }}</span>
+                            <!-- 显示"上次阅读"标记 -->
+                            <div v-if="isLastReadChapter(chapter)" class="last-read-tag">
+                                上次阅读
+                            </div>
+                        </div>
+
+                        <!-- 下载状态和操作按钮 -->
+                        <div class="chapter-actions">
+                            <a-space size="small">
+                                <!-- 下载状态显示 -->
+                                <a-tag v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" color="green"
+                                    size="small">
+                                    已下载
+                                </a-tag>
+                                <a-tag v-else-if="chapterDownloadStatus[chapter.id] === 'downloading'" color="blue"
+                                    size="small">
+                                    下载中
+                                </a-tag>
+
+                                <!-- 下载按钮 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.id] !== 'downloaded'" size="small"
+                                    type="primary" :loading="chapterDownloadStatus[chapter.id] === 'downloading'"
+                                    @click="downloadChapter(chapter)"
+                                    :disabled="chapterDownloadStatus[chapter.id] === 'downloading'">
+                                    <template v-if="chapterDownloadStatus[chapter.id] === 'downloading'">
+                                        {{ chapterDownloadProgress[chapter.id] || 0 }}%
+                                    </template>
+                                    <template v-else>
+                                        下载
+                                    </template>
+                                </a-button>
+
+                                <!-- 重新下载按钮 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" size="small"
+                                    type="default" @click="downloadChapter(chapter, true)">
+                                    重新下载
+                                </a-button>
+                            </a-space>
                         </div>
                     </a-card>
                 </a-col>
@@ -198,12 +256,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getMangaDetail, collectManga, getMangaGroupChapters } from '../api/manga'
+import { getMangaDetail, collectManga, getMangaGroupChapters, downloadChapter as downloadChapterAPI, isChapterDownloaded } from '../api/manga'
 import { getMangaComments, postMangaComment } from '../api/comment'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '@/utils/number'
+import { DownOutlined } from '@ant-design/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -229,9 +288,6 @@ const totalChapters = ref(0)
 const fromCollection = ref(false)
 const lastBrowseInfo = ref(null)
 
-// 刷新状态
-const refreshing = ref(false)
-
 // 评论相关状态
 const comments = ref([])
 const commentsLoading = ref(false)
@@ -244,6 +300,10 @@ const commentsLoaded = ref(false)
 // 新评论相关状态
 const newComment = ref('')
 const submitCommentLoading = ref(false)
+
+// 下载相关状态
+const chapterDownloadStatus = ref({}) // 章节下载状态：'downloading', 'downloaded', 'error'
+const chapterDownloadProgress = ref({}) // 章节下载进度
 
 // 计算属性：检查用户是否已登录
 const isLoggedIn = computed(() => userStore.isLoggedIn)
@@ -340,13 +400,8 @@ const fetchMangaChapter = async () => {
 
 // 初始化数据加载
 const fetchMangaData = async () => {
-    if (!manga.value.name) {
-        await fetchMangaDetail()
-    }
-    if (chapters.value.length === 0) {
-        await fetchMangaChapter()
-    }
-
+    await fetchMangaDetail()
+    await fetchMangaChapter()
 }
 
 // 加载指定分组的章节
@@ -374,6 +429,9 @@ const loadGroupChapters = async (groupPathWord, page = 1) => {
             // 更新分页信息
             totalChapters.value = res.results.total || 0
             currentPage.value = page
+
+            // 检查章节下载状态
+            await checkChapterDownloadStatus(chapters.value)
         } else {
             throw new Error('获取章节数据失败')
         }
@@ -560,6 +618,109 @@ const submitComment = async () => {
         submitCommentLoading.value = false
     })
 
+}
+
+// 下载章节功能
+const downloadChapter = async (chapter, forceRedownload = false) => {
+    // 检查是否已下载
+    if (!forceRedownload && chapterDownloadStatus.value[chapter.id] === 'downloaded') {
+        message.info('章节已下载')
+        return
+    }
+
+    // 设置下载状态
+    chapterDownloadStatus.value[chapter.id] = 'downloading'
+    chapterDownloadProgress.value[chapter.id] = 0
+
+    // 构建章节信息
+    const chapterInfo = {
+        comic_id: chapter.comic_id,
+        group_path_word: chapter.group_path_word || 'default'
+    }
+
+    // 调用下载API
+    await downloadChapterAPI(
+        route.params.pathWord,
+        chapter.id,
+        chapterInfo,
+        (progressInfo) => {
+            // 更新进度
+            chapterDownloadProgress.value[chapter.id] = progressInfo.percent || 0
+
+            if (progressInfo.status === 'error') {
+                console.error('下载进度错误:', progressInfo.error)
+            }
+        }
+    )
+
+    // 下载完成
+    chapterDownloadStatus.value[chapter.id] = 'downloaded'
+    chapterDownloadProgress.value[chapter.id] = 100
+    message.success(`章节 "${chapter.name}" 下载完成`)
+
+}
+
+// 批量下载功能
+const downloadCurrentPage = async () => {
+    const chaptersToDownload = chapters.value.filter(chapter =>
+        chapterDownloadStatus.value[chapter.id] !== 'downloaded'
+    )
+
+    if (chaptersToDownload.length === 0) {
+        message.info('当前页所有章节都已下载')
+        return
+    }
+
+    message.info(`开始批量下载 ${chaptersToDownload.length} 个章节`)
+
+    for (const chapter of chaptersToDownload) {
+        try {
+            await downloadChapter(chapter)
+            // 添加延迟避免过快的请求
+            await new Promise(resolve => setTimeout(resolve, 1000))
+        } catch (error) {
+            console.error(`下载章节 ${chapter.name} 失败:`, error)
+        }
+    }
+}
+
+const downloadAllChapters = async () => {
+    message.warning('下载全部章节功能暂未实现，请使用下载当前页功能')
+}
+
+const downloadNotDownloadedChapters = async () => {
+    const chaptersToDownload = chapters.value.filter(chapter =>
+        chapterDownloadStatus.value[chapter.id] !== 'downloaded'
+    )
+
+    if (chaptersToDownload.length === 0) {
+        message.info('所有章节都已下载')
+        return
+    }
+
+    message.info(`开始下载 ${chaptersToDownload.length} 个未下载的章节`)
+    await downloadCurrentPage()
+}
+
+// 检查章节下载状态
+const checkChapterDownloadStatus = async (chapters) => {
+    if (!manga.value.uuid) return
+
+    for (const chapter of chapters) {
+        try {
+            const isDownloaded = await isChapterDownloaded(
+                manga.value.uuid,
+                chapter.group_path_word || 'default',
+                chapter.id
+            )
+
+            if (isDownloaded) {
+                chapterDownloadStatus.value[chapter.id] = 'downloaded'
+            }
+        } catch (error) {
+            console.error('检查下载状态失败:', error)
+        }
+    }
 }
 
 onMounted(() => {

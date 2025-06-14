@@ -104,6 +104,36 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
+/* 章节卡片下载功能样式 */
+.chapter-actions {
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.last-read-chapter {
+    border: 2px solid #1890ff;
+    background-color: #f0f9ff;
+}
+
+.last-read-tag {
+    background: #1890ff;
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 4px;
+    display: inline-block;
+}
+
+/* 下载进度相关样式 */
+.download-progress {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #666;
+}
+
 /* 分页容器样式 */
 .pagination-container {
     margin-top: 24px;
@@ -237,5 +267,24 @@
 .comment-content {
     @include dark-theme {
         color: #d9d9d9;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .chapter-actions {
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .chapter-actions .ant-space {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .chapter-actions .ant-btn {
+        width: 100%;
+        font-size: 12px;
+        height: 24px;
     }
 }

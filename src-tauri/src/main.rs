@@ -7,6 +7,7 @@ use tauri::AppHandle;
 
 mod cache;
 mod proxy;
+mod download;
 
 // 全局状态跟踪服务器是否已启动
 static SERVER_STARTED: Mutex<bool> = Mutex::new(false);
@@ -49,7 +50,10 @@ fn main() {
             cache::clear_webview_cache,
             cache::get_cache_size,
             cache::open_file_explorer,
-            cache::force_clear_webview_cache
+            cache::force_clear_webview_cache,
+            download::download_chapter,
+            download::check_chapter_downloaded,
+            download::get_downloaded_chapter_info
         ])
         .setup(|_app| {
             // 不在这里自动启动代理服务器，等待前端初始化完成后手动启动

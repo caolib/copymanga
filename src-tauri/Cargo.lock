@@ -538,8 +538,10 @@ checksum = "c469d952047f47f91b68d1cba3f10d63c11d73e4636f24f08daf0278abf01c4d"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
+ "js-sys",
  "num-traits",
  "serde",
+ "wasm-bindgen",
  "windows-link",
 ]
 
@@ -599,9 +601,10 @@ dependencies = [
 
 [[package]]
 name = "copymanga"
-version = "0.8.0"
+version = "0.8.1"
 dependencies = [
  "axum",
+ "chrono",
  "futures-util",
  "http 0.2.12",
  "reqwest",

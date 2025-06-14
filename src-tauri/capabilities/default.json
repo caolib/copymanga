@@ -19,11 +19,21 @@
     "core:window:allow-start-dragging",
     "fs:allow-read-text-file",
     "fs:allow-write-text-file",
+    "fs:allow-write-file",
     "fs:allow-exists",
     "fs:allow-mkdir",
-    "fs:default",
-    "fs:scope-appdata-recursive",
-    "fs:scope-appdata",
+    "fs:allow-create",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        {
+          "path": "$RESOURCE/**"
+        },
+        {
+          "path": "$APPDATA/**"
+        }
+      ]
+    },
     "process:default"
   ]
 }
