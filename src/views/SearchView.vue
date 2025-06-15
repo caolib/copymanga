@@ -55,13 +55,13 @@
             </a-empty> <!-- 结果列表 -->
             <div v-else class="results-grid">
                 <a-row :gutter="[20, 20]">
-                    <a-col v-for="manga in validResults" :key="manga.path_word" :xs="12" :sm="8" :md="6" :lg="4" :xl="3"
-                        :xxl="3">
+                    <a-col v-for="manga in searchResults" :key="manga.path_word" :xs="12" :sm="8" :md="6" :lg="4"
+                        :xl="3" :xxl="3">
                         <a-card hoverable class="manga-card" @click="goToMangaDetail(manga)">
                             <div class="manga-cover">
                                 <img :src="manga.cover" :alt="manga.name" @error="handleImageError" />
                                 <div class="manga-popular" v-if="manga.popular">
-                                    {{ formatPopular(manga.popular) }}
+                                    {{ formatNumber(manga.popular) }}
                                 </div>
                             </div>
                             <a-card-meta :title="manga.name">
@@ -102,12 +102,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { searchManga } from '../api/manga'
-import { formatNumber } from '@/utils/number'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
+import { formatNumber } from '@/utils/number'
 
 const route = useRoute()
 const router = useRouter()
@@ -125,15 +125,6 @@ const hasSearched = ref(false)
 const currentPage = ref(1)
 const pageSize = ref(18)
 const totalCount = ref(0)
-
-// 过滤有效结果
-const validResults = computed(() => {
-    return searchResults.value.filter(item => {
-        // 只要有name和path_word就认为是有效的
-        return item && item.name && item.path_word
-    })
-})
-
 
 // 截断文本
 const truncateText = (text, maxLength) => {

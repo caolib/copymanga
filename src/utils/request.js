@@ -102,10 +102,6 @@ request.interceptors.response.use(
             msg = '网络连接失败，请检查网络设置'
         }
 
-        if (error.response.detail) {
-            msg = error.response.detail
-        }
-
         message.error(msg)
         return Promise.reject(error)
     }

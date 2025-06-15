@@ -20,7 +20,7 @@ export function useMangaNavigation() {
             return
         }
 
-        console.log('跳转到漫画详情:', manga.name)
+        // console.log('跳转到漫画详情:', manga.name)
 
         // 设置当前漫画到 store
         mangaStore.setCurrentManga(manga)
