@@ -270,8 +270,8 @@ const router = useRouter()
 const userStore = useUserStore()
 const manga = ref({})
 const chapters = ref([])
-const loading = ref(true)
-const detailLoading = ref(true)
+const loading = ref(false)
+const detailLoading = ref(false)
 const collectLoading = ref(false)
 const isAscending = ref(false)
 
@@ -370,22 +370,33 @@ const fetchMangaDetail = async () => {
     detailLoading.value = true
     const pathWord = route.params.pathWord
 
-    return getMangaDetail(pathWord).then(res => {
-        manga.value = res.results.comic
-        // 保存分组信息
-        if (res.results.groups) {
-            groups.value = res.results.groups
-            // 设置默认分组
-            currentGroup.value = 'default'
+    try {
+        const res = await getMangaDetail(pathWord)
+
+        if (res && res.results && res.results.comic) {
+            manga.value = res.results.comic
+            // 保存分组信息
+            if (res.results.groups) {
+                groups.value = res.results.groups
+                // 设置默认分组
+                currentGroup.value = 'default'
+            }
+        } else {
+            message.error('获取漫画详情失败：数据格式错误')
         }
-        return true
-    }).catch((error) => {
+    } catch (error) {
         console.error('获取漫画详情失败', error)
-        message.error('获取漫画详情失败')
-        return false
-    }).finally(() => {
+
+        if (error.code === 'ECONNABORTED') {
+            message.error('请求超时，请检查网络连接')
+        } else if (error.code === 'ERR_NETWORK') {
+            message.error('网络连接失败')
+        } else {
+            message.error(`获取漫画详情失败: ${error.message}`)
+        }
+    } finally {
         detailLoading.value = false
-    })
+    }
 }
 
 // 获取漫画章节信息
