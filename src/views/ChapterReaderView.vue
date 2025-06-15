@@ -6,7 +6,7 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                    }}</a-typography-title>
+                        }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
@@ -127,7 +127,7 @@
                                         :dark-image-mask-opacity="darkImageMaskOpacity"
                                         :placeholder-height="calculateImageHeight(image)" />
                                 </div>
-                                <div v-else class="manga-image placeholder">PLACEHOLDER</div>
+                                <div v-else class="placeholder"></div>
                             </a-col>
                         </template>
                         <template v-else>
@@ -143,7 +143,7 @@
                                         :dark-image-mask-opacity="darkImageMaskOpacity"
                                         :placeholder-height="calculateImageHeight(image)" />
                                 </div>
-                                <div v-else class="manga-image placeholder"></div>
+                                <div v-else class="placeholder"></div>
                             </a-col>
                         </template>
                     </a-row>

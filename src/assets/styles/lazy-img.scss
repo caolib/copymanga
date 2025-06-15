@@ -5,9 +5,15 @@
     width: 100%;
     display: flex;
     align-items: center;
+    box-shadow: $shadow-light;
     justify-content: center;
     border-radius: $border-radius-small;
     overflow: hidden;
+    animation: fadeIn 0.3s ease-in-out;
+
+    &:hover {
+        box-shadow: $shadow-heavy;
+    }
 
     // 只在未加载状态时设置最小高度
     &:not(.loaded) {
