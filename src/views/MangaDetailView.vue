@@ -190,19 +190,15 @@
 
                             <!-- 按钮区域 -->
                             <div style="display: flex; justify-content: center; align-items: center; gap: 4px;">
-                                <!-- 下载按钮 (非下载中且未下载时显示) -->
+                                <!-- 下载按钮 -->
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.id] || chapterDownloadStatus[chapter.id] === 'error'"
-                                    size="small" type="primary" @click="downloadChapter(chapter)">
-                                    下载
+                                    size="small" @click="downloadChapter(chapter)" :icon="h(DownloadOutlined)">
                                 </a-button>
 
                                 <!-- 已下载章节的删除按钮 -->
                                 <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" size="small" danger
-                                    @click="deleteChapter(chapter)" :title="'删除章节'">
-                                    <template #icon>
-                                        <delete-outlined />
-                                    </template>
+                                    @click="deleteChapter(chapter)" :title="'删除章节'" :icon="h(DeleteOutlined)">
                                 </a-button>
                             </div>
                         </div>
@@ -267,8 +263,9 @@
 import { onMounted } from 'vue'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '@/utils/number'
-import { DownOutlined, CheckCircleOutlined, SyncOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, CheckCircleOutlined, SyncOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons-vue'
 import { useMangaDetail } from '../composables/useMangaDetail'
+import { h } from 'vue'
 
 // 使用 composable
 const {
@@ -298,11 +295,11 @@ const {
     submitCommentLoading,
     chapterDownloadStatus,
     chapterDownloadProgress,
-    
+
     // 计算属性
     isLoggedIn,
     sortedChapters,
-    
+
     // 方法
     toggleSortOrder,
     goToChapter,

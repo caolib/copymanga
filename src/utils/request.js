@@ -71,6 +71,13 @@ request.interceptors.response.use(
         }
 
         if (response.status === 210) {
+            if (response.data.message.includes('破解')) {
+                Notification.warn({
+                    title: '封禁提示',
+                    message: '账号被检测到使用了第三方软件：' + response.data.message,
+                    placement: 'bottomRight'
+                })
+            }
             message.error(response.data.message)
             return Promise.reject(new Error('需要配置代理'))
         }
@@ -87,23 +94,16 @@ request.interceptors.response.use(
             return Promise.reject(new Error('未授权，请登录'))
         }
 
-        // 处理超时错误
         if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
             msg = '请求超时，请检查网络连接或稍后重试'
         }
-        // 处理网络错误
-        else if (error.code === 'ERR_NETWORK') {
+
+        if (error.code === 'ERR_NETWORK') {
             msg = '网络连接失败，请检查网络设置'
         }
-        // 处理服务器响应错误
-        else if (error.response && error.response.data) {
-            if (error.response.data.detail) {
-                msg = error.response.data.detail
-            } else if (error.response.data.message) {
-                msg = error.response.data.message
-            }
-        } else if (error.message) {
-            msg = error.message
+
+        if (error.response.detail) {
+            msg = error.response.detail
         }
 
         message.error(msg)
