@@ -174,7 +174,7 @@ const initializePlayer = async () => {
                 }
             }
         },
-        autoplay: false,
+        autoplay: true,
         theme: '#1890ff',
         lang: 'zh-cn',
         screenshot: true,

@@ -18,7 +18,7 @@
         </div>
 
         <!-- 年龄确认弹窗 -->
-        <a-modal v-model:visible="ageConfirmVisible" title="年龄确认" :maskClosable="false" :closable="false"
+        <a-modal v-model:open="ageConfirmVisible" title="年龄确认" :maskClosable="false" :closable="false"
             :keyboard="false" :footer="null" centered width="400px">
             <div class="age-confirm-content">
                 <a-alert type="warning" showIcon message="内容提示" description="本区域包含成人内容，仅限年满18周岁人士浏览。" />

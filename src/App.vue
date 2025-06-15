@@ -65,15 +65,15 @@ const rejectDisclaimer = () => {
   window.close()
 }
 
-// 检测当前是否在漫画阅读页面
-const isChapterReaderRoute = computed(() => {
-  return route.name === 'ChapterReader'
+// 检测当前是否在漫画阅读页面或动画播放页面
+const isReaderRoute = computed(() => {
+  return route.name === 'ChapterReader' || route.name === 'CartoonPlayer'
 })
 
 // 处理鼠标移动事件
 const handleMouseMove = (event) => {
-  // 只在漫画阅读页面处理该逻辑
-  if (!isChapterReaderRoute.value) return;
+  // 只在阅读页面处理该逻辑
+  if (!isReaderRoute.value) return;
 
   // 当鼠标在页面顶部 60px 范围内时显示导航栏
   if (event.clientY <= 60) {
@@ -83,9 +83,9 @@ const handleMouseMove = (event) => {
   }
 }
 
-// 监听路由变化，在漫画阅读页面隐藏顶部栏
+// 监听路由变化，在阅读页面隐藏顶部栏
 watchEffect(() => {
-  if (isChapterReaderRoute.value) {
+  if (isReaderRoute.value) {
     showHeader.value = false
   } else {
     showHeader.value = true
