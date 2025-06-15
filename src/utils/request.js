@@ -69,6 +69,14 @@ request.interceptors.response.use(
             message.error('服务器错误，请稍后再试')
             return Promise.reject(new Error('请求失败'))
         }
+
+        if (response.status === 210) {
+            console.log('响应数据:', response.status);
+            router.push('/settings')
+            message.error(response.data.message)
+            return Promise.reject(new Error('需要配置代理'))
+        }
+
         return response.data
     },
     (error) => {
