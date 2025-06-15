@@ -7,19 +7,14 @@ import { convertFileSrc } from '@tauri-apps/api/core'
  * @returns {string} 转换后的URL
  */
 function safeConvertFileSrc(path) {
-    // console.log('safeConvertFileSrc 输入路径:', path)
-
     // 移除 Windows UNC 前缀 \\?\
     let cleanPath = path.replace(/^\\\\\?\\/, '')
 
     // 规范化路径分隔符为正斜杠
     cleanPath = cleanPath.replace(/\\/g, '/')
 
-    // console.log('清理后的路径:', cleanPath)
-
     // 使用默认的 asset 协议
     const result = convertFileSrc(cleanPath)
-    console.log('safeConvertFileSrc 输出URL:', result)
 
     return result
 }
@@ -127,19 +122,13 @@ export class DownloadManager {
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径
      * @param {string} chapterUuid 章节UUID
-     */
-    async getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid) {
+     */    async getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid) {
         try {
-            console.log('获取本地图片 - 漫画UUID:', mangaUuid, '分组:', groupPathWord, '章节UUID:', chapterUuid)
-
             const result = await invoke('get_local_chapter_images', {
                 mangaUuid,
                 groupPathWord,
                 chapterUuid
             })
-
-            console.log('后端返回的本地图片结果:', result)
-            console.log('图片路径列表:', result.images)
 
             return result.images || []
         } catch (error) {
@@ -152,12 +141,8 @@ export class DownloadManager {
      * 转换本地文件路径为 Tauri 可访问的 URL
      * @param {string} filePath 本地文件路径
      * @returns {string} 转换后的 URL
-     */
-    convertLocalFileToUrl(filePath) {
-        console.log('原始路径:', filePath)
-        const result = safeConvertFileSrc(filePath)
-        console.log('转换后URL:', result)
-        return result
+     */    convertLocalFileToUrl(filePath) {
+        return safeConvertFileSrc(filePath)
     }
 
     /**

@@ -323,6 +323,9 @@ const goToChapter = (chapter) => {
         params: {
             pathWord: manga.value.path_word,
             chapterId: chapter.id
+        },
+        query: {
+            mangaUuid: manga.value.uuid // 携带漫画UUID
         }
     })
 }

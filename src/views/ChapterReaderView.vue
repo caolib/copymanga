@@ -442,7 +442,7 @@ const keepNavVisible = () => {
     }
 }
 
-// 获取章节图片数据 - 独立加载流程
+// 获取章节图片数据 - 优先使用本地图片
 const fetchChapterImages = async () => {
     loading.value = true
     error.value = ''
@@ -465,19 +465,19 @@ const fetchChapterImages = async () => {
     }
 
     try {
-        // 首先尝试加载本地图片
-        let localImages = []
-        if (mangaStore.currentManga && mangaStore.currentManga.uuid) {
+        // 首先尝试从路由参数获取漫画UUID
+        let mangaUuid = route.query.mangaUuid
+
+        if (mangaUuid) {
             try {
                 const localImagePaths = await downloadManager.getLocalChapterImages(
-                    mangaStore.currentManga.uuid,
+                    mangaUuid,
                     'default', // 使用默认分组
                     route.params.chapterId
                 )
 
                 if (localImagePaths && localImagePaths.length > 0) {
-                    console.log('找到本地图片:', localImagePaths.length, '张')
-                    localImages = localImagePaths.map((imagePath, index) => ({
+                    const localImages = localImagePaths.map((imagePath, index) => ({
                         url: downloadManager.convertLocalFileToUrl(imagePath),
                         index: index,
                         width: null,
@@ -488,32 +488,39 @@ const fetchChapterImages = async () => {
                     // 使用本地图片
                     images.value = localImages
 
-                    // 设置章节信息（从本地或缓存获取）
-                    if (mangaStore.currentManga.name) {
-                        chapterInfo.value = {
-                            comic_name: mangaStore.currentManga.name,
-                            name: '本地章节',
-                            datetime_created: '',
-                            count: localImages.length
-                        }
+                    // 设置章节信息（从mangaStore或使用默认值）
+                    chapterInfo.value = {
+                        comic_name: mangaStore.currentManga?.name || '本地漫画',
+                        name: '本地章节',
+                        datetime_created: '',
+                        count: localImages.length
                     }
 
                     loading.value = false
-                    return // 使用本地图片，不需要再请求API
+                    return // 成功使用本地图片，不需要API请求
                 }
-            } catch (error) {
-                console.log('获取本地图片失败，将使用在线图片:', error)
+            } catch (localError) {
+                console.error('获取本地图片失败:', localError)
             }
         }
 
-        // 如果没有本地图片，从API获取
+        // 如果本地图片不可用，从API获取
         const response = await getChapterImages(route.params.pathWord, route.params.chapterId)
 
         if (response && response.code === 200 && response.results) {
             const chapterData = response.results.chapter
             const comicData = response.results.comic
 
-            // 保存章节相关信息
+            // 使用在线图片
+            images.value = chapterData.contents.map((image, index) => ({
+                url: image.url,
+                index: index,
+                width: image.width || null,
+                height: image.height || null,
+                isLocal: false
+            }))
+
+            // 设置章节信息
             chapterInfo.value = {
                 comic_name: comicData.name,
                 name: chapterData.name,
@@ -525,16 +532,15 @@ const fetchChapterImages = async () => {
             currentPrevChapterId.value = chapterData.prev
             currentNextChapterId.value = chapterData.next
 
-            // 如果pinia中的漫画名称为空，则更新
-            if (mangaStore.currentManga === null || !mangaStore.currentManga.name) {
-                mangaStore.setCurrentManga({
-                    name: comicData.name,
-                    pathWord: route.params.pathWord,
-                    uuid: comicData.uuid || mangaStore.currentManga?.uuid
-                })
-            }
+            // 更新mangaStore中的漫画信息
+            mangaStore.setCurrentManga({
+                name: comicData.name,
+                pathWord: route.params.pathWord,
+                uuid: comicData.uuid,
+                ...(mangaStore.currentManga || {})
+            })
 
-            // 将当前章节ID对应的索引更新到pinia
+            // 更新章节索引
             const chapterId = route.params.chapterId
             if (chapterId) {
                 const index = mangaStore.findChapterIndex(chapterId)
@@ -542,15 +548,6 @@ const fetchChapterImages = async () => {
                     mangaStore.setCurrentChapterIndex(index)
                 }
             }
-
-            // 保存在线图片数据
-            images.value = chapterData.contents.map((image, index) => ({
-                url: image.url,
-                index: index,
-                width: image.width || null,
-                height: image.height || null,
-                isLocal: false
-            }))
 
         } else {
             throw new Error('获取章节图片失败')
