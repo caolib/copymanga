@@ -150,7 +150,8 @@ export class DownloadManager {
             }
             throw error
         }
-    }/**
+    }
+    /**
      * 检查章节是否已下载 - 通过 Tauri 后端检查
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径
@@ -176,12 +177,14 @@ export class DownloadManager {
             console.error('检查章节下载状态失败:', error)
             return false
         }
-    }    /**
-     * 获取本地章节图片列表 - 通过 Tauri 后端获取
-     * @param {string} mangaUuid 漫画UUID
-     * @param {string} groupPathWord 分组路径
-     * @param {string} chapterUuid 章节UUID
-     */    async getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid) {
+    }
+    /**
+   * 获取本地章节图片列表 - 通过 Tauri 后端获取
+   * @param {string} mangaUuid 漫画UUID
+   * @param {string} groupPathWord 分组路径
+   * @param {string} chapterUuid 章节UUID
+   */
+    async getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid) {
         try {
             const result = await invoke('get_local_chapter_images', {
                 mangaUuid,
@@ -200,11 +203,10 @@ export class DownloadManager {
      * 转换本地文件路径为 Tauri 可访问的 URL
      * @param {string} filePath 本地文件路径
      * @returns {string} 转换后的 URL
-     */    convertLocalFileToUrl(filePath) {
+     */
+    convertLocalFileToUrl(filePath) {
         return safeConvertFileSrc(filePath)
-    }
-
-    /**
+    }    /**
      * 删除已下载的章节
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径
@@ -212,12 +214,18 @@ export class DownloadManager {
      */
     async deleteChapter(mangaUuid, groupPathWord, chapterUuid) {
         try {
-            await invoke('delete_chapter', {
+            const result = await invoke('delete_downloaded_chapter', {
                 mangaUuid,
                 groupPathWord,
                 chapterUuid
             })
-            return true
+
+            if (result.success) {
+                console.log('章节删除成功:', result.message)
+                return true
+            } else {
+                throw new Error(result.message)
+            }
         } catch (error) {
             console.error('删除章节失败:', error)
             throw error

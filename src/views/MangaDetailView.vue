@@ -64,34 +64,6 @@
                             {{ formatDate(manga.datetime_updated) }}
                         </a-descriptions-item>
                     </a-descriptions>
-                    <div style="margin: 24px 0 0 0;">
-                        <!-- 来自书架时显示继续阅读按钮 -->
-                        <a-button v-if="fromCollection && lastBrowseInfo && lastBrowseInfo.last_browse_id"
-                            type="primary" @click="continueReading" style="margin-right: 10px">
-                            继续阅读
-                        </a-button>
-                        <!-- 常规开始阅读按钮 -->
-                        <a-button v-else type="primary" @click="startReading" :disabled="!chapters.length"
-                            style="margin-right: 10px">
-                            开始阅读
-                        </a-button>
-
-                        <!-- 根据来源显示不同的收藏按钮 -->
-                        <template v-if="fromCollection">
-                            <!-- 来自书架只显示取消收藏按钮 -->
-                            <a-button danger @click="handleCollect(false)" :loading="collectLoading"
-                                style="margin-right: 10px">取消收藏</a-button>
-                        </template>
-                        <template v-else>
-                            <!-- 其他来源显示完整的收藏按钮 -->
-                            <a-button @click="handleCollect" :loading="collectLoading"
-                                style="margin-right: 10px">加入书架</a-button>
-                            <a-button danger @click="handleCollect(false)" :loading="collectLoading"
-                                style="margin-right: 10px">取消收藏</a-button>
-                        </template>
-
-                        <a-button @click="fetchMangaData" :loading="detailLoading">刷新数据</a-button>
-                    </div>
                     <div style="margin-top: 20px;">
                         <a-typography-title :level="4">简介</a-typography-title>
 
@@ -137,6 +109,35 @@
                             <DownOutlined />
                         </a-button>
                     </a-dropdown>
+
+                    <!-- 来自书架时显示继续阅读按钮 -->
+                    <a-button v-if="fromCollection && lastBrowseInfo && lastBrowseInfo.last_browse_id" type="primary"
+                        @click="continueReading" size="small">
+                        继续阅读
+                    </a-button>
+                    <!-- 常规开始阅读按钮 -->
+                    <a-button v-else type="primary" @click="startReading" :disabled="!chapters.length" size="small">
+                        开始阅读
+                    </a-button>
+
+                    <!-- 根据来源显示不同的收藏按钮 -->
+                    <template v-if="fromCollection">
+                        <!-- 来自书架只显示取消收藏按钮 -->
+                        <a-button danger @click="handleCollect(false)" :loading="collectLoading" size="small">
+                            取消收藏
+                        </a-button>
+                    </template>
+                    <template v-else>
+                        <!-- 其他来源显示完整的收藏按钮 -->
+                        <a-button @click="handleCollect" :loading="collectLoading" size="small">
+                            加入书架
+                        </a-button>
+                        <a-button danger @click="handleCollect(false)" :loading="collectLoading" size="small">
+                            取消收藏
+                        </a-button>
+                    </template>
+
+                    <a-button @click="fetchMangaData" :loading="detailLoading" size="small">刷新数据</a-button>
                 </a-space>
             </a-col>
         </a-row>
@@ -188,7 +189,7 @@
                             </div>
 
                             <!-- 按钮区域 -->
-                            <div style="display: flex; justify-content: center; align-items: center;">
+                            <div style="display: flex; justify-content: center; align-items: center; gap: 4px;">
                                 <!-- 下载按钮 (非下载中且未下载时显示) -->
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.id] || chapterDownloadStatus[chapter.id] === 'error'"
@@ -196,10 +197,12 @@
                                     下载
                                 </a-button>
 
-                                <!-- 重新下载按钮 -->
-                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" size="small"
-                                    type="default" @click="downloadChapter(chapter, true)">
-                                    重新下载
+                                <!-- 已下载章节的删除按钮 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" size="small" danger
+                                    @click="deleteChapter(chapter)" :title="'删除章节'">
+                                    <template #icon>
+                                        <delete-outlined />
+                                    </template>
                                 </a-button>
                             </div>
                         </div>
@@ -270,7 +273,7 @@ import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '@/utils/number'
-import { DownOutlined, CheckCircleOutlined, SyncOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, CheckCircleOutlined, SyncOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -765,6 +768,25 @@ const checkChapterDownloadStatus = async (chapters) => {
 
     await Promise.all(checkPromises)
     // console.log('章节下载状态检查完成，当前状态:', chapterDownloadStatus.value)
+}
+
+// 删除章节功能
+const deleteChapter = async (chapter) => {
+    const groupPathWord = chapter.group_path_word || 'default'
+
+    await downloadManager.deleteChapter(
+        manga.value.uuid,
+        groupPathWord,
+        chapter.uuid
+    ).then(() => {
+        // 更新下载状态
+        delete chapterDownloadStatus.value[chapter.id]
+        delete chapterDownloadProgress.value[chapter.id]
+        message.success(`章节 "${chapter.name}" 删除成功`)
+    }).catch(error => {
+        console.error('删除章节失败:', error)
+        message.error(`删除失败: ${error.message || '未知错误'}`)
+    })
 }
 
 onMounted(() => {

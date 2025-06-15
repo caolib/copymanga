@@ -54,10 +54,10 @@ fn main() {
             download::download_chapter,
             download::check_chapter_downloaded,
             download::get_downloaded_chapter_info,
-            download::get_local_chapter_images
+            download::get_local_chapter_images,
+            download::delete_downloaded_chapter
         ])
         .setup(|_app| {
-            // 不在这里自动启动代理服务器，等待前端初始化完成后手动启动
             println!("Tauri 应用已启动，等待前端初始化配置文件...");
             Ok(())
         })

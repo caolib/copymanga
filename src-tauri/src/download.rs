@@ -64,6 +64,12 @@ pub struct LocalChapterImages {
     pub total_count: usize,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct DeleteChapterResult {
+    pub success: bool,
+    pub message: String,
+}
+
 #[tauri::command]
 pub async fn download_chapter(
     manga_uuid: String,
@@ -351,4 +357,51 @@ pub async fn get_local_chapter_images(
         images: image_paths,
         total_count,
     })
+}
+
+#[tauri::command]
+pub async fn delete_downloaded_chapter(
+    manga_uuid: String,
+    group_path_word: String,
+    chapter_uuid: String,
+    app_handle: AppHandle,
+) -> Result<DeleteChapterResult, String> {
+    println!("开始删除章节: {}/{}/{}", manga_uuid, group_path_word, chapter_uuid);
+    
+    // 获取应用资源目录
+    let resource_dir = app_handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("获取资源目录失败: {}", e))?;
+    
+    let chapter_path = resource_dir
+        .join("downloads")
+        .join("manga")
+        .join(&manga_uuid)
+        .join(&group_path_word)
+        .join(&chapter_uuid);
+    
+    // 检查章节目录是否存在
+    if !chapter_path.exists() {
+        return Ok(DeleteChapterResult {
+            success: false,
+            message: "章节文件夹不存在".to_string(),
+        });
+    }
+    
+    // 递归删除整个章节目录
+    match fs::remove_dir_all(&chapter_path).await {
+        Ok(_) => {
+            println!("成功删除章节目录: {}", chapter_path.display());
+            Ok(DeleteChapterResult {
+                success: true,
+                message: "章节删除成功".to_string(),
+            })
+        }
+        Err(e) => {
+            let error_msg = format!("删除章节目录失败: {}", e);
+            println!("{}", error_msg);
+            Err(error_msg)
+        }
+    }
 }
