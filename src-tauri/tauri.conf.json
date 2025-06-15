@@ -24,7 +24,7 @@
     "withGlobalTauri": false,
     "macOSPrivateApi": false,
     "security": {
-      "csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' asset: http://asset.localhost; connect-src ipc: http://ipc.localhost",
+      "csp": "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:; connect-src *; media-src * data: blob:; object-src *; child-src *; frame-src *;",
       "assetProtocol": {
         "enable": true,
         "scope": [
