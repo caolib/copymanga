@@ -27,14 +27,11 @@ export class DownloadManager {
         this.downloadQueue = []
         this.activeDownloads = new Map()
         this.maxConcurrentDownloads = 3
-    }
-
-    /**
+    }    /**
      * 下载章节的所有图片 - 通过 Tauri 后端处理
      * @param {Object} chapterInfo 章节信息
      * @param {Function} onProgress 进度回调
-     */
-    async downloadChapter(chapterInfo, onProgress) {
+     */    async downloadChapter(chapterInfo, onProgress) {
         const {
             mangaUuid,
             mangaName,
@@ -46,7 +43,55 @@ export class DownloadManager {
 
         console.log('开始下载章节:', chapterName, '图片数量:', images.length)
 
+        let progressInterval = null
+
         try {
+            // 开始进度回调
+            if (onProgress) {
+                onProgress({
+                    completed: 0,
+                    total: images.length,
+                    percent: 0,
+                    currentImage: '准备下载...',
+                    status: 'starting'
+                })
+            }
+
+            // 启动进度监控定时器
+            if (onProgress) {
+                progressInterval = setInterval(async () => {
+                    try {
+                        // 检查当前已下载的图片数量
+                        const downloadedImages = await this.getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid)
+                        const completed = downloadedImages.length
+                        const percent = Math.floor((completed / images.length) * 100)
+
+                        onProgress({
+                            completed,
+                            total: images.length,
+                            percent,
+                            currentImage: `正在下载 ${completed}/${images.length}`,
+                            status: 'downloading'
+                        })
+
+                        // 如果下载完成，停止监控
+                        if (completed >= images.length) {
+                            clearInterval(progressInterval)
+                            progressInterval = null
+                            onProgress({
+                                completed: images.length,
+                                total: images.length,
+                                percent: 100,
+                                currentImage: '下载完成',
+                                status: 'completed'
+                            })
+                        }
+                    } catch (error) {
+                        console.error('检查下载进度失败:', error)
+                    }
+                }, 1000) // 每秒检查一次
+            }
+
             // 调用 Rust 后端下载命令
             await invoke('download_chapter', {
                 mangaUuid,
@@ -61,10 +106,17 @@ export class DownloadManager {
                 }))
             })
 
-            // 下载完成后的进度回调
+            // 清除定时器
+            if (progressInterval) {
+                clearInterval(progressInterval)
+                progressInterval = null
+            }
+
+            // 最终检查并完成进度回调
             if (onProgress) {
+                const finalImages = await this.getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid)
                 onProgress({
-                    completed: images.length,
+                    completed: finalImages.length,
                     total: images.length,
                     percent: 100,
                     currentImage: '下载完成',
@@ -79,6 +131,13 @@ export class DownloadManager {
             }
         } catch (error) {
             console.error('下载章节失败:', error)
+
+            // 确保清除定时器
+            if (progressInterval) {
+                clearInterval(progressInterval)
+                progressInterval = null
+            }
+
             if (onProgress) {
                 onProgress({
                     completed: 0,
@@ -91,7 +150,7 @@ export class DownloadManager {
             }
             throw error
         }
-    }    /**
+    }/**
      * 检查章节是否已下载 - 通过 Tauri 后端检查
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径

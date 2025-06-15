@@ -50,10 +50,6 @@
         border-color: #1890ff !important;
         color: white !important;
     }
-
-    &:active {
-        transform: translateY(0);
-    }
 }
 
 // 深色主题适配
@@ -267,6 +263,54 @@
 .comment-content {
     @include dark-theme {
         color: #d9d9d9;
+    }
+}
+
+/* 下载状态标签样式 */
+.download-status-tag {
+    position: absolute !important;
+    top: -4px !important;
+    left: -4px !important;
+    z-index: 2 !important;
+    font-size: 11px !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+}
+:deep(.ant-tag > .anticon + span),
+:deep(.ant-tag > span + .anticon) {
+    margin-inline-start: 0px !important;
+}
+
+/* 章节卡片样式 */
+.ant-card {
+    border-color: #d9d9d9 !important;
+    transition: all 0.3s ease;
+
+    &:hover {
+        border-color: #40a9ff !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* 章节卡片网格容器 */
+.ant-row .ant-col {
+    .ant-card {
+        height: 100%;
+        border-color: #bfbfbf !important;
+
+        &:hover {
+            border-color: #40a9ff !important;
+            transform: translateY(-2px);
+        }
+
+        /* 上次阅读章节保持蓝色边框 */
+        &.last-read-chapter {
+            border-color: #1890ff !important;
+
+            &:hover {
+                border-color: #1890ff !important;
+            }
+        }
     }
 }
 

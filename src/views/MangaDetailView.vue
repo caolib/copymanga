@@ -150,43 +150,50 @@
         <a-skeleton :loading="loading || groupLoading" active>
             <a-row :gutter="[12, 12]">
                 <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in sortedChapters" :key="chapter.id">
-                    <a-card :hoverable="true" style="text-align:center; padding:0;" size="small"
+                    <a-card :hoverable="true" style="text-align:center; padding:0; position: relative;" size="small"
                         :body-style="{ padding: '12px 6px' }"
                         :class="{ 'last-read-chapter': isLastReadChapter(chapter) }">
+
+                        <!-- 下载状态标签 - 左上角 -->
+                        <a-tag v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" color="success"
+                            class="download-status-tag">
+                            <template #icon>
+                                <check-circle-outlined />
+                            </template>
+                        </a-tag>
+                        <a-tag v-else-if="chapterDownloadStatus[chapter.id] === 'downloading'" color="processing"
+                            class="download-status-tag">
+                            <template #icon>
+                                <sync-outlined :spin="true" />
+                            </template>
+                        </a-tag>
 
                         <!-- 章节名称 -->
                         <div @click="goToChapter(chapter)" style="cursor:pointer; margin-bottom: 8px;">
                             <span style="font-size:14px;">{{ chapter.name }}</span>
                             <!-- 显示"上次阅读"标记 -->
                             <div v-if="isLastReadChapter(chapter)" class="last-read-tag">
-                                上次阅读
+                                上次
                             </div>
                         </div>
 
                         <!-- 下载状态和操作按钮 -->
-                        <div class="chapter-actions">
-                            <a-space size="small">
-                                <!-- 下载状态显示 -->
-                                <a-tag v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" color="green"
-                                    size="small">
-                                    已下载
-                                </a-tag>
-                                <a-tag v-else-if="chapterDownloadStatus[chapter.id] === 'downloading'" color="blue"
-                                    size="small">
-                                    下载中
-                                </a-tag>
+                        <div class="chapter-actions" style="width: 100%;">
+                            <!-- 下载进度条 (仅在下载中时显示) -->
+                            <div v-if="chapterDownloadStatus[chapter.id] === 'downloading'"
+                                style="width: 100%; margin-bottom: 8px;">
+                                <a-progress :percent="chapterDownloadProgress[chapter.id] || 0"
+                                    :status="chapterDownloadProgress[chapter.id] >= 100 ? 'success' : 'active'"
+                                    :stroke-width="8" :show-info="true" style="width: 100%;" />
+                            </div>
 
-                                <!-- 下载按钮 -->
-                                <a-button v-if="chapterDownloadStatus[chapter.id] !== 'downloaded'" size="small"
-                                    type="primary" :loading="chapterDownloadStatus[chapter.id] === 'downloading'"
-                                    @click="downloadChapter(chapter)"
-                                    :disabled="chapterDownloadStatus[chapter.id] === 'downloading'">
-                                    <template v-if="chapterDownloadStatus[chapter.id] === 'downloading'">
-                                        {{ chapterDownloadProgress[chapter.id] || 0 }}%
-                                    </template>
-                                    <template v-else>
-                                        下载
-                                    </template>
+                            <!-- 按钮区域 -->
+                            <div style="display: flex; justify-content: center; align-items: center;">
+                                <!-- 下载按钮 (非下载中且未下载时显示) -->
+                                <a-button
+                                    v-if="!chapterDownloadStatus[chapter.id] || chapterDownloadStatus[chapter.id] === 'error'"
+                                    size="small" type="primary" @click="downloadChapter(chapter)">
+                                    下载
                                 </a-button>
 
                                 <!-- 重新下载按钮 -->
@@ -194,7 +201,7 @@
                                     type="default" @click="downloadChapter(chapter, true)">
                                     重新下载
                                 </a-button>
-                            </a-space>
+                            </div>
                         </div>
                     </a-card>
                 </a-col>
@@ -263,7 +270,7 @@ import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '@/utils/number'
-import { DownOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, CheckCircleOutlined, SyncOutlined } from '@ant-design/icons-vue'
 
 const route = useRoute()
 const router = useRouter()

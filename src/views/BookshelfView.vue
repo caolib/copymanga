@@ -96,7 +96,7 @@ const postCollectionRef = ref(null)
 // 处理标签页切换
 const handleTabChange = (key) => {
     activeTab.value = key
-    console.log('切换到标签页:', key)
+    // console.log('切换到标签页:', key)
 }
 
 // 刷新当前标签页
