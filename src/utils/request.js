@@ -3,6 +3,7 @@ import { getToken } from './auth'
 import { message } from 'ant-design-vue'
 import { getServerConfig } from '@/config/server-config'
 import router from '@/router'
+import { getCurrentDate } from './date'
 
 // 创建 axios 实例
 const request = axios.create({
@@ -21,15 +22,6 @@ const updateBaseURL = async () => {
 const goToLogin = () => {
     message.error('请先登录')
     router.push('/login')
-}
-
-// 生成当前日期字符串 (YYYY.MM.DD 格式)
-const getCurrentDate = () => {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
-    const day = String(now.getDate()).padStart(2, '0')
-    return `${year}.${month}.${day}`
 }
 
 // 请求拦截器 TODO 区分那些请求不需要token
@@ -66,7 +58,7 @@ request.interceptors.response.use(
         }
         // 处理响应数据
         if (response.status === 500) {
-            message.error('服务器错误，请稍后再试')
+            console.error('服务器错误，请稍后再试')
             return Promise.reject(new Error('请求失败'))
         }
 
@@ -78,8 +70,7 @@ request.interceptors.response.use(
                     placement: 'bottomRight'
                 })
             }
-            message.error(response.data.message)
-            return Promise.reject(new Error('需要配置代理'))
+            return Promise.reject(new Error('需要配置请求头'))
         }
 
         return response.data
@@ -102,7 +93,7 @@ request.interceptors.response.use(
             msg = '网络连接失败，请检查网络设置'
         }
 
-        message.error(msg)
+        console.error(msg)
         return Promise.reject(error)
     }
 )

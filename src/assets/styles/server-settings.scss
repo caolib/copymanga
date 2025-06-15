@@ -1,19 +1,35 @@
 @use "./variables" as *;
+@use "sass:color";
 
 .help-text {
-    color: #999;
-    font-size: 12px;
-    margin-top: 4px;
+    color: $text-tertiary;
+    font-size: $font-xs;
+    margin-top: $spacing-xs;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        color: $dark-text-tertiary;
+    }
 }
 
 .restart-help {
-    color: #666;
-    font-size: 13px;
+    color: $text-secondary;
+    font-size: $font-sm;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        color: $dark-text-secondary;
+    }
 }
 
 .current-source {
     font-weight: 600;
-    color: #1890ff;
+    color: $primary-color;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        color: $primary-hover;
+    }
 }
 
 .ant-input-group {
@@ -21,14 +37,14 @@
 }
 
 .ant-list-item-meta-title {
-    margin-bottom: 4px !important;
+    margin-bottom: $spacing-xs !important;
 }
 
 // 请求头配置样式
 .headers-list {
     .header-item {
-        padding: 8px 0;
-        border-bottom: 1px solid #f0f0f0;
+        padding: $spacing-sm 0;
+        transition: $transition-fast;
 
         &:last-child {
             border-bottom: none;
@@ -42,32 +58,227 @@
 
 .empty-headers {
     text-align: center;
-    padding: 20px;
-    background-color: #fafafa;
-    border-radius: 6px;
-    border: 1px dashed #d9d9d9;
+    padding: $spacing-lg;
+    background-color: $bg-color-light;
+    border-radius: $border-radius-medium;
+    border: 1px dashed $border-color;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        background-color: $dark-fill-tertiary;
+        border-color: $dark-border-color;
+        color: $dark-text-secondary;
+    }
 }
 
 .json-editor-container {
-    border: 1px solid #d9d9d9;
-    border-radius: 6px;
+    border: 1px solid $border-color;
+    border-radius: $border-radius-medium;
     overflow: hidden;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        border-color: $dark-border-color;
+    }
 
     :deep(.jsoneditor) {
         border: none;
 
         .jsoneditor-menu {
-            background-color: #fafafa;
-            border-bottom: 1px solid #d9d9d9;
+            background-color: $bg-color-light;
+            border-bottom: 1px solid $border-color;
+            transition: $transition-fast;
+
+            @include dark-theme {
+                background-color: $dark-fill-secondary;
+                border-bottom-color: $dark-border-color;
+            }
         }
 
         .jsoneditor-tree,
         .ace_editor {
-            background-color: #fff;
+            background-color: $bg-color-white;
+            transition: $transition-fast;
+
+            @include dark-theme {
+                background-color: $dark-bg-container;
+                color: $dark-text-primary;
+            }
         }
 
         .ace_gutter {
-            background-color: #fafafa;
+            background-color: $bg-color-light;
+            transition: $transition-fast;
+
+            @include dark-theme {
+                background-color: $dark-fill-secondary;
+            }
+        }
+    }
+}
+
+// 设置卡片样式增强
+.setting-card {
+    margin-bottom: $spacing-md;
+    border-radius: $border-radius-medium;
+    box-shadow: $shadow-light;
+    transition: $transition-normal;
+
+    @include dark-theme {
+        background-color: $dark-card-bg;
+        border-color: $dark-border-color;
+        box-shadow: $dark-card-shadow;
+    }
+
+    &:hover {
+        box-shadow: $shadow-medium;
+
+        @include dark-theme {
+            box-shadow: $dark-card-hover-shadow;
+        }
+    }
+}
+
+// 重启部分样式优化
+.restart-section {
+    padding: $spacing-md;
+    background-color: $bg-color-light;
+    border-radius: $border-radius-medium;
+    border: 1px solid $border-color-light;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        background-color: $dark-fill-tertiary;
+        border-color: $dark-border-secondary;
+    }
+}
+
+// 表单项标签样式
+.ant-form-item-label > label {
+    color: $text-primary;
+    font-weight: 500;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        color: $dark-text-primary;
+    }
+}
+
+// 输入框组件样式增强
+.ant-input,
+.ant-input-number,
+.ant-select-selector {
+    transition: $transition-fast;
+
+    @include dark-theme {
+        background-color: $dark-fill-secondary;
+        border-color: $dark-border-color;
+        color: $dark-text-primary;
+
+        &:hover {
+            border-color: $dark-border-color-light;
+        }
+
+        &:focus,
+        &.ant-input-focused,
+        &.ant-select-focused .ant-select-selector {
+            border-color: $primary-color;
+            box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+        }
+    }
+}
+
+// 按钮样式增强
+.ant-btn {
+    transition: $transition-fast;
+
+    @include dark-theme {
+        &.ant-btn-default {
+            background-color: $dark-fill-secondary;
+            border-color: $dark-border-color;
+            color: $dark-text-primary;
+
+            &:hover {
+                background-color: $dark-fill-primary;
+                border-color: $dark-border-color-light;
+            }
+        }
+
+        &.ant-btn-text {
+            color: $dark-text-primary;
+
+            &:hover {
+                background-color: $dark-fill-secondary;
+            }
+
+            &.ant-btn-dangerous {
+                color: $error-color;
+
+                &:hover {
+                    background-color: rgba($error-color, 0.1);
+                }
+            }
+        }
+    }
+}
+
+// 列表组件样式
+.ant-list {
+    @include dark-theme {
+        background-color: transparent;
+
+        .ant-list-item {
+            border-bottom-color: $dark-border-secondary;
+
+            &:last-child {
+                border-bottom: none;
+            }
+        }
+    }
+}
+
+// 标签组件样式
+.ant-tag {
+    transition: $transition-fast;
+
+    @include dark-theme {
+        &.ant-tag-green {
+            background-color: rgba($success-color, 0.2);
+            border-color: rgba($success-color, 0.4);
+            color: color.scale($success-color, $lightness: 20%);
+        }
+
+        &.ant-tag-orange {
+            background-color: rgba($warning-color, 0.2);
+            border-color: rgba($warning-color, 0.4);
+            color: color.scale($warning-color, $lightness: 20%);
+        }
+    }
+}
+
+// 警告组件样式
+.ant-alert {
+    transition: $transition-fast;
+
+    @include dark-theme {
+        &.ant-alert-info {
+            background-color: rgba($info-color, 0.1);
+            border-color: rgba($info-color, 0.3);
+            color: $dark-text-primary;
+
+            .ant-alert-icon {
+                color: $info-color;
+            }
+        }
+
+        &.ant-alert-warning {
+            background-color: rgba($warning-color, 0.1);
+            border-color: rgba($warning-color, 0.3);
+            color: $dark-text-primary;
+
+            .ant-alert-icon {
+                color: $warning-color;
+            }
         }
     }
 }

@@ -3,22 +3,19 @@
         <a-card title="转发服务配置" class="setting-card" id="server-config">
             <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
                 <a-form-item label="服务器端口（1-65535）" name="serverPort">
-                    <a-input-number v-model:value="serverForm.serverPort" placeholder="输入一个端口号" :min="1" :max="65535"
-                        style="width: 50%" />
-                </a-form-item>
-
-                <a-form-item>
-                    <a-space>
-                        <a-button type="primary" html-type="submit" :loading="savingServer">
-                            保存设置
+                    <a-input-group compact>
+                        <a-input-number v-model:value="serverForm.serverPort" placeholder="输入一个端口号" :min="1"
+                            :max="65535" style="width: fit-content" />
+                        <a-button type="primary" html-type="submit" :loading="savingServer" style="width: fit-content">
+                            保存
                         </a-button>
-                    </a-space>
+                    </a-input-group>
                 </a-form-item>
             </a-form>
         </a-card> <a-card title="API 域名配置" class="setting-card" id="api-config">
             <a-form layout="vertical"> <!-- 当前API源选择 -->
                 <a-form-item label="当前API源">
-                    <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" style="width: 100%">
+                    <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" style="width: fit-content">
                         <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
                             {{ source }}
                         </a-select-option>
@@ -31,9 +28,9 @@
                 <!-- 添加新API源 -->
                 <a-form-item label="添加新API源">
                     <a-input-group compact>
-                        <a-input v-model:value="newApiSource.url" placeholder="API域名 (如: https://copy20.com)"
-                            style="width: 80%" />
-                        <a-button type="primary" @click="addNewApiSource" :loading="addingSource" style="width: 20%">
+                        <a-input v-model:value="newApiSource.url" placeholder="API域名" style="width: fit-content" />
+                        <a-button type="primary" @click="addNewApiSource" :loading="addingSource"
+                            style="width: fit-content">
                             添加
                         </a-button>
                     </a-input-group>
@@ -44,8 +41,8 @@
                             <a-list-item>
                                 <template #actions>
                                     <a-button v-if="apiSources.length > 1" type="text" danger size="small"
-                                        @click="removeApiSource(index)" :loading="removingIndex === index">
-                                        删除
+                                        :icon="h(DeleteOutlined)" @click="removeApiSource(index)"
+                                        :loading="removingIndex === index">
                                     </a-button>
                                 </template>
                                 <a-list-item-meta>
@@ -68,7 +65,8 @@
             <a-form layout="vertical">
                 <!-- 当前轻小说API源选择 -->
                 <a-form-item label="当前轻小说API源">
-                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange" style="width: 100%">
+                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange"
+                        style="width:fit-content">
                         <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
                             {{ source }}
                         </a-select-option>
@@ -82,9 +80,9 @@
                 <a-form-item label="添加新轻小说API源">
                     <a-input-group compact>
                         <a-input v-model:value="newBookApiSource.url"
-                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: 80%" />
+                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: fit-content" />
                         <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
-                            style="width: 20%">
+                            style="width: fit-content">
                             添加
                         </a-button>
                     </a-input-group>
@@ -97,9 +95,8 @@
                             <a-list-item>
                                 <template #actions>
                                     <a-button v-if="bookApiSources.length > 1" type="text" danger size="small"
-                                        @click="removeBookApiSource(index)" :loading="removingBookIndex === index">
-                                        删除
-                                    </a-button>
+                                        :icon="h(DeleteOutlined)" @click="removeBookApiSource(index)"
+                                        :loading="removingBookIndex === index"></a-button>
                                 </template>
                                 <a-list-item-meta>
                                     <template #title>
@@ -120,9 +117,9 @@
         <!-- 请求头配置 -->
         <a-card title="请求头配置" class="setting-card" id="headers-config">
             <a-form layout="vertical">
-                <a-alert type="info" show-icon style="margin-bottom: 16px">
+                <a-alert type="info" show-icon style="width:fit-content;margin-bottom:10px">
                     <template #message>
-                        配置API请求时的自定义请求头，用于模拟移动端APP访问。可以添加、修改或删除任意请求头。
+                        配置API请求时的自定义请求头
                     </template>
                 </a-alert>
 
@@ -130,23 +127,21 @@
                 <a-form-item label="添加新请求头">
                     <a-row :gutter="16">
                         <a-col :span="8">
-                            <a-input v-model:value="newHeader.key" placeholder="请求头名称 (如: User-Agent)"
-                                @keyup.enter="addNewHeader" />
+                            <a-input v-model:value="newHeader.key" placeholder="请求头名称" @keyup.enter="addNewHeader" />
                         </a-col>
-                        <a-col :span="12">
+                        <a-col :span="14">
                             <a-input v-model:value="newHeader.value" placeholder="请求头值" @keyup.enter="addNewHeader" />
                         </a-col>
-                        <a-col :span="4">
-                            <a-button type="primary" @click="addNewHeader"
+                        <a-col :span="2">
+                            <a-button type="primary" @click="addNewHeader" :icon="h(PlusOutlined)"
                                 :disabled="!newHeader.key || !newHeader.value" block>
-                                添加
                             </a-button>
                         </a-col>
                     </a-row>
                 </a-form-item>
 
                 <!-- 现有请求头列表 -->
-                <a-form-item label="当前请求头配置">
+                <a-form-item>
                     <div v-if="headersList.length === 0" class="empty-headers">
                         <a-empty description="暂无请求头配置" :image="false" />
                     </div>
@@ -157,13 +152,13 @@
                                     <a-input v-model:value="header.key" placeholder="请求头名称"
                                         @change="onHeaderChange(index)" />
                                 </a-col>
-                                <a-col :span="12">
+                                <a-col :span="14">
                                     <a-input v-model:value="header.value" placeholder="请求头值"
                                         @change="onHeaderChange(index)" />
                                 </a-col>
-                                <a-col :span="4">
-                                    <a-button type="text" danger @click="removeHeader(index)" block>
-                                        删除
+                                <a-col :span="2">
+                                    <a-button type="text" danger @click="removeHeader(index)" :icon="h(DeleteOutlined)"
+                                        block>
                                     </a-button>
                                 </a-col>
                             </a-row>
@@ -174,13 +169,13 @@
                 <a-form-item>
                     <a-space>
                         <a-button type="primary" @click="saveAllHeaders" :loading="savingHeaders">
-                            保存请求头配置
+                            保存配置
                         </a-button>
                         <a-button @click="resetHeaders">
-                            恢复默认配置
+                            恢复默认
                         </a-button>
                         <a-button @click="clearAllHeaders" danger>
-                            清空所有请求头
+                            清空请求头
                         </a-button>
                     </a-space>
                 </a-form-item>
@@ -196,7 +191,7 @@
                         :icon="h(ReloadOutlined)">
                         重启应用
                     </a-button>
-                    <a-button @click="openConfigDirectory" :loading="openingDirectory">
+                    <a-button @click="openConfigDirectory" :icon="h(SettingOutlined)" :loading="openingDirectory">
                         打开配置目录
                     </a-button>
                     <span class="restart-help">重启应用以应用所有配置更改</span>
@@ -232,6 +227,7 @@ import { useAppStore } from '@/stores/app'
 import { invoke } from '@tauri-apps/api/core'
 import { appDataDir } from '@tauri-apps/api/path'
 import { restartApp } from '@/utils/restart-helper'
+import { PlusOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons-vue'
 
 const serverForm = ref({
     serverPort: 5001

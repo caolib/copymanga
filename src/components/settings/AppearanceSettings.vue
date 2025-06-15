@@ -25,7 +25,7 @@
                 </a-form-item>
 
                 <a-form-item label="暗色模式图片遮罩" v-if="themeConfig.isDarkMode">
-                    <a-slider v-model:value="themeConfig.darkImageMask" :min="0" :max="1" :step="0.1"
+                    <a-slider v-model:value="themeConfig.darkImageMask" class="slider" :min="0" :max="1" :step="0.1"
                         :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }" @change="onDarkImageMaskChange" />
                     <div style="margin-top: 8px; font-size: 12px; color: #666;">
                         调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
@@ -45,15 +45,15 @@
                 </a-form-item>
 
                 <a-form-item label="每行列数">
-                    <a-slider v-model:value="uiConfig.columnsPerRow" :min="1" :max="4" :step="1"
+                    <a-slider v-model:value="uiConfig.columnsPerRow" :min="1" :max="4" :step="1" class="slider"
                         :marks="{ 1: '1列', 2: '2列', 3: '3列', 4: '4列' }" />
                 </a-form-item>
 
                 <a-form-item label="图片大小">
-                    <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="100" :step="10"
+                    <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="100" :step="10" class="slider"
                         :marks="{ 50: '50%', 100: '100%' }" />
                 </a-form-item> <a-form-item label="图片间距">
-                    <a-slider v-model:value="uiConfig.imageGap" :min="0" :max="30" :step="1"
+                    <a-slider v-model:value="uiConfig.imageGap" :min="0" :max="30" :step="1" class="slider"
                         :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
                 </a-form-item>
 
@@ -63,7 +63,7 @@
                         <a-radio value="end">末尾</a-radio>
                     </a-radio-group>
                     <div style="margin-top: 8px; font-size: 12px; color: #666;">
-                        当图片数量为奇数时，决定在开头还是末尾添加空白页
+                        双列显示时，当图片数量为奇数，决定在开头还是末尾添加空白页
                     </div>
                 </a-form-item>
 

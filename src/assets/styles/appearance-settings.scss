@@ -1,47 +1,48 @@
 @use "./variables" as *;
 
 .setting-card {
-    margin-bottom: 24px;
+    margin-bottom: $spacing-lg;
 }
 
 .font-family-container {
     width: 100%;
 }
 
-.font-preview {
-    padding: 12px;
-    background-color: #f5f5f5;
-    border-radius: 6px;
-    border: 1px solid #d9d9d9;
-}
-
 .preview-label {
-    font-size: 14px;
-    color: #666;
-    margin-right: 8px;
+    font-size: $font-sm;
+    color: $text-secondary;
+    margin-right: $spacing-sm;
+    transition: $transition-fast;
 
     @include dark-theme {
-        color: #cccccc;
+        color: $dark-text-secondary;
     }
 }
 
 .preview-text {
-    font-size: 16px;
-    color: #333;
+    font-size: $font-base;
+    color: $text-primary;
+    transition: $transition-fast;
 
     @include dark-theme {
-        color: #e0e0e0;
+        color: $dark-text-primary;
     }
 }
 
 .font-preview {
-    padding: 12px;
-    background-color: #f5f5f5;
-    border-radius: 6px;
-    border: 1px solid #d9d9d9;
+    padding: $spacing-sm;
+    background-color: $bg-color;
+    border-radius: $border-radius-medium;
+    border: 1px solid $border-color;
+    transition: $transition-fast;
 
     @include dark-theme {
-        background-color: var(--dark-secondary-bg);
-        border-color: #434343;
+        background-color: $dark-fill-secondary;
+        border-color: $dark-border-color;
     }
+}
+
+.slider {
+    width: 80%;
+    margin-left: $spacing-lg;
 }

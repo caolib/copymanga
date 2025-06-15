@@ -25,7 +25,8 @@
                     <div v-for="(item, index) in homeData.rankDayComics?.list?.slice(0, 10) || []"
                         :key="item.comic.path_word" class="rank-item" @click="goToMangaDetail(item.comic)">
                         <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
-                        <img :src="item.comic.cover" :alt="item.comic.name" class="rank-cover" />
+                        <img :src="item.comic.cover" @error="handleImageError" :alt="item.comic.name"
+                            class="rank-cover" />
                         <div class="rank-info">
                             <div class="rank-title">{{ item.comic.name }}</div>
                             <div class="rank-popular">{{ item.comic.popular }}</div>
@@ -38,7 +39,8 @@
                     <div v-for="(item, index) in homeData.rankWeekComics?.list?.slice(0, 10) || []"
                         :key="item.comic.path_word" class="rank-item" @click="goToMangaDetail(item.comic)">
                         <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
-                        <img :src="item.comic.cover" :alt="item.comic.name" class="rank-cover" />
+                        <img :src="item.comic.cover" @error="handleImageError" :alt="item.comic.name"
+                            class="rank-cover" />
                         <div class="rank-info">
                             <div class="rank-title">{{ item.comic.name }}</div>
                             <div class="rank-popular">{{ item.comic.popular }}</div>
@@ -51,7 +53,8 @@
                     <div v-for="(item, index) in homeData.rankMonthComics?.list?.slice(0, 10) || []"
                         :key="item.comic.path_word" class="rank-item" @click="goToMangaDetail(item.comic)">
                         <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
-                        <img :src="item.comic.cover" :alt="item.comic.name" class="rank-cover" />
+                        <img :src="item.comic.cover" @error="handleImageError" :alt="item.comic.name"
+                            class="rank-cover" />
                         <div class="rank-info">
                             <div class="rank-title">{{ item.comic.name }}</div>
                             <div class="rank-popular">{{ item.comic.popular }}</div>
@@ -174,6 +177,7 @@ import { openExternalUrl } from '../utils/external-link'
 import { formatDate } from '../utils/date'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { handleImageError } from '../utils/image'
 import { message } from 'ant-design-vue'
 
 const router = useRouter()

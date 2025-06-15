@@ -52,9 +52,7 @@
             </nav>
         </div>
 
-        <div class="title-bar-center">
-            <!-- 中间区域用于拖动 -->
-        </div>
+        <div class="title-bar-center"></div>
         <div class="title-bar-right">
             <!-- 窗口控制按钮 -->
             <div class="window-controls" data-tauri-drag-region="false">
@@ -69,8 +67,12 @@
                         <rect x="2" y="2" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1" />
                     </svg>
                     <svg width="12" height="12" viewBox="0 0 12 12" v-else>
+                        <!-- 后面的矩形，只显示未被遮挡的部分 -->
+                        <path d="M4 1 L10 1 L10 4 L8 4 L8 3 L4 3 Z" fill="none" stroke="currentColor"
+                            stroke-width="1" />
+                        <path d="M8 4 L10 4 L10 7 L8 7 Z" fill="none" stroke="currentColor" stroke-width="1" />
+                        <!-- 前面的矩形 -->
                         <rect x="2" y="3" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1" />
-                        <rect x="4" y="1" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1" />
                     </svg>
                 </button>
 

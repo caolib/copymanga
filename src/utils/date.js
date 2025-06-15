@@ -48,6 +48,16 @@ const formatDate = (input) => {
     return `${Math.floor(diff / week)}周前`;
 }
 
+// 生成当前日期字符串 (YYYY.MM.DD 格式)
+const getCurrentDate = () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const day = String(now.getDate()).padStart(2, '0')
+    return `${year}.${month}.${day}`
+}
+
 export {
-    formatDate
+    formatDate,
+    getCurrentDate
 }

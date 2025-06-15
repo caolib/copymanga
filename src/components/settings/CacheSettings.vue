@@ -39,9 +39,9 @@
                 <a-alert message="缓存清理说明" type="info" show-icon style="margin-top: 24px;">
                     <template #description>
                         <ul style="margin: 0; padding-left: 16px;">
-                            <li>WebView 缓存包含网页数据、图片、Cookie 等</li>
-                            <li>清除缓存会导致所有登录状态丢失，需要重新登录</li>
-                            <li>你也可以打开缓存目录，接着退出应用，然后直接删除EBWebView文件夹</li>
+                            <li>WebView缓存包含网页数据、图片、Cookie 等（不包括下载的漫画等），清除缓存会导致登录状态丢失</li>
+                            <li>缓存默认在C盘，可以通过创建符号链接的方式转移到其他盘</li>
+                            <li>清除缓存实际就是删除📂EBWebView，过程可能比较慢（因为被当前应用占用了），可以手动删除（需要先关闭应用）</li>
                         </ul>
                     </template>
                 </a-alert>
