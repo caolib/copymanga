@@ -229,9 +229,9 @@ import {
     getDefaultRequestHeaders
 } from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
-import { relaunch } from '@tauri-apps/plugin-process'
 import { invoke } from '@tauri-apps/api/core'
 import { appDataDir } from '@tauri-apps/api/path'
+import { restartApp } from '@/utils/restart-helper'
 
 const serverForm = ref({
     serverPort: 5001
@@ -374,12 +374,15 @@ const onSubmitServer = () => {
 // 处理重启应用
 const handleRestart = async () => {
     restarting.value = true
-    await relaunch().then(() => {
+
+    try {
+        await restartApp()
         appStore.setNeedsRestart(false)
-    }).catch(error => {
+    } catch (error) {
+        console.error('重启应用失败:', error)
         message.error('重启应用失败')
         restarting.value = false
-    })
+    }
 }
 
 // 新增：API源切换

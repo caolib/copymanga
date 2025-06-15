@@ -38,6 +38,17 @@ async fn start_proxy_server(app_handle: AppHandle) -> Result<String, String> {
     }
 }
 
+#[tauri::command]
+async fn stop_proxy_server() -> Result<String, String> {
+    // 重置服务器状态
+    {
+        let mut started = SERVER_STARTED.lock().unwrap();
+        *started = false;
+    }
+    
+    Ok("代理服务器已停止".to_string())
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_process::init())
@@ -46,6 +57,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             open_browser,
             start_proxy_server,
+            stop_proxy_server,
             cache::get_webview_data_dir,
             cache::clear_webview_cache,
             cache::get_cache_size,

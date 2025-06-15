@@ -3,10 +3,10 @@ import { computed, ref, watchEffect, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from './stores/app'
 import { useThemeStore } from './stores/theme'
-import { relaunch } from '@tauri-apps/plugin-process'
 import TitleBar from './components/TitleBar.vue'
 import { theme } from 'ant-design-vue'
 import { checkUpdateOnStartup } from './utils/auto-update'
+import { restartApp } from './utils/restart-helper'
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -93,11 +93,7 @@ watchEffect(() => {
 })
 
 // 重启应用
-const handleRestart = async () => {
-  await relaunch().then(() => {
-    appStore.setNeedsRestart(false)
-  })
-}
+const handleRestart = restartApp
 
 // 组件挂载时检查免责声明和初始化主题
 onMounted(async () => {
