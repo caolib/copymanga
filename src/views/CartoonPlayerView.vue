@@ -141,8 +141,7 @@ const initializePlayer = async () => {
                         maxMaxBufferLength: 600,
                         maxBufferSize: 60 * 1000 * 1000,
                         maxBufferHole: 0.5,
-                        startFragPrefetch: true,
-                        testBandwidth: false
+                        startFragPrefetch: true, testBandwidth: false
                     })
                     hls.value.loadSource(video.src)
                     hls.value.attachMedia(video)
@@ -150,6 +149,18 @@ const initializePlayer = async () => {
                     hls.value.on(Hls.Events.MANIFEST_PARSED, () => {
                         playStatus.value = { text: '准备就绪', color: 'success' }
                         error.value = ''
+                        // 给动态生成的 dplayer-container 和 video 元素添加 tauri 拖拽属性
+                        nextTick(() => {
+                            const dplayerContainer = document.querySelector('.dplayer-container')
+                            if (dplayerContainer) {
+                                dplayerContainer.setAttribute('data-tauri-drag-region', 'true')
+                            }
+
+                            const dplayerVideo = document.querySelector('.dplayer-video')
+                            if (dplayerVideo) {
+                                dplayerVideo.setAttribute('data-tauri-drag-region', 'true')
+                            }
+                        })
                     })
 
                     hls.value.on(Hls.Events.ERROR, (event, data) => {
@@ -174,7 +185,7 @@ const initializePlayer = async () => {
                 }
             }
         },
-        autoplay: false,
+        autoplay: true,
         theme: '#1890ff',
         lang: 'zh-cn',
         screenshot: true,

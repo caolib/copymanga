@@ -64,7 +64,7 @@ const initPromise = Promise.all([
     return themeStore.initTheme()
 }).then(() => {
     configStore.setInitialized()
-    console.log('所有初始化完成')
+    // console.log('所有初始化完成')
 }).catch(error => {
     console.error('初始化失败:', error)
     // 详细的错误信息

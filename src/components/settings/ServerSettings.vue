@@ -601,8 +601,6 @@ const openConfigDirectory = async () => {
         const configDir = appDataPath + '\\config'
         // console.log('配置目录:', configDir)
         return invoke('open_file_explorer', { path: configDir })
-    }).then(() => {
-        message.success('已打开配置文件目录')
     }).catch(error => {
         message.error('打开配置目录失败: ' + (error.message || error))
         console.error('打开配置目录失败:', error)

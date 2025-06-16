@@ -142,13 +142,10 @@ const saveUISettings = () => {
     savingUI.value = true
 
     updateReaderConfig(uiConfig).then(success => {
-        if (success) {
-            message.success('界面设置保存成功！')
-        } else {
-            message.error('保存界面设置失败')
-        }
+        message.success('保存成功！')
     }).catch(error => {
         message.error('保存界面设置失败')
+        console.error('保存界面设置失败:', error)
     }).finally(() => {
         savingUI.value = false
     })
