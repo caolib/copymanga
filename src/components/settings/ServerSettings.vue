@@ -11,6 +11,14 @@
                         </a-button>
                     </a-input-group>
                 </a-form-item>
+
+                <!-- Rust服务器状态监控 -->
+                <a-form-item>
+                    <a-space>
+                        <a-badge :status="serverStatus.status" :text="serverStatus.text" />
+                        <span class="status-info">{{ serverStatus.info }}</span>
+                    </a-space>
+                </a-form-item>
             </a-form>
         </a-card> <a-card title="API 域名配置" class="setting-card" id="api-config">
             <a-form layout="vertical"> <!-- 当前API源选择 -->
@@ -202,7 +210,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { message } from 'ant-design-vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
@@ -261,6 +269,16 @@ const removingBookIndex = ref(-1)
 const headersList = ref([])
 const newHeader = ref({ key: '', value: '' })
 const savingHeaders = ref(false)
+
+// Rust服务器状态监控
+const serverStatus = ref({
+    status: 'default',
+    text: '检查中...',
+    color: 'default',
+    displayText: '检查中',
+    info: '正在检查服务器状态...'
+})
+let statusCheckInterval = null
 
 // 加载当前配置
 const loadConfig = () => {
@@ -609,8 +627,48 @@ const openConfigDirectory = async () => {
     })
 }
 
+// 检查Rust服务器状态
+const checkServerStatus = async () => {
+    const config = await getServerConfig()
+    const port = config.serverPort
+    // 尝试启动代理服务器，如果已经在运行会返回相应消息
+    const result = await invoke('start_proxy_server')
+    if (result === "代理服务器已经在运行") {
+        serverStatus.value = {
+            status: 'success',
+            text: '运行中',
+            info: `代理服务器正在端口 ${port} 上运行`
+        }
+    } else {
+        serverStatus.value = {
+            status: 'error',
+            text: '已停止',
+            info: '代理服务器未运行'
+        }
+    }
+}
+
+// 启动状态检查定时器 5秒检查一次
+const startStatusCheck = () => {
+    checkServerStatus()
+    statusCheckInterval = setInterval(checkServerStatus, 5000)
+}
+
+// 停止状态检查定时器
+const stopStatusCheck = () => {
+    if (statusCheckInterval) {
+        clearInterval(statusCheckInterval)
+        statusCheckInterval = null
+    }
+}
+
 onMounted(() => {
     loadConfig()
+    startStatusCheck()
+})
+
+onUnmounted(() => {
+    stopStatusCheck()
 })
 </script>
 

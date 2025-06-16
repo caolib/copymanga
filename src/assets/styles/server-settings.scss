@@ -32,6 +32,18 @@
     }
 }
 
+// Rust服务器状态样式
+.status-info {
+    color: $text-secondary;
+    font-size: $font-sm;
+    font-style: italic;
+    transition: $transition-fast;
+
+    @include dark-theme {
+        color: $dark-text-secondary;
+    }
+}
+
 .ant-input-group {
     display: flex;
 }

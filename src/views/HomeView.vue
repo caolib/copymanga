@@ -9,7 +9,7 @@
                 <div class="refresh-section">
                     <a-button type="primary" @click="refreshHomeData" :icon="h(ReloadOutlined)"
                         :loading="homeStore.isLoading" :disabled="loading" size="small">
-                        刷新数据
+                        刷新
                     </a-button>
                     <span v-if="homeStore.lastUpdateTime" class="update-time">
                         上次更新: {{ formatDate(homeStore.lastUpdateTime) }}
@@ -96,7 +96,7 @@
                                 <template #description>
                                     <div class="topic-meta-mini">
                                         <span v-if="topic.period" class="topic-period-mini">{{ topic.period
-                                            }}</span>
+                                        }}</span>
                                         <span v-if="topic.datetime_created" class="topic-date-mini">
                                             {{ formatDate(topic.datetime_created) }}
                                         </span>
