@@ -6,7 +6,8 @@
                     <div class="tab-extra-actions">
                         <a-button type="primary" size="small" @click="refreshCurrentTab" :loading="loading">
                             刷新
-                        </a-button>                        <a-typography-text type="secondary" v-if="getCurrentTabUpdateTime() && !loading" class="update-time">
+                        </a-button> <a-typography-text type="secondary" v-if="getCurrentTabUpdateTime() && !loading"
+                            class="update-time">
                             {{ formatDate(getCurrentTabUpdateTime()) }}
                         </a-typography-text>
                     </div>
@@ -18,7 +19,8 @@
                             📚 漫画收藏
                             <a-badge v-if="mangaCount > 0" :count="mangaCount" :offset="[10, -5]" />
                         </span>
-                    </template>                    <MangaCollection :loading="loading && activeTab === 'manga'" @update-count="handleMangaCountUpdate"
+                    </template>
+                    <MangaCollection :loading="loading && activeTab === 'manga'" @update-count="handleMangaCountUpdate"
                         @update-time="(time) => handleUpdateTime('manga', time)" ref="mangaCollectionRef" />
                 </a-tab-pane> <!-- 轻小说收藏标签页 -->
                 <a-tab-pane key="book" tab="轻小说收藏">
@@ -27,7 +29,8 @@
                             📖 轻小说收藏
                             <a-badge v-if="bookCount > 0" :count="bookCount" :offset="[10, -5]" />
                         </span>
-                    </template>                    <BookCollection :loading="loading && activeTab === 'book'" @update-count="handleBookCountUpdate"
+                    </template>
+                    <BookCollection :loading="loading && activeTab === 'book'" @update-count="handleBookCountUpdate"
                         @update-time="(time) => handleUpdateTime('book', time)" ref="bookCollectionRef" />
                 </a-tab-pane>
 
@@ -38,9 +41,10 @@
                             🎬 动画收藏
                             <a-badge v-if="cartoonCount > 0" :count="cartoonCount" :offset="[10, -5]" />
                         </span>
-                    </template>                    <CartoonCollection :loading="loading && activeTab === 'cartoon'"
-                        @update-count="handleCartoonCountUpdate" @update-time="(time) => handleUpdateTime('cartoon', time)"
-                        ref="cartoonCollectionRef" />
+                    </template>
+                    <CartoonCollection :loading="loading && activeTab === 'cartoon'"
+                        @update-count="handleCartoonCountUpdate"
+                        @update-time="(time) => handleUpdateTime('cartoon', time)" ref="cartoonCollectionRef" />
                 </a-tab-pane>
 
                 <!-- 写真收藏标签页 -->
@@ -50,7 +54,8 @@
                             📷 写真收藏
                             <a-badge v-if="postCount > 0" :count="postCount" :offset="[10, -5]" />
                         </span>
-                    </template>                    <PostCollection :loading="loading && activeTab === 'post'" @update-count="handlePostCountUpdate"
+                    </template>
+                    <PostCollection :loading="loading && activeTab === 'post'" @update-count="handlePostCountUpdate"
                         @update-time="(time) => handleUpdateTime('post', time)" ref="postCollectionRef" />
                 </a-tab-pane>
             </a-tabs>

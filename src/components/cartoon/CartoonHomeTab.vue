@@ -19,6 +19,11 @@
                         size="small">
                         刷新
                     </a-button>
+                    <div v-if="lastUpdateTime" class="update-info">
+                        <a-typography-text type="secondary" style="font-size: 12px;">
+                            最后更新：{{ formatDate(lastUpdateTime) }}
+                        </a-typography-text>
+                    </div>
                 </div>
             </div>
             <div class="filter-group">
@@ -103,127 +108,66 @@
 import { ref, onMounted, computed, watch, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { getCartoonHome, getCartoonThemes } from '../../api/cartoon'
+import { useCartoonStore } from '../../stores/cartoon'
 import { formatDate } from '../../utils/date'
 import { formatNumber } from '../../utils/number'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
+const cartoonStore = useCartoonStore()
 
 const ordering = ref('-datetime_updated')
 const selectedTheme = ref('')
-const themes = ref([])
-const cartoons = ref([])
-const total = ref(0)
-const loading = ref(false)
-const loadingMore = ref(false)
 const limit = ref(18)
-const offset = ref(0)
 
-const hasMore = computed(() => cartoons.value.length < total.value)
-
-// 缓存相关
-const THEME_CACHE_KEY = 'cartoon_themes_cache'
-const THEME_CACHE_DURATION = 7 * 24 * 60 * 60 * 1000 // 7天缓存
-
-// 获取主题缓存数据
-const getThemeCachedData = () => {
-    const cached = localStorage.getItem(THEME_CACHE_KEY)
-    if (!cached) return null
-
-    const { data, timestamp } = JSON.parse(cached)
-    const now = Date.now()
-
-    if (now - timestamp > THEME_CACHE_DURATION) {
-        localStorage.removeItem(THEME_CACHE_KEY)
-        return null
-    }
-
-    return data
-}
-
-// 设置主题缓存数据
-const setThemeCachedData = (data) => {
-    const cacheData = {
-        data,
-        timestamp: Date.now()
-    }
-    localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(cacheData))
-}
+// 使用 store 的状态
+const loading = computed(() => cartoonStore.isLoading)
+const loadingMore = computed(() => cartoonStore.isLoadingMore)
+const themes = computed(() => cartoonStore.themes)
+const cartoons = computed(() => cartoonStore.getCartoonList(ordering.value, selectedTheme.value).list)
+const total = computed(() => cartoonStore.getCartoonList(ordering.value, selectedTheme.value).total)
+const hasMore = computed(() => cartoonStore.getCartoonList(ordering.value, selectedTheme.value).hasMore)
+const lastUpdateTime = computed(() => {
+    const data = cartoonStore.getCartoonList(ordering.value, selectedTheme.value)
+    return data.lastUpdateTime ? new Date(data.lastUpdateTime).toISOString() : null
+})
 
 // 获取动画主题列表
-const loadThemes = () => {
-    // 先尝试从缓存获取数据
-    const cachedData = getThemeCachedData()
-    if (cachedData) {
-        themes.value = cachedData
-        return
-    }
+const loadThemes = async (forceRefresh = false) => {
+    const result = await cartoonStore.fetchCartoonThemes(forceRefresh)
 
-    getCartoonThemes().then(response => {
-        const responseData = response.data || response
-
-        if (responseData && responseData.results && responseData.results.list) {
-            // 过滤掉count为0的主题
-            const filteredThemes = responseData.results.list.filter(theme => theme.count > 0)
-            themes.value = filteredThemes
-
-            // 缓存数据
-            setThemeCachedData(filteredThemes)
-        } else {
-            console.warn('主题响应数据格式不正确:', responseData)
-        }
-    }).catch(err => {
-        console.error('获取动画主题失败:', err)
+    if (!result.success) {
         message.error('获取动画主题失败')
-    })
+    }
 }
 
 // 加载动画列表
-const loadCartoons = (isLoadMore = false) => {
-    if (isLoadMore) {
-        loadingMore.value = true
-        offset.value = cartoons.value.length
-    } else {
-        loading.value = true
-        offset.value = 0
+const loadCartoons = async (isLoadMore = false, forceRefresh = false) => {
+    const offset = isLoadMore ? cartoons.value.length : 0
+
+    const result = await cartoonStore.fetchCartoonHome(ordering.value, limit.value, offset, selectedTheme.value, forceRefresh)
+
+    if (result.success && !result.fromCache && forceRefresh) {
+        message.success('动画列表已刷新')
     }
 
-    getCartoonHome(limit.value, offset.value, ordering.value, selectedTheme.value).then(response => {
-        const responseData = response.data || response
-
-        if (responseData && responseData.results && responseData.results.list) {
-            const newCartoons = responseData.results.list || []
-
-            if (isLoadMore) {
-                cartoons.value.push(...newCartoons)
-            } else {
-                cartoons.value = newCartoons
-            }
-
-            total.value = responseData.results.total || 0
-        } else {
-            console.error('响应数据格式不正确:', responseData)
-        }
-    }).catch(err => {
-        console.error('获取动画列表失败:', err)
+    if (!result.success) {
         message.error('获取动画列表失败')
-    }).finally(() => {
-        loading.value = false
-        loadingMore.value = false
-    })
+    }
 }
 
 const loadMore = () => {
     if (!hasMore.value || loadingMore.value) return
-    loadCartoons(true)
+    loadCartoons(true, false)
 }
 
-const refreshCartoons = () => {
-    // 同时刷新主题和动画数据
-    localStorage.removeItem(THEME_CACHE_KEY) // 清除主题缓存
-    loadThemes() // 重新加载主题
-    loadCartoons(false) // 重新加载动画
+const refreshCartoons = async () => {
+    // 清除缓存并重新加载
+    const cacheKey = `${ordering.value}_${selectedTheme.value}`
+    cartoonStore.clearCache(cacheKey)
+    cartoonStore.clearThemeCache()
+    await loadThemes(true)
+    await loadCartoons(false, true)
 }
 
 const changeOrdering = (newOrdering) => {
@@ -240,12 +184,12 @@ const goToDetail = (pathWord) => {
 
 // 监听排序方式和主题变化
 watch([ordering, selectedTheme], () => {
-    loadCartoons(false)
+    loadCartoons(false, false)
 })
 
-onMounted(() => {
-    loadThemes()
-    loadCartoons(false)
+onMounted(async () => {
+    await loadThemes()
+    await loadCartoons(false, false)
 })
 </script>
 
