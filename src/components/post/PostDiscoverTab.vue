@@ -10,7 +10,6 @@
             <!-- 筛选区域 -->
             <div class="filter-section">
                 <div class="filter-group">
-                    <div class="filter-label">排序方式</div>
                     <div class="filter-buttons">
                         <a-button :type="currentOrdering === '-datetime_updated' ? 'primary' : 'default'" size="small"
                             :icon="h(FieldTimeOutlined)" @click="changeOrdering('-datetime_updated')">

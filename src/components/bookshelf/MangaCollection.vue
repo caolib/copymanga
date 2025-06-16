@@ -72,7 +72,6 @@
 import { ref, onMounted } from 'vue'
 import { useCollectionStore } from '../../stores/collection'
 import { useMangaNavigation } from '../../composables/useMangaNavigation'
-import { isLoggedIn } from '../../utils/auth'
 import { message } from 'ant-design-vue'
 import { formatDate } from '../../utils/date'
 

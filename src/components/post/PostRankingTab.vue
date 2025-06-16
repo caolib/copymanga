@@ -5,7 +5,7 @@
             <div class="header-actions">
                 <a-button type="primary" size="small" :loading="refreshLoading" :icon="h(ReloadOutlined)"
                     @click="refreshAllData">
-                    刷新全部
+                    刷新
                 </a-button>
                 <span v-if="rankingStore.lastUpdateTime" class="update-time">
                     上次更新: {{ formatDate(rankingStore.lastUpdateTime) }}

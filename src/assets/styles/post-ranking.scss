@@ -9,7 +9,8 @@
         .header-actions {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: start;
+            gap: $spacing-sm;
 
             .update-time {
                 color: $text-secondary;
