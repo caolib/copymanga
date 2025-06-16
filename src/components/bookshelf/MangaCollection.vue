@@ -116,7 +116,8 @@ const fetchCollection = async (forceRefresh = false) => {
     await collectionStore.fetchCollection({
         page: currentPage.value,
         pageSize: pageSize.value,
-        ordering: ordering.value    }, forceRefresh).then(result => {
+        ordering: ordering.value
+    }, forceRefresh).then(result => {
         mangaList.value = result.data || []
         totalCount.value = result.total || 0
 

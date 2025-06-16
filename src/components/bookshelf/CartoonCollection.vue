@@ -121,14 +121,20 @@ const fetchCartoonList = async (forceRefresh = false) => {
             cartoonList.value = result.data || []
             totalCount.value = result.total || 0
 
-            // 通知父组件更新数量和时间
-            emit('update-count', totalCount.value)
-            emit('update-time', new Date())
-
-            // 如果是从缓存读取的，显示提示
-            if (result.fromCache) {
-                console.log('从缓存加载动画收藏数据')
+            if (!result.fromCache) {
+                const currentTime = new Date().toISOString()
+                emit('update-time', currentTime)
+                if (forceRefresh) {
+                    message.success('动画收藏列表已刷新')
+                }
+            } else if (result.fromCache && cartoonCollectionStore.lastUpdateTime) {
+                // 如果是从缓存加载，发送store中的更新时间
+                const lastTime = new Date(cartoonCollectionStore.lastUpdateTime).toISOString()
+                emit('update-time', lastTime)
             }
+
+            // 通知父组件更新数量
+            emit('update-count', totalCount.value)
 
             // 预加载下一页
             cartoonCollectionStore.preloadNextPage(currentPage.value, pageSize.value, ordering.value)

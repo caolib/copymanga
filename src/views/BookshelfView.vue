@@ -4,7 +4,8 @@
             <a-tabs v-model:activeKey="activeTab" @change="handleTabChange" type="card" size="default">
                 <template #rightExtra>
                     <div class="tab-extra-actions">
-                        <a-button type="primary" size="small" @click="refreshCurrentTab" :loading="loading">
+                        <a-button type="primary" size="small" @click="refreshCurrentTab" :loading="loading"
+                            :icon="h(ReloadOutlined)">
                             刷新
                         </a-button> <a-typography-text type="secondary" v-if="getCurrentTabUpdateTime() && !loading"
                             class="update-time">
@@ -73,6 +74,8 @@ import MangaCollection from '../components/bookshelf/MangaCollection.vue'
 import BookCollection from '../components/bookshelf/BookCollection.vue'
 import CartoonCollection from '../components/bookshelf/CartoonCollection.vue'
 import PostCollection from '../components/bookshelf/PostCollection.vue'
+import { h } from 'vue'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 
