@@ -112,32 +112,6 @@ export const useBookHomeStore = defineStore('bookHome', {
         clearPageCache(ordering, page, pageSize, theme) {
             const cacheKey = this.getCacheKey(ordering, page, pageSize, theme)
             delete this.cache[cacheKey]
-        },
-
-        /**
-         * 预加载下一页数据
-         */
-        async preloadNextPage(ordering, currentPage, pageSize, theme, totalCount) {
-            const nextPage = currentPage + 1
-            const maxPage = Math.ceil(totalCount / pageSize)
-
-            if (nextPage <= maxPage) {
-                const nextCacheKey = this.getCacheKey(ordering, nextPage, pageSize, theme)
-
-                // 如果下一页还没有缓存，预加载
-                if (!this.cache[nextCacheKey]) {
-                    try {
-                        await this.fetchBookHome({
-                            ordering,
-                            page: nextPage,
-                            pageSize,
-                            theme
-                        })
-                    } catch (error) {
-                        console.warn('预加载下一页失败:', error)
-                    }
-                }
-            }
         }
     },
 

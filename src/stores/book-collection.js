@@ -144,27 +144,6 @@ export const useBookCollectionStore = defineStore('book-collection', {
         },
 
         /**
-         * 预加载下一页数据
-         */
-        async preloadNextPage(currentPage, pageSize, ordering) {
-            const nextPage = currentPage + 1
-            const nextCacheKey = this.getCacheKey(nextPage, pageSize, ordering)
-
-            // 如果下一页还没有缓存，预加载
-            if (!this.collectionCache[nextCacheKey]) {
-                try {
-                    await this.fetchCollection({
-                        page: nextPage,
-                        pageSize,
-                        ordering
-                    })
-                } catch (error) {
-                    console.warn('预加载下一页失败:', error)
-                }
-            }
-        },
-
-        /**
          * 设置当前轻小说信息到 bookStore 中
          * @param {Object} book 轻小说信息
          */

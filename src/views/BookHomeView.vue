@@ -111,17 +111,6 @@ const fetchBooks = async (forceRefresh = false) => {
             lastUpdateTime.value = new Date().toISOString()
             message.success(forceRefresh ? '轻小说列表已刷新' : '轻小说列表加载成功')
         }
-
-        // 预加载下一页（如果不是强制刷新且有下一页）
-        if (!forceRefresh && currentPage.value < Math.ceil(total.value / pageSize.value)) {
-            bookHomeStore.preloadNextPage(
-                currentOrdering.value,
-                currentPage.value,
-                pageSize.value,
-                currentTheme.value,
-                total.value
-            )
-        }
     } else {
         message.error(result.error?.message || '获取轻小说列表失败，请检查网络连接')
     }

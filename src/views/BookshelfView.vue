@@ -4,12 +4,11 @@
             <a-tabs v-model:activeKey="activeTab" @change="handleTabChange" type="card" size="default">
                 <template #rightExtra>
                     <div class="tab-extra-actions">
-                        <a-button type="primary" size="small" @click="refreshCurrentTab" :loading="loading"
-                            :icon="h(ReloadOutlined)">
+                        <a-button type="primary" size="small" @click="refreshCurrentTab" :loading="loading">
                             刷新
-                        </a-button> <a-typography-text type="secondary" v-if="getCurrentTabUpdateTime() && !loading"
-                            class="update-time">
-                            {{ formatDate(getCurrentTabUpdateTime()) }}
+                        </a-button>
+                        <a-typography-text type="secondary" v-if="lastUpdateTime && !loading" class="update-time">
+                            {{ formatDate(lastUpdateTime) }}
                         </a-typography-text>
                     </div>
                 </template>
@@ -22,7 +21,7 @@
                         </span>
                     </template>
                     <MangaCollection :loading="loading && activeTab === 'manga'" @update-count="handleMangaCountUpdate"
-                        @update-time="(time) => handleUpdateTime('manga', time)" ref="mangaCollectionRef" />
+                        @update-time="handleUpdateTime" ref="mangaCollectionRef" />
                 </a-tab-pane> <!-- 轻小说收藏标签页 -->
                 <a-tab-pane key="book" tab="轻小说收藏">
                     <template #tab>
@@ -32,7 +31,7 @@
                         </span>
                     </template>
                     <BookCollection :loading="loading && activeTab === 'book'" @update-count="handleBookCountUpdate"
-                        @update-time="(time) => handleUpdateTime('book', time)" ref="bookCollectionRef" />
+                        @update-time="handleUpdateTime" ref="bookCollectionRef" />
                 </a-tab-pane>
 
                 <!-- 动画收藏标签页 -->
@@ -44,8 +43,8 @@
                         </span>
                     </template>
                     <CartoonCollection :loading="loading && activeTab === 'cartoon'"
-                        @update-count="handleCartoonCountUpdate"
-                        @update-time="(time) => handleUpdateTime('cartoon', time)" ref="cartoonCollectionRef" />
+                        @update-count="handleCartoonCountUpdate" @update-time="handleUpdateTime"
+                        ref="cartoonCollectionRef" />
                 </a-tab-pane>
 
                 <!-- 写真收藏标签页 -->
@@ -57,7 +56,7 @@
                         </span>
                     </template>
                     <PostCollection :loading="loading && activeTab === 'post'" @update-count="handlePostCountUpdate"
-                        @update-time="(time) => handleUpdateTime('post', time)" ref="postCollectionRef" />
+                        @update-time="handleUpdateTime" ref="postCollectionRef" />
                 </a-tab-pane>
             </a-tabs>
         </div>
@@ -74,22 +73,13 @@ import MangaCollection from '../components/bookshelf/MangaCollection.vue'
 import BookCollection from '../components/bookshelf/BookCollection.vue'
 import CartoonCollection from '../components/bookshelf/CartoonCollection.vue'
 import PostCollection from '../components/bookshelf/PostCollection.vue'
-import { h } from 'vue'
-import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 
 // 标签页状态
 const activeTab = ref('manga')
 const loading = ref(false)
-
-// 各个tab的更新时间
-const lastUpdateTimes = ref({
-    manga: null,
-    book: null,
-    cartoon: null,
-    post: null
-})
+const lastUpdateTime = ref(null)
 
 // 各个收藏类型的数量
 const mangaCount = ref(0)
@@ -154,13 +144,8 @@ const handlePostCountUpdate = (count) => {
 }
 
 // 处理更新时间
-const handleUpdateTime = (tabKey, time) => {
-    lastUpdateTimes.value[tabKey] = time
-}
-
-// 获取当前tab的更新时间
-const getCurrentTabUpdateTime = () => {
-    return lastUpdateTimes.value[activeTab.value]
+const handleUpdateTime = (time) => {
+    lastUpdateTime.value = time
 }
 
 // 组件挂载时检查登录状态

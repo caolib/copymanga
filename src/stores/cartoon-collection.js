@@ -132,18 +132,6 @@ export const useCartoonCollectionStore = defineStore('cartoonCollection', {
         },
 
         /**
-         * 预加载下一页数据
-         */
-        async preloadNextPage(currentPage, pageSize, ordering) {
-            const nextPage = currentPage + 1
-            const maxPage = Math.ceil(this.totalCount / pageSize)
-
-            if (nextPage <= maxPage && !this.hasPageCache(nextPage, pageSize, ordering)) {
-                await this.fetchCartoonCollection({ page: nextPage, pageSize, ordering })
-            }
-        },
-
-        /**
          * 刷新当前页缓存
          */
         async refreshCurrentPage(page, pageSize, ordering) {

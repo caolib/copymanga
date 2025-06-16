@@ -150,7 +150,9 @@ const refreshCollection = () => {
     // 清除当前页缓存
     collectionStore.clearPageCache(currentPage.value, pageSize.value, ordering.value)
     // 强制刷新
-    fetchCollection(true)
+    fetchCollection(true).catch(() => {
+        message.error('刷新失败，请稍后重试')
+    })
 }
 
 // 分页事件处理

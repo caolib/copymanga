@@ -131,13 +131,8 @@ const fetchCartoonList = async (forceRefresh = false) => {
                 // 如果是从缓存加载，发送store中的更新时间
                 const lastTime = new Date(cartoonCollectionStore.lastUpdateTime).toISOString()
                 emit('update-time', lastTime)
-            }
-
-            // 通知父组件更新数量
+            }            // 通知父组件更新数量
             emit('update-count', totalCount.value)
-
-            // 预加载下一页
-            cartoonCollectionStore.preloadNextPage(currentPage.value, pageSize.value, ordering.value)
         } else {
             error.value = result.error?.message || '获取动画收藏列表失败'
             message.error(error.value)
