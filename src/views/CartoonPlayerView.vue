@@ -190,8 +190,7 @@ const initializePlayer = async () => {
         lang: 'zh-cn',
         screenshot: true,
         hotkey: true,
-        preload: 'auto',
-        volume: 0.7,
+        preload: 'auto', volume: 0.7,
         mutex: true,
         contextmenu: [
             {
@@ -199,6 +198,32 @@ const initializePlayer = async () => {
                 link: '#'
             }
         ]
+    })
+    // 在播放器初始化完成后添加自定义控制按钮
+    dp.value.on('loadedmetadata', () => {
+        // 添加向后跳88秒按钮
+        const skipButton = document.createElement('div')
+        skipButton.className = 'dplayer-icon dplayer-skip-forward-icon'
+        skipButton.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 24 24" style="width: 20px; height: 20px;">
+                <path d="M16,18H18V6H16M6,18L14.5,12L6,6V18Z" fill="currentColor"/>
+                <text x="12" y="16" font-size="8" fill="currentColor" text-anchor="middle"></text>
+            </svg>
+        `
+        skipButton.title = '向后跳88秒（跳过开头）'
+        skipButton.style.cursor = 'pointer'
+
+        // 添加点击事件
+        skipButton.addEventListener('click', () => {
+            const currentTime = dp.value.video.currentTime
+            dp.value.seek(currentTime + 88)
+        })
+
+        // 将按钮插入到控制栏
+        const controllerBar = document.querySelector('.dplayer-controller .dplayer-icons.dplayer-icons-left')
+        if (controllerBar) {
+            controllerBar.appendChild(skipButton)
+        }
     })
 }
 
