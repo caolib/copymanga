@@ -1,7 +1,6 @@
 <template>
-    <div class="post-collection">
-        <!-- 操作栏 -->
-        <div class="collection-controls" v-if="!loading || postList.length > 0">
+    <div class="post-collection"> <!-- 操作栏 -->
+        <div class="collection-controls" v-if="(!props.loading && !internalLoading) || postList.length > 0">
             <div class="controls-left">
                 <a-select v-model:value="ordering" @change="handleOrderingChange" style="width: 180px;">
                     <a-select-option value="-datetime_updated">按写真更新时间排序</a-select-option>
@@ -16,12 +15,12 @@
         <a-alert v-if="error" type="error" :message="error" show-icon style="margin-bottom: 16px" />
 
         <!-- 空状态 -->
-        <a-empty v-if="!loading && postList.length === 0" description="还没有收藏任何写真">
+        <a-empty v-if="!props.loading && !internalLoading && postList.length === 0" description="还没有收藏任何写真">
             <a-button type="primary" @click="$router.push('/posts')">去看写真</a-button>
         </a-empty>
 
         <!-- 骨架屏加载状态 -->
-        <a-row v-if="loading && postList.length === 0" :gutter="[20, 20]">
+        <a-row v-if="(props.loading || internalLoading) && postList.length === 0" :gutter="[20, 20]">
             <a-col v-for="n in 18" :key="`skeleton-${n}`" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" :xxl="4">
                 <a-card class="post-card skeleton-card">
                     <a-skeleton :loading="true" active :paragraph="{ rows: 2 }">
@@ -31,10 +30,8 @@
                     </a-skeleton>
                 </a-card>
             </a-col>
-        </a-row>
-
-        <!-- 写真列表 -->
-        <a-row v-else-if="!loading && postList.length > 0" :gutter="[20, 20]">
+        </a-row> <!-- 写真列表 -->
+        <a-row v-else-if="!props.loading && !internalLoading && postList.length > 0" :gutter="[20, 20]">
             <a-col v-for="item in postList" :key="item.uuid" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" :xxl="4">
                 <a-card hoverable class="post-card" @click="goToPost(item)">
                     <div class="post-cover-container">
@@ -76,11 +73,12 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { getPostCollection } from '../../api/post'
+import { usePostCollectionStore } from '../../stores/post-collection'
 import { formatDate } from '../../utils/date'
 import { isLoggedIn } from '../../utils/auth'
 
 const router = useRouter()
+const postCollectionStore = usePostCollectionStore()
 
 const props = defineProps({
     loading: {
@@ -93,16 +91,13 @@ const emit = defineEmits(['update-count', 'update-time'])
 
 // 数据状态
 const postList = ref([])
-const loading = ref(false)
+const internalLoading = ref(false)
 const error = ref('')
 const totalCount = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(18)
 const ordering = ref('-datetime_updated')
 const lastUpdateTime = ref(null)
-
-// 缓存数据
-const postCache = ref({})
 
 const goToPost = (item) => {
     // 安全检查：确保数据完整
@@ -123,73 +118,54 @@ const goToPost = (item) => {
 }
 
 const fetchCollection = async (forceRefresh = false) => {
-    const cacheKey = `${currentPage.value}-${pageSize.value}-${ordering.value}`
-
-    // 检查缓存
-    if (!forceRefresh && postCache.value[cacheKey]) {
-        postList.value = postCache.value[cacheKey].data
-        totalCount.value = postCache.value[cacheKey].total
-        lastUpdateTime.value = postCache.value[cacheKey].lastUpdateTime
-
-        emit('update-count', totalCount.value)
-        if (lastUpdateTime.value) {
-            emit('update-time', lastUpdateTime.value)
-        }
+    if (!isLoggedIn()) {
+        error.value = '请先登录'
         return
     }
 
-    loading.value = true
+    internalLoading.value = true
     error.value = ''
 
-    try {
-        const response = await getPostCollection(
-            (currentPage.value - 1) * pageSize.value,
-            pageSize.value,
-            1,
-            ordering.value
-        )
+    await postCollectionStore.fetchPostCollection({
+        page: currentPage.value,
+        pageSize: pageSize.value,
+        ordering: ordering.value
+    }, forceRefresh).then(result => {
+        if (result.success) {
+            postList.value = result.data || []
+            totalCount.value = result.total || 0
 
-        if (response && response.code === 200 && response.results) {
-            const data = response.results.list || []
-            const total = response.results.total || 0
-
-            postList.value = data
-            totalCount.value = total
-            lastUpdateTime.value = new Date().toISOString()
-
-            // 缓存数据
-            postCache.value[cacheKey] = {
-                data,
-                total,
-                lastUpdateTime: lastUpdateTime.value
+            if (!result.fromCache) {
+                lastUpdateTime.value = new Date().toISOString()
+                emit('update-time', lastUpdateTime.value)
+                if (forceRefresh) {
+                    message.success('写真收藏列表已刷新')
+                }
+            } else if (result.fromCache && postCollectionStore.lastUpdateTime) {
+                // 如果是从缓存加载，发送store中的更新时间
+                lastUpdateTime.value = new Date(postCollectionStore.lastUpdateTime).toISOString()
+                emit('update-time', lastUpdateTime.value)
             }
 
             // 发送数量更新事件
             emit('update-count', totalCount.value)
-            emit('update-time', lastUpdateTime.value)
-
-            if (forceRefresh) {
-                message.success('写真收藏列表已刷新')
-            }
         } else {
-            throw new Error('API响应格式错误')
+            throw new Error(result.error?.message || '获取数据失败')
         }
-
-    } catch (err) {
+    }).catch(err => {
         console.error('获取写真收藏列表失败:', err)
-        error.value = err.message || '网络错误'
-        message.error('获取写真收藏列表失败: ' + (err.message || '网络错误'))
+        error.value = err.message || '获取写真收藏列表失败'
         totalCount.value = 0
         postList.value = []
         emit('update-count', 0)
-    } finally {
-        loading.value = false
-    }
+    }).finally(() => {
+        internalLoading.value = false
+    })
 }
 
 const refreshCollection = () => {
-    // 清除缓存
-    postCache.value = {}
+    // 清除store缓存
+    postCollectionStore.clearCache()
     fetchCollection(true)
 }
 
@@ -203,14 +179,14 @@ const handlePageSizeChange = (current, size) => {
     currentPage.value = 1
     pageSize.value = size
     // 页面大小改变，清除缓存
-    postCache.value = {}
+    postCollectionStore.clearCache()
     fetchCollection()
 }
 
 const handleOrderingChange = () => {
     currentPage.value = 1
     // 排序改变，清除缓存
-    postCache.value = {}
+    postCollectionStore.clearCache()
     fetchCollection()
 }
 
