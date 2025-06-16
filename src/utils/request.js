@@ -69,8 +69,8 @@ request.interceptors.response.use(
                     message: '账号被检测到使用了第三方软件：' + response.data.message,
                     placement: 'bottomRight'
                 })
+                return Promise.reject(new Error('需要配置请求头'))
             }
-            return Promise.reject(new Error('需要配置请求头'))
         }
 
         return response.data
@@ -90,6 +90,7 @@ request.interceptors.response.use(
         }
 
         if (error.code === 'ERR_NETWORK') {
+            message.error("好像没连上网喔...")
             msg = '网络连接失败，请检查网络设置'
         }
 

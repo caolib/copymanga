@@ -15,7 +15,20 @@
             <a-form v-if="isLogin" :model="loginForm" name="login" @finish="handleLogin" autocomplete="off"
                 layout="vertical" class="auth-form">
                 <a-form-item name="username" :rules="[{ required: true, message: '请输入用户名!' }]">
-                    <a-input v-model:value="loginForm.username" size="large" placeholder="请输入用户名" />
+                    <a-auto-complete v-model:value="loginForm.username" size="large" placeholder="请输入用户名或选择已保存的账号"
+                        allow-clear :options="accountOptions" @change="handleUsernameChange"
+                        @select="handleUsernameSelect">
+                        <template #option="item">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                                <span>{{ item.value }}</span>
+                                <a-button type="text" size="small" danger @click.stop="removeSavedAccount(item.value)"
+                                    :icon="h(CloseOutlined)"
+                                    style="padding: 0; height: auto; border: none; font-size: 12px;">
+                                </a-button>
+                            </div>
+                        </template>
+                    </a-auto-complete>
                 </a-form-item>
 
                 <a-form-item name="password" :rules="[{ required: true, message: '请输入密码!' }]">
@@ -23,8 +36,8 @@
                 </a-form-item>
 
                 <a-form-item>
-                    <a-checkbox v-model:checked="loginForm.rememberPassword">
-                        记住密码
+                    <a-checkbox v-model:checked="autoLoginEnabled">
+                        自动登录（下次启动时自动登录最近使用的账号）
                     </a-checkbox>
                 </a-form-item>
 
@@ -66,11 +79,12 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed, h } from 'vue'
 import { useRouter } from 'vue-router'
 import { login, register } from '../api/login'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
+import { CloseOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -81,8 +95,18 @@ const isLogin = ref(true) // 默认显示登录表单
 // 登录表单数据
 const loginForm = reactive({
     username: '',
-    password: '',
-    rememberPassword: true
+    password: ''
+})
+
+// 自动登录状态
+const autoLoginEnabled = ref(true)
+
+// 计算属性：生成自动完成选项
+const accountOptions = computed(() => {
+    return userStore.savedAccounts.map(account => ({
+        value: account.username,
+        label: account.username
+    }))
 })
 
 // 注册表单数据
@@ -120,13 +144,58 @@ const confirmPasswordRules = [
 ]
 
 onMounted(() => {
-    // 自动填充账号密码
-    if (userStore.username && userStore.password) {
-        loginForm.username = userStore.username
-        loginForm.password = userStore.password
-        loginForm.rememberPassword = true
+    // 初始化自动登录状态
+    autoLoginEnabled.value = userStore.autoLogin
+
+    // 如果用户已经登录，直接跳转
+    if (userStore.isLoggedIn && userStore.token) {
+        router.push('/')
+        return
+    }
+
+    // 如果启用自动登录且有保存的账号，尝试自动登录
+    if (userStore.autoLogin && userStore.savedAccounts.length > 0) {
+        const recentAccount = userStore.getRecentAccount()
+        if (recentAccount && recentAccount.username && recentAccount.password) {
+            loginForm.username = recentAccount.username
+            loginForm.password = recentAccount.password
+            // 延迟执行自动登录，避免在组件还未完全挂载时执行
+            setTimeout(() => {
+                handleLogin()
+            }, 500)
+        }
     }
 })
+
+// 处理用户名选择变化
+const handleUsernameChange = (username) => {
+    const selectedAccount = userStore.savedAccounts.find(account => account.username === username)
+    if (selectedAccount) {
+        loginForm.password = selectedAccount.password
+    } else {
+        // 如果是手动输入的用户名，清空密码
+        loginForm.password = ''
+    }
+}
+
+// 处理用户名选择（从下拉列表选择）
+const handleUsernameSelect = (username) => {
+    const selectedAccount = userStore.savedAccounts.find(account => account.username === username)
+    if (selectedAccount) {
+        loginForm.password = selectedAccount.password
+    }
+}
+
+// 删除保存的账号
+const removeSavedAccount = (username) => {
+    userStore.removeSavedAccount(username)
+    message.success(`已删除账号: ${username}`)
+    // 如果删除的是当前选中的账号，清空表单
+    if (loginForm.username === username) {
+        loginForm.username = ''
+        loginForm.password = ''
+    }
+}
 
 // 切换到登录模式
 const switchToLogin = () => {
@@ -145,33 +214,32 @@ const handleLogin = () => {
     loading.value = true
     errorMessage.value = ''
 
+    // 保存自动登录设置
+    userStore.setAutoLogin(autoLoginEnabled.value)
+
     login(loginForm.username, loginForm.password).then(result => {
-        // 保存用户信息到 Pinia 存储并持久化
+        // 保存用户信息到 Pinia 存储并持久化（使用正确的API字段）
         userStore.setUser({
             username: result.results.username,
             token: result.results.token,
-            email: result.results.email || '',
-            avatar: 'https://s3.mangafuna.xyz/' + result.results.avatar || '',
-            description: result.results.description || '',
-            createdAt: result.results.created_at || new Date().toISOString(),
-            lastLoginAt: new Date().toISOString(),
-            stats: {
-                totalRead: result.results.stats?.total_read || 0,
-                totalChapters: result.results.stats?.total_chapters || 0,
-                totalTime: result.results.stats?.total_time || 0,
-                favorites: result.results.stats?.favorites || 0
-            },
-            password: loginForm.rememberPassword ? loginForm.password : ''
+            user_id: result.results.user_id,
+            nickname: result.results.nickname,
+            avatar: result.results.avatar,
+            datetime_created: result.results.datetime_created,
+            ticket: result.results.ticket,
+            reward_ticket: result.results.reward_ticket,
+            downloads: result.results.downloads,
+            vip_downloads: result.results.vip_downloads,
+            reward_downloads: result.results.reward_downloads,
+            ads_vip_end: result.results.ads_vip_end,
+            post_vip_end: result.results.post_vip_end,
+            password: loginForm.password // 总是保存密码
         })
 
-        // 如果未勾选记住密码，清空pinia中的password
-        if (!loginForm.rememberPassword) {
-            userStore.password = ''
-        }
-
         message.success('登录成功')
-        // 登录成功后跳转到首页
-        router.push('/')
+        // 登录成功后回到上个界面或首页
+        const redirectPath = router.currentRoute.value.query.redirect || '/'
+        router.push(redirectPath)
     }).catch(error => {
         console.error('登录失败', error)
         errorMessage.value = error.message;

@@ -360,3 +360,29 @@
     border-radius: 50%;
     z-index: 10;
 }
+
+// 多账号切换样式
+.account-switch-item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: 2px 0;
+
+    .account-name {
+        font-size: $font-sm;
+        color: $text-secondary;
+
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+}
+
+.user-avatar-dropdown {
+    cursor: pointer;
+    transition: $transition-normal;
+
+    &:hover {
+        opacity: 0.8;
+    }
+}

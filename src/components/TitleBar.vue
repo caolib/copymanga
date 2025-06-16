@@ -6,20 +6,39 @@
                 <template v-if="isLoggedInComputed">
                     <a-dropdown trigger="hover" placement="bottomRight">
                         <span class="user-avatar-dropdown">
-                            <a-avatar :src="userInfo?.avatar || '/logo.png'"
+                            <a-avatar :src="getAvatarUrl(userInfo?.avatar) || '/logo.png'"
                                 :alt="userInfo?.nickname || userInfo?.username || '用户头像'" size="32" />
                         </span>
-                        <template #overlay> <a-menu>
+                        <template #overlay>
+                            <a-menu>
                                 <a-menu-item key="profile" @click="goToProfile">
                                     <UserOutlined class="menu-icon" /> 个人中心
                                 </a-menu-item>
+                                <a-menu-divider v-if="userStore.savedAccounts.length > 1" />
+                                <!-- 多账号列表 -->
+                                <template v-if="userStore.savedAccounts.length > 1">
+                                    <a-menu-item-group title="切换账号">
+                                        <a-menu-item
+                                            v-for="account in userStore.savedAccounts.filter(acc => acc.username !== userStore.username)"
+                                            :key="'switch-' + account.username"
+                                            @click="switchAccount(account.username)">
+                                            <div class="account-switch-item">
+                                                <a-avatar :src="getAvatarUrl(account.userInfo?.avatar)" size="small" />
+                                                <span class="account-name">{{ account.userInfo?.nickname ||
+                                                    account.username }}</span>
+                                            </div>
+                                        </a-menu-item>
+                                    </a-menu-item-group>
+                                    <a-menu-divider />
+                                </template>
                                 <a-menu-item key="logout" style="color:#ff6b6b" @click="handleLogout">
                                     <LogoutOutlined class="menu-icon" /> 退出登录
                                 </a-menu-item>
                             </a-menu>
                         </template>
                     </a-dropdown>
-                </template> <template v-else>
+                </template>
+                <template v-else>
                     <router-link to="/login" class="nav-link login-link">登录</router-link>
                 </template>
             </div>
@@ -95,6 +114,7 @@ import { isLoggedIn, logout } from '../utils/auth'
 import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
 import { useAppStore } from '../stores/app'
+import { message } from 'ant-design-vue'
 import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
@@ -172,6 +192,23 @@ const handleLogout = () => {
 
 const goToProfile = () => {
     router.push('/profile')
+}
+
+// 获取头像完整URL
+const getAvatarUrl = (avatar) => {
+    if (!avatar) return '/logo.png'
+    if (avatar.startsWith('http')) return avatar
+    return `https://s3.mangafuna.xyz/${avatar}`
+}
+
+// 切换账号
+const switchAccount = (username) => {
+    const account = userStore.switchToAccount(username)
+    if (account) {
+        message.info(`哈喽，${account.userInfo.nickname || username}，切换后账号个人收藏数据等需要刷新才能看到当前账号的信息哦`)
+    } else {
+        message.error('切换账号失败，请重新登录')
+    }
 }
 </script>
 
