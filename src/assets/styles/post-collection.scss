@@ -9,11 +9,9 @@
         margin-bottom: $spacing-xs;
         background: $bg-color-light;
         border-radius: $border-radius-medium;
-        border: 1px solid $border-color;
 
         @include dark-theme {
-            background: $dark-bg-elevated;
-            border-color: $dark-border-color;
+            background: $dark-bg-primary;
         }
         .controls-left {
             display: flex;

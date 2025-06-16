@@ -6,11 +6,10 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: $spacing-xs;
-        background: $bg-color-light;
         border-radius: $border-radius-medium;
 
         @include dark-theme {
-            background: $dark-bg-elevated;
+            background: $dark-bg-primary;
         }
         .controls-left {
             display: flex;

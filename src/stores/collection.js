@@ -134,18 +134,6 @@ export const useCollectionStore = defineStore('collection', {
         },
 
         /**
-         * 预加载下一页数据
-         */
-        async preloadNextPage(currentPage, pageSize, ordering) {
-            const nextPage = currentPage + 1
-            const maxPage = Math.ceil(this.totalCount / pageSize)
-
-            if (nextPage <= maxPage && !this.hasPageCache(nextPage, pageSize, ordering)) {
-                await this.fetchCollection({ page: nextPage, pageSize, ordering })
-            }
-        },
-
-        /**
          * 设置当前漫画信息到 mangaStore 中
          * @param {Object} manga 漫画信息
          */
@@ -158,5 +146,11 @@ export const useCollectionStore = defineStore('collection', {
                 mangaStore.pathWord = manga.path_word
             }
         }
+    },
+
+    persist: {
+        key: 'collection-store',
+        storage: localStorage,
+        paths: ['collectionCache', 'totalCount', 'cacheParams', 'lastUpdateTime']
     }
 })

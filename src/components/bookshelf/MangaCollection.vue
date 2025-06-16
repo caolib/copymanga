@@ -113,13 +113,10 @@ const fetchCollection = async (forceRefresh = false) => {
     error.value = ''
 
     // 使用 store 获取数据
-    const result = await collectionStore.fetchCollection({
+    await collectionStore.fetchCollection({
         page: currentPage.value,
         pageSize: pageSize.value,
-        ordering: ordering.value
-    }, forceRefresh)
-
-    if (result.success) {
+        ordering: ordering.value    }, forceRefresh).then(result => {
         mangaList.value = result.data || []
         totalCount.value = result.total || 0
 
@@ -129,21 +126,21 @@ const fetchCollection = async (forceRefresh = false) => {
             if (forceRefresh) {
                 message.success('漫画收藏列表已刷新')
             }
+        } else if (result.fromCache && collectionStore.lastUpdateTime) {
+            // 如果是从缓存加载，发送store中的更新时间
+            lastUpdateTime.value = new Date(collectionStore.lastUpdateTime).toISOString()
+            emit('update-time', lastUpdateTime.value)
         }
 
         // 发送数量更新事件
         emit('update-count', totalCount.value)
-
-        // 预加载下一页（如果不是强制刷新且有下一页）
-        if (!forceRefresh && currentPage.value < Math.ceil(totalCount.value / pageSize.value)) {
-            collectionStore.preloadNextPage(currentPage.value, pageSize.value, ordering.value)
-        }
-    } else {
-        error.value = result.error?.message || '获取收藏列表失败'
+    }).catch(err => {
+        console.error('获取收藏列表失败:', err)
+        error.value = err.message || '获取收藏列表失败'
         totalCount.value = 0
         mangaList.value = []
         emit('update-count', 0)
-    }
+    })
 
     internalLoading.value = false
 }
@@ -152,9 +149,7 @@ const refreshCollection = () => {
     // 清除当前页缓存
     collectionStore.clearPageCache(currentPage.value, pageSize.value, ordering.value)
     // 强制刷新
-    fetchCollection(true).catch(() => {
-        message.error('刷新失败，请稍后重试')
-    })
+    fetchCollection(true)
 }
 
 // 分页事件处理
