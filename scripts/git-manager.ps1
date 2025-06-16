@@ -27,10 +27,10 @@ function Get-CommitsBetweenTags {
         if ($LASTEXITCODE -ne 0) {
             throw "无法获取提交记录"
         }
-        
-        $commitList = @{
+          $commitList = @{
             feat = @()
             fix = @()
+            others = @()
         }
         
         foreach ($commit in $commits) {
@@ -41,18 +41,21 @@ function Get-CommitsBetweenTags {
                     ShortHash = $parts[1]
                     Message = $parts[2]
                 }
-                
-                # 过滤合并提交
+                  # 过滤合并提交
                 if ($commitObj.Message -match "^Merge (branch|pull request)") {
                     continue
                 }
                 
-                # 只包含 feat 和 fix 类型的提交
+                # 分类提交类型
                 if ($commitObj.Message -match "^(✨\s+)?feat(\(.+\))?:\s*(.+)$") {
                     $commitList.feat += $commitObj
                 }
                 elseif ($commitObj.Message -match "^(🐛\s+)?fix(\(.+\))?:\s*(.+)$") {
                     $commitList.fix += $commitObj
+                }
+                else {
+                    # 其他类型的提交都放入 others 分类
+                    $commitList.others += $commitObj
                 }
             }
         }
