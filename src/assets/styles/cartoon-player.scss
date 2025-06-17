@@ -16,6 +16,7 @@
             border-radius: 8px;
             overflow: hidden;
         }
+
         .video-container {
             position: relative;
             width: 100%;
@@ -48,6 +49,7 @@
                 border-radius: 0 !important;
                 background: #000;
             }
+
             &:-ms-fullscreen {
                 width: 100vw !important;
                 height: 100vh !important;
@@ -55,6 +57,7 @@
                 border-radius: 0 !important;
                 background: #000;
             }
+
             .dplayer-container {
                 width: 100%;
                 height: auto;
@@ -97,6 +100,46 @@
                 padding: 12px 0;
                 border-top: 1px solid $border-color;
                 border-bottom: 1px solid $border-color;
+                flex-wrap: nowrap;
+
+                .line-controls {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    width: 100%;
+                    flex-wrap: nowrap;
+
+                    .line-selection {
+                        flex: 1;
+                        margin-right: 16px;
+                        min-width: 0;
+                    }
+
+                    .episode-navigation {
+                        display: flex;
+                        gap: 8px;
+                        flex-shrink: 0;
+
+                        .ant-btn {
+                            height: 32px;
+                            padding: 4px 16px;
+                            font-size: 14px;
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                            white-space: nowrap;
+
+                            &:disabled {
+                                opacity: 0.5;
+                                cursor: not-allowed;
+                            }
+
+                            .anticon {
+                                font-size: 14px;
+                            }
+                        }
+                    }
+                }
 
                 .ant-typography-text {
                     color: $text-primary;
@@ -188,6 +231,29 @@
                 border-color: $dark-border-color;
             }
 
+            .line-controls {
+                .line-selection {
+                    @include dark-theme {
+                        color: $dark-text-primary;
+                    }
+                }
+
+                .episode-navigation {
+                    .ant-btn {
+                        @include dark-theme {
+                            background: $dark-bg-primary;
+                            border-color: $dark-border-color;
+                            color: $dark-text-primary;
+
+                            &:hover {
+                                border-color: $primary-color;
+                                color: $primary-color;
+                            }
+                        }
+                    }
+                }
+            }
+
             .ant-typography-text {
                 @include dark-theme {
                     color: $dark-text-primary;
@@ -233,60 +299,6 @@
         .ant-result-subtitle {
             @include dark-theme {
                 color: $dark-text-secondary;
-            }
-        }
-    }
-}
-
-// 响应式设计
-@media (max-width: 768px) {
-    .cartoon-player-container {
-        padding: 8px;
-
-        .player-card {
-            .video-container {
-                .video-player {
-                    min-height: 250px;
-                }
-            }
-
-            .video-info {
-                .line-selector {
-                    flex-direction: column;
-                    align-items: flex-start;
-                    gap: 8px;
-
-                    .ant-radio-group {
-                        margin-left: 0 !important;
-                        width: 100%;
-
-                        .ant-radio-button-wrapper {
-                            flex: 1;
-                            text-align: center;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@media (max-width: 480px) {
-    .cartoon-player-container {
-        .player-card {
-            .video-info {
-                .ant-typography-title {
-                    font-size: 18px !important;
-                }
-
-                .line-selector {
-                    .ant-radio-group {
-                        .ant-radio-button-wrapper {
-                            font-size: 12px;
-                            padding: 4px 8px;
-                        }
-                    }
-                }
             }
         }
     }

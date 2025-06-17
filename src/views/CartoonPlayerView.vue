@@ -19,16 +19,31 @@
                 <div class="video-info" v-if="videoData.name">
                     <a-typography-title :level="3">{{ cartoonData.name }}</a-typography-title>
                     <a-typography-title :level="4" type="secondary">{{ videoData.name }}</a-typography-title>
-
-                    <!-- 线路选择 -->
+                    <!-- 线路选择和集数导航 -->
                     <div class="line-selector" v-if="videoData.lines">
-                        <a-typography-text strong>选择线路：</a-typography-text>
-                        <a-radio-group v-model:value="currentLine" @change="onLineChange" style="margin-left: 12px;">
-                            <a-radio-button v-for="(line, key) in videoData.lines" :key="key" :value="key"
-                                :disabled="!line.config">
-                                {{ line.name }}
-                            </a-radio-button>
-                        </a-radio-group>
+                        <div class="line-controls">
+                            <div class="line-selection">
+                                <a-typography-text strong>选择线路：</a-typography-text>
+                                <a-radio-group v-model:value="currentLine" @change="onLineChange"
+                                    style="margin-left: 12px;">
+                                    <a-radio-button v-for="(line, key) in videoData.lines" :key="key" :value="key"
+                                        :disabled="!line.config">
+                                        {{ line.name }}
+                                    </a-radio-button>
+                                </a-radio-group>
+                            </div>
+
+                            <!-- 上一集/下一集按钮 -->
+                            <div class="episode-navigation">
+                                <a-button :disabled="!prevChapter" @click="playPrevEpisode">
+                                    <LeftOutlined /> 上一集
+                                </a-button>
+                                <a-button :disabled="!nextChapter" @click="playNextEpisode">
+                                    下一集
+                                    <RightOutlined />
+                                </a-button>
+                            </div>
+                        </div>
                     </div>
 
                 </div><!-- 错误提示 -->
@@ -46,15 +61,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import Hls from 'hls.js'
 import DPlayer from 'dplayer'
 import { getVideoByChapterId } from '../api/cartoon'
+import { useCartoonPlayerStore } from '../stores/cartoon-player'
 
 const route = useRoute()
 const router = useRouter()
+const cartoonPlayerStore = useCartoonPlayerStore()
 
 const dplayerRef = ref(null)
 const loading = ref(false)
@@ -66,6 +85,24 @@ const playStatus = ref(null)
 
 const cartoonData = ref({})
 const videoData = ref({})
+
+// 从Pinia store中计算上一集和下一集信息
+const adjacentChapters = computed(() => {
+    const currentChapterId = route.params.chapterId
+    return cartoonPlayerStore.getAdjacentChapters(currentChapterId)
+})
+
+const prevChapter = computed(() => adjacentChapters.value.prevChapter)
+const nextChapter = computed(() => adjacentChapters.value.nextChapter)
+
+// 调试输出（可以在开发时查看）
+watch([prevChapter, nextChapter], ([prev, next]) => {
+    console.log('章节导航状态:', {
+        prevChapter: prev?.name || '无',
+        nextChapter: next?.name || '无',
+        currentChapter: route.params.chapterId
+    })
+})
 
 const fetchVideoData = (line) => {
     const { pathWord, chapterId } = route.params
@@ -275,6 +312,44 @@ const retryLoad = () => {
     fetchVideoData(currentLine.value)
 }
 
+// 播放上一集
+const playPrevEpisode = () => {
+    if (!prevChapter.value) {
+        message.warning('已经是第一集了')
+        return
+    }
+
+    router.push({
+        name: 'CartoonPlayer',
+        params: {
+            pathWord: route.params.pathWord,
+            chapterId: prevChapter.value.uuid
+        },
+        query: {
+            line: currentLine.value
+        }
+    })
+}
+
+// 播放下一集
+const playNextEpisode = () => {
+    if (!nextChapter.value) {
+        message.warning('已经是最后一集了')
+        return
+    }
+
+    router.push({
+        name: 'CartoonPlayer',
+        params: {
+            pathWord: route.params.pathWord,
+            chapterId: nextChapter.value.uuid
+        },
+        query: {
+            line: currentLine.value
+        }
+    })
+}
+
 onMounted(() => {
     fetchVideoData()
 })
@@ -287,6 +362,22 @@ onUnmounted(() => {
     if (hls.value) {
         hls.value.destroy()
         hls.value = null
+    }
+})
+
+watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
+    if (newChapterId && newChapterId !== oldChapterId) {
+        // 清理之前的播放器
+        if (dp.value) {
+            dp.value.destroy()
+            dp.value = null
+        }
+        if (hls.value) {
+            hls.value.destroy()
+            hls.value = null
+        }
+        // 重新获取数据
+        fetchVideoData(route.query.line)
     }
 })
 </script>

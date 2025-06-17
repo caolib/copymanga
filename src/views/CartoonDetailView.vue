@@ -145,9 +145,11 @@ import { PlayCircleOutlined, HeartOutlined, HeartFilled } from '@ant-design/icon
 import { getCartoonInfo, getCartoonChapters, collectCartoon } from '../api/cartoon'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
+import { useCartoonPlayerStore } from '../stores/cartoon-player'
 
 const route = useRoute()
 const router = useRouter()
+const cartoonPlayerStore = useCartoonPlayerStore()
 
 const cartoon = ref({})
 const chapters = ref([])
@@ -209,6 +211,9 @@ const playChapter = (chapter) => {
         message.warning('章节信息异常，无法播放')
         return
     }
+
+    // 使用Pinia store缓存当前动画的章节列表
+    cartoonPlayerStore.setChapters(route.params.pathWord, chapters.value)
 
     // 选择默认线路（优先选择可用的线路）
     const availableLine = chapter.lines?.find(line => line.config)
