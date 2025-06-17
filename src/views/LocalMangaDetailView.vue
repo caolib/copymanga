@@ -64,9 +64,7 @@
                         </div>
                     </a-col>
                 </a-row>
-            </a-skeleton>
-
-            <a-divider />
+            </a-skeleton> <a-divider />
 
             <a-row justify="space-between" align="middle" style="margin-bottom: 12px;">
                 <a-col>
@@ -90,16 +88,24 @@
                 </a-col>
             </a-row>
 
+            <!-- 分组 Tab 菜单 -->
+            <a-tabs v-if="groupOptions.length > 1" v-model:activeKey="selectedGroup" @change="handleGroupChange"
+                style="margin-bottom: 16px;">
+                <a-tab-pane v-for="group in groupOptions" :key="group.value" :tab="group.label">
+                </a-tab-pane>
+            </a-tabs>
+
             <!-- 章节列表 -->
             <a-skeleton :loading="chaptersLoading" active>
-                <div v-if="chapters.length === 0 && !chaptersLoading" class="empty-chapters">
+                <div v-if="currentGroupChapters.length === 0 && !chaptersLoading" class="empty-chapters">
                     <a-empty description="暂无已下载的章节">
                         <template #image>
                             <img src="/logo.png" alt="暂无数据" style="width: 64px; height: 64px;" />
                         </template>
                     </a-empty>
-                </div> <a-row v-else :gutter="[12, 12]">
-                    <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in sortedChapters"
+                </div>
+                <a-row v-else :gutter="[12, 12]">
+                    <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in currentGroupChapters"
                         :key="chapter.uuid">
                         <a-card :hoverable="true" style="text-align:center; padding:0;" size="small"
                             :body-style="{ padding: '12px 6px' }" class="chapter-card">
@@ -147,11 +153,44 @@ const chaptersLoading = ref(false)
 const manga = ref({})
 const chapters = ref([])
 const isAscending = ref(false)
+const selectedGroup = ref('default')
 
 // 计算属性
 const sortedChapters = computed(() => {
     const sorted = [...chapters.value]
     return isAscending.value ? sorted : sorted.reverse()
+})
+
+// 按分组组织章节
+const chapterGroups = computed(() => {
+    const groups = {}
+    chapters.value.forEach(chapter => {
+        const group = chapter.group || 'default'
+        if (!groups[group]) {
+            groups[group] = []
+        }
+        groups[group].push(chapter)
+    })
+
+    return groups
+})
+
+// 当前选中分组的章节
+const currentGroupChapters = computed(() => {
+    const groupChapters = chapterGroups.value[selectedGroup.value] || []
+    // 对当前分组的章节进行排序
+    const sorted = [...groupChapters]
+    return isAscending.value ?
+        sorted.sort((a, b) => (a.downloadTime || '').localeCompare(b.downloadTime || '')) :
+        sorted.sort((a, b) => (b.downloadTime || '').localeCompare(a.downloadTime || ''))
+})
+
+// 分组选项
+const groupOptions = computed(() => {
+    return Object.keys(chapterGroups.value).map(group => ({
+        label: group === 'default' ? '默认' : group,
+        value: group
+    }))
 })
 
 // 页面生命周期
@@ -194,6 +233,12 @@ const loadChapters = async (mangaUuid) => {
     await getLocalMangaChapters(mangaUuid).then(data => {
         chapters.value = data || []
         console.log('本地章节列表:', chapters.value)
+
+        // 设置默认选中的分组
+        if (chapters.value.length > 0) {
+            const availableGroups = [...new Set(chapters.value.map(chapter => chapter.group || 'default'))]
+            selectedGroup.value = availableGroups.includes('default') ? 'default' : availableGroups[0]
+        }
     }).catch(error => {
         console.error('获取本地章节列表失败:', error)
         message.error('获取本地章节列表失败')
@@ -206,6 +251,11 @@ const loadChapters = async (mangaUuid) => {
 // 切换排序
 const toggleSortOrder = () => {
     isAscending.value = !isAscending.value
+}
+
+// 分组切换处理
+const handleGroupChange = (key) => {
+    selectedGroup.value = key
 }
 
 // 阅读章节
