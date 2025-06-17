@@ -52,6 +52,7 @@
                 <router-link to="/bookshelf" class="nav-link" v-if="isLoggedInComputed">
                     <StarFilled class="nav-icon collection-icon" />书架
                 </router-link>
+                <router-link to="/downloads" class="nav-link">下载</router-link>
                 <router-link to="/topics" class="nav-link">专题</router-link>
                 <router-link to="/settings" class="nav-link settings-link">
                     <SettingFilled class="nav-icon" />
@@ -115,7 +116,7 @@ import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
 import { useAppStore } from '../stores/app'
 import { message } from 'ant-design-vue'
-import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled } from '@ant-design/icons-vue'
+import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled, DownloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
 const router = useRouter()

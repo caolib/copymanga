@@ -140,7 +140,7 @@ function getAuthorMangaList(author, limit = 21, offset = 0, ordering = '-datetim
  * 下载章节
  * @param {string} pathWord 漫画路径标识
  * @param {string} chapterId 章节ID
- * @param {Object} chapterInfo 章节基本信息
+ * @param {Object} chapterInfo 章节基本信息，包含mangaDetail
  * @param {Function} onProgress 进度回调
  * @returns {Promise}
  */
@@ -150,7 +150,7 @@ async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
             const chapterData = response.results.chapter
             const comicData = response.results.comic
 
-            // 构建下载信息
+            // 构建下载信息，优先使用传递的漫画详情
             const downloadInfo = {
                 mangaUuid: comicData.uuid,
                 mangaName: comicData.name,
@@ -162,7 +162,19 @@ async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
                     index: index,
                     width: image.width || null,
                     height: image.height || null
-                }))
+                })),
+                // 使用传递的漫画详情，如果没有则使用API返回的基本信息
+                mangaDetail: chapterInfo.mangaDetail || {
+                    uuid: comicData.uuid,
+                    name: comicData.name,
+                    cover: '',
+                    author: [],
+                    theme: [],
+                    status: null,
+                    popular: null,
+                    brief: null,
+                    datetime_updated: null
+                }
             }
 
             // 开始下载
@@ -209,6 +221,32 @@ async function getDownloadedChapterInfo(mangaUuid, groupPathWord, chapterUuid) {
     return await downloadManager.getDownloadedChapterInfo(mangaUuid, groupPathWord, chapterUuid)
 }
 
+/**
+ * 获取已下载的漫画列表
+ * @returns {Promise<Array>}
+ */
+async function getDownloadedMangaList() {
+    return await downloadManager.getDownloadedMangaList()
+}
+
+/**
+ * 获取本地漫画详情
+ * @param {string} mangaUuid 漫画UUID
+ * @returns {Promise<Object|null>}
+ */
+async function getLocalMangaDetail(mangaUuid) {
+    return await downloadManager.getLocalMangaDetail(mangaUuid)
+}
+
+/**
+ * 获取本地漫画的章节列表
+ * @param {string} mangaUuid 漫画UUID
+ * @returns {Promise<Array>}
+ */
+async function getLocalMangaChapters(mangaUuid) {
+    return await downloadManager.getLocalMangaChapters(mangaUuid)
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
@@ -221,5 +259,8 @@ export {
     getAuthorMangaList,
     downloadChapter,
     isChapterDownloaded,
-    getDownloadedChapterInfo
+    getDownloadedChapterInfo,
+    getDownloadedMangaList,
+    getLocalMangaDetail,
+    getLocalMangaChapters
 }

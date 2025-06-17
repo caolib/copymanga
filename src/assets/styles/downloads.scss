@@ -1,0 +1,187 @@
+@use "./variables" as *;
+
+.downloads-container {
+    padding: 24px;
+    min-height: 100vh;
+    background-color: $bg-color;
+}
+
+.downloads-card {
+    .ant-card-head {
+        border-bottom: 1px solid $border-color;
+    }
+
+    .downloads-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+        h2 {
+            margin: 0;
+            color: $text-primary;
+            font-size: 20px;
+            font-weight: 600;
+        }
+    }
+}
+
+.manga-downloads {
+    .empty-state {
+        text-align: center;
+        padding: 48px 0;
+    }
+
+    .manga-grid {
+        .manga-card {
+            height: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid $border-color;
+
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+                border-color: $primary-color;
+            }
+
+            .manga-cover-container {
+                position: relative;
+                height: 240px;
+                overflow: hidden;
+                border-radius: $border-radius-small;
+
+                .manga-cover {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    transition: transform 0.3s ease;
+                }
+
+                .manga-overlay {
+                    position: absolute;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+                    padding: 16px 12px 12px;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+
+                    .download-info {
+                        color: white;
+                        font-size: 12px;
+
+                        .chapter-count {
+                            background: rgba(255, 255, 255, 0.2);
+                            padding: 4px 8px;
+                            border-radius: $border-radius-small;
+                            backdrop-filter: blur(4px);
+                        }
+                    }
+                }
+
+                &:hover {
+                    .manga-cover {
+                        transform: scale(1.05);
+                    }
+
+                    .manga-overlay {
+                        opacity: 1;
+                    }
+                }
+            }
+
+            .ant-card-meta {
+                .ant-card-meta-title {
+                    color: $text-primary;
+                    font-size: 14px;
+                    font-weight: 500;
+                    line-height: 1.4;
+                    height: 2.8em;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    line-clamp: 2;
+                }
+
+                .manga-meta {
+                    p {
+                        margin: 4px 0;
+                        font-size: 12px;
+                        color: $text-secondary;
+                        line-height: 1.3;
+
+                        &.manga-author {
+                            color: $primary-color;
+                        }
+
+                        &.download-time {
+                            color: $text-tertiary;
+                            font-size: 11px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+.cartoon-downloads {
+    .ant-empty {
+        padding: 64px 0;
+    }
+}
+
+// 深色模式适配
+[data-theme="dark"] {
+    .downloads-container {
+        background-color: $dark-bg-primary;
+    }
+
+    .manga-card {
+        &:hover {
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+        }
+    }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+    .downloads-container {
+        padding: 16px;
+    }
+
+    .downloads-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+
+        h2 {
+            font-size: 18px;
+        }
+    }
+
+    .manga-card {
+        .manga-cover-container {
+            height: 200px;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .manga-card {
+        .manga-cover-container {
+            height: 180px;
+        }
+
+        .ant-card-meta-title {
+            font-size: 13px;
+        }
+
+        .manga-meta p {
+            font-size: 11px;
+        }
+    }
+}

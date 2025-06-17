@@ -38,7 +38,8 @@ export class DownloadManager {
             groupPathWord = 'default',
             chapterUuid,
             chapterName,
-            images
+            images,
+            mangaDetail // 新增漫画详情参数
         } = chapterInfo
 
         console.log('开始下载章节:', chapterName, '图片数量:', images.length)
@@ -90,9 +91,7 @@ export class DownloadManager {
                         console.error('检查下载进度失败:', error)
                     }
                 }, 1000) // 每秒检查一次
-            }
-
-            // 调用 Rust 后端下载命令
+            }            // 调用 Rust 后端下载命令
             await invoke('download_chapter', {
                 mangaUuid,
                 mangaName,
@@ -103,7 +102,8 @@ export class DownloadManager {
                     url: img.url,
                     index: index,
                     filename: `${String(index + 1).padStart(3, '0')}.jpg`
-                }))
+                })),
+                mangaDetail: mangaDetail || null // 传递漫画详情
             })
 
             // 清除定时器
@@ -258,6 +258,62 @@ export class DownloadManager {
         } catch (error) {
             console.error('清理下载数据失败:', error)
             throw error
+        }
+    }
+
+    /**
+     * 获取已下载的漫画列表
+     * @returns {Promise<Array>}
+     */
+    async getDownloadedMangaList() {
+        try {
+            const result = await invoke('get_downloaded_manga_list')
+
+            // 处理返回的数据，转换封面图片路径为可访问的URL
+            return result.map(manga => ({
+                ...manga,
+                coverUrl: manga.coverPath ? this.convertLocalFileToUrl(manga.coverPath) : null
+            }))
+        } catch (error) {
+            console.error('获取已下载漫画列表失败:', error)
+            return []
+        }
+    }
+
+    /**
+     * 获取本地漫画详情
+     * @param {string} mangaUuid 漫画UUID
+     * @returns {Promise<Object|null>}
+     */
+    async getLocalMangaDetail(mangaUuid) {
+        try {
+            const result = await invoke('get_local_manga_detail', { mangaUuid })
+
+            if (result && result.manga_detail) {
+                return {
+                    ...result.manga_detail,
+                    coverUrl: result.cover_path ? this.convertLocalFileToUrl(result.cover_path) : null
+                }
+            }
+            return null
+        } catch (error) {
+            console.error('获取本地漫画详情失败:', error)
+            return null
+        }
+    }
+
+    /**
+     * 获取本地漫画的章节列表
+     * @param {string} mangaUuid 漫画UUID
+     * @returns {Promise<Array>}
+     */
+    async getLocalMangaChapters(mangaUuid) {
+        try {
+            const result = await invoke('get_local_manga_chapters', { mangaUuid })
+            return result || []
+        } catch (error) {
+            console.error('获取本地漫画章节列表失败:', error)
+            return []
         }
     }
 }

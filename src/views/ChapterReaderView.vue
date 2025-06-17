@@ -6,7 +6,7 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                        }}</a-typography-title>
+                    }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
@@ -361,7 +361,16 @@ const hasNextChapter = computed(() => {
 
 // 返回漫画详情页
 const goBack = () => {
-    router.push(`/manga/${mangaStore.pathWord || route.params.pathWord}`);
+    // 检查是否是本地章节（通过查询参数中的mangaUuid判断）
+    const mangaUuid = route.query.mangaUuid;
+
+    if (mangaUuid) {
+        // 本地章节，返回到本地漫画详情页
+        router.push(`/localmanga/${mangaUuid}`);
+    } else {
+        // 在线章节，返回到在线漫画详情页
+        router.push(`/manga/${mangaStore.pathWord || route.params.pathWord}`);
+    }
 }
 
 // 通用章节导航函数
@@ -373,6 +382,9 @@ const navigateToChapter = (direction) => {
     const storeHasChapter = isNext ? mangaStore.hasNextChapter : mangaStore.hasPrevChapter
 
     if (!hasChapter) return
+
+    // 获取当前的查询参数，保持本地/在线状态
+    const currentQuery = { ...route.query };
 
     // 如果有API返回的章节ID，优先使用
     if (apiChapterId) {
@@ -386,7 +398,8 @@ const navigateToChapter = (direction) => {
             params: {
                 pathWord: mangaStore.pathWord || route.params.pathWord,
                 chapterId: apiChapterId
-            }
+            },
+            query: currentQuery // 保持查询参数
         })
     } else if (storeHasChapter) {
         // 使用pinia中的章节信息
@@ -399,7 +412,8 @@ const navigateToChapter = (direction) => {
             params: {
                 pathWord: mangaStore.pathWord,
                 chapterId: targetChapter.id
-            }
+            },
+            query: currentQuery // 保持查询参数
         })
     }
 }

@@ -329,12 +329,22 @@ export function useMangaDetail() {
 
         // 设置下载状态
         chapterDownloadStatus.value[chapter.id] = 'downloading'
-        chapterDownloadProgress.value[chapter.id] = 0
-
-        // 构建章节信息
+        chapterDownloadProgress.value[chapter.id] = 0        // 构建章节信息，包含漫画详情
         const chapterInfo = {
             comic_id: chapter.comic_id,
-            group_path_word: chapter.group_path_word || 'default'
+            group_path_word: chapter.group_path_word || 'default',            // 传递当前页面的漫画详情信息用于保存到本地
+            mangaDetail: manga.value ? {
+                uuid: manga.value.uuid,
+                name: manga.value.name,
+                cover: manga.value.cover || '',
+                author: manga.value.author ? manga.value.author.map(a => a.name || a) : [],
+                theme: manga.value.theme ? manga.value.theme.map(t => t.name || t) : [],
+                status: manga.value.status?.display || null,
+                popular: manga.value.popular || null,
+                brief: manga.value.brief || null,
+                datetime_updated: manga.value.datetime_updated || null,
+                path_word: route.params.pathWord // 添加当前的path_word
+            } : null
         }
 
         // 调用下载API

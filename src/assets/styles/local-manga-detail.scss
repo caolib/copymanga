@@ -1,0 +1,98 @@
+@use "./variables" as *;
+
+.local-manga-container {
+    padding: 24px;
+    min-height: 100vh;
+    padding-top: 0;
+    background-color: $bg-color;
+}
+
+.local-manga-card {
+    .ant-card-head {
+        border-bottom: 1px solid $border-color;
+    }
+}
+
+.empty-chapters {
+    text-align: center;
+    padding: 48px 0;
+}
+
+.chapter-card {
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid $border-color;
+    position: relative;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-color: $primary-color;
+    }
+
+    .local-tag {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 1;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    .chapter-info {
+        .image-count {
+            margin: 4px 0;
+            font-size: 12px;
+            color: $text-primary;
+            font-weight: 500;
+        }
+
+        .download-time {
+            margin: 4px 0 0 0;
+            font-size: 11px;
+            color: $text-secondary;
+        }
+    }
+}
+
+// 深色模式适配
+[data-theme="dark"] {
+    .local-manga-container {
+        background-color: $dark-bg-primary;
+    }
+
+    .chapter-card {
+        &:hover {
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
+        }
+    }
+}
+
+// 响应式设计
+@media (max-width: 768px) {
+    .local-manga-container {
+        padding: 16px;
+    }
+
+    .chapter-card {
+        .local-tag {
+            font-size: 9px;
+            padding: 1px 4px;
+        }
+    }
+}
+
+@media (max-width: 576px) {
+    .chapter-card {
+        .chapter-info {
+            .image-count {
+                font-size: 11px;
+            }
+
+            .download-time {
+                font-size: 10px;
+            }
+        }
+    }
+}

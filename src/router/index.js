@@ -33,6 +33,16 @@ const routes = [
         component: () => import('../views/SettingsView.vue')
     },
     {
+        path: '/downloads',
+        name: 'Downloads',
+        component: () => import('../views/DownloadsView.vue')
+    },
+    {
+        path: '/localmanga/:uuid',
+        name: 'LocalMangaDetail',
+        component: () => import('../views/LocalMangaDetailView.vue')
+    },
+    {
         path: '/topics',
         name: 'Topics',
         component: () => import('../views/TopicsView.vue')
