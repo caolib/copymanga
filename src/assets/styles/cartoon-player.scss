@@ -4,6 +4,7 @@
     min-height: 100vh;
     background: $bg-color;
     padding: 16px;
+    margin-top: -40px;
 
     .player-card {
         max-width: 1200px;
@@ -177,6 +178,43 @@
                 }
             }
 
+            .chapters-list {
+                margin: 16px 0;
+                padding: 16px 0;
+                border-top: 1px solid $border-color;
+
+                .chapters-grid {
+                    margin-top: 12px;
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 8px;
+
+                    .ant-btn {
+                        min-width: 80px;
+                        height: 32px;
+                        font-size: 13px;
+                        border-radius: 6px;
+                        transition: all 0.2s ease;
+
+                        &:hover {
+                            transform: translateY(-1px);
+                            box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+                        }
+
+                        &.ant-btn-primary {
+                            background: $primary-color;
+                            border-color: $primary-color;
+                            box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+
+                            &:hover {
+                                background: $primary-hover;
+                                border-color: $primary-hover;
+                            }
+                        }
+                    }
+                }
+            }
+
             .play-status {
                 margin-top: 12px;
             }
@@ -307,4 +345,61 @@
 .dplayer-controller-mask {
     height: 50px;
     background: #00000070;
+}
+
+// 响应式样式
+@media (max-width: 768px) {
+    .cartoon-player-container {
+        padding: 8px;
+        .player-card {
+            .video-info {
+                .line-selector {
+                    .line-controls {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 12px;
+
+                        .line-selection {
+                            margin-right: 0;
+                            width: 100%;
+                        }
+                    }
+                }
+
+                .chapters-list {
+                    .chapters-grid {
+                        gap: 6px;
+
+                        .ant-btn {
+                            min-width: 60px;
+                            height: 28px;
+                            font-size: 12px;
+                            padding: 0 8px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media (max-width: 480px) {
+    .cartoon-player-container {
+        .player-card {
+            .video-info {
+                .chapters-list {
+                    .chapters-grid {
+                        gap: 4px;
+
+                        .ant-btn {
+                            min-width: 50px;
+                            height: 26px;
+                            font-size: 11px;
+                            padding: 0 6px;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }

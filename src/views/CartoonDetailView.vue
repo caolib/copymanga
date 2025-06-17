@@ -188,6 +188,9 @@ const fetchChapters = (pathWord) => {
 
     getCartoonChapters(pathWord).then(response => {
         chapters.value = response.results.list || []
+
+        // 获取章节列表后立即缓存到 store
+        cartoonPlayerStore.setChapters(pathWord, chapters.value)
     }).catch(err => {
         console.error('获取章节列表失败:', err)
         message.error(err.message || '获取章节列表失败')
@@ -211,9 +214,6 @@ const playChapter = (chapter) => {
         message.warning('章节信息异常，无法播放')
         return
     }
-
-    // 使用Pinia store缓存当前动画的章节列表
-    cartoonPlayerStore.setChapters(route.params.pathWord, chapters.value)
 
     // 选择默认线路（优先选择可用的线路）
     const availableLine = chapter.lines?.find(line => line.config)

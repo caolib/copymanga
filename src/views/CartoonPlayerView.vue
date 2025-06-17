@@ -17,9 +17,27 @@
 
                 <!-- 视频信息 -->
                 <div class="video-info" v-if="videoData.name">
-                    <a-typography-title :level="3">{{ cartoonData.name }}</a-typography-title>
+                    <a-typography-title :level="3" style="cursor: pointer; color: #1890ff;" @click="goToCartoonDetail">
+                        {{ cartoonData.name }}
+                    </a-typography-title>
                     <a-typography-title :level="4" type="secondary">{{ videoData.name }}</a-typography-title>
-                    <!-- 线路选择和集数导航 -->
+
+
+                    <!-- 章节列表 -->
+                    <div class="chapters-list" v-if="cartoonPlayerStore.currentCartoonChapters.length">
+                        <a-typography-text strong style="margin-bottom: 12px; display: block;">
+                            选择集数 ({{ cartoonPlayerStore.currentCartoonChapters.length }}集)：
+                        </a-typography-text>
+                        <div class="chapters-grid">
+                            <a-button v-for="chapter in cartoonPlayerStore.currentCartoonChapters" :key="chapter.uuid"
+                                :type="chapter.uuid === route.params.chapterId ? 'primary' : 'default'" size="small"
+                                @click="playChapter(chapter)" :title="chapter.name">
+                                {{ chapter.name }}
+                            </a-button>
+                        </div>
+                    </div>
+
+                    <!-- 线路选择 -->
                     <div class="line-selector" v-if="videoData.lines">
                         <div class="line-controls">
                             <div class="line-selection">
@@ -31,17 +49,6 @@
                                         {{ line.name }}
                                     </a-radio-button>
                                 </a-radio-group>
-                            </div>
-
-                            <!-- 上一集/下一集按钮 -->
-                            <div class="episode-navigation">
-                                <a-button :disabled="!prevChapter" @click="playPrevEpisode">
-                                    <LeftOutlined /> 上一集
-                                </a-button>
-                                <a-button :disabled="!nextChapter" @click="playNextEpisode">
-                                    下一集
-                                    <RightOutlined />
-                                </a-button>
                             </div>
                         </div>
                     </div>
@@ -61,11 +68,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { LeftOutlined, RightOutlined } from '@ant-design/icons-vue'
-import { h } from 'vue'
 import Hls from 'hls.js'
 import DPlayer from 'dplayer'
 import { getVideoByChapterId } from '../api/cartoon'
@@ -86,24 +91,6 @@ const playStatus = ref(null)
 const cartoonData = ref({})
 const videoData = ref({})
 
-// 从Pinia store中计算上一集和下一集信息
-const adjacentChapters = computed(() => {
-    const currentChapterId = route.params.chapterId
-    return cartoonPlayerStore.getAdjacentChapters(currentChapterId)
-})
-
-const prevChapter = computed(() => adjacentChapters.value.prevChapter)
-const nextChapter = computed(() => adjacentChapters.value.nextChapter)
-
-// 调试输出（可以在开发时查看）
-watch([prevChapter, nextChapter], ([prev, next]) => {
-    console.log('章节导航状态:', {
-        prevChapter: prev?.name || '无',
-        nextChapter: next?.name || '无',
-        currentChapter: route.params.chapterId
-    })
-})
-
 const fetchVideoData = (line) => {
     const { pathWord, chapterId } = route.params
     const selectedLine = line || route.query.line || 'line3'
@@ -121,7 +108,9 @@ const fetchVideoData = (line) => {
         const results = response.results
         cartoonData.value = results.cartoon || {}
         videoData.value = results.chapter || {}
-        currentLine.value = selectedLine        // 初始化视频播放器
+        currentLine.value = selectedLine
+
+        // 初始化视频播放器
         nextTick(() => {
             setTimeout(() => {
                 initializePlayer()
@@ -285,7 +274,9 @@ const tryNextLine = () => {
     if (!videoData.value.lines) return false
 
     const lines = Object.keys(videoData.value.lines)
-    const currentIndex = lines.indexOf(currentLine.value)    // 找到下一个可用的线路
+    const currentIndex = lines.indexOf(currentLine.value)
+
+    // 找到下一个可用的线路
     for (let i = currentIndex + 1; i < lines.length; i++) {
         const lineKey = lines[i]
         const line = videoData.value.lines[lineKey]
@@ -294,7 +285,10 @@ const tryNextLine = () => {
             fetchVideoData(lineKey)
             return true
         }
-    } for (let i = 0; i < currentIndex; i++) {
+    }
+
+    // 重新尝试前面的线路
+    for (let i = 0; i < currentIndex; i++) {
         const lineKey = lines[i]
         const line = videoData.value.lines[lineKey]
         if (line.config) {
@@ -312,10 +306,10 @@ const retryLoad = () => {
     fetchVideoData(currentLine.value)
 }
 
-// 播放上一集
-const playPrevEpisode = () => {
-    if (!prevChapter.value) {
-        message.warning('已经是第一集了')
+// 播放指定章节
+const playChapter = (chapter) => {
+    if (!chapter.uuid) {
+        message.warning('章节信息异常，无法播放')
         return
     }
 
@@ -323,7 +317,7 @@ const playPrevEpisode = () => {
         name: 'CartoonPlayer',
         params: {
             pathWord: route.params.pathWord,
-            chapterId: prevChapter.value.uuid
+            chapterId: chapter.uuid
         },
         query: {
             line: currentLine.value
@@ -331,21 +325,17 @@ const playPrevEpisode = () => {
     })
 }
 
-// 播放下一集
-const playNextEpisode = () => {
-    if (!nextChapter.value) {
-        message.warning('已经是最后一集了')
+// 跳转到动画详情页面
+const goToCartoonDetail = () => {
+    if (!route.params.pathWord) {
+        message.error('动画信息无效')
         return
     }
 
     router.push({
-        name: 'CartoonPlayer',
+        name: 'CartoonDetail',
         params: {
-            pathWord: route.params.pathWord,
-            chapterId: nextChapter.value.uuid
-        },
-        query: {
-            line: currentLine.value
+            pathWord: route.params.pathWord
         }
     })
 }
