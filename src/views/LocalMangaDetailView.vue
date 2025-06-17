@@ -98,21 +98,27 @@
                             <img src="/logo.png" alt="暂无数据" style="width: 64px; height: 64px;" />
                         </template>
                     </a-empty>
-                </div>
-                <a-row v-else :gutter="[12, 12]">
+                </div> <a-row v-else :gutter="[12, 12]">
                     <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in sortedChapters"
                         :key="chapter.uuid">
                         <a-card :hoverable="true" style="text-align:center; padding:0;" size="small"
-                            :body-style="{ padding: '12px 6px' }" class="chapter-card" @click="readChapter(chapter)">
+                            :body-style="{ padding: '12px 6px' }" class="chapter-card">
                             <!-- 章节名称 -->
-                            <div style="cursor:pointer; margin-bottom: 8px;">
+                            <div style="cursor:pointer; margin-bottom: 8px;" @click="readChapter(chapter)">
                                 <span style="font-size:14px;">{{ chapter.name }}</span>
                             </div>
 
                             <!-- 章节信息 -->
-                            <div class="chapter-info">
+                            <div class="chapter-info" @click="readChapter(chapter)" style="cursor:pointer;">
                                 <p class="image-count">{{ chapter.imageCount }} 页</p>
                                 <p class="download-time">{{ formatDate(chapter.downloadTime) }}</p>
+                            </div>
+
+                            <!-- 删除按钮 -->
+                            <div class="chapter-actions" style="margin-top: 8px;">
+                                <a-button size="small" danger @click.stop="deleteChapter(chapter)" :title="'删除章节'"
+                                    :icon="h(DeleteOutlined)">
+                                </a-button>
                             </div>
                         </a-card>
                     </a-col>
@@ -126,10 +132,11 @@
 import { ref, onMounted, computed, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { ReloadOutlined, ArrowLeftOutlined, CheckCircleOutlined } from '@ant-design/icons-vue'
+import { ReloadOutlined, ArrowLeftOutlined, CheckCircleOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
 import { getLocalMangaDetail, getLocalMangaChapters } from '../api/manga'
+import { downloadManager } from '../utils/download-manager'
 
 const router = useRouter()
 const route = useRoute()
@@ -210,6 +217,24 @@ const readChapter = (chapter) => {
             mangaUuid: manga.value.uuid,
             local: 'true' // 标识这是本地章节
         }
+    })
+}
+
+// 删除章节
+const deleteChapter = async (chapter) => {
+    const groupPathWord = chapter.group || 'default'
+
+    await downloadManager.deleteChapter(
+        manga.value.uuid,
+        groupPathWord,
+        chapter.uuid
+    ).then(() => {
+        message.success(`章节 "${chapter.name}" 删除成功`)
+        // 重新加载章节列表
+        loadChapters(manga.value.uuid)
+    }).catch(error => {
+        console.error('删除章节失败:', error)
+        message.error(`删除失败: ${error.message || '未知错误'}`)
     })
 }
 
