@@ -193,7 +193,8 @@
                                 <!-- 下载按钮 -->
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.id] || chapterDownloadStatus[chapter.id] === 'error'"
-                                    size="small" @click="downloadChapter(chapter)" :icon="h(DownloadOutlined)">
+                                    type="primary" size="small" @click="downloadChapter(chapter)"
+                                    :icon="h(DownloadOutlined)">
                                 </a-button>
 
                                 <!-- 已下载章节的删除按钮 -->

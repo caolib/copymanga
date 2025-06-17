@@ -37,7 +37,7 @@
 
                 <a-form-item>
                     <a-checkbox v-model:checked="autoLoginEnabled">
-                        自动登录（下次启动时自动登录最近使用的账号）
+                        自动登录
                     </a-checkbox>
                 </a-form-item>
 

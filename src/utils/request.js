@@ -52,7 +52,7 @@ request.interceptors.request.use(
 // 响应拦截器
 request.interceptors.response.use(
     (response) => {
-        if (response.status === 401) {
+        if (response.status === 401 || response.data.code === 401) {
             goToLogin()
             return Promise.reject(new Error('未授权，请登录'))
         }
