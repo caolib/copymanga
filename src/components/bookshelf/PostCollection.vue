@@ -101,7 +101,7 @@ const lastUpdateTime = ref(null)
 
 const goToPost = (item) => {
     // 安全检查：确保数据完整
-    if (!item || !item.post || !item.post.path_word) {
+    if (!item || !item.post || !item.post.uuid) {
         message.error('写真数据异常，无法跳转')
         return
     }
@@ -109,7 +109,7 @@ const goToPost = (item) => {
     // 跳转到详情页，携带来自收藏和上次浏览信息
     router.push({
         name: 'PostDetail',
-        params: { postId: item.post.path_word },
+        params: { postId: item.post.uuid },
         query: {
             from: 'collection',
             lastBrowse: item.last_browse ? JSON.stringify(item.last_browse) : null
