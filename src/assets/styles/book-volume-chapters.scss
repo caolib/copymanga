@@ -2,7 +2,8 @@
 
 .book-volume-chapters-container {
     padding: $spacing-lg;
-    @include responsive-container;
+    max-width: 1200px;
+    margin: 0 auto;
 
     // 骨架屏样式
     .volume-detail-skeleton {

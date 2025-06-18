@@ -4,10 +4,11 @@
 .post-detail-view {
     min-height: 100vh;
     background: $bg-color;
-    padding: $spacing-sm; /* 减少外层 padding */
+    padding: $spacing-md;
 
     .post-detail-container {
-        @include responsive-container;
+        max-width: 1200px;
+        margin: 0 auto;
         background: $bg-color-white;
         border-radius: $border-radius-large;
         box-shadow: $shadow-light;

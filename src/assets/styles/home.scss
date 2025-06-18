@@ -1,8 +1,10 @@
 @use "./variables" as *;
 
 .home {
-    padding: $spacing-md 0; /* 减少 padding，上下使用中等间距，左右由容器处理 */
-    @include responsive-container;
+    padding: 20px;
+    padding-top: 0;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
 .search-header {
@@ -15,7 +17,7 @@
 
 .search-input {
     flex: 1;
-    max-width: min(500px, 60vw);
+    max-width: 500px;
     min-width: 240px;
 }
 

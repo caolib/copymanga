@@ -1,7 +1,7 @@
 @use "./variables" as *;
 
 .about-container {
-    @include form-container;
+    max-width: 600px;
 }
 
 .about-header {
@@ -54,7 +54,7 @@
 }
 
 .update-section {
-    @include form-container;
+    max-width: 700px;
 }
 
 .changelog-content {

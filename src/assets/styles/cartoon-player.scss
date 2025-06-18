@@ -7,7 +7,8 @@
     margin-top: -40px;
 
     .player-card {
-        @include responsive-container;
+        max-width: 1200px;
+        margin: 0 auto;
         background: $bg-color-white;
         border-radius: 12px;
         box-shadow: $shadow-medium;

@@ -62,9 +62,11 @@
 
 .loading-container {
     flex: 1;
-    padding: $spacing-sm 0; /* 减少 padding，由容器混合器处理左右边距 */
+    padding: $spacing-lg;
     background-color: $bg-color-paper;
-    @include reader-container;
+    max-width: 800px;
+    margin: 0 auto;
+    width: 100%;
 
     @include dark-theme {
         background-color: $dark-bg-secondary;
@@ -134,9 +136,10 @@
     // 移除固定高度，改为最小高度以支持文本换行
     min-height: auto;
     display: block; // 改为block以支持文本自然换行
-    @include reader-container;
-    padding-left: $spacing-sm; /* 减少左边距 */
-    padding-right: $spacing-sm; /* 减少右边距 */
+    max-width: 800px;
+    margin: 0 auto;
+    padding-left: $spacing-md;
+    padding-right: $spacing-md;
     word-wrap: break-word; // 长单词自动换行
     overflow-wrap: break-word; // 更好的换行支持
     white-space: pre-wrap; // 保持空格和换行

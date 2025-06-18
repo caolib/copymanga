@@ -5,7 +5,8 @@
     background: $bg-color;
 
     .post-home-container {
-        @include responsive-container;
+        max-width: 1400px;
+        margin: 0 auto;
 
         .ant-tabs {
             background: $bg-color-white;

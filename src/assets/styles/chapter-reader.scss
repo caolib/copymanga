@@ -2,8 +2,10 @@
 @use "sass:color";
 
 .reader-container {
-    @include reader-container;
-    padding: $spacing-md 0; /* 减少 padding，阅读器由混合器处理左右边距 */
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    padding-top: 0;
 
     &.dark-mode {
         background-color: $dark-bg-primary;
@@ -127,8 +129,9 @@
 }
 
 .nav-content {
-    @include reader-container;
-    padding: $spacing-sm 0; /* 减少导航栏的 padding */
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 12px 20px;
     @include flex-between;
     flex-wrap: wrap;
     gap: 10px;
