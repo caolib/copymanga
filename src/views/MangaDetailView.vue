@@ -137,7 +137,7 @@
                         </a-button>
                     </template>
 
-                    <a-button @click="fetchMangaData" :loading="detailLoading" size="small">刷新数据</a-button>
+                    <a-button @click="fetchMangaData" size="small">刷新数据</a-button>
                 </a-space>
             </a-col>
         </a-row>

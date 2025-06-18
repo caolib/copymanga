@@ -57,12 +57,14 @@
 }
 
 // 深色模式适配
-[data-theme="dark"] {
-    .local-manga-container {
+.local-manga-container {
+    @include dark-theme {
         background-color: $dark-bg-primary;
     }
+}
 
-    .chapter-card {
+.chapter-card {
+    @include dark-theme {
         &:hover {
             box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05);
         }

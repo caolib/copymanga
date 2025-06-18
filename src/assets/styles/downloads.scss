@@ -3,7 +3,6 @@
 .downloads-container {
     padding: 24px;
     min-height: 100vh;
-    background-color: $bg-color;
 }
 
 .downloads-card {
@@ -135,14 +134,105 @@
 }
 
 // 深色模式适配
-[data-theme="dark"] {
-    .downloads-container {
+.downloads-container {
+    @include dark-theme {
         background-color: $dark-bg-primary;
     }
+}
 
-    .manga-card {
+.downloads-card {
+    @include dark-theme {
+        background-color: $dark-bg-secondary;
+        border-color: $dark-border-color;
+
+        .ant-card-head {
+            background-color: $dark-bg-secondary;
+            border-bottom-color: $dark-border-color;
+        }
+    }
+
+    .downloads-header {
+        h2 {
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+    }
+}
+
+.manga-card {
+    @include dark-theme {
+        background-color: $dark-bg-elevated;
+        border-color: $dark-border-color;
+
         &:hover {
             box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+            border-color: $primary-color;
+        }
+    }
+
+    .ant-card-meta {
+        .ant-card-meta-title {
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        .manga-meta {
+            p {
+                @include dark-theme {
+                    color: $dark-text-secondary;
+
+                    &.manga-author {
+                        color: $primary-color;
+                    }
+
+                    &.download-time {
+                        color: $dark-text-tertiary;
+                    }
+
+                    &.manga-status {
+                        color: $dark-text-secondary;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.empty-state {
+    .ant-empty {
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+}
+
+// Tab 标签页适配
+.ant-tabs {
+    .ant-tabs-tab {
+        @include dark-theme {
+            color: $dark-text-secondary;
+
+            &.ant-tabs-tab-active {
+                color: $primary-color;
+            }
+
+            &:hover {
+                color: $primary-hover;
+            }
+        }
+    }
+
+    .ant-tabs-ink-bar {
+        @include dark-theme {
+            background-color: $primary-color;
+        }
+    }
+
+    .ant-tabs-content-holder {
+        @include dark-theme {
+            background-color: transparent;
         }
     }
 }
