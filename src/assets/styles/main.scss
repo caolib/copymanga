@@ -11,10 +11,10 @@
     font-family: var(--font-family);
 }
 
-/* 自定义滚动条样式 - 使其更加不显眼 */
+/* 自定义滚动条样式 - 使其更加不显眼且始终在最右边 */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -24,20 +24,32 @@
 ::-webkit-scrollbar-thumb {
     background-color: rgba($black, 0.2);
     border-radius: $border-radius-medium;
+    border: 1px solid transparent;
+    background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background-color: rgba($black, 0.3);
 }
 
+::-webkit-scrollbar-corner {
+    background: transparent;
+}
+
 /* 在暗色主题下的滚动条 */
 @media (prefers-color-scheme: dark) {
     ::-webkit-scrollbar-thumb {
         background-color: rgba($white, 0.2);
+        border: 1px solid transparent;
+        background-clip: padding-box;
     }
 
     ::-webkit-scrollbar-thumb:hover {
         background-color: rgba($white, 0.3);
+    }
+
+    ::-webkit-scrollbar-corner {
+        background: transparent;
     }
 }
 
@@ -55,6 +67,8 @@ html {
         /* 暗色主题下的滚动条 */
         ::-webkit-scrollbar-thumb {
             background-color: rgba($white, 0.2);
+            border: 1px solid transparent;
+            background-clip: padding-box;
         }
 
         ::-webkit-scrollbar-thumb:hover {
@@ -62,9 +76,39 @@ html {
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba($white, 0.1);
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-corner {
+            background: transparent;
         }
     }
+}
+
+/* 确保滚动条始终在最右边 */
+html,
+body {
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+html {
+    scrollbar-gutter: stable;
+}
+
+/* 确保 body 和根元素正确处理滚动 */
+body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    min-height: 100vh;
+}
+
+/* 确保应用容器不会影响滚动条位置 */
+#app {
+    width: 100%;
+    min-height: 100vh;
+    position: relative;
 }
 
 .ant-card-body {

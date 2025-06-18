@@ -23,6 +23,9 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    position: relative;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .restart-banner {
@@ -42,9 +45,15 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 65px $spacing-sm $spacing-sm $spacing-sm; /* 上边距为标题栏高度 + 20px */
-    max-width: 1200px;
-    margin: 0 auto;
-    width: 100%;
+    position: relative;
+    height: calc(100vh - 65px); /* 确保高度正确 */
+
+    /* 内容容器 */
+    .content-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        width: 100%;
+    }
 
     @include dark-theme {
         background-color: $dark-bg-primary;
@@ -55,7 +64,12 @@ body {
 /* 在漫画阅读页面调整主内容区域 */
 .chapter-reader-mode .main-content {
     padding: 0;
-    max-width: none;
+    height: 100vh;
+
+    .content-wrapper {
+        max-width: none;
+        margin: 0;
+    }
 }
 
 /* 免责声明弹窗样式 */

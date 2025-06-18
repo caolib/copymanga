@@ -133,8 +133,11 @@ onMounted(async () => {
       </div>
 
       <main class="main-content">
-        <!-- 路由视图 -->
-        <router-view />
+        <!-- 内容包装器 -->
+        <div class="content-wrapper">
+          <!-- 路由视图 -->
+          <router-view />
+        </div>
       </main>
 
       <!-- 免责声明弹窗 -->
