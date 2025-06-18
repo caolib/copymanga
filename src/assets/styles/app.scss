@@ -44,20 +44,26 @@ body {
 .main-content {
     flex: 1;
     overflow-y: auto;
-    padding: 65px $spacing-sm $spacing-sm $spacing-sm; /* 上边距为标题栏高度 + 20px */
+    padding: 65px 0 $spacing-sm 0; /* 减少左右 padding，只保留顶部和底部 */
     position: relative;
     height: calc(100vh - 65px); /* 确保高度正确 */
 
     /* 内容容器 */
     .content-wrapper {
-        max-width: 95vw;
-        margin: 0 auto;
-        width: 100%;
+        @include responsive-container;
     }
 
     @include dark-theme {
         background-color: $dark-bg-primary;
         color: $dark-text-primary;
+    }
+}
+
+/* 大屏幕优化 - 更紧凑的布局 */
+@media (min-width: $breakpoint-xl) {
+    .main-content .content-wrapper {
+        max-width: 95vw;
+        padding: 0 $spacing-lg; /* 大屏幕上使用固定的适度 padding */
     }
 }
 

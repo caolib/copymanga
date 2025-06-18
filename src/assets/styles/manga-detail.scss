@@ -2,9 +2,8 @@
 @use "./skeleton-dark" as *;
 
 .manga-detail-container {
-    padding: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+    padding: $spacing-md 0; /* 减少 padding */
+    @include responsive-container;
 }
 
 .image-placeholder {

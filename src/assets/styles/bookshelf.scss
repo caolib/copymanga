@@ -3,8 +3,7 @@
 // 书架容器样式
 .bookshelf-container {
     padding: 0 !important;
-    max-width: 1600px;
-    margin: 0 auto;
+    @include responsive-container;
 
     @include responsive($breakpoint-sm) {
         padding: $spacing-md;

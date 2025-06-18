@@ -1,9 +1,8 @@
 @use "./variables" as *;
 
 .book-detail-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
+    @include responsive-container;
+    padding: $spacing-md 0; /* 减少 padding */
 }
 
 // 骨架屏样式

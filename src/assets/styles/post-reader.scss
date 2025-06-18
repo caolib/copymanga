@@ -82,8 +82,7 @@
             background: $bg-color;
 
             .images-container {
-                max-width: 800px;
-                margin: 0 auto;
+                @include reader-container;
 
                 .image-item {
                     margin-bottom: $spacing-lg;
