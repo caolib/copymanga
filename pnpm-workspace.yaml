@@ -1,4 +1,7 @@
+packages:
+  - "."
+
 onlyBuiltDependencies:
-  - '@parcel/watcher'
+  - "@parcel/watcher"
   - core-js
   - esbuild
