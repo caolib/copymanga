@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -115,6 +117,7 @@ pub fn get_server_config(app_handle: &AppHandle) -> Result<(u16, Option<RequestH
 }
 
 /// 获取服务器端口（带重试机制）
+#[allow(dead_code)]
 pub async fn get_server_port_with_retry(app_handle: &AppHandle) -> Result<u16, String> {
     get_server_config_with_retry(app_handle)
         .await
@@ -122,11 +125,13 @@ pub async fn get_server_port_with_retry(app_handle: &AppHandle) -> Result<u16, S
 }
 
 /// 获取服务器端口
+#[allow(dead_code)]
 pub fn get_server_port(app_handle: &AppHandle) -> Result<u16, String> {
     get_server_config(app_handle).map(|(port, _)| port)
 }
 
 /// 获取当前API域名（带重试机制）
+#[allow(dead_code)]
 pub async fn get_current_api_domain_with_retry(app_handle: &AppHandle) -> Result<String, String> {
     for attempt in 1..=MAX_RETRY_COUNT {
         match get_current_api_domain(app_handle) {

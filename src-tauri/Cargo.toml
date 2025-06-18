@@ -5,6 +5,10 @@ description = "一个拷贝漫画第三方客户端"
 authors = ["caolib"]
 edition = "2021"
 
+[lints.rust]
+dead_code = "allow"
+non_snake_case = "allow"
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
@@ -24,7 +28,7 @@ http = "0.2"
 reqwest = { version = "0.12", features = ["cookies", "json", "multipart"] }
 axum = "0.7"
 futures-util = "0.3"
-tauri = { version = "2", features = [ "protocol-asset", "devtools"] }
+tauri = { version = "2", features = ["protocol-asset", "devtools"] }
 tauri-plugin-opener = "2"
 tauri-plugin-fs = "2"
 serde = { version = "1", features = ["derive"] }
