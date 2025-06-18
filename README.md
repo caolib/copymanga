@@ -16,17 +16,7 @@
 
 ## 1 介绍
 
-这是一个拷贝漫画第三方桌面端应用，目前支持win、mac、linux，只有windows有简单测试过，[前往下载](https://github.com/caolib/copymanga/releases)
-
-功能：
-
-✅ 漫画
-
-✅ 轻小说
-
-✅ 写真
-
-✅ 动画
+这是一个[拷贝漫画](https://www.copy20.com/)第三方桌面端应用，目前支持win、mac、linux，只有windows简单测试过，移动端可以下载[官方app](https://www.copy20.com/download)使用
 
 ### 1.漫画
 
@@ -45,8 +35,6 @@
 ![image-20250613161440084](https://s2.loli.net/2025/06/13/Mpd9Tz7j3kWr6hL.png)
 
 ![image-20250611182441206](https://s2.loli.net/2025/06/11/Wc8G129xh43SzbZ.png)
-
-![image-20250611182559524](https://s2.loli.net/2025/06/11/r3s78xnVkwjX6Mf.png)
 
 ### 2.轻小说
 
