@@ -364,7 +364,10 @@ export function useMangaDetail() {
             // 下载完成
             chapterDownloadStatus.value[chapter.id] = 'downloaded'
             chapterDownloadProgress.value[chapter.id] = 100
-            message.success(`章节 "${chapter.name}" 下载完成`)
+            message.success({
+                content: () => `章节 "${chapter.name}" 下载完成`,
+                class: 'right-bottom-msg'
+            });
         }).catch(error => {
             console.error('下载章节失败:', error)
             chapterDownloadStatus.value[chapter.id] = 'error'

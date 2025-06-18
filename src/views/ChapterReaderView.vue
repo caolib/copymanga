@@ -2,11 +2,11 @@
     <div class="reader-container" :class="{ 'dark-mode': isDarkMode }">
         <!-- 底部章节导航栏 - 固定在屏幕底部 -->
         <div class="bottom-navigation" :class="{ 'visible': showBottomNav }" @mouseenter="keepNavVisible"
-            @mouseleave="hideNavAfterDelay">
+            @mouseleave="hideNavOnLeave">
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                    }}</a-typography-title>
+                        }}</a-typography-title>
                     <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
@@ -267,7 +267,6 @@ const readerConfig = reactive({ ...DEFAULT_UI_CONFIG.reader }); // 阅读器配�
 
 // 底部导航栏显示控制
 const showBottomNav = ref(false)
-let hideNavTimer = null
 
 // 添加暗色模式图片遮罩配置
 const darkImageMaskOpacity = ref(0.8) // 暗色模式图片遮罩透明度，默认值提高
@@ -427,32 +426,23 @@ const nextChapter = () => navigateToChapter('next')
 // 底部导航栏控制方法
 const showNavigation = () => {
     showBottomNav.value = true
-    // 清除之前的隐藏定时器
-    if (hideNavTimer) {
-        clearTimeout(hideNavTimer)
-        hideNavTimer = null
-    }
-}
-
-const hideNavAfterDelay = () => {
-    // 清除之前的定时器
-    if (hideNavTimer) {
-        clearTimeout(hideNavTimer)
-        hideNavTimer = null
-    }
-
-    // 1秒后隐藏导航栏
-    hideNavTimer = setTimeout(() => {
-        showBottomNav.value = false
-        hideNavTimer = null
-    }, 1000)
 }
 
 const keepNavVisible = () => {
-    // 鼠标进入导航栏时，清除隐藏定时器
-    if (hideNavTimer) {
-        clearTimeout(hideNavTimer)
-        hideNavTimer = null
+    // 鼠标进入导航栏时，显示导航栏
+    showBottomNav.value = true
+}
+
+const hideNavOnLeave = () => {
+    // 鼠标离开导航栏时，立即隐藏
+    showBottomNav.value = false
+}
+
+// 检查是否应该隐藏导航栏
+const checkAndHideNavigation = () => {
+    // 如果导航栏当前显示，则隐藏它
+    if (showBottomNav.value) {
+        showBottomNav.value = false
     }
 }
 
@@ -702,10 +692,6 @@ onMounted(() => {
     // 加载用户配置
     loadSettings()
 
-    // 初始显示底部导航栏，1秒后自动隐藏
-    showBottomNav.value = true
-    hideNavAfterDelay()
-
     // 监听窗口大小变化，重新计算图片高度
     const handleResize = () => {
         // 触发重新计算（通过更新一个依赖项）
@@ -715,11 +701,27 @@ onMounted(() => {
         }
     }
 
+    // 监听滚动事件，滚动时隐藏导航栏
+    const handleScroll = () => {
+        checkAndHideNavigation()
+    }
+
     window.addEventListener('resize', handleResize)
+    window.addEventListener('scroll', handleScroll)
+
+    // 也监听主内容容器的滚动
+    const mainContent = document.querySelector('.main-content')
+    if (mainContent) {
+        mainContent.addEventListener('scroll', handleScroll)
+    }
 
     // 组件销毁时移除监听器
     onUnmounted(() => {
         window.removeEventListener('resize', handleResize)
+        window.removeEventListener('scroll', handleScroll)
+        if (mainContent) {
+            mainContent.removeEventListener('scroll', handleScroll)
+        }
     })
 })
 
@@ -732,10 +734,6 @@ watch(() => route.params.chapterId, (newChapterId, oldChapterId) => {
 
         // 仅更新图片部分
         fetchChapterImages()
-
-        // 显示底部导航栏，1秒后自动隐藏
-        showBottomNav.value = true
-        hideNavAfterDelay()
     }
 }, { immediate: false })
 
