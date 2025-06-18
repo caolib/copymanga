@@ -1,5 +1,4 @@
-# 拷贝漫画
-
+<h1 align="center">拷贝漫画</h1>
 <p align="center">
   <img src="https://skillicons.dev/icons?i=tauri,vue,js,rust,pinia,scss,vite,pnpm"/>
 </p>
@@ -9,7 +8,8 @@
   <img src="https://img.shields.io/github/v/release/caolib/copymanga?labelColor=grey&color=red" alt="Release"/>
   <img src="https://img.shields.io/github/license/caolib/copymanga" alt="License"/>
   <img src="https://img.shields.io/github/stars/caolib/copymanga" alt="Stars"/>
-  <img src="https://img.shields.io/github/issues/caolib/copymanga?label=Issues" alt="Issues"/>
+<!--   <img src="https://img.shields.io/github/issues/caolib/copymanga?label=Issues" alt="Issues"/> -->
+  <img src="https://github.com/caolib/copymanga/actions/workflows/ci.yml/badge.svg" alt="release"/>
   <img src="https://img.shields.io/github/downloads/caolib/copymanga/latest/total" alt="Latest Downloads"/>
 </p>
 
