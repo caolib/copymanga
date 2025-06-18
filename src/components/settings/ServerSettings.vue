@@ -298,7 +298,7 @@ const loadConfig = () => {
         currentServerPort.value = config.serverPort
         serverForm.value.serverPort = parseInt(config.serverPort)
     }).catch(error => {
-        message.error('加载服务器配置失败')
+        message.error('加载服务器配置失败', error)
     })
 
     // 加载应用配置
