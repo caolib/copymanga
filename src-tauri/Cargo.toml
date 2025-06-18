@@ -1,6 +1,6 @@
 [package]
 name = "copymanga"
-version = "0.9.5"
+version = "0.9.6"
 description = "一个拷贝漫画第三方客户端"
 authors = ["caolib"]
 edition = "2021"
