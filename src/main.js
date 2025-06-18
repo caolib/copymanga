@@ -4,6 +4,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import Antd from 'ant-design-vue'
 import 'ant-design-vue/dist/reset.css'
 import { invoke } from '@tauri-apps/api/core'
+import { restoreStateCurrent, saveWindowState } from '@tauri-apps/plugin-window-state'
 
 import App from './App.vue'
 import router from './router'
@@ -30,6 +31,20 @@ app.use(Antd)
 
 // 挂载应用
 app.mount('#app')
+
+// 恢复窗口状态
+restoreStateCurrent().then(() => {
+    console.log('窗口状态已恢复')
+}).catch((error) => {
+    console.warn('恢复窗口状态失败:', error)
+})
+
+// 监听窗口关闭事件，保存状态
+window.addEventListener('beforeunload', () => {
+    saveWindowState().catch((error) => {
+        console.error('保存窗口状态失败:', error)
+    })
+})
 
 const themeStore = useThemeStore()
 const configStore = useConfigStore()
