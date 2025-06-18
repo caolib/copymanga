@@ -2,8 +2,8 @@
  * 导出配置文件的工具函数
  */
 
-import { save } from '@tauri-apps/plugin-dialog'
-import { writeTextFile } from '@tauri-apps/plugin-fs'
+import { save, open } from '@tauri-apps/plugin-dialog'
+import { writeTextFile, readTextFile } from '@tauri-apps/plugin-fs'
 import { dirname } from '@tauri-apps/api/path'
 import { invoke } from '@tauri-apps/api/core'
 import { message } from 'ant-design-vue'
@@ -136,5 +136,108 @@ export const exportServerConfig = async (config) => {
         defaultFileName: 'server-config',
         fileType: 'Server Config JSON Files',
         successMessage: '服务器配置已成功导出'
+    })
+}
+
+/**
+ * 导入 JSON 配置文件
+ * @param {Object} options - 导入选项
+ * @param {string} options.fileType - 文件类型描述
+ * @param {string} options.successMessage - 成功消息
+ * @param {Function} options.validator - 数据验证函数
+ * @returns {Promise<Object|null>} - 导入的数据对象，失败返回 null
+ */
+export const importJsonConfig = async (options = {}) => {
+    const {
+        fileType = 'JSON Files',
+        successMessage = '配置已成功导入',
+        validator = null
+    } = options
+
+    try {
+        // 打开文件选择对话框
+        const filePath = await open({
+            filters: [{
+                name: fileType,
+                extensions: ['json']
+            }],
+            multiple: false
+        })
+
+        if (!filePath) {
+            // 用户取消了选择
+            return null
+        }
+
+        // 读取文件内容
+        const fileContent = await readTextFile(filePath)
+
+        // 解析 JSON
+        let data
+        try {
+            data = JSON.parse(fileContent)
+        } catch (parseError) {
+            message.error('JSON 文件格式错误，请检查文件内容')
+            return null
+        }
+
+        // 数据验证
+        if (validator && typeof validator === 'function') {
+            const validationResult = validator(data)
+            if (!validationResult.valid) {
+                message.error(validationResult.message || '导入的数据格式不正确')
+                return null
+            }
+        }
+
+        message.success(successMessage)
+        return data
+    } catch (error) {
+        console.error('导入配置失败:', error)
+        message.error('导入配置失败: ' + error.message)
+        return null
+    }
+}
+
+/**
+ * 导入请求头配置
+ * @returns {Promise<Object|null>} - 导入的请求头对象，失败返回 null
+ */
+export const importHeaders = async () => {
+    // 请求头数据验证函数
+    const validateHeaders = (data) => {
+        // 检查是否是对象
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+            return {
+                valid: false,
+                message: '请求头配置必须是一个包含键值对的对象'
+            }
+        }
+
+        // 检查所有键值对是否都是字符串
+        for (const [key, value] of Object.entries(data)) {
+            if (typeof key !== 'string' || typeof value !== 'string') {
+                return {
+                    valid: false,
+                    message: '请求头的键和值都必须是字符串'
+                }
+            }
+
+            // 检查键是否为空
+            if (!key.trim()) {
+                return {
+                    valid: false,
+                    message: '请求头名称不能为空'
+                }
+            }
+        }
+
+        return { valid: true }
+    }
+
+    return await importJsonConfig({
+        fileType: 'Headers JSON Files',
+        successMessage: '请求头配置已成功导入',
+        validator: validateHeaders
     })
 }

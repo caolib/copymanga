@@ -184,6 +184,10 @@
                             导出配置
                         </a-button>
 
+                        <a-button @click="importHeaders" :loading="importingHeaders" :icon="h(UploadOutlined)">
+                            导入配置
+                        </a-button>
+
                         <a-popconfirm title="你确定?" ok-text="对的" cancel-text="不对" @confirm="resetHeaders">
                             <a-button>恢复默认</a-button>
                         </a-popconfirm>
@@ -239,8 +243,8 @@ import { invoke } from '@tauri-apps/api/core'
 import { dirname } from '@tauri-apps/api/path'
 import { appDataDir } from '@tauri-apps/api/path'
 import { restartApp } from '@/utils/restart-helper'
-import { exportHeaders as exportHeadersConfig } from '@/utils/export-helper'
-import { PlusOutlined, DeleteOutlined, SettingOutlined, DownloadOutlined } from '@ant-design/icons-vue'
+import { exportHeaders as exportHeadersConfig, importHeaders as importHeadersConfig } from '@/utils/export-helper'
+import { PlusOutlined, DeleteOutlined, SettingOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons-vue'
 
 const serverForm = ref({
     serverPort: 5001
@@ -275,6 +279,7 @@ const headersList = ref([])
 const newHeader = ref({ key: '', value: '' })
 const savingHeaders = ref(false)
 const exportingHeaders = ref(false)
+const importingHeaders = ref(false)
 
 // Rust服务器状态监控
 const serverStatus = ref({
@@ -617,7 +622,35 @@ const exportHeaders = async () => {
     }
 }
 
+// 导入请求头配置
+const importHeaders = async () => {
+    try {
+        importingHeaders.value = true
 
+        const importedData = await importHeadersConfig()
+        if (importedData) {
+            // 将导入的对象转换为 headersList 格式
+            headersList.value = Object.entries(importedData).map(([key, value]) => ({
+                key,
+                value
+            }))
+
+            // 自动保存导入的配置
+            try {
+                await saveRequestHeaders(importedData)
+                message.success('请求头配置已导入并保存')
+                appStore.setNeedsRestart(true)
+            } catch (saveError) {
+                message.error('导入成功但保存失败，请手动保存配置')
+                console.error('保存导入的配置失败:', saveError)
+            }
+        }
+    } catch (error) {
+        console.error('导入请求头配置失败:', error)
+    } finally {
+        importingHeaders.value = false
+    }
+}
 
 // 打开配置目录
 const openConfigDirectory = async () => {

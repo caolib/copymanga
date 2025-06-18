@@ -49,6 +49,7 @@
     "process:default",
     "dialog:default",
     "dialog:allow-save",
+    "dialog:allow-open",
     "opener:allow-open-path"
   ]
 }
