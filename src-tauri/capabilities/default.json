@@ -31,9 +31,24 @@
         },
         {
           "path": "$APPDATA/**"
+        },
+        {
+          "path": "$DESKTOP/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        },
+        {
+          "path": "$HOME/**"
         }
       ]
     },
-    "process:default"
+    "process:default",
+    "dialog:default",
+    "dialog:allow-save",
+    "opener:allow-open-path"
   ]
 }

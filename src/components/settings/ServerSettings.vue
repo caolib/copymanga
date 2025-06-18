@@ -179,12 +179,15 @@
                         <a-button type="primary" @click="saveAllHeaders" :loading="savingHeaders">
                             保存配置
                         </a-button>
-                        <a-button @click="resetHeaders">
-                            恢复默认
+
+                        <a-button @click="exportHeaders" :loading="exportingHeaders" :icon="h(DownloadOutlined)">
+                            导出配置
                         </a-button>
-                        <a-button @click="clearAllHeaders" danger>
-                            清空请求头
-                        </a-button>
+
+                        <a-popconfirm title="你确定?" ok-text="对的" cancel-text="不对" @confirm="resetHeaders">
+                            <a-button>恢复默认</a-button>
+                        </a-popconfirm>
+
                     </a-space>
                 </a-form-item>
             </a-form>
@@ -233,9 +236,11 @@ import {
 } from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
 import { invoke } from '@tauri-apps/api/core'
+import { dirname } from '@tauri-apps/api/path'
 import { appDataDir } from '@tauri-apps/api/path'
 import { restartApp } from '@/utils/restart-helper'
-import { PlusOutlined, DeleteOutlined, SettingOutlined } from '@ant-design/icons-vue'
+import { exportHeaders as exportHeadersConfig } from '@/utils/export-helper'
+import { PlusOutlined, DeleteOutlined, SettingOutlined, DownloadOutlined } from '@ant-design/icons-vue'
 
 const serverForm = ref({
     serverPort: 5001
@@ -269,6 +274,7 @@ const removingBookIndex = ref(-1)
 const headersList = ref([])
 const newHeader = ref({ key: '', value: '' })
 const savingHeaders = ref(false)
+const exportingHeaders = ref(false)
 
 // Rust服务器状态监控
 const serverStatus = ref({
@@ -599,17 +605,19 @@ const resetHeaders = async () => {
     }
 }
 
-// 清空所有请求头
-const clearAllHeaders = async () => {
+// 导出请求头配置
+const exportHeaders = async () => {
     try {
-        headersList.value = []
-        await saveRequestHeaders({})
-        message.success('已清空所有请求头配置')
-        appStore.setNeedsRestart(true)
+        exportingHeaders.value = true
+        await exportHeadersConfig(headersList.value)
     } catch (error) {
-        message.error('清空请求头配置失败')
+        console.error('导出请求头配置失败:', error)
+    } finally {
+        exportingHeaders.value = false
     }
 }
+
+
 
 // 打开配置目录
 const openConfigDirectory = async () => {
