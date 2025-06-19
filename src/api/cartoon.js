@@ -1,4 +1,5 @@
 import request from '../utils/request'
+import { cartoonDownloadManager } from '../utils/cartoon-download-manager'
 
 /**
  * 获取动画首页数据
@@ -166,6 +167,94 @@ function searchCartoon(q, limit = 18, offset = 0) {
     });
 }
 
+/**
+ * 下载动画章节
+ * @param {string} pathWord 动画路径标识
+ * @param {string} chapterId 章节ID
+ * @param {string} line 视频线路
+ * @param {Object} chapterInfo 章节基本信息，包含cartoonDetail
+ * @param {Function} onProgress 进度回调
+ * @returns {Promise}
+ */
+async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, onProgress) {
+    return getVideoByChapterId(pathWord, chapterId, line).then(response => {
+        if (response && response.code === 200 && response.results) {
+            const chapterData = response.results.chapter
+            const cartoonData = response.results.cartoon
+
+            // 构建下载信息
+            const downloadInfo = {
+                cartoonUuid: cartoonData.uuid,
+                cartoonName: cartoonData.name,
+                chapterUuid: chapterData.uuid,
+                chapterName: chapterData.name,
+                videoUrl: chapterData.video,
+                cover: chapterData.v_cover,
+                // 使用传递的动画详情，如果没有则使用API返回的基本信息
+                cartoonDetail: chapterInfo.cartoonDetail || {
+                    uuid: cartoonData.uuid,
+                    name: cartoonData.name,
+                    path_word: cartoonData.path_word,
+                    cover: '',
+                    author: null,
+                    theme: [],
+                    status: null,
+                    popular: null,
+                    brief: null,
+                    datetime_updated: null
+                }
+            }
+
+            // 开始下载
+            return cartoonDownloadManager.downloadChapter(downloadInfo, onProgress)
+        } else {
+            throw new Error('获取视频数据失败：服务器返回错误响应')
+        }
+    }).catch(error => {
+        console.error('下载动画章节失败:', error)
+        // 检查错误类型并提供更有意义的错误信息
+        if (error.message && error.message.includes('invoke')) {
+            throw new Error('文件系统操作失败，请检查应用权限')
+        } else if (error.message && error.message.includes('fetch')) {
+            throw new Error('网络请求失败，请检查网络连接')
+        } else if (error.code === 'ERR_NETWORK') {
+            throw new Error('网络连接失败，请检查代理服务器是否正常运行')
+        } else if (error.response && error.response.status === 502) {
+            throw new Error('代理服务器错误(502)，请稍后重试')
+        } else {
+            throw error
+        }
+    })
+}
+
+/**
+ * 检查动画章节是否已下载
+ * @param {string} cartoonUuid 动画UUID
+ * @param {string} chapterUuid 章节UUID
+ * @returns {Promise<boolean>}
+ */
+async function isCartoonChapterDownloaded(cartoonUuid, chapterUuid) {
+    return await cartoonDownloadManager.isChapterDownloaded(cartoonUuid, chapterUuid)
+}
+
+/**
+ * 删除已下载的动画章节
+ * @param {string} cartoonUuid 动画UUID
+ * @param {string} chapterUuid 章节UUID
+ * @returns {Promise<boolean>}
+ */
+async function deleteCartoonChapter(cartoonUuid, chapterUuid) {
+    return await cartoonDownloadManager.deleteChapter(cartoonUuid, chapterUuid)
+}
+
+/**
+ * 获取已下载的动画列表
+ * @returns {Promise<Array>}
+ */
+async function getDownloadedCartoonList() {
+    return await cartoonDownloadManager.getDownloadedCartoonList()
+}
+
 export {
     getCartoonHome,
     getCartoonInfo,
@@ -175,5 +264,9 @@ export {
     getCollectCartoonList,
     getCartoonTopics,
     getCartoonThemes,
-    searchCartoon
+    searchCartoon,
+    downloadCartoonChapter,
+    isCartoonChapterDownloaded,
+    deleteCartoonChapter,
+    getDownloadedCartoonList
 }

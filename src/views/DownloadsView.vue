@@ -65,11 +65,44 @@
 
                 <a-tab-pane key="cartoon" tab="动画">
                     <div class="cartoon-downloads">
-                        <a-empty description="动画下载功能开发中...">
-                            <template #image>
-                                <img src="/logo.png" alt="开发中" style="width: 64px; height: 64px;" />
-                            </template>
-                        </a-empty>
+                        <a-skeleton :loading="cartoonLoading" active>
+                            <div v-if="cartoonList.length" class="downloads-grid">
+                                <a-row :gutter="[16, 16]">
+                                    <a-col v-for="cartoon in cartoonList" :key="cartoon.uuid" :xs="12" :sm="8" :md="6"
+                                        :lg="4" :xl="3">
+                                        <a-card class="download-card" hoverable
+                                            @click="goToCartoonDetail(cartoon.uuid)">
+                                            <template #cover>
+                                                <div class="card-cover">
+                                                    <img :src="cartoon.coverUrl || '/logo.png'" :alt="cartoon.name"
+                                                        @error="handleImageError" />
+                                                </div>
+                                            </template>
+                                            <a-card-meta :title="cartoon.name">
+                                                <template #description>
+                                                    <div class="cartoon-meta">
+                                                        <p v-if="cartoon.company" class="cartoon-company">
+                                                            公司: {{ cartoon.company }}
+                                                        </p>
+                                                        <p v-if="cartoon.cartoon_type" class="cartoon-type">
+                                                            类型: {{ cartoon.cartoon_type }}
+                                                        </p>
+                                                        <p class="download-time">
+                                                            下载时间: {{ formatDate(cartoon.latestDownloadTime) }}
+                                                        </p>
+                                                    </div>
+                                                </template>
+                                            </a-card-meta>
+                                        </a-card>
+                                    </a-col>
+                                </a-row>
+                            </div>
+                            <a-empty v-else description="暂无已下载的动画">
+                                <template #image>
+                                    <img src="/logo.png" alt="暂无数据" style="width: 64px; height: 64px;" />
+                                </template>
+                            </a-empty>
+                        </a-skeleton>
                     </div>
                 </a-tab-pane>
             </a-tabs>
@@ -84,6 +117,7 @@ import { message } from 'ant-design-vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { formatDate } from '../utils/date'
 import { getDownloadedMangaList } from '../api/manga'
+import { getDownloadedCartoonList } from '../api/cartoon'
 
 const router = useRouter()
 
@@ -91,6 +125,8 @@ const router = useRouter()
 const activeTab = ref('manga')
 const loading = ref(false)
 const mangaList = ref([])
+const cartoonLoading = ref(false)
+const cartoonList = ref([])
 
 // 页面生命周期
 onMounted(() => {
@@ -113,10 +149,28 @@ const loadDownloadedMangas = async () => {
     })
 }
 
+// 加载已下载的动画列表
+const loadDownloadedCartoons = async () => {
+    cartoonLoading.value = true
+
+    await getDownloadedCartoonList().then(data => {
+        cartoonList.value = data || []
+        console.log('已下载的动画列表:', cartoonList.value)
+    }).catch(error => {
+        console.error('获取动画下载列表失败:', error)
+        message.error('获取动画下载列表失败')
+        cartoonList.value = []
+    }).finally(() => {
+        cartoonLoading.value = false
+    })
+}
+
 // 刷新下载列表
 const refreshDownloads = () => {
     if (activeTab.value === 'manga') {
         loadDownloadedMangas()
+    } else if (activeTab.value === 'cartoon') {
+        loadDownloadedCartoons()
     }
 }
 
@@ -125,6 +179,8 @@ const handleTabChange = (key) => {
     activeTab.value = key
     if (key === 'manga') {
         loadDownloadedMangas()
+    } else if (key === 'cartoon') {
+        loadDownloadedCartoons()
     }
 }
 
@@ -132,6 +188,14 @@ const handleTabChange = (key) => {
 const goToMangaDetail = (uuid) => {
     if (uuid) {
         router.push(`/localmanga/${uuid}`)
+    }
+}
+
+// 跳转到动画详情页（这里可以后续实现本地动画详情页）
+const goToCartoonDetail = (uuid) => {
+    if (uuid) {
+        // 暂时跳转到在线动画详情页，后续可以实现本地动画详情页
+        message.info('动画本地详情页功能开发中，请从动画首页访问')
     }
 }
 

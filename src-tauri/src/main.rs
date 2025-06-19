@@ -72,7 +72,12 @@ fn main() {
             download::delete_downloaded_chapter,
             download::get_downloaded_manga_list,
             download::get_local_manga_detail,
-            download::get_local_manga_chapters
+            download::get_local_manga_chapters,
+            download::download_cartoon_chapter,
+            download::check_cartoon_chapter_downloaded,
+            download::get_cartoon_download_progress,
+            download::delete_downloaded_cartoon_chapter,
+            download::get_downloaded_cartoon_list
         ])
         .setup(|_app| {
             println!("Tauri 应用已启动，等待前端初始化配置文件...");

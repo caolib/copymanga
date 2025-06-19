@@ -39,9 +39,7 @@
             border: 1px solid $border-color;
 
             &:hover {
-                transform: translateY(-4px);
                 box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-                border-color: $primary-color;
             }
 
             .manga-cover-container {
@@ -54,7 +52,6 @@
                     width: 100%;
                     height: 100%;
                     object-fit: cover;
-                    transition: transform 0.3s ease;
                 }
 
                 .manga-overlay {
@@ -64,8 +61,7 @@
                     right: 0;
                     background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
                     padding: 16px 12px 12px;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
+                    opacity: 1; // 章节徽章一直显示
 
                     .download-info {
                         color: white;
@@ -77,16 +73,6 @@
                             border-radius: $border-radius-small;
                             backdrop-filter: blur(4px);
                         }
-                    }
-                }
-
-                &:hover {
-                    .manga-cover {
-                        transform: scale(1.05);
-                    }
-
-                    .manga-overlay {
-                        opacity: 1;
                     }
                 }
             }
@@ -131,6 +117,65 @@
     .ant-empty {
         padding: 64px 0;
     }
+
+    .downloads-grid {
+        .download-card {
+            height: 100%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid $border-color;
+
+            .card-cover {
+                position: relative;
+                height: 240px;
+                overflow: hidden;
+                border-radius: $border-radius-small;
+
+                img {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                }
+            }
+
+            .ant-card-meta {
+                .ant-card-meta-title {
+                    color: $text-primary;
+                    font-size: 14px;
+                    font-weight: 500;
+                    line-height: 1.4;
+                    height: 2.8em;
+                    overflow: hidden;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    line-clamp: 2;
+                }
+
+                .cartoon-meta {
+                    p {
+                        margin: 4px 0;
+                        font-size: 12px;
+                        color: $text-secondary;
+                        line-height: 1.3;
+
+                        &.cartoon-company {
+                            color: $primary-color;
+                        }
+
+                        &.cartoon-type {
+                            color: $text-secondary;
+                        }
+
+                        &.download-time {
+                            color: $text-tertiary;
+                            font-size: 11px;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 // 深色模式适配
@@ -167,7 +212,6 @@
 
         &:hover {
             box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
-            border-color: $primary-color;
         }
     }
 
@@ -193,6 +237,45 @@
 
                     &.manga-status {
                         color: $dark-text-secondary;
+                    }
+                }
+            }
+        }
+    }
+}
+
+.download-card {
+    @include dark-theme {
+        background-color: $dark-bg-elevated;
+        border-color: $dark-border-color;
+
+        &:hover {
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.08);
+        }
+    }
+
+    .ant-card-meta {
+        .ant-card-meta-title {
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        .cartoon-meta {
+            p {
+                @include dark-theme {
+                    color: $dark-text-secondary;
+
+                    &.cartoon-company {
+                        color: $primary-color;
+                    }
+
+                    &.cartoon-type {
+                        color: $dark-text-secondary;
+                    }
+
+                    &.download-time {
+                        color: $dark-text-tertiary;
                     }
                 }
             }

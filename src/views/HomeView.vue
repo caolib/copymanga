@@ -96,7 +96,7 @@
                                 <template #description>
                                     <div class="topic-meta-mini">
                                         <span v-if="topic.period" class="topic-period-mini">{{ topic.period
-                                        }}</span>
+                                            }}</span>
                                         <span v-if="topic.datetime_created" class="topic-date-mini">
                                             {{ formatDate(topic.datetime_created) }}
                                         </span>
@@ -178,7 +178,6 @@ import { formatDate } from '../utils/date'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import { handleImageError } from '../utils/image'
-import { message } from 'ant-design-vue'
 
 const router = useRouter()
 const homeStore = useHomeStore()
@@ -196,8 +195,10 @@ const activeKeys = ref([])
 
 // 获取主页数据
 const fetchHomeData = () => {
-    const hide = message.loading('正在加载主页数据...', 0)
-    homeStore.fetchHomeData().finally(() => hide())
+    loading.value = true
+    homeStore.fetchHomeData().finally(() => {
+        loading.value = false
+    })
 }
 
 // 刷新主页数据

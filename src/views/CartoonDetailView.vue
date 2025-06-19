@@ -111,9 +111,8 @@
                 </template>
 
                 <div v-if="chapters.length" class="chapters-grid">
-                    <div v-for="chapter in chapters" :key="chapter.uuid" class="chapter-card"
-                        @click="playChapter(chapter)">
-                        <div class="chapter-cover">
+                    <div v-for="chapter in chapters" :key="chapter.uuid" class="chapter-card">
+                        <div class="chapter-cover" @click="playChapter(chapter)">
                             <a-image :src="chapter.v_cover" :alt="chapter.name" :preview="false"
                                 style="width: 100%; height: 100%; object-fit: cover;" />
                             <div class="play-icon">
@@ -126,6 +125,49 @@
                                 <a-tag v-for="line in chapter.lines.slice(0, 2)" :key="line.path_word" size="small">
                                     {{ line.name }}
                                 </a-tag>
+                            </div>
+
+                            <!-- 下载进度条 -->
+                            <div v-if="chapterDownloadStatus[chapter.uuid] === 'downloading'" class="download-progress">
+                                <a-progress :percent="chapterDownloadProgress[chapter.uuid] || 0"
+                                    :status="chapterDownloadProgress[chapter.uuid] >= 100 ? 'success' : 'active'"
+                                    :stroke-width="4" :show-info="true" :format="percent => `${Math.floor(percent)}%`"
+                                    style="width: 100%;" />
+                                <div class="progress-text"
+                                    style="text-align: center; font-size: 12px; color: #666; margin-top: 4px;">
+                                    {{ chapterDownloadProgressText[chapter.uuid] || '准备下载...' }}
+                                </div>
+                            </div>
+
+                            <!-- 按钮区域 -->
+                            <div class="chapter-actions">
+                                <!-- 下载按钮 -->
+                                <a-button
+                                    v-if="!chapterDownloadStatus[chapter.uuid] || chapterDownloadStatus[chapter.uuid] === 'error'"
+                                    size="small" type="primary" @click.stop="downloadChapter(chapter)"
+                                    :loading="chapterDownloadStatus[chapter.uuid] === 'downloading'">
+                                    <template #icon>
+                                        <download-outlined />
+                                    </template>
+                                    下载
+                                </a-button>
+
+                                <!-- 已下载状态 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'downloaded'" size="small"
+                                    type="default" disabled>
+                                    <template #icon>
+                                        <check-circle-outlined />
+                                    </template>
+                                    已下载
+                                </a-button>
+
+                                <!-- 删除按钮 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'downloaded'" size="small"
+                                    danger @click.stop="deleteChapter(chapter)">
+                                    <template #icon>
+                                        <delete-outlined />
+                                    </template>
+                                </a-button>
                             </div>
                         </div>
                     </div>
@@ -141,8 +183,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { PlayCircleOutlined, HeartOutlined, HeartFilled } from '@ant-design/icons-vue'
-import { getCartoonInfo, getCartoonChapters, collectCartoon } from '../api/cartoon'
+import { PlayCircleOutlined, HeartOutlined, HeartFilled, DownloadOutlined, CheckCircleOutlined, DeleteOutlined } from '@ant-design/icons-vue'
+import { getCartoonInfo, getCartoonChapters, collectCartoon, downloadCartoonChapter, isCartoonChapterDownloaded, deleteCartoonChapter } from '../api/cartoon'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
 import { useCartoonPlayerStore } from '../stores/cartoon-player'
@@ -158,6 +200,11 @@ const detailLoading = ref(false)
 const chaptersLoading = ref(false)
 const collectLoading = ref(false)
 const cancelCollectLoading = ref(false)
+
+// 下载相关状态
+const chapterDownloadStatus = ref({}) // 章节下载状态: downloading, downloaded, error
+const chapterDownloadProgress = ref({}) // 章节下载进度
+const chapterDownloadProgressText = ref({}) // 章节下载进度文本
 
 const fetchCartoonData = () => {
     const pathWord = route.params.pathWord
@@ -191,6 +238,11 @@ const fetchChapters = (pathWord) => {
 
         // 获取章节列表后立即缓存到 store
         cartoonPlayerStore.setChapters(pathWord, chapters.value)
+
+        // 检查章节下载状态
+        if (chapters.value.length > 0) {
+            checkChapterDownloadStatus(chapters.value)
+        }
     }).catch(err => {
         console.error('获取章节列表失败:', err)
         message.error(err.message || '获取章节列表失败')
@@ -266,6 +318,122 @@ const handleCancelCollect = () => {
     }).finally(() => {
         cancelCollectLoading.value = false
     })
+}
+
+// 下载章节功能
+const downloadChapter = async (chapter) => {
+    // 检查是否已下载
+    if (chapterDownloadStatus.value[chapter.uuid] === 'downloaded') {
+        message.info('章节已下载')
+        return
+    }
+
+    // 设置下载状态
+    chapterDownloadStatus.value[chapter.uuid] = 'downloading'
+    chapterDownloadProgress.value[chapter.uuid] = 0
+
+    // 选择默认线路（优先选择可用的线路）
+    const availableLine = chapter.lines?.find(line => line.config)
+    const defaultLine = availableLine?.path_word || 'line3'
+
+    // 构建章节信息，包含动画详情
+    const chapterInfo = {
+        // 传递当前页面的动画详情信息用于保存到本地
+        cartoonDetail: cartoon.value ? {
+            uuid: cartoon.value.uuid,
+            name: cartoon.value.name,
+            path_word: route.params.pathWord,
+            cover: cartoon.value.cover || '',
+            company: cartoon.value.company?.name || null,
+            theme: cartoon.value.theme ? cartoon.value.theme.map(t => t.name || t) : [],
+            cartoon_type: cartoon.value.cartoon_type?.display || null,
+            category: cartoon.value.category?.display || null,
+            grade: cartoon.value.grade?.display || null,
+            popular: cartoon.value.popular || null,
+            brief: cartoon.value.brief || null,
+            years: cartoon.value.years || null,
+            datetime_updated: cartoon.value.datetime_updated || null
+        } : null
+    }
+
+    // 调用下载API
+    return downloadCartoonChapter(
+        route.params.pathWord,
+        chapter.uuid,
+        defaultLine,
+        chapterInfo,
+        (progressInfo) => {
+            // 更新进度
+            chapterDownloadProgress.value[chapter.uuid] = progressInfo.percent || 0
+            chapterDownloadProgressText.value[chapter.uuid] = progressInfo.currentFile || '准备下载...'
+
+            if (progressInfo.status === 'error') {
+                console.error('下载进度错误:', progressInfo.error)
+            }
+        }
+    ).then(() => {
+        // 下载完成
+        chapterDownloadStatus.value[chapter.uuid] = 'downloaded'
+        chapterDownloadProgress.value[chapter.uuid] = 100
+        chapterDownloadProgressText.value[chapter.uuid] = '下载完成'
+        message.success({
+            content: `动画章节 "${chapter.name}" 下载完成`,
+            class: 'right-bottom-msg'
+        });
+    }).catch(error => {
+        console.error('下载动画章节失败:', error)
+        // 下载失败
+        chapterDownloadStatus.value[chapter.uuid] = 'error'
+        chapterDownloadProgress.value[chapter.uuid] = 0
+        chapterDownloadProgressText.value[chapter.uuid] = '下载失败'
+        message.error(`下载失败: ${error.message || '未知错误'}`)
+    })
+}
+
+// 删除章节功能
+const deleteChapter = async (chapter) => {
+    await deleteCartoonChapter(
+        cartoon.value.uuid,
+        chapter.uuid
+    ).then(() => {
+        // 更新下载状态
+        delete chapterDownloadStatus.value[chapter.uuid]
+        delete chapterDownloadProgress.value[chapter.uuid]
+        delete chapterDownloadProgressText.value[chapter.uuid]
+        message.success(`动画章节 "${chapter.name}" 删除成功`)
+    }).catch(error => {
+        console.error('删除动画章节失败:', error)
+        message.error(`删除失败: ${error.message || '未知错误'}`)
+    })
+}
+
+// 检查章节下载状态
+const checkChapterDownloadStatus = async (chapters) => {
+    if (!cartoon.value?.uuid) {
+        console.warn('动画UUID为空，无法检查下载状态')
+        return
+    }
+
+    // 使用 Promise.all 并行检查所有章节的下载状态
+    const checkPromises = chapters.map(async (chapter) => {
+        try {
+            const isDownloaded = await isCartoonChapterDownloaded(
+                cartoon.value.uuid,
+                chapter.uuid
+            )
+
+            if (isDownloaded) {
+                chapterDownloadStatus.value[chapter.uuid] = 'downloaded'
+            }
+
+            return isDownloaded
+        } catch (error) {
+            console.error('检查动画章节下载状态失败:', chapter.name, error)
+            return false
+        }
+    })
+
+    await Promise.all(checkPromises)
 }
 
 onMounted(() => {

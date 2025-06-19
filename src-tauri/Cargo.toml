@@ -28,6 +28,7 @@ http = "0.2"
 reqwest = { version = "0.12", features = ["cookies", "json", "multipart"] }
 axum = "0.7"
 futures-util = "0.3"
+futures = "0.3"
 tauri = { version = "2", features = ["protocol-asset", "devtools"] }
 tauri-plugin-opener = "2"
 tauri-plugin-fs = "2"
