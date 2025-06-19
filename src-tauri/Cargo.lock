@@ -637,6 +637,7 @@ dependencies = [
  "tauri-plugin-process",
  "tauri-plugin-window-state",
  "tokio",
+ "tokio-util",
  "tower 0.4.13",
  "tower-service",
  "urlencoding",

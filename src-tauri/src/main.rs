@@ -4,13 +4,15 @@ use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use tauri::AppHandle;
+use tokio_util::sync::CancellationToken;
 
 mod cache;
 mod proxy;
 mod download;
 
-// 全局状态跟踪服务器是否已启动
+// 全局状态跟踪服务器是否已启动和取消令牌
 static SERVER_STARTED: Mutex<bool> = Mutex::new(false);
+static CANCELLATION_TOKEN: Mutex<Option<CancellationToken>> = Mutex::new(None);
 
 #[tauri::command]
 fn open_browser(url: String) {
@@ -21,32 +23,74 @@ fn open_browser(url: String) {
 async fn start_proxy_server(app_handle: AppHandle) -> Result<String, String> {
     // 检查服务器是否已经启动
     {
-        let mut started = SERVER_STARTED.lock().unwrap();
+        let started = SERVER_STARTED.lock().unwrap();
         if *started {
             return Ok("代理服务器已经在运行".to_string());
         }
+    }
+    
+    // 创建新的取消令牌
+    let token = CancellationToken::new();
+    {
+        let mut cancellation_token = CANCELLATION_TOKEN.lock().unwrap();
+        *cancellation_token = Some(token.clone());
+    }
+    
+    // 标记服务器为启动状态
+    {
+        let mut started = SERVER_STARTED.lock().unwrap();
         *started = true;
     }
     
-    match start_proxy(app_handle).await {
-        Ok(_) => Ok("代理服务器启动成功".to_string()),
-        Err(e) => {
-            // 重置状态，允许重新启动
-            *SERVER_STARTED.lock().unwrap() = false;
-            Err(e)
+    // 在新的任务中启动代理服务器
+    let app_handle_clone = app_handle.clone();
+    tokio::spawn(async move {
+        match start_proxy(app_handle_clone, token).await {
+            Ok(_) => {
+                println!("代理服务器正常关闭");
+            }
+            Err(e) => {
+                eprintln!("代理服务器错误: {}", e);
+            }
         }
-    }
+        
+        // 重置状态
+        {
+            let mut started = SERVER_STARTED.lock().unwrap();
+            *started = false;
+        }
+        {
+            let mut cancellation_token = CANCELLATION_TOKEN.lock().unwrap();
+            *cancellation_token = None;
+        }
+    });
+    
+    Ok("代理服务器启动成功".to_string())
 }
 
 #[tauri::command]
 async fn stop_proxy_server() -> Result<String, String> {
-    // 重置服务器状态
+    // 检查服务器是否在运行
     {
-        let mut started = SERVER_STARTED.lock().unwrap();
-        *started = false;
+        let started = SERVER_STARTED.lock().unwrap();
+        if !*started {
+            return Ok("代理服务器未在运行".to_string());
+        }
     }
     
-    Ok("代理服务器已停止".to_string())
+    // 发送取消信号
+    {
+        let cancellation_token = CANCELLATION_TOKEN.lock().unwrap();
+        if let Some(token) = cancellation_token.as_ref() {
+            token.cancel();
+            println!("已发送停止信号到代理服务器");
+        }
+    }
+    
+    // 等待一段时间让服务器优雅关闭
+    tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
+    
+    Ok("代理服务器停止信号已发送".to_string())
 }
 
 fn main() {
@@ -87,7 +131,7 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-async fn start_proxy(app_handle: AppHandle) -> Result<(), String> {
+async fn start_proxy(app_handle: AppHandle, cancellation_token: CancellationToken) -> Result<(), String> {
     println!("正在启动Rust代理服务器...");
 
     let domain = match proxy::get_current_api_domain_with_retry(&app_handle).await {
@@ -129,11 +173,24 @@ async fn start_proxy(app_handle: AppHandle) -> Result<(), String> {
     match tokio::net::TcpListener::bind(addr).await {
         Ok(listener) => {
             println!("代理服务器成功绑定到端口 {}", port);
-            if let Err(e) = axum::serve(listener, app).await {
-                eprintln!("代理服务器运行出错: {}", e);
-                return Err(format!("代理服务器运行出错: {}", e));
+            
+            // 使用 with_graceful_shutdown 来支持优雅关闭
+            match axum::serve(listener, app)
+                .with_graceful_shutdown(async move {
+                    cancellation_token.cancelled().await;
+                    println!("收到停止信号，正在优雅关闭代理服务器...");
+                })
+                .await 
+            {
+                Ok(_) => {
+                    println!("代理服务器已优雅关闭");
+                    Ok(())
+                }
+                Err(e) => {
+                    eprintln!("代理服务器运行出错: {}", e);
+                    Err(format!("代理服务器运行出错: {}", e))
+                }
             }
-            Ok(())
         }
         Err(e) => {
             if e.kind() == std::io::ErrorKind::AddrInUse {
