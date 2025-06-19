@@ -16,7 +16,14 @@
 
 ## 1 介绍
 
-这是一个[拷贝漫画](https://www.copy20.com/)第三方桌面端应用，目前支持win、mac、linux，只有windows简单测试过，移动端可以下载[官方app](https://www.copy20.com/download)使用
+这是一个[拷贝漫画](https://www.copy20.com/)第三方桌面端应用，这是[deepwiki生成的简介](https://deepwiki.com/search/_8131da19-74a1-4016-96ec-65580a05c158)，有更多问题也可以问它，目前支持win、mac、linux，只有windows简单测试过，移动端可以下载[官方app](https://www.copy20.com/download)使用
+
+> [!warning]
+>
+> - 目前应用还在快速迭代，可能会有一些界面加载失败或加载时间长的问题，可以使用顶部栏刷新按钮刷新然后点击各个界面上的刷新按钮
+> - 推荐开启系统代理，应用本身无需多余设置，如果开启代理后图片无法加载，可以添加排除域名规则`*.mangafuna.xyz;`
+
+
 
 ### 1.漫画
 
