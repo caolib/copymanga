@@ -118,11 +118,6 @@ const goToPost = (item) => {
 }
 
 const fetchCollection = async (forceRefresh = false) => {
-    if (!isLoggedIn()) {
-        error.value = '请先登录'
-        return
-    }
-
     internalLoading.value = true
     error.value = ''
 

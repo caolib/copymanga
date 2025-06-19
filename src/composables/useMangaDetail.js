@@ -300,11 +300,6 @@ export function useMangaDetail() {
             return
         }
 
-        if (!isLoggedIn.value) {
-            message.warning('请先登录')
-            return
-        }
-
         submitCommentLoading.value = true
 
         await postMangaComment(manga.value.uuid, commentText).then(res => {

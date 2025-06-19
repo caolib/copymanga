@@ -20,7 +20,7 @@ const updateBaseURL = async () => {
 
 // 前往登录
 const goToLogin = () => {
-    message.error('请先登录')
+    message.error('未登录或身份过期，请重新登录')
     router.push('/login')
 }
 
@@ -54,7 +54,7 @@ request.interceptors.response.use(
     (response) => {
         if (response.status === 401 || response.data.code === 401) {
             goToLogin()
-            return Promise.reject(new Error('未授权，请登录'))
+            return Promise.reject(new Error('请重新登录'))
         }
         // 处理响应数据
         if (response.status === 500) {
@@ -82,7 +82,7 @@ request.interceptors.response.use(
         // 处理401未授权错误，跳转到登录页面
         if (error.response && error.response.status === 401) {
             goToLogin()
-            return Promise.reject(new Error('未授权，请登录'))
+            return Promise.reject(new Error('请重新登录'))
         }
 
         if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
