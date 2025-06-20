@@ -126,7 +126,7 @@ jobs:
           save-if: ${{ github.ref == 'refs/heads/main' }}
 
       - name: install frontend dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
 
       - uses: tauri-apps/tauri-action@v0
         env:
