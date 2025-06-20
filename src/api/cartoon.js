@@ -1,4 +1,5 @@
 import request from '../utils/request'
+import { cartoonDownloadManager } from '../utils/cartoon-download-manager'
 
 /**
  * 获取动画首页数据
@@ -166,6 +167,103 @@ function searchCartoon(q, limit = 18, offset = 0) {
     });
 }
 
+/**
+ * 下载动画章节
+ * @param {string} pathWord 动画路径标识
+ * @param {string} chapterId 章节ID
+ * @param {string} line 视频线路
+ * @param {Object} chapterInfo 章节基本信息，包含cartoonDetail
+ * @param {Function} onProgress 进度回调
+ * @param {boolean} resumeDownload 是否断点续传
+ * @returns {Promise}
+ */
+async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, onProgress, resumeDownload = false) {
+    return getVideoByChapterId(pathWord, chapterId, line).then(response => {
+        if (response && response.code === 200 && response.results) {
+            const chapterData = response.results.chapter
+            const cartoonData = response.results.cartoon
+
+            // 构建下载信息
+            const downloadInfo = {
+                cartoonUuid: cartoonData.uuid,
+                cartoonName: cartoonData.name,
+                chapterUuid: chapterData.uuid,
+                chapterName: chapterData.name,
+                videoUrl: chapterData.video,
+                cover: chapterData.v_cover,
+                videoFile: `${chapterData.name}.mp4`, // 添加视频文件名
+                fileSize: chapterData.filesize || 0, // 添加文件大小
+                // 使用传递的动画详情，如果没有则使用API返回的基本信息
+                cartoonDetail: chapterInfo.cartoonDetail || {
+                    uuid: cartoonData.uuid,
+                    name: cartoonData.name,
+                    path_word: cartoonData.path_word,
+                    cover: '',
+                    author: null,
+                    theme: [],
+                    status: null,
+                    popular: null,
+                    brief: null,
+                    datetime_updated: null
+                }
+            }
+
+            // 开始下载
+            return cartoonDownloadManager.downloadChapter(downloadInfo, onProgress, resumeDownload)
+        } else {
+            throw new Error('获取视频数据失败：服务器返回错误响应')
+        }
+    }).catch(error => {
+        console.error('下载动画章节失败:', error)
+    })
+}
+
+
+/**
+ * 删除已下载的动画章节
+ * @param {string} cartoonUuid 动画UUID
+ * @param {string} chapterUuid 章节UUID
+ * @returns {Promise<boolean>}
+ */
+async function deleteCartoonChapter(cartoonUuid, chapterUuid) {
+    return await cartoonDownloadManager.deleteChapter(cartoonUuid, chapterUuid)
+}
+
+/**
+ * 获取本地动画详情
+ * @param {string} cartoonUuid 动画UUID
+ * @returns {Promise<Object>}
+ */
+async function getLocalCartoonDetail(cartoonUuid) {
+    return await cartoonDownloadManager.getLocalCartoonDetail(cartoonUuid)
+}
+
+/**
+ * 获取本地动画章节列表
+ * @param {string} cartoonUuid 动画UUID
+ * @returns {Promise<Array>}
+ */
+async function getLocalCartoonChapters(cartoonUuid) {
+    return await cartoonDownloadManager.getLocalCartoonChapters(cartoonUuid)
+}
+
+/**
+ * 打开本地视频目录
+ * @param {string} cartoonUuid 动画UUID
+ * @param {string} chapterUuid 章节UUID
+ */
+async function openLocalVideoDirectory(cartoonUuid, chapterUuid) {
+    return await cartoonDownloadManager.openLocalVideoDirectory(cartoonUuid, chapterUuid)
+}
+
+/**
+ * 获取已下载的动画列表
+ * @returns {Promise<Array>}
+ */
+async function getDownloadedCartoonList() {
+    return await cartoonDownloadManager.getDownloadedCartoonList()
+}
+
 export {
     getCartoonHome,
     getCartoonInfo,
@@ -175,5 +273,11 @@ export {
     getCollectCartoonList,
     getCartoonTopics,
     getCartoonThemes,
-    searchCartoon
+    searchCartoon,
+    downloadCartoonChapter,
+    deleteCartoonChapter,
+    getLocalCartoonDetail,
+    getLocalCartoonChapters,
+    openLocalVideoDirectory,
+    getDownloadedCartoonList
 }

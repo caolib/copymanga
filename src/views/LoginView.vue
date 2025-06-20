@@ -147,12 +147,6 @@ onMounted(() => {
     // 初始化自动登录状态
     autoLoginEnabled.value = userStore.autoLogin
 
-    // 如果用户已经登录，直接跳转
-    if (userStore.isLoggedIn && userStore.token) {
-        router.push('/')
-        return
-    }
-
     // 如果启用自动登录且有保存的账号，尝试自动登录
     if (userStore.autoLogin && userStore.savedAccounts.length > 0) {
         const recentAccount = userStore.getRecentAccount()

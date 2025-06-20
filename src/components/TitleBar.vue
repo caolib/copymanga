@@ -63,10 +63,10 @@
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
                     {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
                 </button>
-                <a-button type="text" class="nav-link" @click="goBack" title="后退" :icon="h(ArrowLeftOutlined)">
-                </a-button>
-                <a-button type="text" class="nav-link" @click="goForward" title="前进" :icon="h(ArrowRightOutlined)">
-                </a-button>
+                <a-button type="text" class="nav-link" @click="goBack" title="后退"
+                    :icon="h(ArrowLeftOutlined)"></a-button>
+                <a-button type="text" class="nav-link" @click="goForward" title="前进"
+                    :icon="h(ArrowRightOutlined)"></a-button>
                 <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)">
                 </a-button>
             </nav>
@@ -108,7 +108,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, inject } from 'vue'
 import { useRouter } from 'vue-router'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { isLoggedIn, logout } from '../utils/auth'
@@ -132,6 +132,9 @@ const currentWindow = getCurrentWindow()
 const isLoggedInComputed = computed(() => isLoggedIn())
 const userInfo = computed(() => userStore.userInfo)
 
+// 注入全局刷新方法
+const refreshCurrentRoute = inject('refreshCurrentRoute')
+
 // 前进后退功能
 const goBack = () => {
     router.go(-1)
@@ -143,8 +146,13 @@ const goForward = () => {
 
 // 刷新功能
 const refreshPage = () => {
-    // 使用浏览器自带刷新
-    window.location.reload()
+    // 使用全局的刷新方法，通过改变 key 强制重新渲染组件
+    if (refreshCurrentRoute) {
+        refreshCurrentRoute()
+    } else {
+        // 回退方案
+        router.go(0)
+    }
 }
 
 // 用于存储监听器清理函数

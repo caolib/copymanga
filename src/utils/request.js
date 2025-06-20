@@ -20,7 +20,7 @@ const updateBaseURL = async () => {
 
 // 前往登录
 const goToLogin = () => {
-    message.error('请先登录')
+    message.error('未登录或身份过期，请重新登录')
     router.push('/login')
 }
 
@@ -39,9 +39,6 @@ request.interceptors.request.use(
         // 动态生成 dt 字段 (日期)
         config.headers['dt'] = getCurrentDate()
 
-        // 设置固定的请求头
-        config.headers['Accept'] = '*/*'
-
         return config
     },
     (error) => {
@@ -54,7 +51,7 @@ request.interceptors.response.use(
     (response) => {
         if (response.status === 401 || response.data.code === 401) {
             goToLogin()
-            return Promise.reject(new Error('未授权，请登录'))
+            return Promise.reject(new Error('请重新登录'))
         }
         // 处理响应数据
         if (response.status === 500) {
@@ -82,19 +79,26 @@ request.interceptors.response.use(
         // 处理401未授权错误，跳转到登录页面
         if (error.response && error.response.status === 401) {
             goToLogin()
-            return Promise.reject(new Error('未授权，请登录'))
+            return Promise.reject(new Error('请重新登录'))
         }
 
-        if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+        if (error.code === 'ECONNABORTED') {
             msg = '请求超时，请检查网络连接或稍后重试'
         }
 
         if (error.code === 'ERR_NETWORK') {
-            message.error("好像没连上网喔...")
-            msg = '网络连接失败，请检查网络设置'
+            msg = '好像没连上网喔...'
         }
 
-        console.error(msg)
+        if (error.code === "ECONNABORTED") {
+            msg = '请求超时，请稍后再试'
+        }
+
+        console.error(error)
+        message.error({
+            content: () => msg,
+            class: 'custom-msg-btn'
+        });
         return Promise.reject(error)
     }
 )

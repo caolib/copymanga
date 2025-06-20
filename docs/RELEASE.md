@@ -1,22 +1,29 @@
 ## Change
 
 ### feat
-- [18f2d7e] ✨ feat: 添加请求头导出功能
-- [7371f60] ✨ feat: 添加请求头配置导入功能
-- [79fea28] ✨ feat: 记住应用窗口大小、位置等状态
+- [223b928] ✨ feat: 添加动画下载功能
+- [5501bd8] ✨ feat: 添加动画下载与本地章节检测，重构漫画检测功能
+- [df7507b] ✨ feat: 添加漫画暂停下载和继续功能
+- [b152275] ✨ feat: 添加暂停、继续动画下载功能
 
 ### fix
-- [a2aba1f] 🐛 fix: 修复部分界面暗色背景显示异常
-- [36d2b11] 🐛 fix: 修复设置界面不初始化问题
+- [f3b5272] 🐛 fix: 修复自动登录功能
+- [688aa99] 🐛 fix: 修复应用重启前未关闭转发服务导致端口占用问题
+- [300826b] 🐛 fix: 完成漫画、动画下载及检测
+- [66e7946] 🐛 fix: 修复本地漫画下载界面
+- [1ebc39e] 🐛 fix: 修复本地漫画加载逻辑
+- [bde2935] 🐛 fix: 修复背景颜色显示
+- [e13ca95] 🐛 fix: 修复顶部刷新按钮导致界面加载失败的问题
+- [18d4693] 🐛 fix: 修复检测视频动画逻辑
+- [8be3dcf] 🐛 fix: 修复本地漫画封面显示
 
 ### others
-- [96283a1] 📄 docs: update README.md
-- [116d7cb] 🌈 style: 优化界面显示
-- [e5129e4] Revert "🌈 style: 优化界面，减少间隔"
-- [01a8efe] 🌈 style: 解除宽度限制
-- [5c6787b] 🐳 chore: 发布新版本 v0.9.6
-- [ffb7c15] 🐳 chore: 发布新版本 v0.9.6
+- [8701dd6] Update README.md
+- [a8ea53c] 📄 docs: update doc
+- [d017de7] 📄 docs: update README
+- [a3d2d21] 🌈 style: 优化多个界面，优化代码风格
+- [0a6d620] 🦄 refactor: 应用改名为doki
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.9.5...v0.9.6)
+📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v0.9.6...v1.0.0)
 

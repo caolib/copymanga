@@ -109,7 +109,6 @@ const fetchBooks = async (forceRefresh = false) => {
 
         if (!result.fromCache) {
             lastUpdateTime.value = new Date().toISOString()
-            message.success(forceRefresh ? '轻小说列表已刷新' : '轻小说列表加载成功')
         }
     } else {
         message.error(result.error?.message || '获取轻小说列表失败，请检查网络连接')

@@ -18,7 +18,7 @@
                         <div class="font-preview">
                             <span class="preview-label">预览：</span>
                             <span class="preview-text" :style="{ fontFamily: themeConfig.fontFamily }">
-                                拷贝漫画 CopyManga 0123456789
+                                漫画 doki 0123456789
                             </span>
                         </div>
                     </div>

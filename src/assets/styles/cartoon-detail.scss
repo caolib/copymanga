@@ -125,6 +125,30 @@
                     flex-wrap: wrap;
                     gap: 4px;
                 }
+
+                .download-progress {
+                    margin: 8px 0;
+                }
+
+                .chapter-actions {
+                    display: flex;
+                    gap: 4px;
+                    margin-top: 8px;
+                    flex-wrap: wrap;
+
+                    .ant-btn {
+                        flex: 1;
+                        font-size: 12px;
+                        height: 28px;
+                        padding: 0 8px;
+                        min-width: auto;
+
+                        &:only-child {
+                            flex: none;
+                            min-width: 60px;
+                        }
+                    }
+                }
             }
         }
     }

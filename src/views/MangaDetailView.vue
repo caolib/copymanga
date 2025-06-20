@@ -162,10 +162,23 @@
                                 <check-circle-outlined />
                             </template>
                         </a-tag>
+                        <a-tag v-else-if="chapterDownloadStatus[chapter.id] === 'partial'" color="warning"
+                            class="download-status-tag"
+                            :title="`已下载 ${Math.round(chapterDownloadProgress[chapter.id] || 0)}%`">
+                            <template #icon>
+                                <play-circle-outlined />
+                            </template>
+                        </a-tag>
                         <a-tag v-else-if="chapterDownloadStatus[chapter.id] === 'downloading'" color="processing"
                             class="download-status-tag">
                             <template #icon>
                                 <sync-outlined :spin="true" />
+                            </template>
+                        </a-tag>
+                        <a-tag v-else-if="chapterDownloadStatus[chapter.id] === 'paused'" color="default"
+                            class="download-status-tag" title="下载已暂停">
+                            <template #icon>
+                                <pause-circle-outlined />
                             </template>
                         </a-tag>
 
@@ -179,17 +192,10 @@
                         </div>
 
                         <!-- 下载状态和操作按钮 -->
-                        <div class="chapter-actions" style="width: 100%;">
-                            <!-- 下载进度条 (仅在下载中时显示) -->
-                            <div v-if="chapterDownloadStatus[chapter.id] === 'downloading'"
-                                style="width: 100%; margin-bottom: 8px;">
-                                <a-progress :percent="chapterDownloadProgress[chapter.id] || 0"
-                                    :status="chapterDownloadProgress[chapter.id] >= 100 ? 'success' : 'active'"
-                                    :stroke-width="8" :show-info="true" style="width: 100%;" />
-                            </div>
-
+                        <div class="chapter-actions" style="width: 100%; display: flex; flex-direction: column;">
                             <!-- 按钮区域 -->
-                            <div style="display: flex; justify-content: center; align-items: center; gap: 4px;">
+                            <div
+                                style="display: flex; justify-content: center; align-items: center; gap: 4px; margin-bottom: 8px;">
                                 <!-- 下载按钮 -->
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.id] || chapterDownloadStatus[chapter.id] === 'error'"
@@ -197,10 +203,42 @@
                                     :icon="h(DownloadOutlined)">
                                 </a-button>
 
+                                <!-- 继续下载按钮（部分下载） -->
+                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'partial'" type="primary"
+                                    size="small" @click="resumeDownload(chapter)" :icon="h(PlayCircleOutlined)"
+                                    title="继续下载">
+                                </a-button>
+
+                                <!-- 暂停下载按钮 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloading'" size="small"
+                                    @click="pauseDownload(chapter)" :icon="h(PauseCircleOutlined)" title="暂停下载">
+                                </a-button>
+
+                                <!-- 暂停中显示（禁用状态） -->
+                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'pausing'" size="small"
+                                    :loading="true" disabled title="正在暂停...">
+                                    暂停中
+                                </a-button>
+
+                                <!-- 继续下载按钮（暂停状态） -->
+                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'paused'" type="primary"
+                                    size="small" @click="resumeDownload(chapter)" :icon="h(PlayCircleOutlined)"
+                                    title="继续下载">
+                                </a-button>
+
                                 <!-- 已下载章节的删除按钮 -->
                                 <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" size="small" danger
                                     @click="deleteChapter(chapter)" :title="'删除章节'" :icon="h(DeleteOutlined)">
                                 </a-button>
+                            </div>
+
+                            <!-- 下载进度条 (在下载中、暂停中或部分下载时显示) -->
+                            <div v-if="chapterDownloadStatus[chapter.id] === 'downloading' || chapterDownloadStatus[chapter.id] === 'partial' || chapterDownloadStatus[chapter.id] === 'pausing'"
+                                style="width: 100%;">
+                                <a-progress :percent="chapterDownloadProgress[chapter.id] || 0"
+                                    :status="chapterDownloadProgress[chapter.id] >= 100 ? 'success' : 'active'"
+                                    :stroke-width="8" :show-info="true" :format="(percent) => `${Math.round(percent)}%`"
+                                    style="width: 100%;" />
                             </div>
                         </div>
                     </a-card>
@@ -264,7 +302,7 @@
 import { onMounted } from 'vue'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '@/utils/number'
-import { DownOutlined, CheckCircleOutlined, SyncOutlined, DeleteOutlined, DownloadOutlined } from '@ant-design/icons-vue'
+import { DownOutlined, CheckCircleOutlined, SyncOutlined, DeleteOutlined, DownloadOutlined, PauseCircleOutlined, PlayCircleOutlined } from '@ant-design/icons-vue'
 import { useMangaDetail } from '../composables/useMangaDetail'
 import { h } from 'vue'
 
@@ -291,7 +329,6 @@ const {
     commentsPage,
     commentsPageSize,
     commentsTotal,
-    commentsLoaded,
     newComment,
     submitCommentLoading,
     chapterDownloadStatus,
@@ -313,7 +350,6 @@ const {
     handleGroupChange,
     handleCollect,
     handleCommentsToggle,
-    fetchMangaComments,
     handleCommentsPageChange,
     submitComment,
     downloadChapter,
@@ -321,6 +357,8 @@ const {
     downloadAllChapters,
     downloadNotDownloadedChapters,
     deleteChapter,
+    pauseDownload,
+    resumeDownload,
     initializePage
 } = useMangaDetail()
 

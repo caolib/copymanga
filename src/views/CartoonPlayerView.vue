@@ -50,6 +50,17 @@
                                     </a-radio-button>
                                 </a-radio-group>
                             </div>
+                            <!-- 本地视频按钮 -->
+                            <div class="local-video-section" style="margin-top: 12px;">
+                                <a-button v-if="isLocalVideoAvailable" type="primary" :icon="h(FolderOpenOutlined)"
+                                    @click="openLocalVideoDirectoryHandler" size="small">
+                                    打开本地视频目录
+                                </a-button>
+                                <a-typography-text v-if="isLocalVideoAvailable" type="secondary"
+                                    style="margin-left: 8px; font-size: 12px;">
+                                    该视频已在本地下载
+                                </a-typography-text>
+                            </div>
                         </div>
                     </div>
 
@@ -68,12 +79,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, watch, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import { FolderOpenOutlined } from '@ant-design/icons-vue'
+import { invoke } from '@tauri-apps/api/core'
 import Hls from 'hls.js'
 import DPlayer from 'dplayer'
-import { getVideoByChapterId } from '../api/cartoon'
+import { getVideoByChapterId, openLocalVideoDirectory, getLocalCartoonChapters } from '../api/cartoon'
 import { useCartoonPlayerStore } from '../stores/cartoon-player'
 
 const route = useRoute()
@@ -87,9 +100,55 @@ const hls = ref(null)
 const dp = ref(null)
 const currentLine = ref('')
 const playStatus = ref(null)
+const isLocalVideoAvailable = ref(false)
 
 const cartoonData = ref({})
 const videoData = ref({})
+
+const checkLocalVideo = async (cartoonUuid, chapterId) => {
+    try {
+        console.log('检查本地视频参数:', { cartoonUuid, chapterId })
+        if (cartoonUuid && chapterId) {
+            // 使用批量查询检查本地章节
+            const localChapters = await getLocalCartoonChapters(cartoonUuid)
+            const isDownloaded = localChapters.some(chapter => chapter.chapter_uuid === chapterId)
+            console.log('本地视频检查结果:', isDownloaded)
+
+            // 如果没找到，使用调试功能搜索
+            if (!isDownloaded) {
+                console.log('使用调试功能搜索下载文件...')
+                try {
+                    const foundPaths = await invoke('debug_find_downloaded_files', { cartoonUuid })
+                    console.log('搜索到的下载路径:', foundPaths)
+                } catch (debugError) {
+                    console.error('调试搜索失败:', debugError)
+                }
+            }
+
+            return result
+        }
+        console.log('缺少必要参数进行本地视频检查')
+        return false
+    } catch (error) {
+        console.error('检查本地视频失败:', error)
+        return false
+    }
+}
+
+// 打开本地视频目录
+const openLocalVideoDirectoryHandler = async () => {
+    try {
+        const { chapterId } = route.params
+        if (cartoonData.value.uuid && chapterId) {
+            await openLocalVideoDirectory(cartoonData.value.uuid, chapterId)
+        } else {
+            message.error('无法获取动画信息')
+        }
+    } catch (error) {
+        console.error('打开本地视频目录失败:', error)
+        message.error('打开本地视频目录失败: ' + error.message)
+    }
+}
 
 const fetchVideoData = (line) => {
     const { pathWord, chapterId } = route.params
@@ -104,11 +163,26 @@ const fetchVideoData = (line) => {
     error.value = ''
     playStatus.value = { text: '加载中...', color: 'processing' }
 
-    getVideoByChapterId(pathWord, chapterId, selectedLine).then(response => {
+    getVideoByChapterId(pathWord, chapterId, selectedLine).then(async response => {
         const results = response.results
         cartoonData.value = results.cartoon || {}
         videoData.value = results.chapter || {}
         currentLine.value = selectedLine
+
+        console.log('获取到的动画数据:', cartoonData.value)
+        console.log('动画UUID:', cartoonData.value.uuid)
+
+        // 检查本地视频是否可用
+        if (cartoonData.value.uuid && chapterId) {
+            console.log('检查本地视频:', cartoonData.value.uuid, chapterId)
+            isLocalVideoAvailable.value = await checkLocalVideo(cartoonData.value.uuid, chapterId)
+            console.log('本地视频可用:', isLocalVideoAvailable.value)
+        } else {
+            console.log('缺少必要信息进行本地视频检查:', {
+                uuid: cartoonData.value.uuid,
+                chapterId: chapterId
+            })
+        }
 
         // 初始化视频播放器
         nextTick(() => {

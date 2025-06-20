@@ -157,6 +157,7 @@ async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
                 groupPathWord: chapterInfo.group_path_word || 'default',
                 chapterUuid: chapterData.uuid,
                 chapterName: chapterData.name,
+                totalImages: chapterData.size || chapterData.contents.length, // 添加总图片数量
                 images: chapterData.contents.map((image, index) => ({
                     url: image.url,
                     index: index,
@@ -199,16 +200,7 @@ async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
     })
 }
 
-/**
- * 检查章节是否已下载
- * @param {string} mangaUuid 漫画UUID
- * @param {string} groupPathWord 分组路径
- * @param {string} chapterUuid 章节UUID
- * @returns {Promise<boolean>}
- */
-async function isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid) {
-    return await downloadManager.isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid)
-}
+// isChapterDownloaded 已删除，请使用 getLocalMangaChapters 批量获取本地章节
 
 /**
  * 获取已下载的章节信息
@@ -247,6 +239,17 @@ async function getLocalMangaChapters(mangaUuid) {
     return await downloadManager.getLocalMangaChapters(mangaUuid)
 }
 
+/**
+ * 检查章节下载的详细状态
+ * @param {string} mangaUuid 漫画UUID
+ * @param {string} chapterUuid 章节UUID
+ * @param {string} groupPathWord 分组路径，默认为default
+ * @returns {Promise<Object>} 章节下载详细状态
+ */
+async function checkChapterDownloadDetail(mangaUuid, chapterUuid, groupPathWord = 'default') {
+    return await downloadManager.checkChapterDownloadDetail(mangaUuid, chapterUuid, groupPathWord)
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
@@ -258,9 +261,10 @@ export {
     getHomeIndex,
     getAuthorMangaList,
     downloadChapter,
-    isChapterDownloaded,
+    // isChapterDownloaded - 已删除，请使用 getLocalMangaChapters 批量获取本地章节
     getDownloadedChapterInfo,
     getDownloadedMangaList,
     getLocalMangaDetail,
-    getLocalMangaChapters
+    getLocalMangaChapters,
+    checkChapterDownloadDetail
 }

@@ -5,7 +5,7 @@ import axios from 'axios';
  * @returns {Promise<Object>} 发布信息
  */
 const getLatestRelease = async () => {
-    const response = await axios.get('https://api.github.com/repos/caolib/copymanga/releases/latest');
+    const response = await axios.get('https://api.github.com/repos/caolib/doki/releases/latest');
     return response.data;
 };
 

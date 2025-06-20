@@ -162,13 +162,13 @@ const getCurrentTabUpdateTime = () => {
 }
 
 // 组件挂载时检查登录状态
-onMounted(() => {
-    if (!isLoggedIn()) {
-        message.warning('请先登录')
-        router.push('/login')
-        return
-    }
-})
+// onMounted(() => {
+//     if (!isLoggedIn()) {
+//         message.warning('请先登录')
+//         router.push('/login')
+//         return
+//     }
+// })
 </script>
 
 <style scoped src="../assets/styles/bookshelf.scss" lang="scss"></style>

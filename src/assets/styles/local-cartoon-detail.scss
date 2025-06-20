@@ -1,0 +1,69 @@
+@use "./variables" as *;
+
+.local-cartoon-container {
+    padding: 20px;
+    min-height: 100vh;
+}
+
+.local-cartoon-card {
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.chapters-grid {
+    margin-top: 16px;
+}
+
+.chapter-card {
+    height: 100%;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+    }
+}
+
+.chapter-title {
+    font-size: 12px;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chapter-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.file-size,
+.download-time {
+    font-size: 11px;
+    color: #666;
+}
+
+.chapter-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.empty-chapters {
+    text-align: center;
+    padding: 60px 0;
+    color: #999;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .local-cartoon-container {
+        padding: 12px;
+    }
+
+    .chapter-card {
+        margin-bottom: 8px;
+    }
+}
