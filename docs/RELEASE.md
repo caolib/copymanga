@@ -1,5 +1,14 @@
 ## Change
 
+> [!important]
+>
+> - 本次更新修改了应用ID，不会覆盖之前的0.x版本
+>
+> - 可以将`C:\Users\你的用户名\AppData\Roaming\io.github.caolib.copymanga`文件夹下所有配置文件迁移到`io.github.caolib.copymanga`
+>
+> - 已下载的漫画数据在安装路径下的downloads文件夹，这个迁移后不保证能正常使用（如果你下载了很多数据不想丢失可以先用旧版本）
+
+
 ### feat
 - [223b928] ✨ feat: 添加动画下载功能
 - [5501bd8] ✨ feat: 添加动画下载与本地章节检测，重构漫画检测功能
