@@ -18,5 +18,5 @@
 - [ffb7c15] 🐳 chore: 发布新版本 v0.9.6
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/v0.9.5...v0.9.6)
+📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v0.9.5...v0.9.6)
 

@@ -539,7 +539,6 @@ const checkChapterDownloadStatus = async (chapters) => {
 }
 
 onMounted(() => {
-    // TODO 加载分离
     fetchCartoonData()
 })
 </script>

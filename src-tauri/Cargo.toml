@@ -1,7 +1,7 @@
 [package]
-name = "copymanga"
+name = "doki"
 version = "0.9.6"
-description = "一个拷贝漫画第三方客户端"
+description = "doki是一个集漫画、轻小说、动画于一体的桌面应用，提供简洁快速的漫画阅读体验。"
 authors = ["caolib"]
 edition = "2021"
 
@@ -51,7 +51,7 @@ chrono = { version = "0.4", features = ["serde"] }
 lazy_static = "1.4"
 
 [[bin]]
-name = "copymanga"
+name = "doki"
 path = "src/main.rs"
 required-features = []
 

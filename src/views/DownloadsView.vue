@@ -139,7 +139,7 @@ const loadDownloadedMangas = async () => {
 
     await getDownloadedMangaList().then(data => {
         mangaList.value = data || []
-        console.log('已下载的漫画列表:', mangaList.value)
+        // console.log('已下载的漫画列表:', mangaList.value)
     }).catch(error => {
         console.error('获取下载列表失败:', error)
         message.error('获取下载列表失败')
@@ -155,7 +155,7 @@ const loadDownloadedCartoons = async () => {
 
     await getDownloadedCartoonList().then(data => {
         cartoonList.value = data || []
-        console.log('已下载的动画列表:', cartoonList.value)
+        // console.log('已下载的动画列表:', JSON.stringify(cartoonList.value, null, 2))
     }).catch(error => {
         console.error('获取动画下载列表失败:', error)
         message.error('获取动画下载列表失败')

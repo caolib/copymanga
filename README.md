@@ -1,22 +1,25 @@
-<h1 align="center">拷贝漫画</h1>
+<h1 align="center">
+<img src="./public/logo.png"/>
+</h1>
 <p align="center">
   <img src="https://skillicons.dev/icons?i=tauri,vue,js,rust,pinia,scss,vite,pnpm"/>
 </p>
 
+
 <p align="center">
-  <img src="https://img.shields.io/github/downloads/caolib/copymanga/total?labelColor=grey&color=blue" alt="Downloads"/>
-  <img src="https://img.shields.io/github/v/release/caolib/copymanga?labelColor=grey&color=red" alt="Release"/>
-  <img src="https://img.shields.io/github/license/caolib/copymanga" alt="License"/>
-  <img src="https://img.shields.io/github/stars/caolib/copymanga" alt="Stars"/>
-<!--   <img src="https://img.shields.io/github/issues/caolib/copymanga?label=Issues" alt="Issues"/> -->
-  <img src="https://github.com/caolib/copymanga/actions/workflows/ci.yml/badge.svg" alt="release"/>
-  <img src="https://img.shields.io/github/downloads/caolib/copymanga/latest/total" alt="Latest Downloads"/>
+  <img src="https://img.shields.io/github/downloads/caolib/doki/total?labelColor=grey&color=blue" alt="Downloads"/>
+  <img src="https://img.shields.io/github/v/release/caolib/doki?labelColor=grey&color=red" alt="Release"/>
+  <img src="https://img.shields.io/github/license/caolib/doki" alt="License"/>
+  <img src="https://img.shields.io/github/stars/caolib/doki" alt="Stars"/>
+<!--   <img src="https://img.shields.io/github/issues/caolib/doki?label=Issues" alt="Issues"/> -->
+  <img src="https://github.com/caolib/doki/actions/workflows/ci.yml/badge.svg" alt="release"/>
+  <img src="https://img.shields.io/github/downloads/caolib/doki/latest/total" alt="Latest Downloads"/>
 </p>
 
 
 ## 1 介绍
 
-这是一个[拷贝漫画](https://www.copy20.com/)第三方桌面端应用，这是[deepwiki生成的简介](https://deepwiki.com/search/_8131da19-74a1-4016-96ec-65580a05c158)，有更多问题也可以问它，目前支持win、mac、linux，只有windows简单测试过，移动端可以下载[官方app](https://www.copy20.com/download)使用
+doki是一个集漫画、轻小说、动画于一体的桌面应用，提供简洁快速的漫画阅读体验，这是[deepwiki生成的简介](https://deepwiki.com/search/_8131da19-74a1-4016-96ec-65580a05c158)，有更多问题也可以问它，目前支持win、mac、linux，只有windows简单测试过，移动端可以下载[官方app](https://www.copy20.com/download)使用
 
 > [!warning]
 >

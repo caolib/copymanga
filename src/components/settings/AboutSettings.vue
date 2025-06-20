@@ -5,12 +5,12 @@
             <div class="about-container">
                 <div class="about-header">
                     <div class="about-logo">
-                        <img src="/logo.png" alt="CopyManga" class="app-logo" />
+                        <img src="/logo.png" alt="doki" class="app-logo" />
                     </div>
                     <div class="about-info">
-                        <h3>CopyManga</h3>
+                        <h3>doki</h3>
                         <div class="description">
-                            拷贝漫画第三方桌面端应用
+                            doki是一个集漫画、轻小说、动画于一体的桌面应用，提供简洁快速的漫画阅读体验。
                         </div>
                     </div>
                 </div>
@@ -138,7 +138,7 @@ import { openExternalUrl } from '@/utils/external-link'
 import { formatDate } from '@/utils/date'
 
 // github仓库地址
-const repoUrl = 'https://github.com/caolib/copymanga'
+const repoUrl = 'https://github.com/caolib/doki'
 
 // 关于页面信息
 const appVersion = ref('')

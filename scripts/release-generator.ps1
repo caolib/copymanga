@@ -36,7 +36,7 @@ function Generate-ReleaseInfo {
     }
     
     $output += "---`n"
-    $output += "📋 [查看完整更新日志](https://github.com/caolib/copymanga/compare/$PreviousTag...$LatestTag)`n"
+    $output += "📋 [查看完整更新日志](https://github.com/caolib/doki/compare/$PreviousTag...$LatestTag)`n"
     
     try {
         # 脚本现在在项目根目录，直接使用 docs 路径

@@ -93,29 +93,11 @@
                 <div v-else class="chapters-grid">
                     <a-row :gutter="[12, 12]">
                         <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in displayChapters"
-                            :key="chapter.chapter_uuid">
-                            <a-card size="small" :hoverable="true" class="chapter-card">
+                            :key="chapter.chapter_uuid"> <a-card size="small" :hoverable="true" class="chapter-card">
                                 <template #title>
                                     <div class="chapter-title" :title="chapter.chapter_name">
                                         {{ chapter.chapter_name }}
                                     </div>
-                                </template>
-                                <template #extra>
-                                    <a-dropdown :trigger="['click']">
-                                        <a-button type="text" size="small" :icon="h(MoreOutlined)" />
-                                        <template #overlay> <a-menu>
-                                                <a-menu-item key="open" @click="openVideoDirectory(chapter)"
-                                                    :icon="h(FolderOpenOutlined)">
-                                                    打开目录
-                                                </a-menu-item>
-                                                <a-menu-divider />
-                                                <a-menu-item key="delete" @click="showDeleteConfirm(chapter)" danger
-                                                    :icon="h(DeleteOutlined)">
-                                                    删除章节
-                                                </a-menu-item>
-                                            </a-menu>
-                                        </template>
-                                    </a-dropdown>
                                 </template>
                                 <div class="chapter-info">
                                     <div class="file-size">
@@ -129,6 +111,13 @@
                                             :icon="h(FolderOpenOutlined)">
                                             打开目录
                                         </a-button>
+                                        <a-popconfirm title="确认删除"
+                                            :description="`确定要删除章节 '${chapter.chapter_name}' 吗？删除后无法恢复。`" ok-text="确认删除"
+                                            cancel-text="取消" ok-type="danger" @confirm="deleteChapter(chapter)">
+                                            <a-button size="small" danger :icon="h(DeleteOutlined)">
+                                                删除
+                                            </a-button>
+                                        </a-popconfirm>
                                     </div>
                                 </div>
                             </a-card>
@@ -143,11 +132,10 @@
 <script setup>
 import { ref, computed, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { message, Modal } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import {
     ReloadOutlined,
     ArrowLeftOutlined,
-    MoreOutlined,
     FolderOpenOutlined,
     DeleteOutlined
 } from '@ant-design/icons-vue'
@@ -169,7 +157,7 @@ const loading = ref(true)
 const chaptersLoading = ref(false)
 const cartoon = ref({})
 const chapters = ref([])
-const isAscending = ref(false)
+const isAscending = ref(true)
 
 // 计算属性
 const displayChapters = computed(() => {
@@ -207,8 +195,8 @@ const loadCartoonData = async () => {
         cartoon.value = cartoonDetail || {}
         chapters.value = chaptersList || []
 
-        console.log('本地动画详情:', JSON.stringify(cartoon.value, null, 2))
-        console.log('本地动画章节:', chapters.value)
+        // console.log('本地动画详情:', JSON.stringify(cartoon.value, null, 2))
+        // console.log('本地动画章节:', chapters.value)
 
     } catch (error) {
         console.error('加载本地动画数据失败:', error)
@@ -244,18 +232,6 @@ const openVideoDirectory = async (chapter) => {
         console.error('打开视频目录失败:', error)
         message.error('打开视频目录失败: ' + error.message)
     }
-}
-
-// 显示删除确认对话框
-const showDeleteConfirm = (chapter) => {
-    Modal.confirm({
-        title: '确认删除',
-        content: `确定要删除章节 "${chapter.chapter_name}" 吗？删除后无法恢复。`,
-        okText: '确认删除',
-        okType: 'danger',
-        cancelText: '取消',
-        onOk: () => deleteChapter(chapter)
-    })
 }
 
 // 删除章节
