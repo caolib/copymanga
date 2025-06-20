@@ -98,7 +98,6 @@ const handleRestart = restartApp
 
 // 刷新当前路由
 const refreshCurrentRoute = () => {
-  console.log('刷新当前路由')
   routerKey.value += 1
 }
 

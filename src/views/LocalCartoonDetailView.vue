@@ -16,20 +16,8 @@
 
                 <a-row :gutter="32">
                     <a-col :xs="24" :sm="8">
-                        <a-image :src="cartoon.coverUrl || '/logo.png'" :alt="cartoon.name" width="100%" height="350px"
-                            style="border-radius: 8px; object-fit: cover;" :placeholder="true">
-                            <template #placeholder>
-                                <div
-                                    style="width: 100%; height: 350px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                                    <img src="/logo.png" alt="封面" style="width: 64px; height: 64px;" />
-                                </div>
-                            </template>
-                            <template #error>
-                                <div
-                                    style="width: 100%; height: 350px; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
-                                    <img src="/logo.png" alt="封面加载失败" style="width: 64px; height: 64px;" />
-                                </div>
-                            </template>
+                        <a-image :src="cartoon.cover || '/logo.png'" :alt="cartoon.name" width="100%" height="350px"
+                            style="border-radius: 8px; object-fit: cover;">
                         </a-image>
                     </a-col>
                     <a-col :xs="24" :sm="16">
@@ -115,19 +103,14 @@
                                 <template #extra>
                                     <a-dropdown :trigger="['click']">
                                         <a-button type="text" size="small" :icon="h(MoreOutlined)" />
-                                        <template #overlay>
-                                            <a-menu>
-                                                <a-menu-item key="open" @click="openVideoDirectory(chapter)">
-                                                    <template #icon>
-                                                        <FolderOpenOutlined />
-                                                    </template>
+                                        <template #overlay> <a-menu>
+                                                <a-menu-item key="open" @click="openVideoDirectory(chapter)"
+                                                    :icon="h(FolderOpenOutlined)">
                                                     打开目录
                                                 </a-menu-item>
                                                 <a-menu-divider />
-                                                <a-menu-item key="delete" @click="showDeleteConfirm(chapter)" danger>
-                                                    <template #icon>
-                                                        <DeleteOutlined />
-                                                    </template>
+                                                <a-menu-item key="delete" @click="showDeleteConfirm(chapter)" danger
+                                                    :icon="h(DeleteOutlined)">
                                                     删除章节
                                                 </a-menu-item>
                                             </a-menu>
@@ -142,7 +125,8 @@
                                         下载: {{ formatDate(chapter.download_time) }}
                                     </div>
                                     <div class="chapter-actions">
-                                        <a-button type="primary" size="small" @click="openVideoDirectory(chapter)">
+                                        <a-button type="primary" size="small" @click="openVideoDirectory(chapter)"
+                                            :icon="h(FolderOpenOutlined)">
                                             打开目录
                                         </a-button>
                                     </div>
@@ -175,6 +159,7 @@ import {
     openLocalVideoDirectory,
     deleteCartoonChapter
 } from '../api/cartoon'
+
 
 const route = useRoute()
 const router = useRouter()
@@ -222,7 +207,7 @@ const loadCartoonData = async () => {
         cartoon.value = cartoonDetail || {}
         chapters.value = chaptersList || []
 
-        console.log('本地动画详情:', cartoon.value)
+        console.log('本地动画详情:', JSON.stringify(cartoon.value, null, 2))
         console.log('本地动画章节:', chapters.value)
 
     } catch (error) {
@@ -297,70 +282,4 @@ const formatFileSize = (bytes) => {
 }
 </script>
 
-<style scoped>
-.local-cartoon-container {
-    padding: 20px;
-    min-height: 100vh;
-    background: #f5f5f5;
-}
-
-.local-cartoon-card {
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.chapters-grid {
-    margin-top: 16px;
-}
-
-.chapter-card {
-    height: 100%;
-    transition: all 0.3s ease;
-}
-
-.chapter-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.chapter-title {
-    font-size: 12px;
-    font-weight: 500;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.chapter-info {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.file-size,
-.download-time {
-    font-size: 11px;
-    color: #666;
-}
-
-.chapter-actions {
-    margin-top: 8px;
-}
-
-.empty-chapters {
-    text-align: center;
-    padding: 60px 0;
-    color: #999;
-}
-
-/* 响应式调整 */
-@media (max-width: 768px) {
-    .local-cartoon-container {
-        padding: 12px;
-    }
-
-    .chapter-card {
-        margin-bottom: 8px;
-    }
-}
-</style>
+<style scoped src="../assets/styles/local-cartoon-detail.scss" lang="scss"></style>

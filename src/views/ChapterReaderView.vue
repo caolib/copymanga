@@ -6,7 +6,7 @@
             <div class="nav-content">
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
-                    }}</a-typography-title>
+                        }}</a-typography-title>
                     isLocal: true
                     })
 
@@ -228,6 +228,7 @@ import {
 import { getChapterImages } from '../api/manga'
 import { getChapterComments, postChapterComment } from '../api/comment'
 import { downloadManager } from '../utils/download-manager'
+import { convertLocalFileToUrl } from '../utils/file-converter'
 import { useMangaStore } from '../stores/manga'
 import { useThemeStore } from '../stores/theme'
 import { useUserStore } from '../stores/user'
@@ -503,7 +504,7 @@ const fetchChapterImages = async () => {
                     })
 
                     const localImages = sortedPaths.map((imagePath, index) => ({
-                        url: downloadManager.convertLocalFileToUrl(imagePath),
+                        url: convertLocalFileToUrl(imagePath),
                         index: index,
                         width: null,
                         height: null,

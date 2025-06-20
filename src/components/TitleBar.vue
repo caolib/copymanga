@@ -146,8 +146,6 @@ const goForward = () => {
 
 // 刷新功能
 const refreshPage = () => {
-    console.log('刷新按钮被点击')
-
     // 使用全局的刷新方法，通过改变 key 强制重新渲染组件
     if (refreshCurrentRoute) {
         refreshCurrentRoute()

@@ -74,17 +74,11 @@
                             style="margin-right: 10px">
                             开始观看
                         </a-button> <a-button type="default" @click="handleCollect" :loading="collectLoading"
-                            style="margin-right: 10px; color: #ff4d4f; border-color: #ff4d4f;">
-                            <template #icon>
-                                <HeartFilled />
-                            </template>
+                            style="margin-right: 10px; color: #ff4d4f; border-color: #ff4d4f;" :icon="h(HeartFilled)">
                             收藏
                         </a-button>
                         <a-button type="default" @click="handleCancelCollect" :loading="cancelCollectLoading"
-                            style="margin-right: 10px">
-                            <template #icon>
-                                <HeartOutlined />
-                            </template>
+                            style="margin-right: 10px" :icon="h(HeartOutlined)">
                             取消收藏
                         </a-button>
                         <a-button @click="fetchCartoonData" :loading="detailLoading">刷新数据</a-button>
@@ -145,20 +139,14 @@
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.uuid] || chapterDownloadStatus[chapter.uuid] === 'error'"
                                     size="small" type="primary" :disabled="detailLoading || !cartoon.uuid"
-                                    @click.stop="downloadChapter(chapter)">
-                                    <template #icon>
-                                        <download-outlined />
-                                    </template>
+                                    @click.stop="downloadChapter(chapter)" :icon="h(DownloadOutlined)">
                                     下载
                                 </a-button>
 
                                 <!-- 继续下载按钮（部分下载状态） -->
                                 <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'partial'" size="small"
                                     type="primary" :disabled="detailLoading || !cartoon.uuid"
-                                    @click.stop="downloadChapter(chapter)">
-                                    <template #icon>
-                                        <download-outlined />
-                                    </template>
+                                    @click.stop="downloadChapter(chapter)" :icon="h(DownloadOutlined)">
                                     继续下载
                                 </a-button>
 
@@ -170,28 +158,20 @@
 
                                 <!-- 继续按钮 -->
                                 <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'paused'" size="small"
-                                    type="primary" @click.stop="resumeDownload(chapter)">
-                                    <template #icon>
-                                        <download-outlined />
-                                    </template>
+                                    type="primary" @click.stop="resumeDownload(chapter)" :icon="h(DownloadOutlined)">
                                     继续下载
                                 </a-button>
 
                                 <!-- 打开目录按钮 -->
                                 <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'downloaded'" size="small"
-                                    type="primary" class="success-btn" @click.stop="openVideoDirectory(chapter)">
-                                    <template #icon>
-                                        <folder-open-outlined />
-                                    </template>
+                                    type="primary" class="success-btn" @click.stop="openVideoDirectory(chapter)"
+                                    :icon="h(FolderOpenOutlined)">
                                     打开目录
                                 </a-button>
 
                                 <!-- 删除按钮 -->
                                 <a-button v-if="shouldShowDeleteButton(chapter.uuid)" size="small" danger
-                                    @click.stop="deleteChapter(chapter)">
-                                    <template #icon>
-                                        <delete-outlined />
-                                    </template>
+                                    @click.stop="deleteChapter(chapter)" :icon="h(DeleteOutlined)">
                                 </a-button>
                             </div>
                         </div>
@@ -205,7 +185,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { PlayCircleOutlined, HeartOutlined, HeartFilled, DownloadOutlined, CheckCircleOutlined, DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
@@ -241,7 +221,7 @@ const fetchCartoonData = () => {
     const pathWord = route.params.pathWord
 
     // 如果已经有动画详情，直接获取章节列表
-    if (cartoon.value.name) {
+    if (cartoon.value.uuid) {
         fetchChapters(pathWord)
         return;
     }

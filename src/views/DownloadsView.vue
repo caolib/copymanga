@@ -68,8 +68,8 @@
                         <a-skeleton :loading="cartoonLoading" active>
                             <div v-if="cartoonList.length" class="downloads-grid">
                                 <a-row :gutter="[16, 16]">
-                                    <a-col v-for="cartoon in cartoonList" :key="cartoon.uuid" :xs="12" :sm="8" :md="6"
-                                        :lg="4" :xl="3">
+                                    <a-col v-for="cartoon in cartoonList" :key="cartoon.uuid" :xs="24" :sm="12" :md="10"
+                                        :lg="6" :xl="4">
                                         <a-card class="download-card" hoverable
                                             @click="goToCartoonDetail(cartoon.uuid)">
                                             <template #cover>
