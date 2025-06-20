@@ -23,6 +23,7 @@
 - [d017de7] 📄 docs: update README
 - [a3d2d21] 🌈 style: 优化多个界面，优化代码风格
 - [0a6d620] 🦄 refactor: 应用改名为doki
+- [ceed323] 🐳 chore: 发布新版本 v1.0.0
 
 ---
 📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v0.9.6...v1.0.0)
