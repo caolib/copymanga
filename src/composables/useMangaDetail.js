@@ -420,28 +420,25 @@ export function useMangaDetail() {
             return
         }
 
-        // 使用 Promise.all 并行检查所有章节的下载状态
-        const checkPromises = chapters.map(async (chapter) => {
-            try {
-                const isDownloaded = await downloadManager.isChapterDownloaded(
-                    manga.value.uuid,
-                    chapter.group_path_word || 'default',
-                    chapter.uuid
-                )
+        try {
+            // 批量查询本地已下载的章节
+            const { getLocalMangaChapters } = await import('../api/manga')
+            const localChapters = await getLocalMangaChapters(manga.value.uuid)
 
-                if (isDownloaded) {
+            // 创建本地章节UUID的Set，方便快速查询
+            const downloadedChapterUuids = new Set(localChapters.map(ch => ch.chapter_uuid))
+
+            // 更新当前显示章节的下载状态
+            for (const chapter of chapters) {
+                if (downloadedChapterUuids.has(chapter.uuid)) {
                     chapterDownloadStatus.value[chapter.id] = 'downloaded'
-                    // console.log('设置章节状态为已下载:', chapter.name, 'ID:', chapter.id)
                 }
-
-                return isDownloaded
-            } catch (error) {
-                console.error('检查章节下载状态失败:', chapter.name, error)
-                return false
             }
-        })
 
-        await Promise.all(checkPromises)
+            console.log(`漫画 ${manga.value.name}: 批量检查完成，已下载章节数: ${downloadedChapterUuids.size}`)
+        } catch (error) {
+            console.error('批量检查漫画章节下载状态失败:', error)
+        }
     }
 
     // 删除章节功能

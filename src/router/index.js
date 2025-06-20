@@ -43,6 +43,11 @@ const routes = [
         component: () => import('../views/LocalMangaDetailView.vue')
     },
     {
+        path: '/localcartoon/:uuid',
+        name: 'LocalCartoonDetail',
+        component: () => import('../views/LocalCartoonDetailView.vue')
+    },
+    {
         path: '/topics',
         name: 'Topics',
         component: () => import('../views/TopicsView.vue')

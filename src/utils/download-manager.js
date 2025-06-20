@@ -13,10 +13,7 @@ function safeConvertFileSrc(path) {
     // 规范化路径分隔符为正斜杠
     cleanPath = cleanPath.replace(/\\/g, '/')
 
-    // 使用默认的 asset 协议
-    const result = convertFileSrc(cleanPath)
-
-    return result
+    return convertFileSrc(cleanPath)
 }
 
 /**
@@ -58,25 +55,28 @@ export class DownloadManager {
                 })
             }
 
-            // 启动进度监控定时器
+            // 启动进度监控定时器 - 使用新的进度查询API
             if (onProgress) {
                 progressInterval = setInterval(async () => {
                     try {
-                        // 检查当前已下载的图片数量
-                        const downloadedImages = await this.getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid)
-                        const completed = downloadedImages.length
-                        const percent = Math.floor((completed / images.length) * 100)
+                        // 使用新的进度查询API获取准确进度
+                        const progress = await invoke('get_download_progress', {
+                            mangaUuid,
+                            groupPathWord,
+                            chapterUuid,
+                            expectedImageCount: images.length
+                        })
 
                         onProgress({
-                            completed,
-                            total: images.length,
-                            percent,
-                            currentImage: `正在下载 ${completed}/${images.length}`,
-                            status: 'downloading'
+                            completed: progress.completed,
+                            total: progress.total,
+                            percent: Math.floor(progress.percent),
+                            currentImage: progress.current_image,
+                            status: progress.status
                         })
 
                         // 如果下载完成，停止监控
-                        if (completed >= images.length) {
+                        if (progress.status === 'completed' || progress.completed >= images.length) {
                             clearInterval(progressInterval)
                             progressInterval = null
                             onProgress({
@@ -89,8 +89,36 @@ export class DownloadManager {
                         }
                     } catch (error) {
                         console.error('检查下载进度失败:', error)
+                        // 如果新API失败，回退到文件系统检查
+                        try {
+                            const downloadedImages = await this.getLocalChapterImages(mangaUuid, groupPathWord, chapterUuid)
+                            const completed = downloadedImages.length
+                            const percent = Math.floor((completed / images.length) * 100)
+
+                            onProgress({
+                                completed,
+                                total: images.length,
+                                percent,
+                                currentImage: `正在下载 ${completed}/${images.length}`,
+                                status: 'downloading'
+                            })
+
+                            if (completed >= images.length) {
+                                clearInterval(progressInterval)
+                                progressInterval = null
+                                onProgress({
+                                    completed: images.length,
+                                    total: images.length,
+                                    percent: 100,
+                                    currentImage: '下载完成',
+                                    status: 'completed'
+                                })
+                            }
+                        } catch (fallbackError) {
+                            console.error('回退进度检查也失败:', fallbackError)
+                        }
                     }
-                }, 1000) // 每秒检查一次
+                }, 500) // 每500ms检查一次，提高响应性
             }            // 调用 Rust 后端下载命令
             await invoke('download_chapter', {
                 mangaUuid,
@@ -151,33 +179,7 @@ export class DownloadManager {
             throw error
         }
     }
-    /**
-     * 检查章节是否已下载 - 通过 Tauri 后端检查
-     * @param {string} mangaUuid 漫画UUID
-     * @param {string} groupPathWord 分组路径
-     * @param {string} chapterUuid 章节UUID
-     */
-    async isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid) {
-        try {
-            // console.log('检查章节下载状态 - 漫画UUID:', mangaUuid, '分组:', groupPathWord, '章节UUID:', chapterUuid)
-
-            const result = await invoke('check_chapter_downloaded', {
-                mangaUuid,
-                groupPathWord,
-                chapterUuid
-            })
-
-            // console.log('后端返回结果:', result)
-
-            const isDownloaded = result.is_downloaded || false
-            // console.log('章节是否已下载:', isDownloaded)
-
-            return isDownloaded
-        } catch (error) {
-            console.error('检查章节下载状态失败:', error)
-            return false
-        }
-    }
+    // 删除 isChapterDownloaded - 请使用 getLocalMangaChapters 批量获取本地章节
     /**
    * 获取本地章节图片列表 - 通过 Tauri 后端获取
    * @param {string} mangaUuid 漫画UUID

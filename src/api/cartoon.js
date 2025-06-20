@@ -227,15 +227,7 @@ async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, on
     })
 }
 
-/**
- * 检查动画章节是否已下载
- * @param {string} cartoonUuid 动画UUID
- * @param {string} chapterUuid 章节UUID
- * @returns {Promise<boolean>}
- */
-async function isCartoonChapterDownloaded(cartoonUuid, chapterUuid) {
-    return await cartoonDownloadManager.isChapterDownloaded(cartoonUuid, chapterUuid)
-}
+// isCartoonChapterDownloaded 已删除，请使用 getLocalCartoonChapters 批量获取本地章节
 
 /**
  * 删除已下载的动画章节
@@ -245,6 +237,33 @@ async function isCartoonChapterDownloaded(cartoonUuid, chapterUuid) {
  */
 async function deleteCartoonChapter(cartoonUuid, chapterUuid) {
     return await cartoonDownloadManager.deleteChapter(cartoonUuid, chapterUuid)
+}
+
+/**
+ * 获取本地动画详情
+ * @param {string} cartoonUuid 动画UUID
+ * @returns {Promise<Object>}
+ */
+async function getLocalCartoonDetail(cartoonUuid) {
+    return await cartoonDownloadManager.getLocalCartoonDetail(cartoonUuid)
+}
+
+/**
+ * 获取本地动画章节列表
+ * @param {string} cartoonUuid 动画UUID
+ * @returns {Promise<Array>}
+ */
+async function getLocalCartoonChapters(cartoonUuid) {
+    return await cartoonDownloadManager.getLocalCartoonChapters(cartoonUuid)
+}
+
+/**
+ * 打开本地视频目录
+ * @param {string} cartoonUuid 动画UUID
+ * @param {string} chapterUuid 章节UUID
+ */
+async function openLocalVideoDirectory(cartoonUuid, chapterUuid) {
+    return await cartoonDownloadManager.openLocalVideoDirectory(cartoonUuid, chapterUuid)
 }
 
 /**
@@ -268,5 +287,8 @@ export {
     downloadCartoonChapter,
     isCartoonChapterDownloaded,
     deleteCartoonChapter,
+    getLocalCartoonDetail,
+    getLocalCartoonChapters,
+    openLocalVideoDirectory,
     getDownloadedCartoonList
 }

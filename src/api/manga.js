@@ -199,16 +199,7 @@ async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
     })
 }
 
-/**
- * 检查章节是否已下载
- * @param {string} mangaUuid 漫画UUID
- * @param {string} groupPathWord 分组路径
- * @param {string} chapterUuid 章节UUID
- * @returns {Promise<boolean>}
- */
-async function isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid) {
-    return await downloadManager.isChapterDownloaded(mangaUuid, groupPathWord, chapterUuid)
-}
+// isChapterDownloaded 已删除，请使用 getLocalMangaChapters 批量获取本地章节
 
 /**
  * 获取已下载的章节信息
@@ -258,7 +249,7 @@ export {
     getHomeIndex,
     getAuthorMangaList,
     downloadChapter,
-    isChapterDownloaded,
+    // isChapterDownloaded - 已删除，请使用 getLocalMangaChapters 批量获取本地章节
     getDownloadedChapterInfo,
     getDownloadedMangaList,
     getLocalMangaDetail,

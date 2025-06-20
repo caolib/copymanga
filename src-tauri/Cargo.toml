@@ -43,7 +43,7 @@ urlencoding = "2.1"
 chrono = { version = "0.4", features = ["serde"] }
 
 [[bin]]
-name = "tauri-app"
+name = "copymanga"
 path = "src/main.rs"
 required-features = []
 

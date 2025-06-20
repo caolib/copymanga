@@ -152,13 +152,13 @@
                                     下载
                                 </a-button>
 
-                                <!-- 已下载状态 -->
+                                <!-- 打开目录按钮 -->
                                 <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'downloaded'" size="small"
-                                    type="default" disabled>
+                                    type="primary" @click.stop="openVideoDirectory(chapter)">
                                     <template #icon>
-                                        <check-circle-outlined />
+                                        <folder-open-outlined />
                                     </template>
-                                    已下载
+                                    打开目录
                                 </a-button>
 
                                 <!-- 删除按钮 -->
@@ -183,8 +183,8 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
-import { PlayCircleOutlined, HeartOutlined, HeartFilled, DownloadOutlined, CheckCircleOutlined, DeleteOutlined } from '@ant-design/icons-vue'
-import { getCartoonInfo, getCartoonChapters, collectCartoon, downloadCartoonChapter, isCartoonChapterDownloaded, deleteCartoonChapter } from '../api/cartoon'
+import { PlayCircleOutlined, HeartOutlined, HeartFilled, DownloadOutlined, CheckCircleOutlined, DeleteOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
+import { getCartoonInfo, getCartoonChapters, collectCartoon, downloadCartoonChapter, isCartoonChapterDownloaded, deleteCartoonChapter, openLocalVideoDirectory } from '../api/cartoon'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
 import { useCartoonPlayerStore } from '../stores/cartoon-player'
@@ -407,6 +407,17 @@ const deleteChapter = async (chapter) => {
     })
 }
 
+// 打开本地视频目录
+const openVideoDirectory = async (chapter) => {
+    try {
+        await openLocalVideoDirectory(cartoon.value.uuid, chapter.uuid)
+        message.success('目录打开成功')
+    } catch (error) {
+        console.error('打开目录失败:', error)
+        message.error(`打开目录失败: ${error.message || '未知错误'}`)
+    }
+}
+
 // 检查章节下载状态
 const checkChapterDownloadStatus = async (chapters) => {
     if (!cartoon.value?.uuid) {
@@ -414,29 +425,29 @@ const checkChapterDownloadStatus = async (chapters) => {
         return
     }
 
-    // 使用 Promise.all 并行检查所有章节的下载状态
-    const checkPromises = chapters.map(async (chapter) => {
-        try {
-            const isDownloaded = await isCartoonChapterDownloaded(
-                cartoon.value.uuid,
-                chapter.uuid
-            )
+    try {
+        // 批量查询本地已下载的章节
+        const { getLocalCartoonChapters } = await import('../api/cartoon')
+        const localChapters = await getLocalCartoonChapters(cartoon.value.uuid)
 
-            if (isDownloaded) {
+        // 创建本地章节UUID的Set，方便快速查询
+        const downloadedChapterUuids = new Set(localChapters.map(ch => ch.chapter_uuid))
+
+        // 更新当前显示章节的下载状态
+        for (const chapter of chapters) {
+            if (downloadedChapterUuids.has(chapter.uuid)) {
                 chapterDownloadStatus.value[chapter.uuid] = 'downloaded'
             }
-
-            return isDownloaded
-        } catch (error) {
-            console.error('检查动画章节下载状态失败:', chapter.name, error)
-            return false
         }
-    })
 
-    await Promise.all(checkPromises)
+        console.log(`动画 ${cartoon.value.name}: 批量检查完成，已下载章节数: ${downloadedChapterUuids.size}`)
+    } catch (error) {
+        console.error('批量检查动画章节下载状态失败:', error)
+    }
 }
 
 onMounted(() => {
+    // TODO 加载分离
     fetchCartoonData()
 })
 </script>

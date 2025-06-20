@@ -85,7 +85,7 @@ request.interceptors.response.use(
             return Promise.reject(new Error('请重新登录'))
         }
 
-        if (error.code === 'ECONNABORTED' && error.message.includes('timeout')) {
+        if (error.code === 'ECONNABORTED') {
             msg = '请求超时，请检查网络连接或稍后重试'
         }
 
@@ -94,7 +94,12 @@ request.interceptors.response.use(
             msg = '网络连接失败，请检查网络设置'
         }
 
+        if (error.code === "ECONNABORTED") {
+            msg = '请求超时，请稍后再试'
+        }
+
         console.error(msg)
+        console.error(error.code)
         return Promise.reject(error)
     }
 )

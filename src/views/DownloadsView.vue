@@ -191,11 +191,10 @@ const goToMangaDetail = (uuid) => {
     }
 }
 
-// 跳转到动画详情页（这里可以后续实现本地动画详情页）
+// 跳转到本地动画详情页
 const goToCartoonDetail = (uuid) => {
     if (uuid) {
-        // 暂时跳转到在线动画详情页，后续可以实现本地动画详情页
-        message.info('动画本地详情页功能开发中，请从动画首页访问')
+        router.push(`/localcartoon/${uuid}`)
     }
 }
 

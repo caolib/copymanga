@@ -58,48 +58,33 @@ export class CartoonDownloadManager {
             }
 
             // 检查是否是HLS流
-            const isHLS = videoUrl.includes('.m3u8')
-
-            // 启动进度监控定时器
+            const isHLS = videoUrl.includes('.m3u8')            // 启动进度监控定时器
             if (onProgress) {
-                let currentPercent = 0
                 progressInterval = setInterval(async () => {
                     try {
-                        // 对于HLS流，模拟进度增长
-                        if (isHLS) {
-                            currentPercent = Math.min(currentPercent + Math.random() * 10, 90)
-                            onProgress({
-                                completed: Math.floor(currentPercent),
-                                total: 100,
-                                percent: Math.floor(currentPercent),
-                                currentFile: currentPercent < 50 ? '正在解析视频流...' :
-                                    currentPercent < 80 ? '正在下载视频片段...' : '正在合并视频...',
-                                status: 'downloading'
-                            })
-                        } else {
-                            // 普通文件的进度检查
-                            const progress = await this.getDownloadProgress(cartoonUuid, chapterUuid)
+                        // 获取真实的下载进度
+                        const progress = await this.getDownloadProgress(cartoonUuid, chapterUuid)
 
+                        onProgress({
+                            completed: progress.downloaded_size || 0,
+                            total: progress.total_size || 1,
+                            percent: progress.percent || 0,
+                            currentFile: progress.percent < 80 ? '正在下载视频片段...' :
+                                progress.percent < 100 ? '正在合并视频...' : '下载完成',
+                            status: progress.completed ? 'completed' : 'downloading'
+                        })
+
+                        // 如果下载完成，停止监控
+                        if (progress.completed) {
+                            clearInterval(progressInterval)
+                            progressInterval = null
                             onProgress({
-                                completed: progress.downloaded_size || 0,
+                                completed: progress.total_size || 1,
                                 total: progress.total_size || 1,
-                                percent: progress.percent || 0,
-                                currentFile: `正在下载视频文件`,
-                                status: 'downloading'
+                                percent: 100,
+                                currentFile: '下载完成',
+                                status: 'completed'
                             })
-
-                            // 如果下载完成，停止监控
-                            if (progress.completed) {
-                                clearInterval(progressInterval)
-                                progressInterval = null
-                                onProgress({
-                                    completed: progress.total_size || 1,
-                                    total: progress.total_size || 1,
-                                    percent: 100,
-                                    currentFile: '下载完成',
-                                    status: 'completed'
-                                })
-                            }
                         }
                     } catch (error) {
                         console.error('检查下载进度失败:', error)
@@ -160,27 +145,7 @@ export class CartoonDownloadManager {
             }
             throw error
         }
-    }
-
-    /**
-     * 检查动画章节是否已下载 - 通过 Tauri 后端检查
-     * @param {string} cartoonUuid 动画UUID
-     * @param {string} chapterUuid 章节UUID
-     */
-    async isChapterDownloaded(cartoonUuid, chapterUuid) {
-        try {
-            const result = await invoke('check_cartoon_chapter_downloaded', {
-                cartoonUuid,
-                chapterUuid
-            })
-
-            const isDownloaded = result.is_downloaded || false
-            return isDownloaded
-        } catch (error) {
-            console.error('检查动画章节下载状态失败:', error)
-            return false
-        }
-    }
+    }    // 删除 isChapterDownloaded - 请使用 getLocalCartoonChapters 批量获取本地章节
 
     /**
      * 获取下载进度
@@ -248,6 +213,71 @@ export class CartoonDownloadManager {
      */
     convertLocalFileToUrl(filePath) {
         return safeConvertFileSrc(filePath)
+    }
+
+    /**
+     * 获取本地动画详情
+     * @param {string} cartoonUuid 动画UUID
+     * @returns {Promise<Object>}
+     */
+    async getLocalCartoonDetail(cartoonUuid) {
+        try {
+            const result = await invoke('get_local_cartoon_detail', {
+                cartoonUuid
+            })
+
+            // 处理封面图片路径
+            if (result.coverPath) {
+                result.coverUrl = this.convertLocalFileToUrl(result.coverPath)
+            }
+
+            return result
+        } catch (error) {
+            console.error('获取本地动画详情失败:', error)
+            throw error
+        }
+    }
+
+    /**
+     * 获取本地动画章节列表
+     * @param {string} cartoonUuid 动画UUID
+     * @returns {Promise<Array>}
+     */
+    async getLocalCartoonChapters(cartoonUuid) {
+        try {
+            const result = await invoke('get_local_cartoon_chapters', {
+                cartoonUuid
+            })
+
+            return result || []
+        } catch (error) {
+            console.error('获取本地动画章节列表失败:', error)
+            return []
+        }
+    }
+
+    /**
+     * 打开本地视频文件所在目录
+     * @param {string} cartoonUuid 动画UUID
+     * @param {string} chapterUuid 章节UUID
+     */
+    async openLocalVideoDirectory(cartoonUuid, chapterUuid) {
+        try {
+            const result = await invoke('open_local_video_directory', {
+                cartoonUuid,
+                chapterUuid
+            })
+
+            if (result.success) {
+                console.log('打开本地目录成功:', result.message)
+                return true
+            } else {
+                throw new Error(result.message)
+            }
+        } catch (error) {
+            console.error('打开本地目录失败:', error)
+            throw error
+        }
     }
 }
 
