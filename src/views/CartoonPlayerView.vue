@@ -86,7 +86,7 @@ import { FolderOpenOutlined } from '@ant-design/icons-vue'
 import { invoke } from '@tauri-apps/api/core'
 import Hls from 'hls.js'
 import DPlayer from 'dplayer'
-import { getVideoByChapterId, isCartoonChapterDownloaded, openLocalVideoDirectory } from '../api/cartoon'
+import { getVideoByChapterId, openLocalVideoDirectory, getLocalCartoonChapters } from '../api/cartoon'
 import { useCartoonPlayerStore } from '../stores/cartoon-player'
 
 const route = useRoute()
@@ -109,12 +109,13 @@ const checkLocalVideo = async (cartoonUuid, chapterId) => {
     try {
         console.log('检查本地视频参数:', { cartoonUuid, chapterId })
         if (cartoonUuid && chapterId) {
-            // 首先尝试正常检查
-            const result = await isCartoonChapterDownloaded(cartoonUuid, chapterId)
-            console.log('本地视频检查结果:', result)
+            // 使用批量查询检查本地章节
+            const localChapters = await getLocalCartoonChapters(cartoonUuid)
+            const isDownloaded = localChapters.some(chapter => chapter.chapter_uuid === chapterId)
+            console.log('本地视频检查结果:', isDownloaded)
 
             // 如果没找到，使用调试功能搜索
-            if (!result) {
+            if (!isDownloaded) {
                 console.log('使用调试功能搜索下载文件...')
                 try {
                     const foundPaths = await invoke('debug_find_downloaded_files', { cartoonUuid })

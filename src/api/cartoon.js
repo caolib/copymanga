@@ -227,7 +227,6 @@ async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, on
     })
 }
 
-// isCartoonChapterDownloaded 已删除，请使用 getLocalCartoonChapters 批量获取本地章节
 
 /**
  * 删除已下载的动画章节
@@ -285,7 +284,6 @@ export {
     getCartoonThemes,
     searchCartoon,
     downloadCartoonChapter,
-    isCartoonChapterDownloaded,
     deleteCartoonChapter,
     getLocalCartoonDetail,
     getLocalCartoonChapters,
