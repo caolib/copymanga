@@ -87,16 +87,18 @@ request.interceptors.response.use(
         }
 
         if (error.code === 'ERR_NETWORK') {
-            message.error("好像没连上网喔...")
-            msg = '网络连接失败，请检查网络设置'
+            msg = '好像没连上网喔...'
         }
 
         if (error.code === "ECONNABORTED") {
             msg = '请求超时，请稍后再试'
         }
 
-        console.error(msg)
-        console.error(error.code)
+        console.error(error)
+        message.error({
+            content: () => msg,
+            class: 'custom-msg-btn'
+        });
         return Promise.reject(error)
     }
 )

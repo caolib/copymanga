@@ -218,9 +218,7 @@ pub async fn download_cartoon_chapter(
 
     // 检查视频文件是否已存在
     if video_path.exists() {
-        println!("视频文件已存在，跳过下载: {}", video_path.display());
-
-        // 创建章节信息文件
+        println!("视频文件已存在，跳过下载: {}", video_path.display()); // 创建章节信息文件
         let chapter_info = CartoonChapterInfo {
             cartoon_uuid: download_info.cartoon_uuid.clone(),
             cartoon_name: download_info.cartoon_name.clone(),
@@ -229,6 +227,7 @@ pub async fn download_cartoon_chapter(
             video_file: video_filename.clone(),
             file_size: 0, // 已存在文件，暂不获取大小
             download_time: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+            is_completed: true, // 文件已存在，标记为完成
         };
 
         let info_content = serde_json::to_string_pretty(&chapter_info)
@@ -281,6 +280,7 @@ pub async fn download_cartoon_chapter(
         video_file: video_filename.clone(),
         file_size: 0, // 初始为0，下载完成后更新
         download_time: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+        is_completed: false, // 初始为false，下载完成后设为true
     };
 
     let info_content = serde_json::to_string_pretty(&initial_chapter_info)
@@ -306,9 +306,7 @@ pub async fn download_cartoon_chapter(
                 "视频下载成功: {} ({}MB)",
                 video_path.display(),
                 file_size / 1024 / 1024
-            );
-
-            // 更新章节信息文件，包含实际文件大小
+            ); // 更新章节信息文件，包含实际文件大小
             let final_chapter_info = CartoonChapterInfo {
                 cartoon_uuid: download_info.cartoon_uuid.clone(),
                 cartoon_name: download_info.cartoon_name.clone(),
@@ -317,6 +315,7 @@ pub async fn download_cartoon_chapter(
                 video_file: video_filename,
                 file_size,
                 download_time: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+                is_completed: true, // 下载完成，标记为true
             };
 
             let final_info_content = serde_json::to_string_pretty(&final_chapter_info)
@@ -999,10 +998,43 @@ async fn count_downloaded_cartoon_chapters(cartoon_path: &PathBuf) -> usize {
             if chapter_path.is_dir()
                 && chapter_path.file_name().unwrap_or_default() != "cartoon_detail.json"
             {
-                // 检查是否有info.json文件
+                // 检查是否有info.json文件，并且是否下载完成
                 let info_file = chapter_path.join("info.json");
                 if info_file.exists() {
-                    count += 1;
+                    if let Ok(content) = fs::read_to_string(&info_file).await {
+                        if let Ok(chapter_info) =
+                            serde_json::from_str::<CartoonChapterInfo>(&content)
+                        {
+                            if chapter_info.is_completed {
+                                count += 1;
+                            }
+                        } else {
+                            // 兼容旧版本，如果解析失败尝试作为Value解析
+                            if let Ok(value) = serde_json::from_str::<Value>(&content) {
+                                if let Some(is_completed) =
+                                    value.get("is_completed").and_then(|v| v.as_bool())
+                                {
+                                    if is_completed {
+                                        count += 1;
+                                    }
+                                } else {
+                                    // 旧版本没有is_completed字段，检查视频文件是否存在
+                                    if let Some(video_file) =
+                                        value.get("video_file").and_then(|v| v.as_str())
+                                    {
+                                        let video_path = chapter_path.join(video_file);
+                                        if video_path.exists() {
+                                            if let Ok(metadata) = std::fs::metadata(&video_path) {
+                                                if metadata.len() > 0 {
+                                                    count += 1;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -1025,8 +1057,54 @@ async fn get_latest_cartoon_download_time(cartoon_path: &PathBuf) -> String {
                         if let Ok(chapter_info) =
                             serde_json::from_str::<CartoonChapterInfo>(&content)
                         {
-                            if latest_time.is_empty() || chapter_info.download_time > latest_time {
+                            // 只考虑已完成的章节
+                            if chapter_info.is_completed
+                                && (latest_time.is_empty()
+                                    || chapter_info.download_time > latest_time)
+                            {
                                 latest_time = chapter_info.download_time;
+                            }
+                        } else {
+                            // 兼容旧版本
+                            if let Ok(value) = serde_json::from_str::<Value>(&content) {
+                                if let Some(is_completed) =
+                                    value.get("is_completed").and_then(|v| v.as_bool())
+                                {
+                                    if is_completed {
+                                        if let Some(download_time) =
+                                            value.get("download_time").and_then(|v| v.as_str())
+                                        {
+                                            if latest_time.is_empty()
+                                                || download_time > latest_time.as_str()
+                                            {
+                                                latest_time = download_time.to_string();
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // 旧版本没有is_completed字段，检查视频文件
+                                    if let Some(video_file) =
+                                        value.get("video_file").and_then(|v| v.as_str())
+                                    {
+                                        let video_path = chapter_path.join(video_file);
+                                        if video_path.exists() {
+                                            if let Ok(metadata) = std::fs::metadata(&video_path) {
+                                                if metadata.len() > 0 {
+                                                    if let Some(download_time) = value
+                                                        .get("download_time")
+                                                        .and_then(|v| v.as_str())
+                                                    {
+                                                        if latest_time.is_empty()
+                                                            || download_time > latest_time.as_str()
+                                                        {
+                                                            latest_time = download_time.to_string();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -1171,23 +1249,88 @@ pub async fn get_local_cartoon_chapters(
         if chapter_uuid == "cartoon_detail.json" || chapter_uuid.is_empty() {
             continue;
         }
-
         let info_file = chapter_path.join("info.json");
         if !info_file.exists() {
             continue;
         }
-
         match fs::read_to_string(&info_file).await {
             Ok(content) => match serde_json::from_str::<Value>(&content) {
-                Ok(chapter_info) => {
-                    chapters.push(chapter_info);
+                Ok(mut chapter_info) => {
+                    // 检查是否下载完成
+                    if let Some(is_completed) =
+                        chapter_info.get("is_completed").and_then(|v| v.as_bool())
+                    {
+                        if is_completed {
+                            eprintln!(
+                                "发现已完成的章节: {}",
+                                chapter_info
+                                    .get("chapter_name")
+                                    .and_then(|v| v.as_str())
+                                    .unwrap_or("未知")
+                            );
+                        } else {
+                            eprintln!(
+                                "发现未完成的章节: {}",
+                                chapter_info
+                                    .get("chapter_name")
+                                    .and_then(|v| v.as_str())
+                                    .unwrap_or("未知")
+                            );
+                        }
+                        chapters.push(chapter_info);
+                    } else {
+                        // 兼容旧版本，如果没有 is_completed 字段，则按原来的逻辑检查视频文件
+                        if let Some(video_file_name) =
+                            chapter_info.get("video_file").and_then(|v| v.as_str())
+                        {
+                            let video_file_path = chapter_path.join(video_file_name);
+
+                            if video_file_path.exists() {
+                                match fs::metadata(&video_file_path).await {
+                                    Ok(metadata) if metadata.len() > 0 => {
+                                        eprintln!("发现旧版本已完成章节: {}", video_file_name);
+                                        // 为旧版本数据添加 is_completed 标记
+                                        if let Some(obj) = chapter_info.as_object_mut() {
+                                            obj.insert(
+                                                "is_completed".to_string(),
+                                                serde_json::Value::Bool(true),
+                                            );
+                                        }
+                                    }
+                                    _ => {
+                                        eprintln!("发现旧版本未完成章节: {}", video_file_name);
+                                        // 为旧版本数据添加 is_completed 标记
+                                        if let Some(obj) = chapter_info.as_object_mut() {
+                                            obj.insert(
+                                                "is_completed".to_string(),
+                                                serde_json::Value::Bool(false),
+                                            );
+                                        }
+                                    }
+                                }
+                            } else {
+                                eprintln!(
+                                    "发现旧版本未完成章节（无视频文件）: {}",
+                                    video_file_name
+                                );
+                                // 为旧版本数据添加 is_completed 标记
+                                if let Some(obj) = chapter_info.as_object_mut() {
+                                    obj.insert(
+                                        "is_completed".to_string(),
+                                        serde_json::Value::Bool(false),
+                                    );
+                                }
+                            }
+                        }
+                        chapters.push(chapter_info);
+                    }
                 }
                 Err(e) => {
-                    println!("解析章节信息失败 {}: {}", info_file.display(), e);
+                    eprintln!("解析章节信息失败 {}: {}", info_file.display(), e);
                 }
             },
             Err(e) => {
-                println!("读取章节信息失败 {}: {}", info_file.display(), e);
+                eprintln!("读取章节信息失败 {}: {}", info_file.display(), e);
             }
         }
     }

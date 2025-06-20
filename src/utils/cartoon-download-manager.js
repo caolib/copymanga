@@ -229,7 +229,7 @@ export class CartoonDownloadManager {
      */
     async deleteChapter(cartoonUuid, chapterUuid) {
         try {
-            const result = await invoke('delete_cartoon_chapter', {
+            const result = await invoke('delete_downloaded_cartoon_chapter', {
                 cartoonUuid,
                 chapterUuid
             })

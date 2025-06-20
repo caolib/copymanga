@@ -382,14 +382,14 @@ export function useMangaDetail() {
                     if (finalStatus === 'downloaded') {
                         message.success({
                             content: () => `章节 "${chapter.name}" 下载完成`,
-                            class: 'right-bottom-msg'
+                            class: 'custom-msg-btn'
                         });
                         console.log(`章节 "${chapter.name}" 下载完成`)
                     } else if (finalStatus === 'partial') {
                         const progress = chapterDownloadProgress.value[chapter.id] || 0
                         message.info({
                             content: () => `章节 "${chapter.name}" 已暂停，进度 ${Math.round(progress)}%`,
-                            class: 'right-bottom-msg'
+                            class: 'custom-msg-btn'
                         });
                         console.log(`章节 "${chapter.name}" 下载已暂停，进度 ${progress}%`)
                     }

@@ -109,6 +109,7 @@ pub struct CartoonChapterInfo {
     pub video_file: String,
     pub file_size: u64,
     pub download_time: String,
+    pub is_completed: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
