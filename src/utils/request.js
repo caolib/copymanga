@@ -39,9 +39,6 @@ request.interceptors.request.use(
         // 动态生成 dt 字段 (日期)
         config.headers['dt'] = getCurrentDate()
 
-        // 设置固定的请求头
-        config.headers['Accept'] = '*/*'
-
         return config
     },
     (error) => {

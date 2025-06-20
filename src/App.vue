@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watchEffect, onMounted } from 'vue'
+import { computed, ref, watchEffect, onMounted, provide } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from './stores/app'
 import { useThemeStore } from './stores/theme'
@@ -12,6 +12,7 @@ const route = useRoute()
 const appStore = useAppStore()
 const themeStore = useThemeStore()
 const showHeader = ref(true)
+const routerKey = ref(0)
 
 // 主题配置
 const themeConfig = computed(() => {
@@ -95,6 +96,15 @@ watchEffect(() => {
 // 重启应用
 const handleRestart = restartApp
 
+// 刷新当前路由
+const refreshCurrentRoute = () => {
+  console.log('刷新当前路由')
+  routerKey.value += 1
+}
+
+// 将刷新方法注入到全局
+provide('refreshCurrentRoute', refreshCurrentRoute)
+
 // 组件挂载时检查免责声明和初始化主题
 onMounted(async () => {
   checkDisclaimer()
@@ -136,7 +146,7 @@ onMounted(async () => {
         <!-- 内容包装器 -->
         <div class="content-wrapper">
           <!-- 路由视图 -->
-          <router-view />
+          <router-view :key="routerKey" />
         </div>
       </main>
 
