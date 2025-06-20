@@ -1,9 +1,10 @@
 <h1 align="center">
-<img src="./public/logo.png"/>
+<img src=".\src-tauri\icons\128x128.png"/>
 </h1>
 <p align="center">
   <img src="https://skillicons.dev/icons?i=tauri,vue,js,rust,pinia,scss,vite,pnpm"/>
 </p>
+
 
 
 <p align="center">
