@@ -7,7 +7,10 @@
                 <div class="reader-title">
                     <a-typography-title :level="4" style="margin: 0;">{{ chapterInfo.comic_name || '漫画标题'
                     }}</a-typography-title>
-                    <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
+                    isLocal: true
+                    })
+
+                    // 使用本地图片 <a-typography-text type="secondary">{{ chapterInfo.name || '章节标题' }}</a-typography-text>
                 </div>
                 <div class="reader-controls">
                     <a-space>
@@ -481,7 +484,25 @@ const fetchChapterImages = async () => {
                 )
 
                 if (localImagePaths && localImagePaths.length > 0) {
-                    const localImages = localImagePaths.map((imagePath, index) => ({
+                    // 智能排序图片路径，处理数字排序问题
+                    const sortedPaths = localImagePaths.sort((a, b) => {
+                        // 提取文件名进行比较
+                        const filenameA = a.split(/[/\\]/).pop()
+                        const filenameB = b.split(/[/\\]/).pop()
+
+                        // 尝试提取数字进行数值比较
+                        const numberA = parseInt(filenameA.match(/\d+/)?.[0] || '0')
+                        const numberB = parseInt(filenameB.match(/\d+/)?.[0] || '0')
+
+                        if (numberA !== numberB) {
+                            return numberA - numberB
+                        }
+
+                        // 如果数字相同，则按字符串排序
+                        return filenameA.localeCompare(filenameB)
+                    })
+
+                    const localImages = sortedPaths.map((imagePath, index) => ({
                         url: downloadManager.convertLocalFileToUrl(imagePath),
                         index: index,
                         width: null,
@@ -502,10 +523,14 @@ const fetchChapterImages = async () => {
 
                     loading.value = false
                     return // 成功使用本地图片，不需要API请求
+                } else {
+                    // 没有找到本地图片，将尝试在线获取
                 }
             } catch (localError) {
                 console.error('获取本地图片失败:', localError)
             }
+        } else {
+            // 没有mangaUuid参数，将尝试在线获取
         }
 
         // 如果本地图片不可用，从API获取

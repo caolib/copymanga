@@ -223,7 +223,8 @@ export class DownloadManager {
                 chapterUuid
             })
 
-            return result.images || []
+            // 后端直接返回字符串数组，不是包含images字段的对象
+            return result || []
         } catch (error) {
             console.error('获取本地章节图片失败:', error)
             return []
@@ -326,7 +327,7 @@ export class DownloadManager {
                 }
                 return mangaDetail
             }
-            
+
             return null
         } catch (error) {
             console.error('DownloadManager: 获取本地漫画详情失败:', error)

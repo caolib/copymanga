@@ -149,7 +149,7 @@
                             <!-- 章节名称 -->
                             <div style="cursor:pointer; margin-bottom: 8px;" @click="readChapter(chapter)">
                                 <span style="font-size:14px;">{{ chapter.chapter_name || chapter.name || '未知章节'
-                                }}</span>
+                                    }}</span>
                             </div>
 
                             <!-- 章节信息 -->
@@ -245,7 +245,7 @@ onMounted(() => {
 // 加载漫画数据
 const loadMangaData = async () => {
     const mangaUuid = route.params.uuid
-    
+
     if (!mangaUuid) {
         errorState.value = {
             title: '参数错误',
@@ -256,7 +256,7 @@ const loadMangaData = async () => {
 
     loading.value = true
     errorState.value = null
-    
+
     // 加载漫画详情
     await getLocalMangaDetail(mangaUuid).then(data => {
         if (data && typeof data === 'object') {

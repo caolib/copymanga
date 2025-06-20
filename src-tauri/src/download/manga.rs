@@ -354,26 +354,28 @@ pub async fn get_downloaded_manga_list(app_handle: AppHandle) -> Result<Vec<Valu
 pub async fn get_local_manga_detail(
     app_handle: AppHandle,
     manga_uuid: String,
-) -> Result<Value, String> {    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
+) -> Result<Value, String> {
+    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
     let manga_path = manga_downloads_path.join(&manga_uuid);
 
     if !manga_path.exists() {
         return Err("本地漫画不存在".to_string());
-    }    // 读取漫画详情文件
+    } // 读取漫画详情文件
     let detail_file = manga_path.join("manga_detail.json");
 
     if !detail_file.exists() {
         return Err("漫画详情文件不存在".to_string());
-    }    let detail_content = fs::read_to_string(&detail_file)
+    }
+    let detail_content = fs::read_to_string(&detail_file)
         .await
         .map_err(|e| format!("读取漫画详情失败: {}", e))?;
 
-    let mut manga_detail: Value = serde_json::from_str(&detail_content)
-        .map_err(|e| format!("解析漫画详情失败: {}", e))?;
+    let mut manga_detail: Value =
+        serde_json::from_str(&detail_content).map_err(|e| format!("解析漫画详情失败: {}", e))?;
 
     // 添加本地信息
     manga_detail["uuid"] = json!(manga_uuid);
-    manga_detail["latestDownloadTime"] = json!(get_manga_latest_download_time(&manga_path).await);    // 添加封面路径
+    manga_detail["latestDownloadTime"] = json!(get_manga_latest_download_time(&manga_path).await); // 添加封面路径
     if let Some(cover_path) = find_manga_cover_file(&manga_path).await {
         manga_detail["coverPath"] = json!(cover_path);
     }
@@ -385,7 +387,8 @@ pub async fn get_local_manga_detail(
 pub async fn get_local_manga_chapters(
     app_handle: AppHandle,
     manga_uuid: String,
-) -> Result<Vec<Value>, String> {    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
+) -> Result<Vec<Value>, String> {
+    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
     let manga_path = manga_downloads_path.join(&manga_uuid);
 
     if !manga_path.exists() {
@@ -434,7 +437,7 @@ pub async fn get_local_manga_chapters(
                 }
             }
         }
-    }    // 按章节名排序
+    } // 按章节名排序
     chapters.sort_by(|a, b| {
         let a_name = a["chapter_name"].as_str().unwrap_or("");
         let b_name = b["chapter_name"].as_str().unwrap_or("");
