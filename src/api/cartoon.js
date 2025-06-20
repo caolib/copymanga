@@ -174,9 +174,10 @@ function searchCartoon(q, limit = 18, offset = 0) {
  * @param {string} line 视频线路
  * @param {Object} chapterInfo 章节基本信息，包含cartoonDetail
  * @param {Function} onProgress 进度回调
+ * @param {boolean} resumeDownload 是否断点续传
  * @returns {Promise}
  */
-async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, onProgress) {
+async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, onProgress, resumeDownload = false) {
     return getVideoByChapterId(pathWord, chapterId, line).then(response => {
         if (response && response.code === 200 && response.results) {
             const chapterData = response.results.chapter
@@ -190,6 +191,8 @@ async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, on
                 chapterName: chapterData.name,
                 videoUrl: chapterData.video,
                 cover: chapterData.v_cover,
+                videoFile: `${chapterData.name}.mp4`, // 添加视频文件名
+                fileSize: chapterData.filesize || 0, // 添加文件大小
                 // 使用传递的动画详情，如果没有则使用API返回的基本信息
                 cartoonDetail: chapterInfo.cartoonDetail || {
                     uuid: cartoonData.uuid,
@@ -206,7 +209,7 @@ async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, on
             }
 
             // 开始下载
-            return cartoonDownloadManager.downloadChapter(downloadInfo, onProgress)
+            return cartoonDownloadManager.downloadChapter(downloadInfo, onProgress, resumeDownload)
         } else {
             throw new Error('获取视频数据失败：服务器返回错误响应')
         }

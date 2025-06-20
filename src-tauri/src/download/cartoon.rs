@@ -1,17 +1,18 @@
-use std::path::PathBuf;
+use crate::download::manga::{download_image, get_extension_from_filename, get_filename_from_url};
+use crate::download::types::*;
+use serde_json::{json, Value};
 use std::collections::HashMap;
+use std::path::PathBuf;
 use std::sync::{Arc, Mutex as StdMutex};
 use tauri::{AppHandle, Manager};
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
 use tokio::sync::Mutex;
-use serde_json::{json, Value};
-use crate::download::types::*;
-use crate::download::manga::{get_filename_from_url, get_extension_from_filename, download_image};
 
 // 全局进度跟踪器
 use std::sync::OnceLock;
-static DOWNLOAD_PROGRESS: OnceLock<Arc<Mutex<HashMap<String, CartoonProgressTracker>>>> = OnceLock::new();
+static DOWNLOAD_PROGRESS: OnceLock<Arc<Mutex<HashMap<String, CartoonProgressTracker>>>> =
+    OnceLock::new();
 
 fn get_progress_tracker() -> &'static Arc<Mutex<HashMap<String, CartoonProgressTracker>>> {
     DOWNLOAD_PROGRESS.get_or_init(|| Arc::new(Mutex::new(HashMap::new())))
@@ -47,6 +48,7 @@ pub async fn pause_cartoon_download(
 ) -> Result<bool, String> {
     let chapter_key = format!("{}|{}", cartoon_uuid, chapter_uuid);
     set_cartoon_pause_flag(&chapter_key, true);
+    eprintln!("暂停动画下载: {}", chapter_key);
     println!("暂停动画下载: {}", chapter_key);
     Ok(true)
 }
@@ -58,6 +60,7 @@ pub async fn resume_cartoon_download(
 ) -> Result<bool, String> {
     let chapter_key = format!("{}|{}", cartoon_uuid, chapter_uuid);
     set_cartoon_pause_flag(&chapter_key, false);
+    eprintln!("恢复动画下载: {}", chapter_key);
     println!("恢复动画下载: {}", chapter_key);
     Ok(true)
 }
@@ -75,8 +78,16 @@ pub async fn check_incomplete_cartoon_download(
 
     // 检查可能的路径
     let possible_paths = vec![
-        resource_dir.join("downloads").join("cartoons").join(&cartoon_uuid).join(&chapter_uuid),
-        resource_dir.join("downloads").join("anime").join(&cartoon_uuid).join(&chapter_uuid),
+        resource_dir
+            .join("downloads")
+            .join("cartoons")
+            .join(&cartoon_uuid)
+            .join(&chapter_uuid),
+        resource_dir
+            .join("downloads")
+            .join("anime")
+            .join(&cartoon_uuid)
+            .join(&chapter_uuid),
     ];
 
     for chapter_path in possible_paths {
@@ -124,7 +135,8 @@ pub async fn download_cartoon_chapter(
     cartoon_detail: Option<CartoonDetail>,
     app_handle: AppHandle,
 ) -> Result<CartoonDownloadResult, String> {
-    println!("开始下载动画章节: {}", chapter_name);
+    eprintln!("开始下载动画章节: {}", chapter_name);
+    eprintln!("视频URL: {}", video_url);
 
     let download_info = CartoonDownloadInfo {
         cartoon_uuid: cartoon_uuid.clone(),
@@ -167,7 +179,10 @@ pub async fn download_cartoon_chapter(
         // 下载封面图片
         if !detail.cover.is_empty() {
             let cover_filename = get_filename_from_url(&detail.cover);
-            let cover_path = cartoon_path.join(format!("cover.{}", get_extension_from_filename(&cover_filename)));    
+            let cover_path = cartoon_path.join(format!(
+                "cover.{}",
+                get_extension_from_filename(&cover_filename)
+            ));
 
             // 检查封面是否已存在
             if !cover_path.exists() {
@@ -229,37 +244,72 @@ pub async fn download_cartoon_chapter(
             message: format!("章节 \"{}\" 已存在", download_info.chapter_name),
             file_path: video_path.to_string_lossy().to_string(),
         });
-    }    // 创建HTTP客户端
+    } // 创建HTTP客户端
     let client = reqwest::Client::builder()
         .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
         .timeout(std::time::Duration::from_secs(300)) // 5分钟超时
         .build()
-        .map_err(|e| format!("创建HTTP客户端失败: {}", e))?;
-
-    // 初始化下载进度跟踪
+        .map_err(|e| format!("创建HTTP客户端失败: {}", e))?; // 初始化下载进度跟踪
     let progress_key = format!("{}_{}", cartoon_uuid, chapter_uuid);
+    let pause_key = format!("{}|{}", cartoon_uuid, chapter_uuid); // 暂停键使用不同格式
+    eprintln!("Progress key: {}, Pause key: {}", progress_key, pause_key);
     {
         let tracker = get_progress_tracker();
         let mut progress_map = tracker.lock().await;
-        progress_map.insert(progress_key.clone(), CartoonProgressTracker {
-            current_segment: 0,
-            total_segments: 0,
-            downloaded_bytes: 0,
-            total_bytes: 0,
-            percent: 0.0,
-            status: "starting".to_string(),
-            current_file: "准备下载...".to_string(),
-        });
+        progress_map.insert(
+            progress_key.clone(),
+            CartoonProgressTracker {
+                current_segment: 0,
+                total_segments: 0,
+                downloaded_bytes: 0,
+                total_bytes: 0,
+                percent: 0.0,
+                status: "starting".to_string(),
+                current_file: "准备下载...".to_string(),
+            },
+        );
+    } // 下载视频文件
+    eprintln!("开始下载视频: {}", download_info.video_url);
+
+    // 先创建章节信息文件（包含预估信息）
+    let video_filename = format!("{}.mp4", &download_info.chapter_name);
+    let initial_chapter_info = CartoonChapterInfo {
+        cartoon_uuid: download_info.cartoon_uuid.clone(),
+        cartoon_name: download_info.cartoon_name.clone(),
+        chapter_uuid: download_info.chapter_uuid.clone(),
+        chapter_name: download_info.chapter_name.clone(),
+        video_file: video_filename.clone(),
+        file_size: 0, // 初始为0，下载完成后更新
+        download_time: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
+    };
+
+    let info_content = serde_json::to_string_pretty(&initial_chapter_info)
+        .map_err(|e| format!("序列化章节信息失败: {}", e))?;
+
+    let info_path = chapter_path.join("info.json");
+    if let Err(e) = fs::write(&info_path, info_content).await {
+        return Err(format!("写入初始章节信息失败: {}", e));
     }
+    eprintln!("已创建初始info.json文件: {}", info_path.display());
 
-    // 下载视频文件
-    println!("开始下载视频: {}", download_info.video_url);
-    match download_video(&client, &download_info.video_url, &video_path, &progress_key).await {
+    match download_video(
+        &client,
+        &download_info.video_url,
+        &video_path,
+        &progress_key,
+        &pause_key,
+    )
+    .await
+    {
         Ok(file_size) => {
-            println!("视频下载成功: {} ({}MB)", video_path.display(), file_size / 1024 / 1024);
+            eprintln!(
+                "视频下载成功: {} ({}MB)",
+                video_path.display(),
+                file_size / 1024 / 1024
+            );
 
-            // 创建章节信息文件
-            let chapter_info = CartoonChapterInfo {
+            // 更新章节信息文件，包含实际文件大小
+            let final_chapter_info = CartoonChapterInfo {
                 cartoon_uuid: download_info.cartoon_uuid.clone(),
                 cartoon_name: download_info.cartoon_name.clone(),
                 chapter_uuid: download_info.chapter_uuid.clone(),
@@ -269,18 +319,21 @@ pub async fn download_cartoon_chapter(
                 download_time: chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string(),
             };
 
-            let info_content = serde_json::to_string_pretty(&chapter_info)
-                .map_err(|e| format!("序列化章节信息失败: {}", e))?;            let info_path = chapter_path.join("info.json");
-            if let Err(e) = fs::write(&info_path, info_content).await {
-                return Err(format!("写入章节信息失败: {}", e));
-            }
+            let final_info_content = serde_json::to_string_pretty(&final_chapter_info)
+                .map_err(|e| format!("序列化最终章节信息失败: {}", e))?;
 
-            // 清理进度跟踪器
+            if let Err(e) = fs::write(&info_path, final_info_content).await {
+                return Err(format!("更新章节信息失败: {}", e));
+            }
+            eprintln!("已更新info.json文件，包含文件大小: {} bytes", file_size);
+
+            // 清理进度跟踪器和暂停标志
             {
                 let tracker = get_progress_tracker();
                 let mut progress_map = tracker.lock().await;
                 progress_map.remove(&progress_key);
             }
+            clear_cartoon_pause_flag(&pause_key);
 
             Ok(CartoonDownloadResult {
                 success: true,
@@ -289,15 +342,16 @@ pub async fn download_cartoon_chapter(
             })
         }
         Err(e) => {
-            println!("视频下载失败: {} - {}", download_info.video_url, e);
-            
-            // 清理进度跟踪器
+            eprintln!("视频下载失败: {} - {}", download_info.video_url, e);
+
+            // 清理进度跟踪器和暂停标志
             {
                 let tracker = get_progress_tracker();
                 let mut progress_map = tracker.lock().await;
                 progress_map.remove(&progress_key);
             }
-            
+            clear_cartoon_pause_flag(&pause_key);
+
             Err(format!("视频下载失败: {}", e))
         }
     }
@@ -309,13 +363,14 @@ async fn download_video(
     url: &str,
     save_path: &PathBuf,
     progress_key: &str,
+    pause_key: &str,
 ) -> Result<u64, String> {
     // 检查是否是HLS流（m3u8文件）
     if url.ends_with(".m3u8") {
-        return download_hls_stream(client, url, save_path, progress_key).await;
-    }
+        return download_hls_stream(client, url, save_path, progress_key, pause_key).await;
+    } // 普通视频文件下载
+    eprintln!("开始下载普通视频文件: {}", url);
 
-    // 普通视频文件下载
     let response = client
         .get(url)
         .send()
@@ -324,23 +379,63 @@ async fn download_video(
 
     if !response.status().is_success() {
         return Err(format!("HTTP状态错误: {}", response.status()));
-    }
+    } // 获取文件大小
+    let total_size = response.content_length().unwrap_or(0);
+    eprintln!("文件总大小: {} bytes", total_size);
 
     let mut file = fs::File::create(save_path)
         .await
         .map_err(|e| format!("创建文件失败: {}", e))?;
 
-    // 直接读取所有字节数据
-    let bytes = response.bytes().await.map_err(|e| format!("读取响应数据失败: {}", e))?;
+    // 分块下载以支持暂停
+    use futures_util::StreamExt;
+    let mut stream = response.bytes_stream();
+    let mut downloaded = 0u64;
 
-    file.write_all(&bytes)
+    while let Some(chunk_result) = stream.next().await {
+        // 检查暂停标志
+        if is_cartoon_paused(pause_key) {
+            eprintln!("普通文件下载被暂停: {}", pause_key);
+
+            // 等待恢复
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                if !is_cartoon_paused(pause_key) {
+                    eprintln!("普通文件下载恢复: {}", pause_key);
+                    break;
+                }
+            }
+        }
+
+        let chunk = chunk_result.map_err(|e| format!("读取数据块失败: {}", e))?;
+
+        file.write_all(&chunk)
+            .await
+            .map_err(|e| format!("写入文件失败: {}", e))?;
+
+        downloaded += chunk.len() as u64;
+
+        // 更新进度
+        {
+            let tracker = get_progress_tracker();
+            let mut progress_map = tracker.lock().await;
+            if let Some(progress) = progress_map.get_mut(progress_key) {
+                progress.downloaded_bytes = downloaded;
+                progress.total_bytes = total_size;
+                if total_size > 0 {
+                    progress.percent = (downloaded as f64 / total_size as f64) * 100.0;
+                }
+                progress.status = "downloading".to_string();
+                progress.current_file = format!("下载进度: {:.1}%", progress.percent);
+            }
+        }
+    }
+
+    file.flush()
         .await
-        .map_err(|e| format!("写入文件失败: {}", e))?;
+        .map_err(|e| format!("刷新文件失败: {}", e))?;
 
-    let downloaded = bytes.len() as u64;
-
-    file.flush().await.map_err(|e| format!("刷新文件失败: {}", e))?;
-
+    eprintln!("普通视频文件下载完成: {} bytes", downloaded);
     Ok(downloaded)
 }
 
@@ -350,8 +445,9 @@ async fn download_hls_stream(
     m3u8_url: &str,
     save_path: &PathBuf,
     progress_key: &str,
+    pause_key: &str,
 ) -> Result<u64, String> {
-    println!("检测到HLS流，开始解析m3u8文件: {}", m3u8_url);
+    eprintln!("检测到HLS流，开始解析m3u8文件: {}", m3u8_url);
 
     // 获取m3u8文件内容
     let response = client
@@ -377,17 +473,88 @@ async fn download_hls_stream(
         return Err("未找到视频片段".to_string());
     }
 
-    println!("找到 {} 个视频片段", segment_urls.len());
-
-    // 创建临时目录存储片段
+    eprintln!("找到 {} 个视频片段", segment_urls.len()); // 创建临时目录存储片段
     let temp_dir = save_path.parent().unwrap().join("temp_segments");
     if let Err(e) = fs::create_dir_all(&temp_dir).await {
         return Err(format!("创建临时目录失败: {}", e));
     }
 
+    // 检查已存在的分片文件，支持断点续传
+    let mut existing_segments = Vec::new();
+    let mut start_index = 0;
     let mut total_downloaded = 0u64;
-    let mut segment_files = Vec::new();    // 下载所有片段
-    for (index, url) in segment_urls.iter().enumerate() {
+
+    if temp_dir.exists() {
+        let mut entries = fs::read_dir(&temp_dir)
+            .await
+            .map_err(|e| format!("读取临时目录失败: {}", e))?;
+
+        while let Some(entry) = entries
+            .next_entry()
+            .await
+            .map_err(|e| format!("遍历临时目录失败: {}", e))?
+        {
+            let file_name = entry.file_name();
+            let file_name_str = file_name.to_string_lossy();
+
+            if file_name_str.starts_with("segment_") && file_name_str.ends_with(".ts") {
+                if let Some(index_str) = file_name_str
+                    .strip_prefix("segment_")
+                    .and_then(|s| s.strip_suffix(".ts"))
+                {
+                    if let Ok(index) = index_str.parse::<usize>() {
+                        let file_path = entry.path();
+                        let file_size = entry
+                            .metadata()
+                            .await
+                            .map_err(|e| format!("获取文件元数据失败: {}", e))?
+                            .len();
+
+                        existing_segments.push((index, file_path, file_size));
+                        total_downloaded += file_size;
+                    }
+                }
+            }
+        }
+
+        // 按索引排序
+        existing_segments.sort_by_key(|&(index, _, _)| index);
+
+        if !existing_segments.is_empty() {
+            let last_index = existing_segments.last().unwrap().0;
+            eprintln!(
+                "发现 {} 个已下载的分片，最后一个索引: {}",
+                existing_segments.len(),
+                last_index
+            );
+
+            // 删除最后一个分片文件（可能不完整）
+            if let Some((_, last_file_path, last_file_size)) = existing_segments.pop() {
+                if let Err(e) = fs::remove_file(&last_file_path).await {
+                    eprintln!("删除最后一个分片失败: {}", e);
+                } else {
+                    eprintln!(
+                        "已删除可能不完整的最后一个分片: {}",
+                        last_file_path.display()
+                    );
+                    total_downloaded -= last_file_size;
+                }
+            }
+
+            // 从下一个分片开始下载
+            start_index = if existing_segments.is_empty() {
+                0
+            } else {
+                existing_segments.last().unwrap().0 + 1
+            };
+            eprintln!("将从分片 {} 开始继续下载", start_index + 1);
+        }
+    }
+
+    let mut segment_files = Vec::new();
+
+    // 下载分片（从 start_index 开始）
+    for (index, url) in segment_urls.iter().enumerate().skip(start_index) {
         let segment_path = temp_dir.join(format!("segment_{:04}.ts", index));
 
         // 更新进度
@@ -403,7 +570,7 @@ async fn download_hls_stream(
             }
         }
 
-        println!("下载片段 {}/{}: {}", index + 1, segment_urls.len(), url);
+        eprintln!("下载片段 {}/{}: {}", index + 1, segment_urls.len(), url);
 
         let segment_response = client
             .get(url)
@@ -412,7 +579,11 @@ async fn download_hls_stream(
             .map_err(|e| format!("下载片段{}失败: {}", index, e))?;
 
         if !segment_response.status().is_success() {
-            return Err(format!("片段{}下载失败，HTTP状态: {}", index, segment_response.status()));
+            return Err(format!(
+                "片段{}下载失败，HTTP状态: {}",
+                index,
+                segment_response.status()
+            ));
         }
 
         let segment_data = segment_response
@@ -434,12 +605,10 @@ async fn download_hls_stream(
             if let Some(progress) = progress_map.get_mut(progress_key) {
                 progress.downloaded_bytes = total_downloaded;
             }
-        }
+        } // 检查暂停标志
+        if is_cartoon_paused(pause_key) {
+            eprintln!("下载被暂停: {}", pause_key);
 
-        // 检查暂停标志
-        if is_cartoon_paused(progress_key) {
-            println!("下载被暂停: {}", progress_key);
-            
             // 更新进度为暂停状态
             {
                 let tracker = get_progress_tracker();
@@ -450,12 +619,11 @@ async fn download_hls_stream(
                 }
             }
 
-            // 等待恢复
+            // 等待恢复 - 使用正确的 pause_key
             loop {
                 tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-
-                if !is_cartoon_paused(progress_key) {
-                    println!("下载恢复: {}", progress_key);
+                if !is_cartoon_paused(pause_key) {
+                    eprintln!("下载恢复: {}", pause_key);
                     break;
                 }
             }
@@ -466,13 +634,35 @@ async fn download_hls_stream(
                 let mut progress_map = tracker.lock().await;
                 if let Some(progress) = progress_map.get_mut(progress_key) {
                     progress.status = "downloading".to_string();
-                    progress.current_file = format!("下载片段 {}/{}", index + 1, segment_urls.len());
+                    progress.current_file =
+                        format!("下载片段 {}/{}", index + 1, segment_urls.len());
                 }
             }
         }
-    }    // 合并所有片段为单个视频文件
-    println!("合并视频片段...");
-    
+    }
+
+    // 合并所有片段为单个视频文件
+    eprintln!("合并视频片段...");
+
+    // 收集所有分片文件路径（包括已存在的和新下载的），按索引排序
+    let mut all_segment_files = Vec::new();
+
+    // 添加已存在的分片
+    for (index, file_path, _) in &existing_segments {
+        all_segment_files.push((*index, file_path.clone()));
+    }
+
+    // 添加新下载的分片
+    for (i, file_path) in segment_files.iter().enumerate() {
+        let actual_index = start_index + i;
+        all_segment_files.push((actual_index, file_path.clone()));
+    }
+
+    // 按索引排序
+    all_segment_files.sort_by_key(|&(index, _)| index);
+
+    eprintln!("准备合并 {} 个分片文件", all_segment_files.len());
+
     // 更新进度为合并阶段
     {
         let tracker = get_progress_tracker();
@@ -487,13 +677,13 @@ async fn download_hls_stream(
     let mut output_file = fs::File::create(save_path)
         .await
         .map_err(|e| format!("创建输出文件失败: {}", e))?;
-
-    for (index, segment_file) in segment_files.iter().enumerate() {
+    for (file_index, (segment_index, segment_file)) in all_segment_files.iter().enumerate() {
         let segment_data = fs::read(segment_file)
             .await
             .map_err(|e| format!("读取片段文件失败: {}", e))?;
 
-        output_file.write_all(&segment_data)
+        output_file
+            .write_all(&segment_data)
             .await
             .map_err(|e| format!("写入合并文件失败: {}", e))?;
 
@@ -502,14 +692,22 @@ async fn download_hls_stream(
             let tracker = get_progress_tracker();
             let mut progress_map = tracker.lock().await;
             if let Some(progress) = progress_map.get_mut(progress_key) {
-                let merge_progress = (index as f64 / segment_files.len() as f64) * 20.0;
+                let merge_progress = (file_index as f64 / all_segment_files.len() as f64) * 20.0;
                 progress.percent = 80.0 + merge_progress;
-                progress.current_file = format!("合并片段 {}/{}", index + 1, segment_files.len());
+                progress.current_file = format!(
+                    "合并片段 {}/{} (索引:{})",
+                    file_index + 1,
+                    all_segment_files.len(),
+                    segment_index
+                );
             }
         }
     }
 
-    output_file.flush().await.map_err(|e| format!("刷新输出文件失败: {}", e))?;
+    output_file
+        .flush()
+        .await
+        .map_err(|e| format!("刷新输出文件失败: {}", e))?;
 
     // 更新为完成状态
     {
@@ -521,15 +719,13 @@ async fn download_hls_stream(
             progress.current_file = "下载完成".to_string();
             progress.total_bytes = total_downloaded;
         }
-    }
-
-    // 清理临时文件
-    for segment_file in segment_files {
+    } // 清理临时文件
+    for (_, segment_file) in all_segment_files {
         let _ = fs::remove_file(segment_file).await;
     }
     let _ = fs::remove_dir(temp_dir).await;
 
-    println!("视频合并完成，总大小: {}MB", total_downloaded / 1024 / 1024);
+    eprintln!("视频合并完成，总大小: {}MB", total_downloaded / 1024 / 1024);
     Ok(total_downloaded)
 }
 
@@ -562,7 +758,8 @@ fn parse_m3u8_segments(content: &str, base_url: &str) -> Result<Vec<String>, Str
         };
 
         segments.push(segment_url);
-    }    Ok(segments)
+    }
+    Ok(segments)
 }
 
 #[tauri::command]
@@ -594,8 +791,16 @@ pub async fn get_cartoon_download_progress(
 
     // 检查两个可能的路径：新的 cartoons 和旧的 anime（向后兼容）
     let possible_paths = vec![
-        resource_dir.join("downloads").join("cartoons").join(&cartoon_uuid).join(&chapter_uuid),
-        resource_dir.join("downloads").join("anime").join(&cartoon_uuid).join(&chapter_uuid),
+        resource_dir
+            .join("downloads")
+            .join("cartoons")
+            .join(&cartoon_uuid)
+            .join(&chapter_uuid),
+        resource_dir
+            .join("downloads")
+            .join("anime")
+            .join(&cartoon_uuid)
+            .join(&chapter_uuid),
     ];
 
     for chapter_path in possible_paths {
@@ -637,8 +842,16 @@ pub async fn delete_downloaded_cartoon_chapter(
 
     // 检查两个可能的路径：新的 cartoons 和旧的 anime（向后兼容）
     let possible_paths = vec![
-        resource_dir.join("downloads").join("cartoons").join(&cartoon_uuid).join(&chapter_uuid),
-        resource_dir.join("downloads").join("anime").join(&cartoon_uuid).join(&chapter_uuid),
+        resource_dir
+            .join("downloads")
+            .join("cartoons")
+            .join(&cartoon_uuid)
+            .join(&chapter_uuid),
+        resource_dir
+            .join("downloads")
+            .join("anime")
+            .join(&cartoon_uuid)
+            .join(&chapter_uuid),
     ];
 
     for chapter_path in possible_paths {
@@ -684,18 +897,22 @@ pub async fn get_downloaded_cartoon_list(
         }
 
         // 读取下载目录中的所有动画文件夹
-        let mut entries = fs::read_dir(&download_dir).await
+        let mut entries = fs::read_dir(&download_dir)
+            .await
             .map_err(|e| format!("读取下载目录失败: {}", e))?;
 
-        while let Some(entry) = entries.next_entry().await
-            .map_err(|e| format!("读取目录项失败: {}", e))? {
-
+        while let Some(entry) = entries
+            .next_entry()
+            .await
+            .map_err(|e| format!("读取目录项失败: {}", e))?
+        {
             let cartoon_path = entry.path();
             if !cartoon_path.is_dir() {
                 continue;
             }
 
-            let cartoon_uuid = cartoon_path.file_name()
+            let cartoon_uuid = cartoon_path
+                .file_name()
                 .and_then(|name| name.to_str())
                 .unwrap_or("")
                 .to_string();
@@ -705,7 +922,10 @@ pub async fn get_downloaded_cartoon_list(
             }
 
             // 避免重复添加同一个动画（如果在两个目录都存在）
-            if cartoon_list.iter().any(|info: &DownloadedCartoonInfo| info.uuid == cartoon_uuid) {
+            if cartoon_list
+                .iter()
+                .any(|info: &DownloadedCartoonInfo| info.uuid == cartoon_uuid)
+            {
                 continue;
             }
 
@@ -720,10 +940,12 @@ pub async fn get_downloaded_cartoon_list(
                     match serde_json::from_str::<CartoonDetail>(&content) {
                         Ok(detail) => {
                             // 统计已下载的章节数量
-                            let chapter_count = count_downloaded_cartoon_chapters(&cartoon_path).await;
+                            let chapter_count =
+                                count_downloaded_cartoon_chapters(&cartoon_path).await;
 
                             // 获取最新下载时间
-                            let latest_download_time = get_latest_cartoon_download_time(&cartoon_path).await;
+                            let latest_download_time =
+                                get_latest_cartoon_download_time(&cartoon_path).await;
 
                             // 检查封面文件
                             let cover_path = find_cartoon_cover_file(&cartoon_path).await;
@@ -774,8 +996,9 @@ async fn count_downloaded_cartoon_chapters(cartoon_path: &PathBuf) -> usize {
     if let Ok(mut entries) = fs::read_dir(cartoon_path).await {
         while let Ok(Some(entry)) = entries.next_entry().await {
             let chapter_path = entry.path();
-            if chapter_path.is_dir() &&
-               chapter_path.file_name().unwrap_or_default() != "cartoon_detail.json" {
+            if chapter_path.is_dir()
+                && chapter_path.file_name().unwrap_or_default() != "cartoon_detail.json"
+            {
                 // 检查是否有info.json文件
                 let info_file = chapter_path.join("info.json");
                 if info_file.exists() {
@@ -799,7 +1022,9 @@ async fn get_latest_cartoon_download_time(cartoon_path: &PathBuf) -> String {
                 let info_file = chapter_path.join("info.json");
                 if info_file.exists() {
                     if let Ok(content) = fs::read_to_string(&info_file).await {
-                        if let Ok(chapter_info) = serde_json::from_str::<CartoonChapterInfo>(&content) {
+                        if let Ok(chapter_info) =
+                            serde_json::from_str::<CartoonChapterInfo>(&content)
+                        {
                             if latest_time.is_empty() || chapter_info.download_time > latest_time {
                                 latest_time = chapter_info.download_time;
                             }
@@ -845,28 +1070,26 @@ pub async fn open_local_video_directory(
         .join("cartoons")
         .join(&cartoon_uuid)
         .join(&chapter_uuid);
-    
+
     if !chapter_path.exists() {
         return Err("本地章节不存在".to_string());
     }
-    
+
     // 使用系统命令打开目录
     #[cfg(target_os = "windows")]
     {
         use std::process::Command;
-        let result = Command::new("explorer")
-            .arg(&chapter_path)
-            .status();
-            
+        let result = Command::new("explorer").arg(&chapter_path).status();
+
         match result {
             Ok(_) => Ok(json!({
                 "success": true,
                 "message": "目录打开成功"
             })),
-            Err(e) => Err(format!("打开目录失败: {}", e))
+            Err(e) => Err(format!("打开目录失败: {}", e)),
         }
     }
-    
+
     #[cfg(not(target_os = "windows"))]
     {
         Err("此功能仅支持Windows系统".to_string())
@@ -889,16 +1112,17 @@ pub async fn get_local_cartoon_detail(
         .join(&cartoon_uuid);
 
     let detail_file = cartoon_path.join("cartoon_detail.json");
-    
+
     if !detail_file.exists() {
         return Err("动画详情文件不存在".to_string());
     }
 
-    let content = fs::read_to_string(&detail_file).await
+    let content = fs::read_to_string(&detail_file)
+        .await
         .map_err(|e| format!("读取动画详情失败: {}", e))?;
 
-    let detail: Value = serde_json::from_str(&content)
-        .map_err(|e| format!("解析动画详情失败: {}", e))?;
+    let detail: Value =
+        serde_json::from_str(&content).map_err(|e| format!("解析动画详情失败: {}", e))?;
 
     Ok(detail)
 }
@@ -924,18 +1148,22 @@ pub async fn get_local_cartoon_chapters(
 
     let mut chapters = Vec::new();
 
-    let mut entries = fs::read_dir(&cartoon_path).await
+    let mut entries = fs::read_dir(&cartoon_path)
+        .await
         .map_err(|e| format!("读取动画目录失败: {}", e))?;
 
-    while let Some(entry) = entries.next_entry().await
-        .map_err(|e| format!("读取目录项失败: {}", e))? {
-
+    while let Some(entry) = entries
+        .next_entry()
+        .await
+        .map_err(|e| format!("读取目录项失败: {}", e))?
+    {
         let chapter_path = entry.path();
         if !chapter_path.is_dir() {
             continue;
         }
 
-        let chapter_uuid = chapter_path.file_name()
+        let chapter_uuid = chapter_path
+            .file_name()
             .and_then(|name| name.to_str())
             .unwrap_or("")
             .to_string();
@@ -950,16 +1178,14 @@ pub async fn get_local_cartoon_chapters(
         }
 
         match fs::read_to_string(&info_file).await {
-            Ok(content) => {
-                match serde_json::from_str::<Value>(&content) {
-                    Ok(chapter_info) => {
-                        chapters.push(chapter_info);
-                    }
-                    Err(e) => {
-                        println!("解析章节信息失败 {}: {}", info_file.display(), e);
-                    }
+            Ok(content) => match serde_json::from_str::<Value>(&content) {
+                Ok(chapter_info) => {
+                    chapters.push(chapter_info);
                 }
-            }
+                Err(e) => {
+                    println!("解析章节信息失败 {}: {}", info_file.display(), e);
+                }
+            },
             Err(e) => {
                 println!("读取章节信息失败 {}: {}", info_file.display(), e);
             }
@@ -989,7 +1215,11 @@ pub async fn debug_find_downloaded_files(
     let mut found_paths = Vec::new();
 
     // 递归搜索包含cartoon_uuid的目录
-    fn search_recursive(dir: &PathBuf, target_uuid: &str, found: &mut Vec<String>) -> Result<(), std::io::Error> {
+    fn search_recursive(
+        dir: &PathBuf,
+        target_uuid: &str,
+        found: &mut Vec<String>,
+    ) -> Result<(), std::io::Error> {
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries {
                 if let Ok(entry) = entry {
@@ -1013,5 +1243,6 @@ pub async fn debug_find_downloaded_files(
     println!("搜索动画UUID {} 的下载文件:", cartoon_uuid);
     for path in &found_paths {
         println!("  找到目录: {}", path);
-    }    Ok(found_paths)
+    }
+    Ok(found_paths)
 }

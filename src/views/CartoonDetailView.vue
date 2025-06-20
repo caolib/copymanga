@@ -144,7 +144,8 @@
                                 <!-- 下载按钮 -->
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.uuid] || chapterDownloadStatus[chapter.uuid] === 'error'"
-                                    size="small" type="primary" @click.stop="downloadChapter(chapter)">
+                                    size="small" type="primary" :disabled="detailLoading || !cartoon.uuid"
+                                    @click.stop="downloadChapter(chapter)">
                                     <template #icon>
                                         <download-outlined />
                                     </template>
@@ -225,21 +226,22 @@ const fetchCartoonData = () => {
         return
     }
 
-    detailLoading.value = true
 
-    getCartoonInfo(pathWord).then(response => {
-        const results = response.results
-        cartoon.value = results.cartoon || {}
-        popular.value = results.popular || 0
+    if (!cartoon.value.name) {
+        detailLoading.value = true
 
-        // 获取章节列表
-        fetchChapters(pathWord)
-    }).catch(err => {
-        console.error('获取动画详情失败:', err)
-        message.error(err.message || '获取动画详情失败')
-    }).finally(() => {
-        detailLoading.value = false
-    })
+        // 获取动画详情
+        getCartoonInfo(pathWord).then(response => {
+            const results = response.results
+            cartoon.value = results.cartoon || {}
+            popular.value = results.popular || 0
+        }).finally(() => {
+            detailLoading.value = false
+        })
+    }
+
+    // 获取章节列表
+    fetchChapters(pathWord)
 }
 
 const fetchChapters = (pathWord) => {
@@ -377,7 +379,15 @@ const downloadChapter = async (chapter) => {
         (progressInfo) => {
             // 更新进度
             chapterDownloadProgress.value[chapter.uuid] = progressInfo.percent || 0
-            chapterDownloadProgressText.value[chapter.uuid] = progressInfo.currentFile || '准备下载...'
+
+            // 构建进度文本
+            let progressText = progressInfo.currentFile || '准备下载...'
+            if (progressInfo.downloadedSize && progressInfo.totalSize) {
+                const downloadedMB = Math.round(progressInfo.downloadedSize / 1024 / 1024 * 100) / 100
+                const totalMB = Math.round(progressInfo.totalSize / 1024 / 1024 * 100) / 100
+                progressText = `${progressText} (${downloadedMB}MB/${totalMB}MB)`
+            }
+            chapterDownloadProgressText.value[chapter.uuid] = progressText
 
             if (progressInfo.status === 'error') {
                 console.error('下载进度错误:', progressInfo.error)
@@ -420,7 +430,48 @@ const resumeDownload = async (chapter) => {
     try {
         chapterDownloadStatus.value[chapter.uuid] = 'downloading'
         chapterDownloadProgressText.value[chapter.uuid] = '准备继续下载...'
-        await downloadChapter(chapter) // 断点续传
+
+        // 直接调用动画下载管理器的继续下载方法
+        await cartoonDownloadManager.resumeDownload(cartoon.value.uuid, chapter.uuid)
+
+        // 启动进度监控
+        const progressInterval = cartoonDownloadManager.startProgressMonitoring(
+            cartoon.value.uuid,
+            chapter.uuid,
+            (progressInfo) => {
+                // 更新进度
+                chapterDownloadProgress.value[chapter.uuid] = progressInfo.percent || 0
+
+                // 构建进度文本，包含文件大小信息
+                let progressText = progressInfo.currentFile || '继续下载中...'
+                if (progressInfo.downloadedSize && progressInfo.totalSize) {
+                    const downloadedMB = Math.round(progressInfo.downloadedSize / 1024 / 1024 * 100) / 100
+                    const totalMB = Math.round(progressInfo.totalSize / 1024 / 1024 * 100) / 100
+                    progressText = `${progressText} (${downloadedMB}MB/${totalMB}MB)`
+                }
+                chapterDownloadProgressText.value[chapter.uuid] = progressText
+
+                // 如果下载完成
+                if (progressInfo.status === 'completed' || progressInfo.percent >= 100) {
+                    chapterDownloadStatus.value[chapter.uuid] = 'downloaded'
+                    chapterDownloadProgress.value[chapter.uuid] = 100
+                    chapterDownloadProgressText.value[chapter.uuid] = '下载完成'
+                    message.success({
+                        content: `动画章节 "${chapter.name}" 下载完成`,
+                        class: 'right-bottom-msg'
+                    });
+                }
+
+                // 如果下载出错
+                if (progressInfo.status === 'error') {
+                    chapterDownloadStatus.value[chapter.uuid] = 'error'
+                    chapterDownloadProgressText.value[chapter.uuid] = '下载失败'
+                    console.error('下载进度错误:', progressInfo.error)
+                }
+            }
+        )
+
+        message.info(`动画章节 "${chapter.name}" 继续下载`)
     } catch (error) {
         console.error('继续下载失败:', error)
         chapterDownloadStatus.value[chapter.uuid] = 'paused'

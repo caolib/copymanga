@@ -63,12 +63,11 @@
                     :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
                     {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
                 </button>
-                <a-button type="text" class="nav-link" @click="goBack" title="后退" :icon="h(ArrowLeftOutlined)">
-                </a-button>
-                <a-button type="text" class="nav-link" @click="goForward" title="前进" :icon="h(ArrowRightOutlined)">
-                </a-button>
+                <a-button type="text" class="nav-link" @click="goBack" title="后退"
+                    :icon="h(ArrowLeftOutlined)"></a-button>
+                <a-button type="text" class="nav-link" @click="goForward" title="前进"
+                    :icon="h(ArrowRightOutlined)"></a-button>
                 <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)">
-                    刷新
                 </a-button>
             </nav>
         </div>
