@@ -1,20 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
-import { convertFileSrc } from '@tauri-apps/api/core'
-
-/**
- * 安全的文件路径转换函数 - 处理Windows路径问题
- * @param {string} path 本地文件路径
- * @returns {string} 转换后的URL
- */
-function safeConvertFileSrc(path) {
-    // 移除 Windows UNC 前缀 \\?\
-    let cleanPath = path.replace(/^\\\\\?\\/, '')
-
-    // 规范化路径分隔符为正斜杠
-    cleanPath = cleanPath.replace(/\\/g, '/')
-
-    return convertFileSrc(cleanPath)
-}
+import { safeConvertFileSrc, convertLocalFileToUrl } from './file-converter'
 
 /**
  * 下载管理器类 - 只通过 Tauri 后端处理下载
@@ -232,13 +217,6 @@ export class DownloadManager {
     }
 
     /**
-     * 转换本地文件路径为 Tauri 可访问的 URL
-     * @param {string} filePath 本地文件路径
-     * @returns {string} 转换后的 URL
-     */
-    convertLocalFileToUrl(filePath) {
-        return safeConvertFileSrc(filePath)
-    }    /**
      * 删除已下载的章节
      * @param {string} mangaUuid 漫画UUID
      * @param {string} groupPathWord 分组路径
@@ -304,7 +282,7 @@ export class DownloadManager {
             // 处理返回的数据，转换封面图片路径为可访问的URL
             return result.map(manga => ({
                 ...manga,
-                coverUrl: manga.coverPath ? this.convertLocalFileToUrl(manga.coverPath) : null
+                coverUrl: manga.coverPath ? convertLocalFileToUrl(manga.coverPath) : null
             }))
         } catch (error) {
             console.error('获取已下载漫画列表失败:', error)
@@ -323,7 +301,7 @@ export class DownloadManager {
                 // 后端直接返回漫画详情对象，不需要解包
                 const mangaDetail = {
                     ...result,
-                    coverUrl: result.coverPath ? this.convertLocalFileToUrl(result.coverPath) : null
+                    coverUrl: result.coverPath ? convertLocalFileToUrl(result.coverPath) : null
                 }
                 return mangaDetail
             }

@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core'
+import { convertLocalFileToUrl } from './file-converter'
 
 /**
  * 动画下载管理器类
@@ -278,7 +279,13 @@ export class CartoonDownloadManager {
      */
     async getDownloadedCartoonList() {
         try {
-            return await invoke('get_downloaded_cartoon_list')
+            const cartoonList = await invoke('get_downloaded_cartoon_list')
+
+            // 转换封面路径为可显示的URL
+            return cartoonList.map(cartoon => ({
+                ...cartoon,
+                coverUrl: convertLocalFileToUrl(cartoon.coverPath)
+            }))
         } catch (error) {
             console.error('获取已下载动画列表失败:', error)
             throw error
