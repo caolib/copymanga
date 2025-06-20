@@ -26,8 +26,6 @@ pub async fn download_chapter(
     manga_detail: Option<MangaDetail>,
     app_handle: AppHandle,
 ) -> Result<DownloadResult, String> {
-    println!("开始下载章节: {}", chapter_name);
-
     let download_info = DownloadInfo {
         manga_uuid: manga_uuid.clone(),
         manga_name: manga_name.clone(),
@@ -73,13 +71,12 @@ pub async fn download_chapter(
                     .timeout(std::time::Duration::from_secs(30))
                     .build()
                     .map_err(|e| format!("创建HTTP客户端失败: {}", e))?;
-
                 match download_image(&client, &detail.cover, &cover_path).await {
-                    Ok(_) => println!("封面下载成功: {}", cover_path.display()),
-                    Err(e) => println!("封面下载失败: {} - {}", detail.cover, e),
+                    Ok(_) => {} // 封面下载成功，无需输出
+                    Err(e) => eprintln!("封面下载失败: {} - {}", detail.cover, e),
                 }
             } else {
-                println!("封面已存在，跳过下载: {}", cover_path.display());
+                // 封面已存在，无需输出
             }
         }
     }
@@ -88,8 +85,6 @@ pub async fn download_chapter(
     let chapter_path = manga_path
         .join(&download_info.group_path_word)
         .join(&download_info.chapter_uuid);
-
-    println!("下载路径: {}", chapter_path.display());
 
     // 确保目录存在
     if let Err(e) = fs::create_dir_all(&chapter_path).await {
@@ -122,20 +117,13 @@ pub async fn download_chapter(
         .map_err(|e| format!("创建HTTP客户端失败: {}", e))?;
     let mut downloaded_images = Vec::new();
     let chapter_key = format!("{}|{}|{}", manga_uuid, group_path_word, chapter_uuid);
-    eprintln!("🚀🚀🚀 开始下载章节，章节密钥: {} 🚀🚀🚀", chapter_key);
 
     // 确保暂停标志初始状态是false
     set_pause_flag(&chapter_key, false);
-    eprintln!("🔄 初始化暂停标志为 false: {}", chapter_key);
-    for (index, image_info) in download_info.images.iter().enumerate() {
+
+    for image_info in download_info.images.iter() {
         // 检查是否被暂停 - 在每张图片开始前检查
         if is_paused(&chapter_key) {
-            // 使用 eprintln! 确保日志能被看到
-            eprintln!(
-                "❌ 下载已暂停，停止在第 {} 张图片: {}",
-                index + 1,
-                chapter_key
-            );
             break;
         }
 
@@ -143,41 +131,28 @@ pub async fn download_chapter(
 
         // 检查图片是否已存在
         if image_path.exists() {
-            eprintln!("⏭️ 图片已存在，跳过下载: {}", image_path.display());
             downloaded_images.push(image_info.filename.clone());
             continue;
         }
 
-        eprintln!(
-            "⬇️ 开始下载图片 {}/{}: {} (章节: {})",
-            index + 1,
-            download_info.images.len(),
-            image_info.filename,
-            chapter_key
-        );
-
         // 再次检查暂停状态 - 在真正开始下载前
         if is_paused(&chapter_key) {
-            eprintln!("❌ 下载在开始下载图片前暂停: {}", chapter_key);
             break;
         }
 
         match download_image(&client, &image_info.url, &image_path).await {
             Ok(_) => {
-                eprintln!("✅ 图片下载成功: {}", image_path.display());
                 downloaded_images.push(image_info.filename.clone());
 
                 // 在下载完成后立即检查暂停状态
                 if is_paused(&chapter_key) {
-                    eprintln!("❌ 下载在图片完成后暂停: {}", chapter_key);
                     break;
                 }
             }
             Err(e) => {
-                eprintln!("❌ 图片下载失败: {} - {}", image_info.url, e);
+                eprintln!("图片下载失败: {} - {}", image_info.url, e);
                 // 即使下载失败也要检查暂停状态
                 if is_paused(&chapter_key) {
-                    eprintln!("❌ 下载在图片失败后暂停: {}", chapter_key);
                     break;
                 }
             }
@@ -188,7 +163,6 @@ pub async fn download_chapter(
 
         // 延迟后再次检查暂停状态
         if is_paused(&chapter_key) {
-            eprintln!("❌ 下载在延迟后暂停: {}", chapter_key);
             break;
         }
     }
@@ -380,32 +354,26 @@ pub async fn get_downloaded_manga_list(app_handle: AppHandle) -> Result<Vec<Valu
 pub async fn get_local_manga_detail(
     app_handle: AppHandle,
     manga_uuid: String,
-) -> Result<Value, String> {
-    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
+) -> Result<Value, String> {    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
     let manga_path = manga_downloads_path.join(&manga_uuid);
 
     if !manga_path.exists() {
         return Err("本地漫画不存在".to_string());
-    }
-
-    // 读取漫画详情文件
+    }    // 读取漫画详情文件
     let detail_file = manga_path.join("manga_detail.json");
+
     if !detail_file.exists() {
         return Err("漫画详情文件不存在".to_string());
-    }
-
-    let detail_content = fs::read_to_string(&detail_file)
+    }    let detail_content = fs::read_to_string(&detail_file)
         .await
         .map_err(|e| format!("读取漫画详情失败: {}", e))?;
 
-    let mut manga_detail: Value =
-        serde_json::from_str(&detail_content).map_err(|e| format!("解析漫画详情失败: {}", e))?;
+    let mut manga_detail: Value = serde_json::from_str(&detail_content)
+        .map_err(|e| format!("解析漫画详情失败: {}", e))?;
 
     // 添加本地信息
     manga_detail["uuid"] = json!(manga_uuid);
-    manga_detail["latestDownloadTime"] = json!(get_manga_latest_download_time(&manga_path).await);
-
-    // 添加封面路径
+    manga_detail["latestDownloadTime"] = json!(get_manga_latest_download_time(&manga_path).await);    // 添加封面路径
     if let Some(cover_path) = find_manga_cover_file(&manga_path).await {
         manga_detail["coverPath"] = json!(cover_path);
     }
@@ -417,8 +385,7 @@ pub async fn get_local_manga_detail(
 pub async fn get_local_manga_chapters(
     app_handle: AppHandle,
     manga_uuid: String,
-) -> Result<Vec<Value>, String> {
-    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
+) -> Result<Vec<Value>, String> {    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
     let manga_path = manga_downloads_path.join(&manga_uuid);
 
     if !manga_path.exists() {
@@ -431,9 +398,9 @@ pub async fn get_local_manga_chapters(
     if let Ok(mut group_entries) = fs::read_dir(&manga_path).await {
         while let Ok(Some(group_entry)) = group_entries.next_entry().await {
             let group_path = group_entry.path();
-            if group_path.is_dir() {
-                let group_name = group_path.file_name().unwrap_or_default().to_string_lossy();
+            let group_name = group_path.file_name().unwrap_or_default().to_string_lossy();
 
+            if group_path.is_dir() {
                 // 跳过非章节目录
                 if group_name == "manga_detail.json" || group_name.starts_with("cover.") {
                     continue;
@@ -443,6 +410,7 @@ pub async fn get_local_manga_chapters(
                 if let Ok(mut chapter_entries) = fs::read_dir(&group_path).await {
                     while let Ok(Some(chapter_entry)) = chapter_entries.next_entry().await {
                         let chapter_path = chapter_entry.path();
+
                         if chapter_path.is_dir() {
                             let info_file = chapter_path.join("info.json");
                             if info_file.exists() {
@@ -466,9 +434,7 @@ pub async fn get_local_manga_chapters(
                 }
             }
         }
-    }
-
-    // 按章节名排序
+    }    // 按章节名排序
     chapters.sort_by(|a, b| {
         let a_name = a["chapter_name"].as_str().unwrap_or("");
         let b_name = b["chapter_name"].as_str().unwrap_or("");
@@ -704,32 +670,13 @@ pub async fn pause_chapter_download(
     chapter_uuid: String,
 ) -> Result<bool, String> {
     let chapter_key = format!("{}|{}|{}", manga_uuid, group_path_word, chapter_uuid);
-    eprintln!("🔶 收到暂停请求 - 章节密钥: {}", chapter_key);
-
-    // 检查暂停标志是否已设置
-    let was_paused = is_paused(&chapter_key);
-    eprintln!(
-        "🔍 暂停前状态: {}",
-        if was_paused { "已暂停" } else { "运行中" }
-    );
 
     set_pause_flag(&chapter_key, true);
 
     // 验证暂停标志是否设置成功
     let is_now_paused = is_paused(&chapter_key);
-    eprintln!("✅ 暂停标志设置完成: {}", is_now_paused);
-    let is_now_paused = is_paused(&chapter_key);
-    println!(
-        "暂停后状态: {}",
-        if is_now_paused {
-            "已暂停"
-        } else {
-            "设置失败"
-        }
-    );
 
-    println!("暂停漫画下载成功: {}", chapter_key);
-    Ok(true)
+    Ok(is_now_paused)
 }
 
 #[tauri::command]
@@ -740,7 +687,6 @@ pub async fn resume_chapter_download(
 ) -> Result<bool, String> {
     let chapter_key = format!("{}|{}|{}", manga_uuid, group_path_word, chapter_uuid);
     set_pause_flag(&chapter_key, false);
-    println!("恢复漫画下载: {}", chapter_key);
     Ok(true)
 }
 

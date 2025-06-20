@@ -309,9 +309,7 @@ export class DownloadManager {
             console.error('获取已下载漫画列表失败:', error)
             return []
         }
-    }
-
-    /**
+    }    /**
      * 获取本地漫画详情
      * @param {string} mangaUuid 漫画UUID
      * @returns {Promise<Object|null>}
@@ -320,20 +318,21 @@ export class DownloadManager {
         try {
             const result = await invoke('get_local_manga_detail', { mangaUuid })
 
-            if (result && result.manga_detail) {
-                return {
-                    ...result.manga_detail,
-                    coverUrl: result.cover_path ? this.convertLocalFileToUrl(result.cover_path) : null
+            if (result) {
+                // 后端直接返回漫画详情对象，不需要解包
+                const mangaDetail = {
+                    ...result,
+                    coverUrl: result.coverPath ? this.convertLocalFileToUrl(result.coverPath) : null
                 }
+                return mangaDetail
             }
+            
             return null
         } catch (error) {
-            console.error('获取本地漫画详情失败:', error)
-            return null
+            console.error('DownloadManager: 获取本地漫画详情失败:', error)
+            throw error // 向上抛出错误，而不是返回null
         }
-    }
-
-    /**
+    }    /**
      * 获取本地漫画的章节列表
      * @param {string} mangaUuid 漫画UUID
      * @returns {Promise<Array>}
@@ -343,8 +342,8 @@ export class DownloadManager {
             const result = await invoke('get_local_manga_chapters', { mangaUuid })
             return result || []
         } catch (error) {
-            console.error('获取本地漫画章节列表失败:', error)
-            return []
+            console.error('DownloadManager: 获取本地漫画章节列表失败:', error)
+            throw error // 向上抛出错误
         }
     }
 
