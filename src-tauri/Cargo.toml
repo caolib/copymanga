@@ -1,6 +1,6 @@
 [package]
 name = "doki"
-version = "0.9.6"
+version = "1.0.0"
 description = "doki是一个集漫画、轻小说、动画于一体的桌面应用，提供简洁快速的漫画阅读体验。"
 authors = ["caolib"]
 edition = "2021"
