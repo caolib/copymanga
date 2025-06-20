@@ -25,6 +25,7 @@ pub struct ChapterInfo {
     pub group_path_word: String,
     pub chapter_uuid: String,
     pub chapter_name: String,
+    pub total_images: usize, // 添加总图片数量字段
     pub images: Vec<String>,
     pub download_time: String,
 }
@@ -148,4 +149,30 @@ pub struct DownloadedCartoonInfo {
     pub coverPath: Option<String>,
     pub chapterCount: usize,
     pub latestDownloadTime: String,
+}
+
+// 未完成下载检查结果
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IncompleteDownloadResult {
+    pub has_incomplete: bool,
+    pub completed: Option<usize>,
+    pub total: Option<usize>,
+    pub percent: Option<f64>,
+}
+
+// 动画未完成下载检查结果
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IncompleteCartoonDownloadResult {
+    pub has_incomplete: bool,
+    pub downloaded: Option<u64>,
+    pub total: Option<u64>,
+    pub percent: Option<f64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ChapterDownloadDetail {
+    pub status: String, // "not_downloaded", "partial", "downloaded"
+    pub total_images: usize,
+    pub downloaded_images: usize,
+    pub progress: f64,
 }

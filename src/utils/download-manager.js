@@ -23,12 +23,17 @@ export class DownloadManager {
     constructor() {
         this.downloadQueue = []
         this.activeDownloads = new Map()
+        this.pausedDownloads = new Map() // 暂停的下载
         this.maxConcurrentDownloads = 3
-    }    /**
+    }
+
+    /**
      * 下载章节的所有图片 - 通过 Tauri 后端处理
      * @param {Object} chapterInfo 章节信息
      * @param {Function} onProgress 进度回调
-     */    async downloadChapter(chapterInfo, onProgress) {
+     * @param {boolean} resumeDownload 是否为断点续传
+     */
+    async downloadChapter(chapterInfo, onProgress, resumeDownload = false) {
         const {
             mangaUuid,
             mangaName,
@@ -39,19 +44,42 @@ export class DownloadManager {
             mangaDetail // 新增漫画详情参数
         } = chapterInfo
 
-        console.log('开始下载章节:', chapterName, '图片数量:', images.length)
+        const chapterKey = `${mangaUuid}|${groupPathWord}|${chapterUuid}`
+
+        console.log('开始下载章节:', chapterName, '图片数量:', images.length, '断点续传:', resumeDownload)
 
         let progressInterval = null
 
         try {
+            // 如果不是断点续传，检查是否有未完成的下载
+            if (!resumeDownload) {
+                const incompleteCheck = await this.checkIncompleteDownload(mangaUuid, groupPathWord, chapterUuid)
+                if (incompleteCheck.hasIncomplete) {
+                    console.log('发现未完成的下载，建议续传')
+                    // 可以通过回调告知上层有未完成下载
+                    if (onProgress) {
+                        onProgress({
+                            completed: incompleteCheck.completed || 0,
+                            total: images.length,
+                            percent: Math.floor(((incompleteCheck.completed || 0) / images.length) * 100),
+                            currentImage: '发现未完成下载',
+                            status: 'incomplete_found'
+                        })
+                    }
+                }
+            }
+
+            // 添加到活跃下载列表
+            this.activeDownloads.set(chapterKey, chapterInfo)
+
             // 开始进度回调
             if (onProgress) {
                 onProgress({
                     completed: 0,
                     total: images.length,
                     percent: 0,
-                    currentImage: '准备下载...',
-                    status: 'starting'
+                    currentImage: resumeDownload ? '继续下载...' : '准备下载...',
+                    status: resumeDownload ? 'resuming' : 'starting'
                 })
             }
 
@@ -126,6 +154,7 @@ export class DownloadManager {
                 groupPathWord,
                 chapterUuid,
                 chapterName,
+                totalImages: chapterInfo.totalImages || images.length, // 添加总图片数量
                 images: images.map((img, index) => ({
                     url: img.url,
                     index: index,
@@ -317,6 +346,138 @@ export class DownloadManager {
             console.error('获取本地漫画章节列表失败:', error)
             return []
         }
+    }
+
+    /**
+     * 暂停下载
+     * @param {string} mangaUuid 漫画UUID
+     * @param {string} chapterUuid 章节UUID
+     */
+    async pauseDownload(mangaUuid, chapterUuid) {
+        const chapterKey = `${mangaUuid}|default|${chapterUuid}`
+
+        try {
+            await invoke('pause_chapter_download', {
+                mangaUuid,
+                groupPathWord: 'default',
+                chapterUuid
+            })
+
+            // 将下载信息移到暂停列表
+            if (this.activeDownloads.has(chapterKey)) {
+                this.pausedDownloads.set(chapterKey, this.activeDownloads.get(chapterKey))
+                this.activeDownloads.delete(chapterKey)
+            }
+
+            console.log('暂停下载成功:', chapterKey)
+        } catch (error) {
+            console.error('暂停下载失败:', error)
+            throw error
+        }
+    }
+
+    /**
+     * 继续下载
+     * @param {string} mangaUuid 漫画UUID  
+     * @param {string} chapterUuid 章节UUID
+     */
+    async resumeDownload(mangaUuid, chapterUuid) {
+        const chapterKey = `${mangaUuid}|default|${chapterUuid}`
+
+        try {
+            await invoke('resume_chapter_download', {
+                mangaUuid,
+                groupPathWord: 'default',
+                chapterUuid
+            })
+
+            // 将下载信息移回活跃列表
+            if (this.pausedDownloads.has(chapterKey)) {
+                this.activeDownloads.set(chapterKey, this.pausedDownloads.get(chapterKey))
+                this.pausedDownloads.delete(chapterKey)
+            }
+
+            console.log('继续下载成功:', chapterKey)
+        } catch (error) {
+            console.error('继续下载失败:', error)
+            throw error
+        }
+    }
+
+    /**
+     * 检查是否有未完成的下载可以续传
+     * @param {string} mangaUuid 漫画UUID
+     * @param {string} groupPathWord 分组路径
+     * @param {string} chapterUuid 章节UUID
+     */
+    async checkIncompleteDownload(mangaUuid, groupPathWord, chapterUuid) {
+        try {
+            const result = await invoke('check_incomplete_download', {
+                mangaUuid,
+                groupPathWord,
+                chapterUuid
+            })
+            return result
+        } catch (error) {
+            console.error('检查未完成下载失败:', error)
+            return { hasIncomplete: false }
+        }
+    }
+
+    /**
+     * 检查章节下载的详细状态
+     * @param {string} mangaUuid 漫画UUID
+     * @param {string} chapterUuid 章节UUID
+     * @param {string} groupPathWord 分组路径
+     */
+    async checkChapterDownloadDetail(mangaUuid, chapterUuid, groupPathWord = 'default') {
+        try {
+            const result = await invoke('check_chapter_download_detail', {
+                mangaUuid,
+                groupPathWord,
+                chapterUuid
+            })
+            return result
+        } catch (error) {
+            console.error('检查章节下载详细状态失败:', error)
+            throw error
+        }
+    }
+
+    /**
+     * 启动进度监控
+     */
+    startProgressMonitoring(chapterInfo, onProgress) {
+        const { mangaUuid, groupPathWord, chapterUuid, images } = chapterInfo
+
+        const progressInterval = setInterval(async () => {
+            try {
+                const progress = await invoke('get_download_progress', {
+                    mangaUuid,
+                    groupPathWord,
+                    chapterUuid,
+                    expectedImageCount: images.length
+                })
+
+                onProgress({
+                    completed: progress.completed,
+                    total: progress.total,
+                    percent: Math.floor(progress.percent),
+                    currentImage: progress.current_image,
+                    status: progress.status
+                })
+
+                // 如果下载完成或暂停，停止监控
+                if (progress.status === 'completed' || progress.status === 'paused') {
+                    clearInterval(progressInterval)
+                }
+            } catch (error) {
+                console.error('检查下载进度失败:', error)
+                clearInterval(progressInterval)
+            }
+        }, 1000)
+
+        return progressInterval
     }
 }
 

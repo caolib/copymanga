@@ -141,7 +141,6 @@ const openLocalVideoDirectoryHandler = async () => {
         const { chapterId } = route.params
         if (cartoonData.value.uuid && chapterId) {
             await openLocalVideoDirectory(cartoonData.value.uuid, chapterId)
-            message.success('已打开本地视频目录')
         } else {
             message.error('无法获取动画信息')
         }

@@ -255,7 +255,6 @@ const goToOnlineDetail = () => {
 const openVideoDirectory = async (chapter) => {
     try {
         await openLocalVideoDirectory(cartoon.value.uuid, chapter.chapter_uuid)
-        message.success('已打开视频目录')
     } catch (error) {
         console.error('打开视频目录失败:', error)
         message.error('打开视频目录失败: ' + error.message)

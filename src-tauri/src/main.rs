@@ -7,8 +7,8 @@ use tauri::AppHandle;
 use tokio_util::sync::CancellationToken;
 
 mod cache;
-mod proxy;
 mod download;
+mod proxy;
 
 // 全局状态跟踪服务器是否已启动和取消令牌
 static SERVER_STARTED: Mutex<bool> = Mutex::new(false);
@@ -28,20 +28,20 @@ async fn start_proxy_server(app_handle: AppHandle) -> Result<String, String> {
             return Ok("代理服务器已经在运行".to_string());
         }
     }
-    
+
     // 创建新的取消令牌
     let token = CancellationToken::new();
     {
         let mut cancellation_token = CANCELLATION_TOKEN.lock().unwrap();
         *cancellation_token = Some(token.clone());
     }
-    
+
     // 标记服务器为启动状态
     {
         let mut started = SERVER_STARTED.lock().unwrap();
         *started = true;
     }
-    
+
     // 在新的任务中启动代理服务器
     let app_handle_clone = app_handle.clone();
     tokio::spawn(async move {
@@ -53,7 +53,7 @@ async fn start_proxy_server(app_handle: AppHandle) -> Result<String, String> {
                 eprintln!("代理服务器错误: {}", e);
             }
         }
-        
+
         // 重置状态
         {
             let mut started = SERVER_STARTED.lock().unwrap();
@@ -64,7 +64,7 @@ async fn start_proxy_server(app_handle: AppHandle) -> Result<String, String> {
             *cancellation_token = None;
         }
     });
-    
+
     Ok("代理服务器启动成功".to_string())
 }
 
@@ -77,7 +77,7 @@ async fn stop_proxy_server() -> Result<String, String> {
             return Ok("代理服务器未在运行".to_string());
         }
     }
-    
+
     // 发送取消信号
     {
         let cancellation_token = CANCELLATION_TOKEN.lock().unwrap();
@@ -86,10 +86,10 @@ async fn stop_proxy_server() -> Result<String, String> {
             println!("已发送停止信号到代理服务器");
         }
     }
-    
+
     // 等待一段时间让服务器优雅关闭
     tokio::time::sleep(tokio::time::Duration::from_millis(1000)).await;
-    
+
     Ok("代理服务器停止信号已发送".to_string())
 }
 
@@ -110,6 +110,10 @@ fn main() {
             cache::open_file_explorer,
             cache::force_clear_webview_cache,
             download::download_chapter,
+            download::pause_chapter_download,
+            download::resume_chapter_download,
+            download::check_incomplete_download,
+            download::check_chapter_download_detail,
             download::get_download_progress,
             download::get_downloaded_chapter_info,
             download::get_local_chapter_images,
@@ -118,6 +122,9 @@ fn main() {
             download::get_local_manga_detail,
             download::get_local_manga_chapters,
             download::download_cartoon_chapter,
+            download::pause_cartoon_download,
+            download::resume_cartoon_download,
+            download::check_incomplete_cartoon_download,
             download::get_cartoon_download_progress,
             download::delete_downloaded_cartoon_chapter,
             download::get_downloaded_cartoon_list,
@@ -134,7 +141,10 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-async fn start_proxy(app_handle: AppHandle, cancellation_token: CancellationToken) -> Result<(), String> {
+async fn start_proxy(
+    app_handle: AppHandle,
+    cancellation_token: CancellationToken,
+) -> Result<(), String> {
     println!("正在启动Rust代理服务器...");
 
     let domain = match proxy::get_current_api_domain_with_retry(&app_handle).await {
@@ -176,14 +186,14 @@ async fn start_proxy(app_handle: AppHandle, cancellation_token: CancellationToke
     match tokio::net::TcpListener::bind(addr).await {
         Ok(listener) => {
             println!("代理服务器成功绑定到端口 {}", port);
-            
+
             // 使用 with_graceful_shutdown 来支持优雅关闭
             match axum::serve(listener, app)
                 .with_graceful_shutdown(async move {
                     cancellation_token.cancelled().await;
                     println!("收到停止信号，正在优雅关闭代理服务器...");
                 })
-                .await 
+                .await
             {
                 Ok(_) => {
                     println!("代理服务器已优雅关闭");

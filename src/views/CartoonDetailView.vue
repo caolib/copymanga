@@ -144,12 +144,23 @@
                                 <!-- 下载按钮 -->
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.uuid] || chapterDownloadStatus[chapter.uuid] === 'error'"
-                                    size="small" type="primary" @click.stop="downloadChapter(chapter)"
-                                    :loading="chapterDownloadStatus[chapter.uuid] === 'downloading'">
+                                    size="small" type="primary" @click.stop="downloadChapter(chapter)">
                                     <template #icon>
                                         <download-outlined />
                                     </template>
                                     下载
+                                </a-button>
+
+                                <!-- 暂停按钮 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'downloading'" size="small"
+                                    @click.stop="pauseDownload(chapter)">
+                                    暂停
+                                </a-button>
+
+                                <!-- 继续按钮 -->
+                                <a-button v-if="chapterDownloadStatus[chapter.uuid] === 'paused'" size="small"
+                                    type="primary" @click.stop="resumeDownload(chapter)">
+                                    继续
                                 </a-button>
 
                                 <!-- 打开目录按钮 -->
@@ -188,6 +199,7 @@ import { getCartoonInfo, getCartoonChapters, collectCartoon, downloadCartoonChap
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
 import { useCartoonPlayerStore } from '../stores/cartoon-player'
+import { cartoonDownloadManager } from '../utils/cartoon-download-manager'
 
 const route = useRoute()
 const router = useRouter()
@@ -202,7 +214,7 @@ const collectLoading = ref(false)
 const cancelCollectLoading = ref(false)
 
 // 下载相关状态
-const chapterDownloadStatus = ref({}) // 章节下载状态: downloading, downloaded, error
+const chapterDownloadStatus = ref({}) // 章节下载状态: downloading, downloaded, error, paused
 const chapterDownloadProgress = ref({}) // 章节下载进度
 const chapterDownloadProgressText = ref({}) // 章节下载进度文本
 
@@ -388,6 +400,33 @@ const downloadChapter = async (chapter) => {
         chapterDownloadProgressText.value[chapter.uuid] = '下载失败'
         message.error(`下载失败: ${error.message || '未知错误'}`)
     })
+}
+
+// 暂停下载功能
+const pauseDownload = async (chapter) => {
+    try {
+        await cartoonDownloadManager.pauseDownload(cartoon.value.uuid, chapter.uuid)
+        chapterDownloadStatus.value[chapter.uuid] = 'paused'
+        chapterDownloadProgressText.value[chapter.uuid] = '已暂停'
+        message.info(`动画章节 "${chapter.name}" 下载已暂停`)
+    } catch (error) {
+        console.error('暂停下载失败:', error)
+        message.error(`暂停下载失败: ${error.message || '未知错误'}`)
+    }
+}
+
+// 继续下载功能
+const resumeDownload = async (chapter) => {
+    try {
+        chapterDownloadStatus.value[chapter.uuid] = 'downloading'
+        chapterDownloadProgressText.value[chapter.uuid] = '准备继续下载...'
+        await downloadChapter(chapter) // 断点续传
+    } catch (error) {
+        console.error('继续下载失败:', error)
+        chapterDownloadStatus.value[chapter.uuid] = 'paused'
+        chapterDownloadProgressText.value[chapter.uuid] = '继续下载失败'
+        message.error(`继续下载失败: ${error.message || '未知错误'}`)
+    }
 }
 
 // 删除章节功能

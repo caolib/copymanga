@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex as StdMutex};
 use tauri::{AppHandle, Manager};
 use tokio::fs;
 use tokio::io::AsyncWriteExt;
@@ -15,6 +15,100 @@ static DOWNLOAD_PROGRESS: OnceLock<Arc<Mutex<HashMap<String, CartoonProgressTrac
 
 fn get_progress_tracker() -> &'static Arc<Mutex<HashMap<String, CartoonProgressTracker>>> {
     DOWNLOAD_PROGRESS.get_or_init(|| Arc::new(Mutex::new(HashMap::new())))
+}
+
+// 暂停标志管理
+lazy_static::lazy_static! {
+    static ref CARTOON_PAUSE_FLAGS: Arc<StdMutex<HashMap<String, bool>>> = Arc::new(StdMutex::new(HashMap::new()));
+}
+
+// 设置动画下载暂停标志
+fn set_cartoon_pause_flag(chapter_key: &str, paused: bool) {
+    let mut flags = CARTOON_PAUSE_FLAGS.lock().unwrap();
+    flags.insert(chapter_key.to_string(), paused);
+}
+
+// 检查动画下载是否暂停
+fn is_cartoon_paused(chapter_key: &str) -> bool {
+    let flags = CARTOON_PAUSE_FLAGS.lock().unwrap();
+    *flags.get(chapter_key).unwrap_or(&false)
+}
+
+// 清除动画下载暂停标志
+fn clear_cartoon_pause_flag(chapter_key: &str) {
+    let mut flags = CARTOON_PAUSE_FLAGS.lock().unwrap();
+    flags.remove(chapter_key);
+}
+
+#[tauri::command]
+pub async fn pause_cartoon_download(
+    cartoon_uuid: String,
+    chapter_uuid: String,
+) -> Result<bool, String> {
+    let chapter_key = format!("{}|{}", cartoon_uuid, chapter_uuid);
+    set_cartoon_pause_flag(&chapter_key, true);
+    println!("暂停动画下载: {}", chapter_key);
+    Ok(true)
+}
+
+#[tauri::command]
+pub async fn resume_cartoon_download(
+    cartoon_uuid: String,
+    chapter_uuid: String,
+) -> Result<bool, String> {
+    let chapter_key = format!("{}|{}", cartoon_uuid, chapter_uuid);
+    set_cartoon_pause_flag(&chapter_key, false);
+    println!("恢复动画下载: {}", chapter_key);
+    Ok(true)
+}
+
+#[tauri::command]
+pub async fn check_incomplete_cartoon_download(
+    cartoon_uuid: String,
+    chapter_uuid: String,
+    app_handle: AppHandle,
+) -> Result<IncompleteCartoonDownloadResult, String> {
+    let resource_dir = app_handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("获取资源目录失败: {}", e))?;
+
+    // 检查可能的路径
+    let possible_paths = vec![
+        resource_dir.join("downloads").join("cartoons").join(&cartoon_uuid).join(&chapter_uuid),
+        resource_dir.join("downloads").join("anime").join(&cartoon_uuid).join(&chapter_uuid),
+    ];
+
+    for chapter_path in possible_paths {
+        if !chapter_path.exists() {
+            continue;
+        }
+
+        let info_file = chapter_path.join("info.json");
+        if !info_file.exists() {
+            // 有目录但没有info.json，检查是否有部分下载的文件
+            let files = std::fs::read_dir(&chapter_path)
+                .map_err(|e| format!("读取章节目录失败: {}", e))?
+                .filter_map(|entry| entry.ok())
+                .count();
+
+            if files > 0 {
+                return Ok(IncompleteCartoonDownloadResult {
+                    has_incomplete: true,
+                    downloaded: Some(0), // 无法确定确切进度
+                    total: None,
+                    percent: Some(0.0),
+                });
+            }
+        }
+    }
+
+    Ok(IncompleteCartoonDownloadResult {
+        has_incomplete: false,
+        downloaded: None,
+        total: None,
+        percent: None,
+    })
 }
 
 // ========== 动画下载相关代码 ==========
@@ -339,6 +433,41 @@ async fn download_hls_stream(
             let mut progress_map = tracker.lock().await;
             if let Some(progress) = progress_map.get_mut(progress_key) {
                 progress.downloaded_bytes = total_downloaded;
+            }
+        }
+
+        // 检查暂停标志
+        if is_cartoon_paused(progress_key) {
+            println!("下载被暂停: {}", progress_key);
+            
+            // 更新进度为暂停状态
+            {
+                let tracker = get_progress_tracker();
+                let mut progress_map = tracker.lock().await;
+                if let Some(progress) = progress_map.get_mut(progress_key) {
+                    progress.status = "paused".to_string();
+                    progress.current_file = "下载已暂停".to_string();
+                }
+            }
+
+            // 等待恢复
+            loop {
+                tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+
+                if !is_cartoon_paused(progress_key) {
+                    println!("下载恢复: {}", progress_key);
+                    break;
+                }
+            }
+
+            // 更新进度为继续状态
+            {
+                let tracker = get_progress_tracker();
+                let mut progress_map = tracker.lock().await;
+                if let Some(progress) = progress_map.get_mut(progress_key) {
+                    progress.status = "downloading".to_string();
+                    progress.current_file = format!("下载片段 {}/{}", index + 1, segment_urls.len());
+                }
             }
         }
     }    // 合并所有片段为单个视频文件
@@ -884,7 +1013,5 @@ pub async fn debug_find_downloaded_files(
     println!("搜索动画UUID {} 的下载文件:", cartoon_uuid);
     for path in &found_paths {
         println!("  找到目录: {}", path);
-    }
-
-    Ok(found_paths)
+    }    Ok(found_paths)
 }
