@@ -96,7 +96,7 @@
                                 <template #description>
                                     <div class="topic-meta-mini">
                                         <span v-if="topic.period" class="topic-period-mini">{{ topic.period
-                                            }}</span>
+                                        }}</span>
                                         <span v-if="topic.datetime_created" class="topic-date-mini">
                                             {{ formatDate(topic.datetime_created) }}
                                         </span>
@@ -195,10 +195,7 @@ const activeKeys = ref([])
 
 // 获取主页数据
 const fetchHomeData = () => {
-    loading.value = true
-    homeStore.fetchHomeData().finally(() => {
-        loading.value = false
-    })
+    homeStore.fetchHomeData()
 }
 
 // 刷新主页数据
