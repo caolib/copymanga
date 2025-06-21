@@ -7,6 +7,9 @@ const DEFAULT_UI_CONFIG = {
         fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace', // 字体系列
         darkImageMask: 0.3 // 暗色模式图片遮罩透明度 (0-1，0为无遮罩，1为完全遮罩)
     },
+    system: {
+        showTrayIcon: false // 托盘图标显示控制，默认隐藏
+    },
     reader: {
         layout: 'rtl', // 从右到左（默认，日漫风格）
         columnsPerRow: 2, // 一行显示的列数
@@ -95,6 +98,19 @@ async function updateThemeConfig(themeConfig) {
     return await saveUIConfig(updatedConfig)
 }
 
+// 更新系统配置
+async function updateSystemConfig(systemConfig) {
+    const currentConfig = await loadUIConfig()
+    const updatedConfig = {
+        ...currentConfig,
+        system: {
+            ...currentConfig.system,
+            ...systemConfig
+        }
+    }
+    return await saveUIConfig(updatedConfig)
+}
+
 export {
     loadUIConfig,
     saveUIConfig,
@@ -102,6 +118,7 @@ export {
     updateReaderConfig,
     updateTextReaderConfig,
     updateThemeConfig,
+    updateSystemConfig,
     DEFAULT_UI_CONFIG,
     initializeUIConfig
 }

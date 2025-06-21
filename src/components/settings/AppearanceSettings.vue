@@ -1,8 +1,5 @@
 <template>
     <div>
-        <h2 class="settings-section-title">界面设置</h2>
-
-        <!-- 主题设置 -->
         <a-card title="主题设置" class="setting-card">
             <a-form layout="vertical"> <a-form-item label="主题模式">
                     <a-radio-group v-model:value="themeConfig.isDarkMode" button-style="solid"
@@ -30,6 +27,15 @@
                     <div style="margin-top: 8px; font-size: 12px; color: #666;">
                         调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
                     </div>
+                </a-form-item>
+            </a-form>
+        </a-card>
+
+        <!-- 系统设置 -->
+        <a-card title="系统设置" class="setting-card">
+            <a-form layout="vertical">
+                <a-form-item label="托盘图标">
+                    <a-switch v-model:checked="systemConfig.showTrayIcon" @change="onTrayIconToggle" />
                 </a-form-item>
             </a-form>
         </a-card>
@@ -85,8 +91,9 @@
 <script setup>
 import { reactive, ref, onMounted } from 'vue'
 import { message } from 'ant-design-vue'
-import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
+import { loadUIConfig, updateReaderConfig, updateSystemConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
 import { useThemeStore } from '@/stores/theme'
+import { initTray, destroyTray } from '@/utils/tray'
 
 const themeStore = useThemeStore()
 
@@ -95,6 +102,11 @@ const themeConfig = reactive({
     isDarkMode: false,
     fontFamily: '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace',
     darkImageMask: 0.3 // 暗色模式图片遮罩透明度
+})
+
+// 系统配置
+const systemConfig = reactive({
+    showTrayIcon: false
 })
 
 // UI界面设置
@@ -124,6 +136,37 @@ const onDarkImageMaskChange = async () => {
     }
 }
 
+// 系统配置相关方法
+const onTrayIconToggle = async () => {
+    try {
+        // 立即保存设置
+        await updateSystemConfig({
+            showTrayIcon: systemConfig.showTrayIcon
+        })
+
+        // 根据设置启用或禁用托盘图标
+        if (systemConfig.showTrayIcon) {
+            const success = await initTray()
+            if (success) {
+                message.success('托盘图标已启用')
+            } else {
+                message.error('托盘图标启用失败')
+                systemConfig.showTrayIcon = false
+            }
+        } else {
+            await destroyTray()
+            message.info('托盘图标已禁用')
+        }
+
+        console.log('托盘图标设置已保存')
+    } catch (error) {
+        console.error('保存托盘图标设置失败:', error)
+        message.error('保存设置失败')
+        // 回滚设置
+        systemConfig.showTrayIcon = !systemConfig.showTrayIcon
+    }
+}
+
 // UI配置相关方法
 const loadUISettings = () => {
     loadUIConfig().then(config => {
@@ -133,6 +176,8 @@ const loadUISettings = () => {
         themeConfig.isDarkMode = config.theme?.isDarkMode || false
         themeConfig.fontFamily = config.theme?.fontFamily || '"Cascadia Code", "霞鹜文楷", "喵字果汁体", "微软雅黑", "Courier New", Courier, monospace'
         themeConfig.darkImageMask = config.theme?.darkImageMask || 0.3
+        // 加载系统配置
+        systemConfig.showTrayIcon = config.system?.showTrayIcon || false
     }).catch(error => {
         message.error('加载配置失败')
     })

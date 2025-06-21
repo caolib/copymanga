@@ -35,6 +35,7 @@
     border-radius: $border-radius-medium;
     border: 1px solid $border-color;
     transition: $transition-fast;
+    width: fit-content;
 
     @include dark-theme {
         background-color: $dark-fill-secondary;
@@ -45,4 +46,21 @@
 .slider {
     width: 80%;
     margin-left: $spacing-lg;
+}
+
+.system-setting-item {
+    .ant-form-item-label {
+        font-weight: 500;
+    }
+
+    .setting-description {
+        margin-top: $spacing-xs;
+        font-size: $font-sm;
+        color: $text-secondary;
+        line-height: 1.4;
+
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
 }

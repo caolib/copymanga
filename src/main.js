@@ -15,7 +15,7 @@ import {
     initializeDefaultApiSources,
     initializeDefaultBookApiSources
 } from './config/server-config'
-import { initializeUIConfig } from './config/ui-config'
+import { initializeUIConfig, loadUIConfig } from './config/ui-config'
 import { initTray } from './utils/tray'
 
 import './assets/styles/main.scss'
@@ -79,13 +79,21 @@ const initPromise = Promise.all([
     configStore.setServerStarted()
     return themeStore.initTheme()
 }).then(() => {
-    // 初始化托盘图标
-    return initTray()
+    // 根据配置决定是否初始化托盘图标
+    return loadUIConfig().then(config => {
+        const shouldShowTray = config.system?.showTrayIcon || false
+        if (shouldShowTray) {
+            return initTray()
+        } else {
+            console.log('托盘图标已禁用，跳过初始化')
+            return false
+        }
+    })
 }).then((trayResult) => {
     if (trayResult) {
         console.log('托盘图标初始化成功')
     } else {
-        console.warn('托盘图标初始化失败')
+        console.log('托盘图标未启用或初始化失败')
     }
     configStore.setInitialized()
     // console.log('所有初始化完成')
