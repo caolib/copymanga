@@ -16,6 +16,7 @@ import {
     initializeDefaultBookApiSources
 } from './config/server-config'
 import { initializeUIConfig } from './config/ui-config'
+import { initTray } from './utils/tray'
 
 import './assets/styles/main.scss'
 
@@ -78,6 +79,14 @@ const initPromise = Promise.all([
     configStore.setServerStarted()
     return themeStore.initTheme()
 }).then(() => {
+    // 初始化托盘图标
+    return initTray()
+}).then((trayResult) => {
+    if (trayResult) {
+        console.log('托盘图标初始化成功')
+    } else {
+        console.warn('托盘图标初始化失败')
+    }
     configStore.setInitialized()
     // console.log('所有初始化完成')
 }).catch(error => {
