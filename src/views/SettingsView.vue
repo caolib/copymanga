@@ -71,7 +71,7 @@ onMounted(() => {
     const hasRefreshed = sessionStorage.getItem('settings-page-refreshed')
 
     if (!hasRefreshed) {
-        console.log('设置页面首次加载，准备刷新...')
+        // console.log('设置页面首次加载，准备刷新...')
         // 标记已经刷新过
         sessionStorage.setItem('settings-page-refreshed', 'true')
 
@@ -80,8 +80,6 @@ onMounted(() => {
             console.log('执行页面刷新')
             window.location.reload()
         }, 500)
-    } else {
-        console.log('设置页面已刷新过，跳过自动刷新')
     }
 })
 </script>

@@ -36,6 +36,29 @@ async fn start_proxy_server(app_handle: AppHandle) -> Result<String, String> {
         *cancellation_token = Some(token.clone());
     }
 
+    // 先尝试启动代理服务器，如果端口被占用则立即返回错误
+    let port = match proxy::get_server_port_with_retry(&app_handle).await {
+        Ok(port) => port,
+        Err(e) => {
+            return Err(format!("获取服务器端口失败: {}", e));
+        }
+    };
+
+    // 测试端口是否可用
+    let addr = std::net::SocketAddr::from(([127, 0, 0, 1], port));
+    match tokio::net::TcpListener::bind(addr).await {
+        Ok(_) => {
+            // 端口可用，关闭测试连接
+        }
+        Err(e) => {
+            if e.kind() == std::io::ErrorKind::AddrInUse {
+                return Err(format!("端口 {} 已被占用，可能服务器已在运行", port));
+            } else {
+                return Err(format!("无法绑定到端口 {}: {}", port, e));
+            }
+        }
+    }
+
     // 标记服务器为启动状态
     {
         let mut started = SERVER_STARTED.lock().unwrap();
@@ -93,6 +116,45 @@ async fn stop_proxy_server() -> Result<String, String> {
     Ok("代理服务器停止信号已发送".to_string())
 }
 
+#[tauri::command]
+async fn check_proxy_server_status(app_handle: AppHandle) -> Result<String, String> {
+    // 检查内部状态
+    let is_started = {
+        let started = SERVER_STARTED.lock().unwrap();
+        *started
+    };
+
+    if !is_started {
+        return Ok("代理服务器未运行".to_string());
+    }
+
+    // 如果内部状态显示已启动，还需要检查端口是否真的在监听
+    let port = match proxy::get_server_port_with_retry(&app_handle).await {
+        Ok(port) => port,
+        Err(e) => {
+            return Err(format!("获取服务器端口失败: {}", e));
+        }
+    };
+
+    // 尝试连接到代理服务器来验证它是否真的在运行
+    let addr = format!("127.0.0.1:{}", port);
+    match tokio::net::TcpStream::connect(&addr).await {
+        Ok(_) => Ok("代理服务器正在运行".to_string()),
+        Err(_) => {
+            // 如果连接失败，说明服务器实际上没有在运行，重置状态
+            {
+                let mut started = SERVER_STARTED.lock().unwrap();
+                *started = false;
+            }
+            {
+                let mut cancellation_token = CANCELLATION_TOKEN.lock().unwrap();
+                *cancellation_token = None;
+            }
+            Ok("代理服务器未运行".to_string())
+        }
+    }
+}
+
 fn main() {
     tauri::Builder::default()
         .plugin(
@@ -112,6 +174,7 @@ fn main() {
             open_browser,
             start_proxy_server,
             stop_proxy_server,
+            check_proxy_server_status,
             cache::get_webview_data_dir,
             cache::clear_webview_cache,
             cache::get_cache_size,

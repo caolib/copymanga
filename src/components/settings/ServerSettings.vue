@@ -17,6 +17,14 @@
                     <a-space>
                         <a-badge :status="serverStatus.status" :text="serverStatus.text" />
                         <span class="status-info">{{ serverStatus.info }}</span>
+                        <a-button v-if="serverStatus.status === 'error'" type="primary" size="small"
+                            :loading="startingServer" @click="startServer">
+                            启动服务器
+                        </a-button>
+                        <a-button v-if="serverStatus.status === 'success'" type="default" size="small"
+                            :loading="stoppingServer" @click="stopServer">
+                            停止服务器
+                        </a-button>
                     </a-space>
                 </a-form-item>
             </a-form>
@@ -290,6 +298,8 @@ const serverStatus = ref({
     info: '正在检查服务器状态...'
 })
 let statusCheckInterval = null
+const startingServer = ref(false)
+const stoppingServer = ref(false)
 
 // 加载当前配置
 const loadConfig = () => {
@@ -401,8 +411,8 @@ const handleRestart = async () => {
     restarting.value = true
 
     try {
-        await restartApp()
         appStore.setNeedsRestart(false)
+        await restartApp()
     } catch (error) {
         console.error('重启应用失败:', error)
         message.error('重启应用失败')
@@ -670,21 +680,40 @@ const openConfigDirectory = async () => {
 
 // 检查Rust服务器状态
 const checkServerStatus = async () => {
-    const config = await getServerConfig()
-    const port = config.serverPort
-    // 尝试启动代理服务器，如果已经在运行会返回相应消息
-    const result = await invoke('start_proxy_server')
-    if (result === "代理服务器已经在运行") {
-        serverStatus.value = {
-            status: 'success',
-            text: '运行中',
-            info: `代理服务器正在端口 ${port} 上运行`
+    try {
+        const config = await getServerConfig()
+        const port = config.serverPort
+
+        // 使用专门的状态检查命令
+        const result = await invoke('check_proxy_server_status')
+
+        if (result === "代理服务器正在运行") {
+            serverStatus.value = {
+                status: 'success',
+                text: '运行中',
+                info: `代理服务器正在端口 ${port} 上运行`
+            }
+        } else {
+            serverStatus.value = {
+                status: 'error',
+                text: '已停止',
+                info: '代理服务器未运行'
+            }
         }
-    } else {
-        serverStatus.value = {
-            status: 'error',
-            text: '已停止',
-            info: '代理服务器未运行'
+    } catch (error) {
+        // 如果检查失败，尝试启动服务器来获取更详细的错误信息
+        try {
+            await invoke('start_proxy_server')
+            // 如果启动成功，重新检查状态
+            setTimeout(checkServerStatus, 1000)
+        } catch (startError) {
+            const config = await getServerConfig()
+            const port = config.serverPort
+            serverStatus.value = {
+                status: 'error',
+                text: '启动失败',
+                info: startError.includes('端口') ? startError : `端口 ${port} 被占用或启动失败，请尝试更换端口`
+            }
         }
     }
 }
@@ -700,6 +729,40 @@ const stopStatusCheck = () => {
     if (statusCheckInterval) {
         clearInterval(statusCheckInterval)
         statusCheckInterval = null
+    }
+}
+
+// 手动启动服务器
+const startServer = async () => {
+    startingServer.value = true
+    try {
+        const result = await invoke('start_proxy_server')
+        message.success('服务器启动成功')
+        // 延迟一下再检查状态，给服务器启动时间
+        setTimeout(checkServerStatus, 1000)
+    } catch (error) {
+        message.error(error || '启动服务器失败')
+        serverStatus.value = {
+            status: 'error',
+            text: '启动失败',
+            info: error || '启动服务器失败'
+        }
+    } finally {
+        startingServer.value = false
+    }
+}
+
+// 手动停止服务器
+const stopServer = async () => {
+    stoppingServer.value = true
+    try {
+        await invoke('stop_proxy_server')
+        // 延迟一下再检查状态，给服务器关闭时间
+        setTimeout(checkServerStatus, 2000)
+    } catch (error) {
+        message.error(error || '停止服务器失败')
+    } finally {
+        stoppingServer.value = false
     }
 }
 

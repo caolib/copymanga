@@ -232,8 +232,8 @@ const openChangelogUrl = () => {
 const formatChangeLog = (body) => {
     if (!body) return ''
 
-    // 简单的markdown转换，只显示前几行
-    const lines = body.split('\n').slice(0, 10)
+    // 简单的markdown转换，只显示前50行
+    const lines = body.split('\n').slice(0, 50)
     return lines
         .map(line => {
             if (line.startsWith('##')) {
