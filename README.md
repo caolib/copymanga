@@ -12,7 +12,6 @@
   <img src="https://img.shields.io/github/v/release/caolib/doki?labelColor=grey&color=red" alt="Release"/>
   <img src="https://img.shields.io/github/license/caolib/doki" alt="License"/>
   <img src="https://img.shields.io/github/stars/caolib/doki" alt="Stars"/>
-<!--   <img src="https://img.shields.io/github/issues/caolib/doki?label=Issues" alt="Issues"/> -->
   <img src="https://github.com/caolib/doki/actions/workflows/ci.yml/badge.svg" alt="release"/>
   <img src="https://img.shields.io/github/downloads/caolib/doki/latest/total" alt="Latest Downloads"/>
 </p>
@@ -130,3 +129,7 @@ pnpm dev:cli
 > - 建议用户在监护人陪同下使用，并自行判断内容的适宜性
 
 ✅**继续使用本应用即表示您已阅读、理解并同意上述所有条款。**
+
+<p align="center">
+  <img src="https://counter.seku.su/cmoe?name=doki&theme=r34"/>
+</p>
