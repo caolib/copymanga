@@ -58,6 +58,10 @@ export function useMangaDetail() {
         return [...chapters.value].sort((a, b) => isAscending.value ? a.index - b.index : b.index - a.index)
     })
 
+    // 创建一个函数来检查是否显示删除按钮
+    const shouldShowDeleteButton = (chapterUuid) => {
+        return ['downloaded', 'partial', 'paused'].includes(chapterDownloadStatus.value[chapterUuid])
+    }
     // 业务逻辑函数
     const toggleSortOrder = () => {
         isAscending.value = !isAscending.value
@@ -639,6 +643,7 @@ export function useMangaDetail() {
         sortedChapters,
 
         // 方法
+        shouldShowDeleteButton,
         toggleSortOrder,
         goToChapter,
         goToAuthorPage,

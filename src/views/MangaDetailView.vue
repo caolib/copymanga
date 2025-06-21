@@ -227,7 +227,7 @@
                                 </a-button>
 
                                 <!-- 已下载章节的删除按钮 -->
-                                <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloaded'" size="small" danger
+                                <a-button v-if="shouldShowDeleteButton(chapter.id)" size="small" danger
                                     @click="deleteChapter(chapter)" :title="'删除章节'" :icon="h(DeleteOutlined)">
                                 </a-button>
                             </div>
@@ -339,6 +339,7 @@ const {
     sortedChapters,
 
     // 方法
+    shouldShowDeleteButton,
     toggleSortOrder,
     goToChapter,
     goToAuthorPage,
