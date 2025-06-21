@@ -4,7 +4,7 @@
             <!-- 头部用户信息卡片 -->
             <a-card class="user-header-card" :bordered="false">
                 <div class="user-header">
-                    <a-avatar :size="80" :src="userInfo?.avatar || '/logo.png'" />
+                    <a-avatar :size="80" :src="getAvatarUrl(userInfo?.avatar) || '/logo.png'" />
                     <div class="user-basic-info">
                         <h3>{{ userInfo?.nickname || userInfo?.username || '用户' }}</h3>
                         <p class="username">{{ userInfo?.username || '-' }}</p>
@@ -366,6 +366,13 @@ const handleTabChange = (key) => {
             loadBrowseHistory(type, true)
         }
     }
+}
+
+// 获取头像完整URL
+const getAvatarUrl = (avatar) => {
+    if (!avatar) return '/logo.png'
+    if (avatar.startsWith('http')) return avatar
+    return `https://s3.mangafuna.xyz/${avatar}`
 }
 
 // 刷新当前浏览记录

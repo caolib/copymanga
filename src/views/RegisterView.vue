@@ -87,13 +87,28 @@ const handleRegister = () => {
     errorMessage.value = ''
 
     register(formState.username, formState.password).then(result => {
-        message.success('注册成功！请登录')
-        // 注册成功后跳转到登录页面
-        router.push('/login')
+        // V3 API的响应结构：{code: 200, message: "请求成功", results: {...}}
+        if (result.code === 200) {
+            message.success('注册成功！请登录')
+            // 注册成功后跳转到登录页面
+            router.push('/login')
+        } else {
+            throw new Error(result.message || '注册失败')
+        }
     }).catch(error => {
         console.error('注册失败', error)
-        if (error.response && error.response.data && error.response.data.message) {
-            errorMessage.value = error.response.data.message
+        // 优先展示后端返回的错误信息
+        if (error.response && error.response.data) {
+            if (error.response.data.detail) {
+                errorMessage.value = error.response.data.detail
+            } else if (error.response.data.message) {
+                errorMessage.value = error.response.data.message
+            } else {
+                errorMessage.value = '注册失败，请检查网络连接或稍后重试'
+            }
+        } else if (error.message) {
+            // 处理如超时等AxiosError
+            errorMessage.value = error.message
         } else {
             errorMessage.value = '注册失败，请检查网络连接或稍后重试'
         }

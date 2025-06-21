@@ -18,7 +18,12 @@ export const useUserStore = defineStore('user', {
             vip_downloads: 0,
             reward_downloads: 0,
             ads_vip_end: null,
-            post_vip_end: null
+            post_vip_end: null,
+            invite_code: null,
+            invited: null,
+            scy_answer: false,
+            day_downloads_refresh: '',
+            day_downloads: 0
         },
         // 浏览记录相关
         browseHistory: {
@@ -49,7 +54,12 @@ export const useUserStore = defineStore('user', {
                 vip_downloads: userData.vip_downloads || 0,
                 reward_downloads: userData.reward_downloads || 0,
                 ads_vip_end: userData.ads_vip_end || null,
-                post_vip_end: userData.post_vip_end || null
+                post_vip_end: userData.post_vip_end || null,
+                invite_code: userData.invite_code || null,
+                invited: userData.invited || null,
+                scy_answer: userData.scy_answer || false,
+                day_downloads_refresh: userData.day_downloads_refresh || '',
+                day_downloads: userData.day_downloads || 0
             }
 
             // 保存账号到多账号列表（保存完整用户信息包括token）
@@ -141,7 +151,12 @@ export const useUserStore = defineStore('user', {
                 vip_downloads: 0,
                 reward_downloads: 0,
                 ads_vip_end: null,
-                post_vip_end: null
+                post_vip_end: null,
+                invite_code: null,
+                invited: null,
+                scy_answer: false,
+                day_downloads_refresh: '',
+                day_downloads: 0
             }
             // 注意：不清除savedAccounts，保留多账号信息
         },
@@ -171,8 +186,11 @@ export const useUserStore = defineStore('user', {
                         reward_downloads: userInfoData.reward_downloads || 0,
                         ads_vip_end: userInfoData.ads_vip_end || null,
                         post_vip_end: userInfoData.post_vip_end || null,
-                        day_downloads: userInfoData.day_downloads || 0,
-                        day_downloads_refresh: userInfoData.day_downloads_refresh || ''
+                        invite_code: userInfoData.invite_code || null,
+                        invited: userInfoData.invited || null,
+                        scy_answer: userInfoData.scy_answer || false,
+                        day_downloads_refresh: userInfoData.day_downloads_refresh || '',
+                        day_downloads: userInfoData.day_downloads || 0
                     }
                     return this.userInfo;
                 }

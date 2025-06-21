@@ -147,8 +147,11 @@ onMounted(() => {
     // 初始化自动登录状态
     autoLoginEnabled.value = userStore.autoLogin
 
-    // 如果启用自动登录且有保存的账号，尝试自动登录
-    if (userStore.autoLogin && userStore.savedAccounts.length > 0) {
+    // 检查是否是添加账号操作
+    const isAddAccountAction = router.currentRoute.value.query.action === 'add-account'
+
+    // 如果启用自动登录且有保存的账号，且不是添加账号操作，尝试自动登录
+    if (userStore.autoLogin && userStore.savedAccounts.length > 0 && !isAddAccountAction) {
         const recentAccount = userStore.getRecentAccount()
         if (recentAccount && recentAccount.username && recentAccount.password) {
             loginForm.username = recentAccount.username
@@ -212,28 +215,40 @@ const handleLogin = () => {
     userStore.setAutoLogin(autoLoginEnabled.value)
 
     login(loginForm.username, loginForm.password).then(result => {
-        // 保存用户信息到 Pinia 存储并持久化（使用正确的API字段）
-        userStore.setUser({
-            username: result.results.username,
-            token: result.results.token,
-            user_id: result.results.user_id,
-            nickname: result.results.nickname,
-            avatar: result.results.avatar,
-            datetime_created: result.results.datetime_created,
-            ticket: result.results.ticket,
-            reward_ticket: result.results.reward_ticket,
-            downloads: result.results.downloads,
-            vip_downloads: result.results.vip_downloads,
-            reward_downloads: result.results.reward_downloads,
-            ads_vip_end: result.results.ads_vip_end,
-            post_vip_end: result.results.post_vip_end,
-            password: loginForm.password // 总是保存密码
-        })
+        // V3 API的响应结构：{code: 200, message: "请求成功", results: {...}}
+        if (result.code === 200 && result.results) {
+            const userData = result.results
 
-        message.success('登录成功')
-        // 登录成功后回到上个界面或首页
-        const redirectPath = router.currentRoute.value.query.redirect || '/'
-        router.push(redirectPath)
+            // 保存用户信息到 Pinia 存储并持久化（使用V3 API字段）
+            userStore.setUser({
+                username: userData.username,
+                token: userData.token, // 根据登录.json，token在results内部
+                user_id: userData.user_id,
+                nickname: userData.nickname,
+                avatar: userData.avatar,
+                datetime_created: userData.datetime_created,
+                ticket: userData.ticket || 0,
+                reward_ticket: userData.reward_ticket || 0,
+                downloads: userData.downloads || 0,
+                vip_downloads: userData.vip_downloads || 0,
+                reward_downloads: userData.reward_downloads || 0,
+                ads_vip_end: userData.ads_vip_end,
+                post_vip_end: userData.post_vip_end,
+                invite_code: userData.invite_code,
+                invited: userData.invited,
+                scy_answer: userData.scy_answer || false,
+                day_downloads_refresh: userData.day_downloads_refresh || '',
+                day_downloads: userData.day_downloads || 0,
+                password: loginForm.password // 总是保存密码
+            })
+
+            message.success('登录成功')
+            // 登录成功后回到上个界面或首页
+            const redirectPath = router.currentRoute.value.query.redirect || '/'
+            router.push(redirectPath)
+        } else {
+            throw new Error(result.message || '登录失败')
+        }
     }).catch(error => {
         console.error('登录失败', error)
         errorMessage.value = error.message;
@@ -248,16 +263,21 @@ const handleRegister = () => {
     errorMessage.value = ''
 
     register(registerForm.username, registerForm.password).then(result => {
-        message.success('注册成功！请登录')
-        // 注册成功后切换到登录模式并预填用户名
-        isLogin.value = true
-        loginForm.username = registerForm.username
-        loginForm.password = registerForm.password
-        loginForm.rememberPassword = true
-        // 清空注册表单
-        registerForm.username = ''
-        registerForm.password = ''
-        registerForm.confirmPassword = ''
+        // V3 API的响应结构：{code: 200, message: "请求成功", results: {...}}
+        if (result.code === 200) {
+            message.success('注册成功！请登录')
+            // 注册成功后切换到登录模式并预填用户名
+            isLogin.value = true
+            loginForm.username = registerForm.username
+            loginForm.password = registerForm.password
+            loginForm.rememberPassword = true
+            // 清空注册表单
+            registerForm.username = ''
+            registerForm.password = ''
+            registerForm.confirmPassword = ''
+        } else {
+            throw new Error(result.message || '注册失败')
+        }
     }).catch(error => {
         console.error('注册失败', error)
         // 优先展示后端返回的错误信息

@@ -31,6 +31,10 @@
                                     </a-menu-item-group>
                                     <a-menu-divider />
                                 </template>
+                                <a-menu-item key="add-account" @click="addNewAccount">
+                                    <PlusOutlined class="menu-icon" /> 添加账号
+                                </a-menu-item>
+                                <a-menu-divider />
                                 <a-menu-item key="logout" style="color:#ff6b6b" @click="handleLogout">
                                     <LogoutOutlined class="menu-icon" /> 退出登录
                                 </a-menu-item>
@@ -116,7 +120,7 @@ import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
 import { useAppStore } from '../stores/app'
 import { message } from 'ant-design-vue'
-import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled, DownloadOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled, DownloadOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
 const router = useRouter()
@@ -214,10 +218,25 @@ const getAvatarUrl = (avatar) => {
 const switchAccount = (username) => {
     const account = userStore.switchToAccount(username)
     if (account) {
-        message.info(`哈喽，${account.userInfo.nickname || username}，切换后账号个人收藏数据等需要刷新才能看到当前账号的信息哦`)
+        message.info(`哈喽，${account.userInfo.nickname || username}，切换账号后，个人收藏数据等需要刷新才能看到当前账号的信息哦`)
     } else {
         message.error('切换账号失败，请重新登录')
     }
+}
+
+// 添加新账号
+const addNewAccount = () => {
+    // 临时禁用自动登录，避免在添加账号时自动登录
+    const originalAutoLogin = userStore.autoLogin
+    userStore.setAutoLogin(false)
+
+    // 跳转到登录页面，并在URL中添加参数表示这是添加账号操作
+    router.push('/login?action=add-account').then(() => {
+        // 页面跳转完成后，恢复原来的自动登录设置
+        setTimeout(() => {
+            userStore.setAutoLogin(originalAutoLogin)
+        }, 1000)
+    })
 }
 </script>
 
