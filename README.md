@@ -26,39 +26,50 @@ doki是一个集漫画、轻小说、动画于一体的桌面应用，提供简�
 
 ### 1.漫画
 
-![image-20250611171235202](https://s2.loli.net/2025/06/11/3a7YcMSFtkE46VC.png)
-
-![image-20250611171319310](https://s2.loli.net/2025/06/11/kNGwQKeCpYniDJI.png)
-
-![image-20250611182153968](https://s2.loli.net/2025/06/11/T8jP5cmgdSziquW.png)
-
-![image-20250529162057214](https://s2.loli.net/2025/05/29/rwYCb5BLvfHKn7X.png)
-
-![image-20250529162210160](https://s2.loli.net/2025/05/29/aopKubEDILBzkY7.png)
-
-![image-20250613161311903](https://s2.loli.net/2025/06/13/5qZMzt1ivDNge92.png)
-
-![image-20250613161440084](https://s2.loli.net/2025/06/13/Mpd9Tz7j3kWr6hL.png)
-
-![image-20250611182441206](https://s2.loli.net/2025/06/11/Wc8G129xh43SzbZ.png)
+<table>
+<tr>
+<td><img src="https://s2.loli.net/2025/06/21/eGMfoDwXhdm9q2z.png" alt="首页" /></td>
+<td><img src="https://s2.loli.net/2025/06/21/U5CsVo9R42beQGA.png" alt="搜索" /></td>
+</tr>
+<tr>
+<td><img src="https://s2.loli.net/2025/06/21/UryZHueIz8N4ng6.png" alt="阅读" /></td>
+<td><img src="https://s2.loli.net/2025/05/29/rwYCb5BLvfHKn7X.png" alt="搜索" /></td>
+</tr>
+<tr>
+<td><img src="https://s2.loli.net/2025/05/29/aopKubEDILBzkY7.png" alt="书架" /></td>
+<td><img src="https://s2.loli.net/2025/06/13/5qZMzt1ivDNge92.png" alt="设置" /></td>
+</tr>
+<tr>
+<td><img src="https://s2.loli.net/2025/06/13/Mpd9Tz7j3kWr6hL.png" alt="章节" /></td>
+<td><img src="https://s2.loli.net/2025/06/11/Wc8G129xh43SzbZ.png" alt="主题" /></td>
+</tr>
+</table>
 
 ### 2.轻小说
 
-![image-20250602164731951](https://s2.loli.net/2025/06/02/D5jpQv89Idc4wsm.png)
-
-![image-20250611183006201](https://s2.loli.net/2025/06/11/xbjEPk4Yt26UuBZ.png)
-
-![image-20250602193020756](https://s2.loli.net/2025/06/02/MtHREhCqiTZK9pN.png)
+<table>
+<tr>
+<td><img src="https://s2.loli.net/2025/06/02/D5jpQv89Idc4wsm.png" alt="首页" /></td>
+<td><img src="https://s2.loli.net/2025/06/11/xbjEPk4Yt26UuBZ.png" alt="阅读" /></td>
+</tr>
+<tr>
+<td><img src="https://s2.loli.net/2025/06/02/MtHREhCqiTZK9pN.png" alt="详情" /></td>
+<td></td>
+</tr>
+</table>
 
 ### 3.动画
 
-![image-20250613160040740](https://s2.loli.net/2025/06/13/udFeXIhRViKJblW.png)
-
-![image-20250613160307708](https://s2.loli.net/2025/06/13/4eGRoafHv371l86.png)
+<table>
+<tr>
+<td><img src="https://s2.loli.net/2025/06/13/udFeXIhRViKJblW.png" alt="首页" /></td>
+<td><img src="https://s2.loli.net/2025/06/13/4eGRoafHv371l86.png" alt="播放" /></td>
+</tr>
+</table>
 
 ### 4.写真
 
-> 这部分可以自己去探索
+> 这部分自己探索
 
 ## 2 开发
 

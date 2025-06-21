@@ -23,7 +23,7 @@
 
             <a-row :gutter="32">
                 <a-col :xs="24" :sm="8">
-                    <a-image :src="manga.cover" :alt="manga.name" width="100%" height="350px"
+                    <a-image :src="manga.cover" :alt="manga.name" width="328px" height="auto"
                         style="border-radius: 8px; object-fit: cover;" :placeholder="true">
                         <template #placeholder>
                             <div class="image-placeholder">
