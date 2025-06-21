@@ -27,49 +27,54 @@ doki是一个集漫画、轻小说、动画于一体的桌面应用，提供简�
 ### 1.漫画
 
 <table>
-<tr>
-<td><img src="https://s2.loli.net/2025/06/21/eGMfoDwXhdm9q2z.png" alt="首页" /></td>
-<td><img src="https://s2.loli.net/2025/06/21/U5CsVo9R42beQGA.png" alt="搜索" /></td>
-</tr>
-<tr>
-<td><img src="https://s2.loli.net/2025/06/21/UryZHueIz8N4ng6.png" alt="阅读" /></td>
-<td><img src="https://s2.loli.net/2025/05/29/rwYCb5BLvfHKn7X.png" alt="搜索" /></td>
-</tr>
-<tr>
-<td><img src="https://s2.loli.net/2025/05/29/aopKubEDILBzkY7.png" alt="书架" /></td>
-<td><img src="https://s2.loli.net/2025/06/13/5qZMzt1ivDNge92.png" alt="设置" /></td>
-</tr>
-<tr>
-<td><img src="https://s2.loli.net/2025/06/13/Mpd9Tz7j3kWr6hL.png" alt="章节" /></td>
-<td><img src="https://s2.loli.net/2025/06/11/Wc8G129xh43SzbZ.png" alt="主题" /></td>
-</tr>
-</table>
+  <tr>
+    <td><img src="https://s2.loli.net/2025/06/21/eGMfoDwXhdm9q2z.png"/></td>
+    <td><img src="https://s2.loli.net/2025/06/21/U5CsVo9R42beQGA.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://s2.loli.net/2025/06/21/UryZHueIz8N4ng6.png"/></td>
+    <td><img src="https://s2.loli.net/2025/06/21/8q4HKDjrsNMl9IF.png"/></td>
+  </tr>  
+  <tr>
+    <td><img src="https://s2.loli.net/2025/06/21/Nwoe2DCagTHf3xn.png"/></td>
+    <td><img src="https://s2.loli.net/2025/06/21/Kirp1LucGdH8YOy.png"/></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="https://s2.loli.net/2025/06/21/Yf5pVHRLk9314Fl.png"/></td>
+  </tr>
+</table> 
+
 
 ### 2.轻小说
 
 <table>
-<tr>
-<td><img src="https://s2.loli.net/2025/06/02/D5jpQv89Idc4wsm.png" alt="首页" /></td>
-<td><img src="https://s2.loli.net/2025/06/11/xbjEPk4Yt26UuBZ.png" alt="阅读" /></td>
-</tr>
-<tr>
-<td><img src="https://s2.loli.net/2025/06/02/MtHREhCqiTZK9pN.png" alt="详情" /></td>
-<td></td>
-</tr>
+  <tr>
+    <td><img src="https://s2.loli.net/2025/06/21/vnoST4pdD2ikeUO.png"/></td>
+    <td><img src="https://s2.loli.net/2025/06/21/a6OSsdzE527LfwV.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://s2.loli.net/2025/06/21/9f1Umi6G4FvD7Nb.png"/></td>
+    <td><img src="https://s2.loli.net/2025/06/21/BM5fa6oduv7Zxl2.png"/></td>
+  </tr>
 </table>
 
 ### 3.动画
 
 <table>
-<tr>
-<td><img src="https://s2.loli.net/2025/06/13/udFeXIhRViKJblW.png" alt="首页" /></td>
-<td><img src="https://s2.loli.net/2025/06/13/4eGRoafHv371l86.png" alt="播放" /></td>
-</tr>
+  <tr>
+    <td><img src="https://s2.loli.net/2025/06/21/ljeIh1dqZBwSTVg.png"/></td>
+    <td><img src="https://s2.loli.net/2025/06/21/75TRXdABi4Nx1Lu.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="https://s2.loli.net/2025/06/21/dyGD1EuZtpTRjev.png"/></td>
+    <td><img src="https://s2.loli.net/2025/06/21/fC21eLMa58dkpyb.png"/></td>
+  </tr>
 </table>
+
 
 ### 4.写真
 
-> 这部分自己探索
+> 这部分需要你自己探索
 
 ## 2 开发
 
