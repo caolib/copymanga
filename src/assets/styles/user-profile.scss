@@ -1,255 +1,257 @@
 @use "./variables" as *;
 
-// 用户资料页面样式
 .user-profile-container {
-    background-color: $bg-color-light;
-    min-height: calc(100vh - 48px);
-    margin: $spacing-md;
-    padding: 0;
+  height: 100%;
+  background: var(--background-color);
+
+  .user-profile-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: $spacing-lg;
+  }
 }
 
-// 侧栏样式
-.user-profile-sider {
-    background: $bg-color-white !important;
-    border-right: 1px solid $border-color-light !important;
-}
+.user-header-card {
+  margin-bottom: $spacing-lg;
 
-.user-sider-header {
-    padding: 20px $spacing-md;
+  .user-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid $border-color-light;
-}
+    gap: $spacing-lg;
 
-.user-nickname {
-    font-size: $spacing-md;
-    font-weight: 500;
-    margin-bottom: 2px;
-}
+    .user-basic-info {
+      flex: 1;
 
-.user-username {
-    font-size: 12px;
-    color: $text-tertiary;
-}
+      h3 {
+        margin: 0 0 $spacing-xs;
+        color: var(--text-color);
+        font-size: 24px;
+        font-weight: 600;
+      }
 
-.user-profile-menu {
-    border-right: none;
-}
+      .username {
+        margin: 0 0 $spacing-xs;
+        color: var(--text-color-secondary);
+        font-size: 14px;
+      }
 
-// 内容区域样式
-.user-profile-content {
-    background-color: $bg-color;
-    padding: 0 $spacing-lg;
-    min-height: calc(100vh - 48px);
-}
-
-// 个人资料卡片
-.profile-card {
-    margin-top: $spacing-md;
-}
-
-.profile-title {
-    font-size: 18px;
-    font-weight: 500;
-}
-
-.profile-header {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: $spacing-lg;
-}
-
-.profile-info {
-    flex: 1;
-}
-
-.profile-name {
-    margin-bottom: $spacing-sm !important;
-}
-
-.profile-description {
-    margin-bottom: 0 !important;
-    font-size: 14px;
-    color: $text-secondary;
-}
-
-// 昵称编辑样式
-.nickname-display {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    .edit-btn {
-        opacity: 0;
-        transition: opacity 0.2s;
-        padding: 0 4px;
-        height: 20px;
+      .join-date {
+        margin: 0;
+        color: var(--text-color-tertiary);
         font-size: 12px;
+      }
     }
 
-    &:hover .edit-btn {
-        opacity: 1;
-    }
-}
+    .user-stats {
+      display: flex;
+      gap: $spacing-xl;
 
-.nickname-edit {
-    .edit-actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 8px;
+      :deep(.ant-statistic) {
+        text-align: center;
 
-        .ant-btn {
-            height: 24px;
-            padding: 0 8px;
-            font-size: 12px;
+        .ant-statistic-title {
+          color: var(--text-color-secondary);
+          font-size: 12px;
         }
+
+        .ant-statistic-content {
+          color: var(--primary-color);
+          font-weight: 600;
+        }
+      }
     }
+  }
 }
 
-// 浏览记录样式
+.profile-tabs {
+  :deep(.ant-tabs-nav) {
+    margin-bottom: $spacing-lg;
+  }
+
+  :deep(.ant-tabs-tab) {
+    .ant-badge {
+      .ant-badge-count {
+        font-size: 10px;
+        min-width: 16px;
+        height: 16px;
+        line-height: 16px;
+        border-radius: 8px;
+      }
+    }
+  }
+}
+
+// 浏览记录相关样式
 .browse-history-content {
-    margin-top: $spacing-md;
-}
-
-.browse-history-title {
-    font-size: 18px;
-    font-weight: 500;
-}
-
-// 浏览记录列表
-.browse-list-container {
-    margin-top: $spacing-sm;
-}
-
-// 浏览卡片
-.browse-card {
-    height: 100%;
-    cursor: pointer;
-    transition: $transition-normal;
-
-    &:hover {
-        transform: translateY(-4px);
-        box-shadow: $shadow-medium;
-    }
-}
-
-.browse-card-content {
+  .browse-controls {
     display: flex;
-    flex-direction: column;
-    height: 100%;
-}
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+    padding: $spacing-md;
+    background: var(--component-background);
+    border-radius: $border-radius-medium;
+    border: 1px solid var(--border-color-base);
 
-.browse-card-cover {
-    height: 180px;
-    overflow: hidden;
-    margin-bottom: 12px;
-    border-radius: $border-radius-small;
+    .controls-left {
+      .total-info {
+        color: var(--text-color-secondary);
+        font-size: 14px;
+      }
+    }
 
-    img {
+    .controls-right {
+      display: flex;
+      gap: $spacing-sm;
+    }
+  }
+  .browse-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: $spacing-lg;
+    margin-bottom: $spacing-lg;
+
+    .browse-card {
+      height: auto;
+      transition: all 0.3s ease;
+      cursor: pointer;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      }
+
+      .browse-cover {
         width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.4s ease;
-    }
-}
+        aspect-ratio: 270 / 348; // 保持封面的横纵比
+        overflow: hidden;
+        border-radius: $border-radius-medium;
+        margin-bottom: $spacing-sm;
 
-.browse-card:hover .browse-card-cover img {
-    transform: scale(1.05);
-}
-
-.browse-card-info {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
-
-// 分页样式
-.browse-pagination {
-    margin-top: $spacing-lg;
-    display: flex;
-    justify-content: center;
-}
-
-// 文本样式
-.comic-title {
-    font-size: $spacing-md;
-    font-weight: 500;
-    color: $text-primary;
-    margin-bottom: $spacing-sm;
-    @include text-ellipsis;
-}
-
-.comic-chapter,
-.comic-author,
-.read-chapter {
-    font-size: 13px;
-    color: $text-secondary;
-    margin-bottom: $spacing-xs;
-    @include text-ellipsis;
-}
-
-.read-chapter {
-    color: $primary-color;
-}
-
-// 暗色主题样式
-.user-profile-container {
-    @include dark-theme {
-        background-color: var(--dark-bg-custom, $dark-bg-primary);
-    }
-}
-
-.user-profile-content {
-    @include dark-theme {
-        background-color: var(--dark-bg-custom, $dark-bg-primary);
-    }
-}
-
-.user-profile-sider {
-    @include dark-theme {
-        background: var(--dark-bg-custom, $dark-bg-primary) !important;
-        border-right: 1px solid $dark-border-color !important;
-    }
-}
-
-.user-sider-header {
-    @include dark-theme {
-        border-bottom: 1px solid $dark-border-color !important;
-        color: $dark-text-primary;
-    }
-}
-
-.browse-card {
-    @include dark-theme {
-        background: $dark-bg-primary;
-        border: 1px solid $dark-border-color;
-
-        &:hover {
-            border-color: $dark-border-color-light;
-            box-shadow: $shadow-dark-medium;
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.3s ease;
         }
+      }
+
+      &:hover .browse-cover img {
+        transform: scale(1.05);
+      }
+
+      :deep(.ant-card-meta-title) {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-bottom: $spacing-xs;
+        // 限制显示行数
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        line-clamp: 2;
+        overflow: hidden;
+      }
+
+      :deep(.ant-card-meta-description) {
+        .browse-author {
+          color: var(--text-color-secondary);
+          font-size: 12px;
+          margin-bottom: $spacing-xs;
+          // 限制显示行数
+          display: -webkit-box;
+          -webkit-line-clamp: 1;
+          -webkit-box-orient: vertical;
+          line-clamp: 1;
+          overflow: hidden;
+        }
+
+        .last-chapter {
+          color: var(--primary-color);
+          font-size: 12px;
+          margin-bottom: $spacing-xs;
+          font-weight: 500;
+        }
+
+        .browse-time {
+          color: var(--text-color-tertiary);
+          font-size: 11px;
+        }
+      }
+
+      :deep(.ant-card-actions) {
+        border-top: 1px solid var(--border-color-base);
+
+        li {
+          margin: 0;
+
+          .anticon {
+            color: var(--text-color-secondary);
+
+            &:hover {
+              color: var(--error-color);
+            }
+          }
+        }
+      }
     }
+    // 骨架屏样式
+    .skeleton-card {
+      .skeleton-cover {
+        width: 100%;
+        aspect-ratio: 270 / 348; // 保持与实际封面相同的比例
+        background: var(--background-color-light);
+        border-radius: $border-radius-medium;
+        margin-bottom: $spacing-sm;
+      }
+    }
+  }
+
+  .load-more {
+    margin-top: $spacing-lg;
+    text-align: center;
+  }
 }
 
-.comic-chapter,
-.comic-author {
-    @include dark-theme {
-        color: $dark-text-secondary;
+// 响应式设计
+@media (max-width: 768px) {
+  .user-profile-container {
+    .user-profile-content {
+      padding: $spacing-md;
     }
+  }
+
+  .user-header-card {
+    .user-header {
+      flex-direction: column;
+      text-align: center;
+      gap: $spacing-md;
+    }
+  }
+
+  .browse-history-content {
+    .browse-controls {
+      flex-direction: column;
+      gap: $spacing-sm;
+
+      .controls-left,
+      .controls-right {
+        width: 100%;
+        text-align: center;
+      }
+    }
+    .browse-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: $spacing-md;
+    }
+  }
 }
 
-.comic-title {
-    @include dark-theme {
-        color: $dark-text-primary;
+@media (max-width: 576px) {
+  .browse-history-content {
+    .browse-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: $spacing-sm;
     }
-}
-
-.read-chapter {
-    color: $primary-color;
-
-    @include dark-theme {
-        color: $primary-hover;
-    }
+  }
 }

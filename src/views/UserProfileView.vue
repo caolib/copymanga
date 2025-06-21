@@ -1,260 +1,415 @@
 <template>
     <div class="user-profile-container">
-        <!-- 左侧侧栏导航 -->
-        <a-layout>
-            <a-layout-sider width="200" theme="light" class="user-profile-sider">
-                <div class="user-sider-header">
-                    <a-avatar :src="userInfo?.avatar || '/logo.jpg'" :alt="userInfo?.username || '用户头像'" :size="56"
-                        @error="handleAvatarError" />
-                    <div>
-                        <div class="user-nickname">
-                            {{ userInfo?.nickname || userInfo?.username || '用户' }}
-                        </div>
-                        <div class="user-username">
-                            {{ userInfo?.username || '-' }}
-                        </div>
+        <div class="user-profile-content">
+            <!-- 头部用户信息卡片 -->
+            <a-card class="user-header-card" :bordered="false">
+                <div class="user-header">
+                    <a-avatar :size="80" :src="userInfo?.avatar || '/logo.png'" />
+                    <div class="user-basic-info">
+                        <h3>{{ userInfo?.nickname || userInfo?.username || '用户' }}</h3>
+                        <p class="username">{{ userInfo?.username || '-' }}</p>
+                        <p class="join-date">
+                            加入时间：{{ formatDate(userInfo?.datetime_created) }}
+                        </p>
                     </div>
                 </div>
+            </a-card> <!-- 标签页内容 -->
+            <a-tabs v-model:activeKey="activeTab" type="card" class="profile-tabs" @change="handleTabChange">
+                <template #rightExtra>
+                    <a-button v-if="activeTab.startsWith('browse-')" type="primary" size="small"
+                        @click="refreshCurrentBrowseHistory" :loading="getCurrentBrowseData().loading">
+                        刷新
+                    </a-button>
+                </template>
 
-                <a-menu v-model:selectedKeys="selectedMenu" mode="inline" class="user-profile-menu">
-                    <a-menu-item key="profile" :icon="h(UserOutlined)">
-                        个人信息
-                    </a-menu-item>
-                    <a-menu-item key="browse-history" :icon="h(HistoryOutlined)">
-                        浏览记录
-                    </a-menu-item>
-                </a-menu>
-            </a-layout-sider>
+                <!-- 漫画浏览记录标签页 -->
+                <a-tab-pane key="browse-comics" tab="漫画浏览">
+                    <template #tab>
+                        <span>
+                            📚 漫画浏览
+                            <a-badge v-if="browseHistory.comics.total > 0" :count="browseHistory.comics.total"
+                                :offset="[10, -5]" />
+                        </span>
+                    </template>
 
-            <a-layout-content class="user-profile-content">
-                <!-- 个人信息页面 -->
-                <div v-show="selectedMenu.includes('profile')">
-                    <a-card :bordered="false" class="profile-card">
-                        <template #title>
-                            <div class="profile-title">个人资料</div>
-                        </template>
-
-                        <div class="profile-header">
-                            <a-avatar :src="userInfo?.avatar || '/logo.jpg'" :alt="userInfo?.username || '用户头像'"
-                                :size="80" @error="handleAvatarError" />
-                            <div class="profile-info">
-                                <a-typography-title :level="4" class="profile-name">
-                                    {{ userInfo?.nickname || userInfo?.username || '用户' }}
-                                </a-typography-title>
+                    <div class="browse-history-content">
+                        <!-- 操作栏 -->
+                        <div class="browse-controls" v-if="browseHistory.comics.list.length > 0">
+                            <div class="controls-left">
+                                <span class="total-info">共 {{ browseHistory.comics.total }} 条漫画浏览记录</span>
                             </div>
                         </div>
 
-                        <a-divider />
+                        <!-- 空状态 -->
+                        <a-empty v-if="!browseHistory.comics.loading && browseHistory.comics.list.length === 0"
+                            description="您还没有浏览任何漫画">
+                            <a-button type="primary" @click="$router.push('/')">去首页看看</a-button>
+                        </a-empty>
 
-                        <a-descriptions :column="{ xs: 1, sm: 2 }" bordered>
-                            <a-descriptions-item label="用户名">
-                                {{ userInfo?.username || '-' }}
-                            </a-descriptions-item>
-                            <a-descriptions-item label="昵称">
-                                <div v-if="!editingNickname" class="nickname-display">
-                                    <span>{{ userInfo?.nickname || '-' }}</span>
-                                    <a-button type="text" size="small" @click="startEditNickname" class="edit-btn"
-                                        :icon="h(EditOutlined)">
-                                        编辑
-                                    </a-button>
-                                </div>
-                                <div v-else class="nickname-edit">
-                                    <a-input v-model:value="tempNickname" placeholder="请输入昵称" :maxlength="20" show-count
-                                        size="small" @pressEnter="saveNickname" />
-                                    <div class="edit-actions">
-                                        <a-button type="primary" size="small" :loading="savingNickname"
-                                            @click="saveNickname">
-                                            保存
-                                        </a-button>
-                                        <a-button size="small" @click="cancelEditNickname">
-                                            取消
-                                        </a-button>
-                                    </div>
-                                </div>
-                            </a-descriptions-item>
-                            <a-descriptions-item label="注册时间">
-                                {{ formatDate(userInfo?.createdAt) || '-' }}
-                            </a-descriptions-item>
-                            <a-descriptions-item label="最后登录">
-                                {{ formatDate(userInfo?.lastLoginAt) || '-' }}
-                            </a-descriptions-item>
-                        </a-descriptions>
-                    </a-card>
-                </div>
-
-                <!-- 浏览记录页面 -->
-                <div v-show="selectedMenu.includes('browse-history')" class="browse-history-content">
-                    <a-card :bordered="false">
-                        <template #title>
-                            <div class="browse-history-title">浏览记录</div>
-                        </template>
-
-                        <!-- 浏览记录内容 -->
-                        <div>
-                            <a-spin :spinning="browseLoading">
-                                <div class="browse-list-container">
-                                    <a-row :gutter="[16, 16]">
-                                        <a-col :span="8" v-for="(item, index) in browseList" :key="index">
-                                            <a-card hoverable class="browse-card" @click="goToManga(item)">
-                                                <div class="browse-card-content">
-                                                    <div class="browse-card-cover">
-                                                        <img :src="item.comic.cover" alt="cover" />
-                                                    </div>
-                                                    <div class="browse-card-info">
-                                                        <div class="comic-title">{{ item.comic.name }}</div>
-                                                        <div class="comic-chapter">最新: {{ item.comic.last_chapter_name
-                                                            }}
-                                                        </div>
-                                                        <div class="comic-author">作者: {{item.comic.author.map(a =>
-                                                            a.name).join('、')
-                                                            }}</div>
-                                                        <div class="read-chapter">已读: {{ item.last_chapter_name }}</div>
-                                                    </div>
-                                                </div>
-                                            </a-card>
-                                        </a-col>
-                                    </a-row>
-
-                                    <div class="browse-pagination">
-                                        <a-pagination v-if="browseTotal > browseLimit" :total="browseTotal"
-                                            :page-size="browseLimit"
-                                            :current="Math.floor(browseOffset / browseLimit) + 1"
-                                            @change="handleBrowsePageChange" show-size-changer
-                                            :page-size-options="['6', '12', '18', '24']" :default-page-size="18" />
-                                    </div>
-                                </div>
-
-                                <a-empty v-if="browseList.length === 0" description="暂无浏览记录" />
-                            </a-spin>
+                        <!-- 加载骨架屏 -->
+                        <div v-if="browseHistory.comics.loading && browseHistory.comics.list.length === 0"
+                            class="browse-grid">
+                            <a-card v-for="n in 12" :key="n" class="browse-card skeleton-card">
+                                <a-skeleton :loading="true" active :paragraph="{ rows: 2 }">
+                                    <template #avatar>
+                                        <div class="skeleton-cover"></div>
+                                    </template>
+                                </a-skeleton>
+                            </a-card>
                         </div>
-                    </a-card>
-                </div>
-            </a-layout-content>
-        </a-layout>
+
+                        <!-- 浏览记录网格 -->
+                        <div v-else-if="browseHistory.comics.list.length > 0" class="browse-grid">
+                            <a-card v-for="item in browseHistory.comics.list" :key="item.id" hoverable
+                                class="browse-card" @click="goToMangaDetail(item)">
+                                <div class="browse-cover">
+                                    <img :src="item.comic?.cover" :alt="item.comic?.name" />
+                                </div>
+                                <a-card-meta :title="item.comic?.name">
+                                    <template #description>
+                                        <div class="browse-author" v-if="item.comic?.author?.length">
+                                            {{item.comic.author.map(a => a.name).join(', ')}}
+                                        </div>
+                                        <div class="last-chapter">
+                                            上次看到：{{ item.last_chapter_name }}
+                                        </div>
+                                        <div class="browse-time">
+                                            更新时间：{{ formatDate(item.comic?.datetime_updated) }}
+                                        </div>
+                                    </template>
+                                </a-card-meta>
+                            </a-card>
+                        </div>
+
+                        <!-- 加载更多 -->
+                        <div v-if="browseHistory.comics.hasMore && browseHistory.comics.list.length > 0"
+                            class="load-more">
+                            <a-button type="primary" @click="loadMore('comics')" :loading="browseHistory.comics.loading"
+                                block>
+                                加载更多
+                            </a-button>
+                        </div>
+                    </div>
+                </a-tab-pane>
+
+                <!-- 轻小说浏览记录标签页 -->
+                <a-tab-pane key="browse-books" tab="轻小说浏览">
+                    <template #tab>
+                        <span>
+                            📖 轻小说浏览
+                            <a-badge v-if="browseHistory.books.total > 0" :count="browseHistory.books.total"
+                                :offset="[10, -5]" />
+                        </span>
+                    </template>
+
+                    <div class="browse-history-content">
+                        <!-- 操作栏 -->
+                        <div class="browse-controls" v-if="browseHistory.books.list.length > 0">
+                            <div class="controls-left">
+                                <span class="total-info">共 {{ browseHistory.books.total }} 条轻小说浏览记录</span>
+                            </div>
+                        </div>
+
+                        <!-- 空状态 -->
+                        <a-empty v-if="!browseHistory.books.loading && browseHistory.books.list.length === 0"
+                            description="您还没有浏览任何轻小说">
+                            <a-button type="primary" @click="$router.push('/book')">去书库看看</a-button>
+                        </a-empty>
+
+                        <!-- 加载骨架屏 -->
+                        <div v-if="browseHistory.books.loading && browseHistory.books.list.length === 0"
+                            class="browse-grid">
+                            <a-card v-for="n in 12" :key="n" class="browse-card skeleton-card">
+                                <a-skeleton :loading="true" active :paragraph="{ rows: 2 }">
+                                    <template #avatar>
+                                        <div class="skeleton-cover"></div>
+                                    </template>
+                                </a-skeleton>
+                            </a-card>
+                        </div>
+
+                        <!-- 浏览记录网格 -->
+                        <div v-else-if="browseHistory.books.list.length > 0" class="browse-grid">
+                            <a-card v-for="item in browseHistory.books.list" :key="item.id" hoverable
+                                class="browse-card" @click="goToBookDetail(item)">
+                                <div class="browse-cover">
+                                    <img :src="item.book?.cover" :alt="item.book?.name" />
+                                </div>
+                                <a-card-meta :title="item.book?.name">
+                                    <template #description>
+                                        <div class="browse-author" v-if="item.book?.author?.length">
+                                            {{item.book.author.map(a => a.name).join(', ')}}
+                                        </div>
+                                        <div class="last-chapter">
+                                            上次看到：{{ item.last_volume_name }}
+                                        </div>
+                                        <div class="browse-time">
+                                            更新时间：{{ formatDate(item.book?.datetime_updated) }}
+                                        </div>
+                                    </template>
+                                </a-card-meta>
+                            </a-card>
+                        </div>
+
+                        <!-- 加载更多 -->
+                        <div v-if="browseHistory.books.hasMore && browseHistory.books.list.length > 0"
+                            class="load-more">
+                            <a-button type="primary" @click="loadMore('books')" :loading="browseHistory.books.loading"
+                                block>
+                                加载更多
+                            </a-button>
+                        </div>
+                    </div>
+                </a-tab-pane>
+
+                <!-- 写真浏览记录标签页 -->
+                <a-tab-pane key="browse-posts" tab="写真浏览">
+                    <template #tab>
+                        <span>
+                            🖼️ 写真浏览
+                            <a-badge v-if="browseHistory.posts.total > 0" :count="browseHistory.posts.total"
+                                :offset="[10, -5]" />
+                        </span>
+                    </template>
+
+                    <div class="browse-history-content">
+                        <!-- 操作栏 -->
+                        <div class="browse-controls" v-if="browseHistory.posts.list.length > 0">
+                            <div class="controls-left">
+                                <span class="total-info">共 {{ browseHistory.posts.total }} 条写真浏览记录</span>
+                            </div>
+                        </div>
+
+                        <!-- 空状态 -->
+                        <a-empty v-if="!browseHistory.posts.loading && browseHistory.posts.list.length === 0"
+                            description="您还没有浏览任何写真">
+                            <a-button type="primary" @click="$router.push('/post')">去写真看看</a-button>
+                        </a-empty>
+
+                        <!-- 加载骨架屏 -->
+                        <div v-if="browseHistory.posts.loading && browseHistory.posts.list.length === 0"
+                            class="browse-grid">
+                            <a-card v-for="n in 12" :key="n" class="browse-card skeleton-card">
+                                <a-skeleton :loading="true" active :paragraph="{ rows: 2 }">
+                                    <template #avatar>
+                                        <div class="skeleton-cover"></div>
+                                    </template>
+                                </a-skeleton>
+                            </a-card>
+                        </div>
+
+                        <!-- 浏览记录网格 -->
+                        <div v-else-if="browseHistory.posts.list.length > 0" class="browse-grid">
+                            <a-card v-for="item in browseHistory.posts.list" :key="item.id" hoverable
+                                class="browse-card" @click="goToPostDetail(item)">
+                                <div class="browse-cover">
+                                    <img :src="item.post?.cover" :alt="item.post?.name" />
+                                </div>
+                                <a-card-meta :title="item.post?.name">
+                                    <template #description>
+                                        <div class="browse-author" v-if="item.post?.author?.length">
+                                            {{item.post.author.map(a => a.name).join(', ')}}
+                                        </div>
+                                        <div class="last-chapter">
+                                            上次看到：{{ item.last_chapter_name }}
+                                        </div>
+                                        <div class="browse-time">
+                                            更新时间：{{ formatDate(item.post?.datetime_updated) }}
+                                        </div>
+                                    </template>
+                                </a-card-meta>
+                            </a-card>
+                        </div>
+
+                        <!-- 加载更多 -->
+                        <div v-if="browseHistory.posts.hasMore && browseHistory.posts.list.length > 0"
+                            class="load-more">
+                            <a-button type="primary" @click="loadMore('posts')" :loading="browseHistory.posts.loading"
+                                block>
+                                加载更多
+                            </a-button>
+                        </div>
+                    </div>
+                </a-tab-pane>
+
+                <!-- 动画浏览记录标签页 -->
+                <a-tab-pane key="browse-cartoons" tab="动画浏览">
+                    <template #tab>
+                        <span>
+                            🎬 动画浏览
+                            <a-badge v-if="browseHistory.cartoons.total > 0" :count="browseHistory.cartoons.total"
+                                :offset="[10, -5]" />
+                        </span>
+                    </template>
+
+                    <div class="browse-history-content">
+                        <!-- 操作栏 -->
+                        <div class="browse-controls" v-if="browseHistory.cartoons.list.length > 0">
+                            <div class="controls-left">
+                                <span class="total-info">共 {{ browseHistory.cartoons.total }} 条动画浏览记录</span>
+                            </div>
+                        </div>
+
+                        <!-- 空状态 -->
+                        <a-empty v-if="!browseHistory.cartoons.loading && browseHistory.cartoons.list.length === 0"
+                            description="您还没有浏览任何动画">
+                            <a-button type="primary" @click="$router.push('/cartoon')">去动画看看</a-button>
+                        </a-empty>
+
+                        <!-- 加载骨架屏 -->
+                        <div v-if="browseHistory.cartoons.loading && browseHistory.cartoons.list.length === 0"
+                            class="browse-grid">
+                            <a-card v-for="n in 12" :key="n" class="browse-card skeleton-card">
+                                <a-skeleton :loading="true" active :paragraph="{ rows: 2 }">
+                                    <template #avatar>
+                                        <div class="skeleton-cover"></div>
+                                    </template>
+                                </a-skeleton>
+                            </a-card>
+                        </div>
+
+                        <!-- 浏览记录网格 -->
+                        <div v-else-if="browseHistory.cartoons.list.length > 0" class="browse-grid">
+                            <a-card v-for="item in browseHistory.cartoons.list" :key="item.id" hoverable
+                                class="browse-card" @click="goToCartoonDetail(item)">
+                                <div class="browse-cover">
+                                    <img :src="item.cartoon?.cover" :alt="item.cartoon?.name" />
+                                </div>
+                                <a-card-meta :title="item.cartoon?.name">
+                                    <template #description>
+                                        <div class="browse-author" v-if="item.cartoon?.author?.length">
+                                            {{item.cartoon.author.map(a => a.name).join(', ')}}
+                                        </div>
+                                        <div class="last-chapter">
+                                            上次看到：{{ item.last_chapter_name }}
+                                        </div>
+                                        <div class="browse-time">
+                                            更新时间：{{ formatDate(item.cartoon?.datetime_updated) }}
+                                        </div>
+                                    </template>
+                                </a-card-meta>
+                            </a-card>
+                        </div>
+
+                        <!-- 加载更多 -->
+                        <div v-if="browseHistory.cartoons.hasMore && browseHistory.cartoons.list.length > 0"
+                            class="load-more">
+                            <a-button type="primary" @click="loadMore('cartoons')"
+                                :loading="browseHistory.cartoons.loading" block>
+                                加载更多
+                            </a-button>
+                        </div>
+                    </div>
+                </a-tab-pane>
+            </a-tabs>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
-import { useMangaNavigation } from '../composables/useMangaNavigation'
-import { formatDate } from '../utils/date'
 import { message } from 'ant-design-vue'
-import { getUserBrowseList } from '../api/browse'
-import { updateUserNickname } from '../api/user'
-import { UserOutlined, HistoryOutlined, EditOutlined } from '@ant-design/icons-vue'
-import { h } from 'vue'
 
 const router = useRouter()
 const userStore = useUserStore()
-const { goToMangaDetail } = useMangaNavigation()
+const activeTab = ref('browse-comics')
+
 const userInfo = computed(() => userStore.userInfo)
+const browseHistory = computed(() => userStore.browseHistory)
 
-// 菜单选择相关
-const selectedMenu = ref(['profile'])
+// 格式化日期
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-'
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    })
+}
 
-// 监听菜单选择变化，当切换到浏览记录时自动加载
-const watchMenuSelection = (newVal) => {
-    if (newVal.includes('browse-history')) {
-        loadBrowseList()
+// 获取当前选项卡的浏览数据
+const getCurrentBrowseData = () => {
+    const type = activeTab.value.replace('browse-', '')
+    return browseHistory.value[type] || { loading: false }
+}
+
+// 获取类型标签
+const getTypeLabel = (type) => {
+    const labels = {
+        comics: '漫画',
+        books: '轻小说',
+        posts: '写真',
+        cartoons: '动画'
+    }
+    return labels[type] || type
+}
+
+// 加载浏览记录
+const loadBrowseHistory = async (type, reset = false) => {
+    try {
+        const offset = reset ? 0 : browseHistory.value[type].list.length
+        await userStore.fetchBrowseHistory(type, offset, 18, reset)
+    } catch (error) {
+        message.error(`加载${getTypeLabel(type)}浏览记录失败`)
     }
 }
-watch(selectedMenu, watchMenuSelection)
 
-// 浏览记录相关
-const browseList = ref([])
-const browseTotal = ref(0)
-const browseLoading = ref(false)
-const browseVisible = ref(true) // 默认显示，不需要通过按钮控制
-const browseLimit = ref(18) // 默认每页18条记录
-const browseOffset = ref(0)
-
-// 昵称编辑相关
-const editingNickname = ref(false)
-const tempNickname = ref('')
-const savingNickname = ref(false)
-
-// 开始编辑昵称
-function startEditNickname() {
-    editingNickname.value = true
-    tempNickname.value = userInfo.value?.nickname || ''
-}
-
-// 取消编辑昵称
-function cancelEditNickname() {
-    editingNickname.value = false
-    tempNickname.value = ''
-}
-
-// 保存昵称
-function saveNickname() {
-    if (!tempNickname.value.trim()) {
-        message.error('昵称不能为空')
-        return
+// 标签页切换处理
+const handleTabChange = (key) => {
+    if (key.startsWith('browse-')) {
+        const type = key.replace('browse-', '')
+        // 如果还没有加载过数据，则加载
+        if (browseHistory.value[type].list.length === 0) {
+            loadBrowseHistory(type, true)
+        }
     }
+}
 
-    if (tempNickname.value === userInfo.value?.nickname) {
-        editingNickname.value = false
-        return
+// 刷新当前浏览记录
+const refreshCurrentBrowseHistory = async () => {
+    const type = activeTab.value.replace('browse-', '')
+    userStore.resetBrowseHistory(type)
+    await loadBrowseHistory(type, true)
+}
+
+// 加载更多
+const loadMore = (type) => {
+    loadBrowseHistory(type, false)
+}
+
+// 跳转到详情页
+const goToMangaDetail = (item) => {
+    router.push(`/manga/${item.comic?.path_word}`)
+}
+
+const goToBookDetail = (item) => {
+    router.push(`/book/${item.book?.path_word}`)
+}
+
+const goToPostDetail = (item) => {
+    router.push(`/post/${item.post?.uuid}`)
+}
+
+const goToCartoonDetail = (item) => {
+    router.push(`/cartoon/${item.cartoon?.path_word}`)
+}
+
+// 组件挂载时加载数据
+onMounted(async () => {
+    if (userStore.isLoggedIn) {
+        try {
+            // 获取最新用户信息
+            await userStore.fetchUserInfo()
+            // 获取默认的漫画浏览记录
+            await loadBrowseHistory('comics', true)
+        } catch (error) {
+            console.error('加载用户数据失败:', error)
+        }
     }
-
-    savingNickname.value = true
-    updateUserNickname(tempNickname.value.trim())
-        .then(() => {
-            message.success('昵称修改成功')
-            // 更新本地用户信息
-            userStore.updateUserInfo({ nickname: tempNickname.value.trim() })
-            editingNickname.value = false
-        })
-        .catch(error => {
-            if (error.response?.status === 400) {
-                message.error('昵称已被占用，请换一个试试')
-            } else {
-                message.error('昵称修改失败')
-            }
-        })
-        .finally(() => {
-            savingNickname.value = false
-        })
-}
-
-function loadBrowseList() {
-    browseLoading.value = true
-    getUserBrowseList(browseLimit.value, browseOffset.value)
-        .then(data => {
-            browseList.value = data?.results?.list || []
-            browseTotal.value = data?.results?.total || 0
-            browseVisible.value = true
-        })
-        .catch(() => {
-            message.error('获取浏览记录失败')
-        })
-        .finally(() => {
-            browseLoading.value = false
-        })
-}
-
-function handleBrowsePageChange(page, pageSize) {
-    browseOffset.value = (page - 1) * pageSize
-    browseLimit.value = pageSize
-    loadBrowseList()
-}
-
-// 跳转到漫画详情页
-const goToManga = (item) => {
-    // 使用统一的导航逻辑
-    goToMangaDetail(item.comic)
-}
-
-// 组件挂载时获取最新的用户信息
-onMounted(() => {
-    userStore.fetchUserInfo().catch(() => { })
 })
-
-const handleAvatarError = (event) => {
-    event.target.src = '/logo.jpg'
-}
 </script>
 
-<style src="../assets/styles/user-profile.scss" lang="scss"></style>
+<style scoped src="../assets/styles/user-profile.scss" lang="scss"></style>

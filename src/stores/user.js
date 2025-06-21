@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getUserInfo as fetchUserInfo } from '../api/user'
+import { getUserInfo as fetchUserInfo, getBrowseComics, getBrowseBooks, getBrowsePosts, getBrowseCartoons } from '../api/user'
 
 export const useUserStore = defineStore('user', {
     state: () => ({
@@ -19,6 +19,13 @@ export const useUserStore = defineStore('user', {
             reward_downloads: 0,
             ads_vip_end: null,
             post_vip_end: null
+        },
+        // 浏览记录相关
+        browseHistory: {
+            comics: { list: [], total: 0, loading: false, hasMore: true },
+            books: { list: [], total: 0, loading: false, hasMore: true },
+            posts: { list: [], total: 0, loading: false, hasMore: true },
+            cartoons: { list: [], total: 0, loading: false, hasMore: true },
         },
         // 多账号存储 - 保存完整的用户信息
         savedAccounts: [], // [{username, password, userInfo, lastLoginTime}]
@@ -150,24 +157,22 @@ export const useUserStore = defineStore('user', {
                 if (response.code === 200 && response.results) {
                     const userInfoData = response.results;
 
-                    // 更新用户信息
+                    // 更新用户信息，保持API字段名
                     this.userInfo = {
+                        user_id: userInfoData.user_id || '',
                         username: userInfoData.username || this.username,
                         nickname: userInfoData.nickname || '',
                         avatar: userInfoData.avatar || '',
-                        description: userInfoData.description || '这个用户很懒，什么都没有写...',
-                        createdAt: userInfoData.datetime_created || this.userInfo.createdAt,
-                        lastLoginAt: new Date().toISOString(),
-                        userId: userInfoData.user_id || '',
-                        stats: {
-                            totalRead: userInfoData.downloads || 0,
-                            totalChapters: userInfoData.day_downloads || 0,
-                            vipDownloads: userInfoData.vip_downloads || 0,
-                            rewardDownloads: userInfoData.reward_downloads || 0,
-                            ticket: userInfoData.ticket || 0,
-                            rewardTicket: userInfoData.reward_ticket || 0,
-                            favorites: 0
-                        }
+                        datetime_created: userInfoData.datetime_created || '',
+                        ticket: userInfoData.ticket || 0,
+                        reward_ticket: userInfoData.reward_ticket || 0,
+                        downloads: userInfoData.downloads || 0,
+                        vip_downloads: userInfoData.vip_downloads || 0,
+                        reward_downloads: userInfoData.reward_downloads || 0,
+                        ads_vip_end: userInfoData.ads_vip_end || null,
+                        post_vip_end: userInfoData.post_vip_end || null,
+                        day_downloads: userInfoData.day_downloads || 0,
+                        day_downloads_refresh: userInfoData.day_downloads_refresh || ''
                     }
                     return this.userInfo;
                 }
@@ -182,6 +187,71 @@ export const useUserStore = defineStore('user', {
             this.userInfo = {
                 ...this.userInfo,
                 ...updates
+            }
+        },
+
+        // 获取浏览记录
+        async fetchBrowseHistory(type = 'comics', offset = 0, limit = 18, reset = false) {
+            if (!this.isLoggedIn) return
+
+            this.browseHistory[type].loading = true
+
+            try {
+                let response
+                switch (type) {
+                    case 'comics':
+                        response = await getBrowseComics(offset, limit)
+                        break
+                    case 'books':
+                        response = await getBrowseBooks(offset, limit)
+                        break
+                    case 'posts':
+                        response = await getBrowsePosts(offset, limit)
+                        break
+                    case 'cartoons':
+                        response = await getBrowseCartoons(offset, limit)
+                        break
+                    default:
+                        throw new Error('无效的浏览记录类型')
+                }
+
+                if (response.code === 200 && response.results) {
+                    const { list, total } = response.results
+
+                    if (reset) {
+                        this.browseHistory[type].list = list
+                    } else {
+                        this.browseHistory[type].list.push(...list)
+                    }
+
+                    this.browseHistory[type].total = total
+                    this.browseHistory[type].hasMore = this.browseHistory[type].list.length < total
+                }
+            } catch (error) {
+                console.error(`获取${type}浏览记录失败:`, error)
+                throw error
+            } finally {
+                this.browseHistory[type].loading = false
+            }
+        },
+
+        // 重置浏览记录状态
+        resetBrowseHistory(type = null) {
+            if (type) {
+                this.browseHistory[type] = {
+                    list: [],
+                    total: 0,
+                    loading: false,
+                    hasMore: true
+                }
+            } else {
+                // 重置所有类型
+                this.browseHistory = {
+                    comics: { list: [], total: 0, loading: false, hasMore: true },
+                    books: { list: [], total: 0, loading: false, hasMore: true },
+                    posts: { list: [], total: 0, loading: false, hasMore: true },
+                    cartoons: { list: [], total: 0, loading: false, hasMore: true },
+                }
             }
         }
     },
