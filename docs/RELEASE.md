@@ -1,38 +1,23 @@
 ## Change
 
-> [!important]
->
-> - 本次更新修改了应用ID，不会覆盖之前的0.x版本
->
-> - 可以将`C:\Users\你的用户名\AppData\Roaming\io.github.caolib.copymanga`文件夹下所有配置文件迁移到`io.github.caolib.copymanga`
->
-> - 已下载的漫画数据在安装路径下的downloads文件夹，这个迁移后不保证能正常使用（如果你下载了很多数据不想丢失可以先用旧版本）
-
-
 ### feat
-- [223b928] ✨ feat: 添加动画下载功能
-- [5501bd8] ✨ feat: 添加动画下载与本地章节检测，重构漫画检测功能
-- [df7507b] ✨ feat: 添加漫画暂停下载和继续功能
-- [b152275] ✨ feat: 添加暂停、继续动画下载功能
+- [81fa87c] ✨ feat: 添加托盘图标
+- [5364c35] ✨ feat: 添加托盘开关设置
+- [faf9315] ✨ feat: 重构个人中心界面，添加除漫画外的其他类型的各个浏览记录
+- [156e45f] ✨ feat: 登录注册接口修改，新增添加账号按钮
 
 ### fix
-- [f3b5272] 🐛 fix: 修复自动登录功能
-- [688aa99] 🐛 fix: 修复应用重启前未关闭转发服务导致端口占用问题
-- [300826b] 🐛 fix: 完成漫画、动画下载及检测
-- [66e7946] 🐛 fix: 修复本地漫画下载界面
-- [1ebc39e] 🐛 fix: 修复本地漫画加载逻辑
-- [bde2935] 🐛 fix: 修复背景颜色显示
-- [e13ca95] 🐛 fix: 修复顶部刷新按钮导致界面加载失败的问题
-- [18d4693] 🐛 fix: 修复检测视频动画逻辑
-- [8be3dcf] 🐛 fix: 修复本地漫画封面显示
+- [473e23f] 🐛 fix: 修复窗口状态组件警告
+- [bb1b76c] 🐛 fix: 修复主界面警告
 
 ### others
-- [8701dd6] Update README.md
-- [a8ea53c] 📄 docs: update doc
-- [d017de7] 📄 docs: update README
-- [a3d2d21] 🌈 style: 优化多个界面，优化代码风格
-- [0a6d620] 🦄 refactor: 应用改名为doki
+- [44c21a8] 📄 docs: update README
+- [1855ef8] 📄 docs: update plans
+- [71e1b33] 🌈 style: 修改logo
+- [8bdaaea] 🌈 style: 禁用rust导入未使用警告
+- [b7404ab] 🌈 style: 优化界面
+- [953c170] 🌈 style: 优化登录界面
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v0.9.6...v1.0.0)
+📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v1.0.0...v1.0.1)
 
