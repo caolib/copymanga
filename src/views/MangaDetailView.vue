@@ -90,7 +90,7 @@
                     </a-button>
 
                     <!-- 批量下载按钮 -->
-                    <a-dropdown>
+                    <a-dropdown v-show="showDownloadControls">
                         <template #overlay>
                             <a-menu>
                                 <a-menu-item key="download-current-page" @click="downloadCurrentPage">
@@ -136,6 +136,11 @@
                             取消收藏
                         </a-button>
                     </template>
+
+                    <!-- 下载章节控制按钮 -->
+                    <a-button @click="toggleDownloadControls" size="small">
+                        {{ showDownloadControls ? '隐藏下载' : '下载章节' }}
+                    </a-button>
 
                     <a-button @click="fetchMangaData" size="small">刷新数据</a-button>
                 </a-space>
@@ -193,8 +198,8 @@
 
                         <!-- 下载状态和操作按钮 -->
                         <div class="chapter-actions" style="width: 100%; display: flex; flex-direction: column;">
-                            <!-- 按钮区域 -->
-                            <div
+                            <!-- 按钮区域 - 仅在显示下载控制时显示 -->
+                            <div v-show="showDownloadControls"
                                 style="display: flex; justify-content: center; align-items: center; gap: 4px; margin-bottom: 8px;">
                                 <!-- 下载按钮 -->
                                 <a-button
@@ -233,7 +238,7 @@
                             </div>
 
                             <!-- 下载进度条 (在下载中、暂停中或部分下载时显示) -->
-                            <div v-if="chapterDownloadStatus[chapter.id] === 'downloading' || chapterDownloadStatus[chapter.id] === 'partial' || chapterDownloadStatus[chapter.id] === 'pausing'"
+                            <div v-if="showDownloadControls && (chapterDownloadStatus[chapter.id] === 'downloading' || chapterDownloadStatus[chapter.id] === 'partial' || chapterDownloadStatus[chapter.id] === 'pausing')"
                                 style="width: 100%;">
                                 <a-progress :percent="chapterDownloadProgress[chapter.id] || 0"
                                     :status="chapterDownloadProgress[chapter.id] >= 100 ? 'success' : 'active'"
@@ -333,6 +338,7 @@ const {
     submitCommentLoading,
     chapterDownloadStatus,
     chapterDownloadProgress,
+    showDownloadControls,
 
     // 计算属性
     isLoggedIn,
@@ -341,6 +347,7 @@ const {
     // 方法
     shouldShowDeleteButton,
     toggleSortOrder,
+    toggleDownloadControls,
     goToChapter,
     goToAuthorPage,
     startReading,

@@ -69,7 +69,7 @@
                                                             <a-progress :stroke-color="{
                                                                 '0%': '#108ee9',
                                                                 '100%': '#87d068',
-                                                            }" :percent="Number(item.progress).toFixed(3)"
+                                                            }" :percent="Number(item.progress).toFixed(2)"
                                                                 :status="getProgressStatus(item.status)"
                                                                 :stroke-width="6" :show-info="true" />
                                                             <div class="progress-info">
@@ -77,8 +77,8 @@
                                                                     '准备下载...' }}</span>
                                                                 <span class="download-size" v-if="item.downloadedSize">
                                                                     {{ formatFileSize(item.downloadedSize) }}{{
-                                                                    item.totalSize ? ' / ' +
-                                                                    formatFileSize(item.totalSize) : '' }}
+                                                                        item.totalSize ? ' / ' +
+                                                                            formatFileSize(item.totalSize) : '' }}
                                                                 </span>
                                                             </div>
                                                         </div>

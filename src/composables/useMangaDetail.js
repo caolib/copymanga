@@ -50,6 +50,7 @@ export function useMangaDetail() {
     const chapterDownloadStatus = ref({}) // 章节下载状态：'downloading', 'downloaded', 'partial', 'error', 'paused'
     const chapterDownloadProgress = ref({}) // 章节下载进度
     const chapterUuidMapping = ref({}) // 章节ID -> { mangaUuid, chapterUuid } 映射，用于暂停/继续功能
+    const showDownloadControls = ref(false) // 控制是否显示下载操作按钮
 
     // 计算属性
     const isLoggedIn = computed(() => userStore.isLoggedIn)
@@ -65,6 +66,10 @@ export function useMangaDetail() {
     // 业务逻辑函数
     const toggleSortOrder = () => {
         isAscending.value = !isAscending.value
+    }
+
+    const toggleDownloadControls = () => {
+        showDownloadControls.value = !showDownloadControls.value
     }
 
     const goToChapter = (chapter) => {
@@ -637,6 +642,7 @@ export function useMangaDetail() {
         submitCommentLoading,
         chapterDownloadStatus,
         chapterDownloadProgress,
+        showDownloadControls,
 
         // 计算属性
         isLoggedIn,
@@ -645,6 +651,7 @@ export function useMangaDetail() {
         // 方法
         shouldShowDeleteButton,
         toggleSortOrder,
+        toggleDownloadControls,
         goToChapter,
         goToAuthorPage,
         startReading,
