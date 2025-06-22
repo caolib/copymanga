@@ -177,7 +177,7 @@ function searchCartoon(q, limit = 18, offset = 0) {
  * @param {boolean} resumeDownload 是否断点续传
  * @returns {Promise}
  */
-async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, onProgress, resumeDownload = false) {
+async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo) {
     return getVideoByChapterId(pathWord, chapterId, line).then(response => {
         if (response && response.code === 200 && response.results) {
             const chapterData = response.results.chapter
@@ -190,15 +190,19 @@ async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, on
                 chapterUuid: chapterData.uuid,
                 chapterName: chapterData.name,
                 videoUrl: chapterData.video,
-                cover: chapterData.v_cover,
+                // 优先使用动画主封面，如果没有再使用章节封面
+                cover: (chapterInfo.cartoonDetail && chapterInfo.cartoonDetail.cover) ?
+                    chapterInfo.cartoonDetail.cover :
+                    (chapterData.v_cover || cartoonData.cover || '/logo.png'),
                 videoFile: `${chapterData.name}.mp4`, // 添加视频文件名
                 fileSize: chapterData.filesize || 0, // 添加文件大小
+                startTime: new Date().toISOString(), // 添加开始时间
                 // 使用传递的动画详情，如果没有则使用API返回的基本信息
                 cartoonDetail: chapterInfo.cartoonDetail || {
                     uuid: cartoonData.uuid,
                     name: cartoonData.name,
                     path_word: cartoonData.path_word,
-                    cover: '',
+                    cover: cartoonData.cover || '',
                     author: null,
                     theme: [],
                     status: null,
@@ -208,13 +212,14 @@ async function downloadCartoonChapter(pathWord, chapterId, line, chapterInfo, on
                 }
             }
 
-            // 开始下载
-            return cartoonDownloadManager.downloadChapter(downloadInfo, onProgress, resumeDownload)
+            // 将任务添加到下载管理器
+            return cartoonDownloadManager.addDownloadTask(downloadInfo)
         } else {
             throw new Error('获取视频数据失败：服务器返回错误响应')
         }
     }).catch(error => {
-        console.error('下载动画章节失败:', error)
+        console.error('添加下载任务失败:', error)
+        throw error
     })
 }
 

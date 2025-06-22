@@ -202,7 +202,15 @@ fn main() {
             download::get_local_cartoon_detail,
             download::get_local_cartoon_chapters,
             download::open_local_video_directory,
-            download::debug_find_downloaded_files
+            download::debug_find_downloaded_files,
+            download::get_active_download_tasks,
+            download::save_download_task,
+            download::update_download_task_status,
+            download::update_download_task_progress,
+            download::remove_download_task,
+            download::cancel_cartoon_download,
+            download::cleanup_completed_tasks,
+            download::get_download_task_stats
         ])
         .setup(|_app| {
             println!("Tauri 应用已启动，等待前端初始化配置文件...");
