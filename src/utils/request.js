@@ -4,6 +4,7 @@ import { message } from 'ant-design-vue'
 import { getServerConfig } from '@/config/server-config'
 import router from '@/router'
 import { getCurrentDate } from './date'
+import { notification } from 'ant-design-vue'
 
 // 创建 axios 实例
 const request = axios.create({
@@ -61,10 +62,11 @@ request.interceptors.response.use(
 
         if (response.status === 210) {
             if (response.data.message.includes('破解')) {
-                Notification.warn({
-                    title: '封禁提示',
-                    message: '账号被检测到使用了第三方软件：' + response.data.message,
-                    placement: 'bottomRight'
+                notification.warn({
+                    message: '账号暂时封禁，建议先切换其他账号或者退出重新登录',
+                    description: response.data.message,
+                    placement: 'bottomRight',
+                    duration: null,
                 })
                 return Promise.reject(new Error('需要配置请求头'))
             }
