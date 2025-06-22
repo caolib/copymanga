@@ -2,7 +2,9 @@
     <div class="login-container">
         <a-card class="login-card" :bordered="false">
             <template #title>
-                <div class="card-title">{{ isLogin ? '登录' : '注册' }}</div>
+                <div class="app-logo">
+                    <img src="/logo.png" alt="应用图标" class="logo-image" />
+                </div>
             </template>
 
             <!-- 切换按钮 -->
