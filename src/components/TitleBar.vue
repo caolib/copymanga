@@ -121,6 +121,7 @@ import { useAppStore } from '../stores/app'
 import { message } from 'ant-design-vue'
 import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled, DownloadOutlined, PlusOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { goBack, goForward } from '@/router/go'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -138,14 +139,6 @@ const userInfo = computed(() => userStore.userInfo)
 // 注入全局刷新方法
 const refreshCurrentRoute = inject('refreshCurrentRoute')
 
-// 前进后退功能
-const goBack = () => {
-    router.go(-1)
-}
-
-const goForward = () => {
-    router.go(1)
-}
 
 // 刷新功能
 const refreshPage = () => {

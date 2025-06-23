@@ -232,6 +232,7 @@ import { useUserStore } from '../stores/user'
 import { loadUIConfig, updateReaderConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
 import { formatDate } from '../utils/date'
 import { message } from 'ant-design-vue'
+import { goBack } from '../router/go'
 import LazyImg from '@/components/LazyImg.vue'
 
 const route = useRoute()
@@ -359,19 +360,7 @@ const hasNextChapter = computed(() => {
     return mangaStore.hasNextChapter;
 })
 
-// 返回漫画详情页
-const goBack = () => {
-    // 检查是否是本地章节（通过查询参数中的mangaUuid判断）
-    const mangaUuid = route.query.mangaUuid;
 
-    if (mangaUuid) {
-        // 本地章节，返回到本地漫画详情页
-        router.push(`/localmanga/${mangaUuid}`);
-    } else {
-        // 在线章节，返回到在线漫画详情页
-        router.push(`/manga/${mangaStore.pathWord || route.params.pathWord}`);
-    }
-}
 
 // 通用章节导航函数
 const navigateToChapter = (direction) => {
