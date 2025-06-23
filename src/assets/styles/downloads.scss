@@ -180,13 +180,13 @@
 
 // 任务列表样式
 .task-downloads {
+
     .task-header {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 24px;
         padding: 16px;
-        background: $bg-color-white;
         border-radius: $border-radius-medium;
         border: 1px solid $border-color;
 
