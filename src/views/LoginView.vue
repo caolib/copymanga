@@ -77,6 +77,10 @@
                 <a-alert v-if="errorMessage" type="error" :message="errorMessage" show-icon />
             </a-form>
         </a-card>
+
+        <div v-if="yiyan" class="yiyan-box">
+            <span>{{ yiyan }}</span>
+        </div>
     </div>
 </template>
 
@@ -87,6 +91,7 @@ import { login, register } from '../api/login'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 import { CloseOutlined } from '@ant-design/icons-vue'
+import axios from 'axios'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -164,6 +169,8 @@ onMounted(() => {
             }, 500)
         }
     }
+
+    getYiyan()
 })
 
 // 处理用户名选择变化
@@ -299,6 +306,16 @@ const handleRegister = () => {
         }
     }).finally(() => {
         loading.value = false
+    })
+}
+
+
+const yiyan = ref('')
+const getYiyan = () => {
+    axios.get('https://v1.hitokoto.cn/?c=b').then(response => {
+        yiyan.value = `${response.data.hitokoto} - ${response.data.from}`
+    }).catch(error => {
+        console.error('获取一言失败:', error)
     })
 }
 

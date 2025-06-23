@@ -217,6 +217,23 @@
             .play-status {
                 margin-top: 12px;
             }
+
+            .video-url-link {
+                cursor: pointer;
+                font-size: 12px;
+                word-break: break-all;
+                line-height: 1.4;
+                display: block;
+                margin-top: 4px;
+                width: fit-content;
+                text-decoration: none;
+                transition: text-decoration 0.2s ease;
+
+                &:hover {
+                    text-decoration: underline;
+                    text-decoration-style: dashed;
+                }
+            }
         }
 
         .ant-result {

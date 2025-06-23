@@ -31,14 +31,7 @@
             </a-form>
         </a-card>
 
-        <!-- 系统设置 -->
-        <a-card title="系统设置" class="setting-card">
-            <a-form layout="vertical">
-                <a-form-item label="托盘图标">
-                    <a-switch v-model:checked="systemConfig.showTrayIcon" @change="onTrayIconToggle" />
-                </a-form-item>
-            </a-form>
-        </a-card>
+
 
         <!-- 阅读器设置 -->
         <a-card title="阅读器设置" class="setting-card">
@@ -85,6 +78,16 @@
                 </a-form-item>
             </a-form>
         </a-card>
+
+        <!-- 系统设置 -->
+        <a-card title="系统设置" class="setting-card">
+            <a-form layout="vertical">
+                <a-form-item label="托盘图标">
+                    <a-switch v-model:checked="systemConfig.showTrayIcon" @change="onTrayIconToggle" />
+                </a-form-item>
+            </a-form>
+        </a-card>
+
     </div>
 </template>
 
@@ -124,46 +127,29 @@ const onFontFamilyChange = () => {
 
 const onDarkImageMaskChange = async () => {
     // 暗色模式图片遮罩变化时立即保存
-    try {
-        const { updateThemeConfig } = await import('@/config/ui-config')
-        await updateThemeConfig({
-            darkImageMask: themeConfig.darkImageMask
-        })
-        console.log('暗色模式图片遮罩设置已保存')
-    } catch (error) {
+    const { updateThemeConfig } = await import('@/config/ui-config')
+    await updateThemeConfig({
+        darkImageMask: themeConfig.darkImageMask
+    }).catch(error => {
         console.error('保存暗色模式图片遮罩设置失败:', error)
-        message.error('保存设置失败')
-    }
+    })
 }
 
 // 系统配置相关方法
 const onTrayIconToggle = async () => {
-    try {
-        // 立即保存设置
-        await updateSystemConfig({
-            showTrayIcon: systemConfig.showTrayIcon
+    // 立即保存设置
+    await updateSystemConfig({
+        showTrayIcon: systemConfig.showTrayIcon
+    })
+
+    // 根据设置启用或禁用托盘图标
+    if (systemConfig.showTrayIcon) {
+        await initTray().catch(error => {
+            console.error('初始化托盘图标失败:', error)
+            systemConfig.showTrayIcon = false
         })
-
-        // 根据设置启用或禁用托盘图标
-        if (systemConfig.showTrayIcon) {
-            const success = await initTray()
-            if (success) {
-                message.success('托盘图标已启用')
-            } else {
-                message.error('托盘图标启用失败')
-                systemConfig.showTrayIcon = false
-            }
-        } else {
-            await destroyTray()
-            message.info('托盘图标已禁用')
-        }
-
-        console.log('托盘图标设置已保存')
-    } catch (error) {
-        console.error('保存托盘图标设置失败:', error)
-        message.error('保存设置失败')
-        // 回滚设置
-        systemConfig.showTrayIcon = !systemConfig.showTrayIcon
+    } else {
+        await destroyTray()
     }
 }
 

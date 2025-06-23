@@ -17,12 +17,15 @@
 
                 <!-- 视频信息 -->
                 <div class="video-info" v-if="videoData.name">
-                    <a-typography-title :level="3" style="cursor: pointer; color: #1890ff;" @click="goToCartoonDetail">
+                    <a-typography-title :level="3" style="cursor: pointer; color: #1890ff;width: fit-content;"
+                        @click="goToCartoonDetail">
                         {{ cartoonData.name }}
                     </a-typography-title>
-                    <a-typography-title :level="4" type="secondary">{{ videoData.name }}</a-typography-title>
-
-
+                    <a-tooltip v-if="videoData.video" title="点击复制">
+                        <a-typography-text type="secondary" @click="copyVideoUrl" class="video-url-link">
+                            {{ videoData.video }}
+                        </a-typography-text>
+                    </a-tooltip>
                     <!-- 章节列表 -->
                     <div class="chapters-list" v-if="cartoonPlayerStore.currentCartoonChapters.length">
                         <a-typography-text strong style="margin-bottom: 12px; display: block;">
@@ -378,6 +381,17 @@ const tryNextLine = () => {
 const retryLoad = () => {
     error.value = ''
     fetchVideoData(currentLine.value)
+}
+
+// 复制视频地址到剪贴板
+const copyVideoUrl = async () => {
+    try {
+        await navigator.clipboard.writeText(videoData.value.video)
+        message.success('视频地址已复制到剪贴板')
+    } catch (error) {
+        console.error('复制失败:', error)
+        message.error('复制失败，请手动复制')
+    }
 }
 
 // 播放指定章节
