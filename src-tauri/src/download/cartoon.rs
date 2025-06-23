@@ -65,63 +65,6 @@ pub async fn resume_cartoon_download(
     Ok(true)
 }
 
-#[tauri::command]
-pub async fn check_incomplete_cartoon_download(
-    cartoon_uuid: String,
-    chapter_uuid: String,
-    app_handle: AppHandle,
-) -> Result<IncompleteCartoonDownloadResult, String> {
-    let resource_dir = app_handle
-        .path()
-        .resource_dir()
-        .map_err(|e| format!("获取资源目录失败: {}", e))?;
-
-    // 检查可能的路径
-    let possible_paths = vec![
-        resource_dir
-            .join("downloads")
-            .join("cartoons")
-            .join(&cartoon_uuid)
-            .join(&chapter_uuid),
-        resource_dir
-            .join("downloads")
-            .join("anime")
-            .join(&cartoon_uuid)
-            .join(&chapter_uuid),
-    ];
-
-    for chapter_path in possible_paths {
-        if !chapter_path.exists() {
-            continue;
-        }
-
-        let info_file = chapter_path.join("info.json");
-        if !info_file.exists() {
-            // 有目录但没有info.json，检查是否有部分下载的文件
-            let files = std::fs::read_dir(&chapter_path)
-                .map_err(|e| format!("读取章节目录失败: {}", e))?
-                .filter_map(|entry| entry.ok())
-                .count();
-
-            if files > 0 {
-                return Ok(IncompleteCartoonDownloadResult {
-                    has_incomplete: true,
-                    downloaded: Some(0), // 无法确定确切进度
-                    total: None,
-                    percent: Some(0.0),
-                });
-            }
-        }
-    }
-
-    Ok(IncompleteCartoonDownloadResult {
-        has_incomplete: false,
-        downloaded: None,
-        total: None,
-        percent: None,
-    })
-}
-
 // ========== 动画下载相关代码 ==========
 
 #[tauri::command]

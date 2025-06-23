@@ -1,6 +1,5 @@
-use crate::download::types::*;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde_json::Value;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager};
 use tokio::fs;
@@ -172,35 +171,6 @@ pub async fn update_download_task_status(
     Ok(())
 }
 
-/// 更新任务进度
-#[tauri::command]
-pub async fn update_download_task_progress(
-    app_handle: AppHandle,
-    cartoon_uuid: String,
-    chapter_uuid: String,
-    progress: f64,
-) -> Result<(), String> {
-    let mut tasks = read_all_tasks(&app_handle).await?;
-
-    let task_key = format!("{}|{}", cartoon_uuid, chapter_uuid);
-    let now = chrono::Utc::now().format("%Y-%m-%d %H:%M:%S").to_string();
-
-    if let Some(task) = tasks
-        .iter_mut()
-        .find(|t| format!("{}|{}", t.cartoon_uuid, t.chapter_uuid) == task_key)
-    {
-        task.progress = progress;
-        task.updated_at = now;
-
-        save_all_tasks(&app_handle, &tasks).await?;
-        // 不打印进度更新日志，避免过于频繁
-    } else {
-        return Err(format!("未找到任务: {}", task_key));
-    }
-
-    Ok(())
-}
-
 /// 删除任务
 #[tauri::command]
 pub async fn remove_download_task(
@@ -241,51 +211,4 @@ pub async fn cancel_cartoon_download(
     )
     .await;
     remove_download_task(app_handle, cartoon_uuid, chapter_uuid).await
-}
-
-/// 清理已完成的任务
-#[tauri::command]
-pub async fn cleanup_completed_tasks(app_handle: AppHandle) -> Result<usize, String> {
-    let mut tasks = read_all_tasks(&app_handle).await?;
-
-    let original_len = tasks.len();
-    tasks.retain(|task| !matches!(task.status.as_str(), "completed" | "error" | "cancelled"));
-
-    let cleaned_count = original_len - tasks.len();
-
-    if cleaned_count > 0 {
-        save_all_tasks(&app_handle, &tasks).await?;
-        println!("已清理 {} 个已完成的任务", cleaned_count);
-    }
-
-    Ok(cleaned_count)
-}
-
-/// 获取任务统计信息
-#[tauri::command]
-pub async fn get_download_task_stats(app_handle: AppHandle) -> Result<Value, String> {
-    let tasks = read_all_tasks(&app_handle).await?;
-
-    let mut downloading = 0;
-    let mut paused = 0;
-    let mut completed = 0;
-    let mut error = 0;
-
-    for task in &tasks {
-        match task.status.as_str() {
-            "downloading" => downloading += 1,
-            "paused" => paused += 1,
-            "completed" => completed += 1,
-            "error" | "cancelled" => error += 1,
-            _ => {}
-        }
-    }
-
-    Ok(json!({
-        "total": tasks.len(),
-        "downloading": downloading,
-        "paused": paused,
-        "completed": completed,
-        "error": error
-    }))
 }

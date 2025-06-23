@@ -195,34 +195,6 @@ pub async fn download_chapter(
 }
 
 #[tauri::command]
-pub async fn get_downloaded_chapter_info(
-    app_handle: AppHandle,
-    manga_uuid: String,
-    group_path_word: String,
-    chapter_uuid: String,
-) -> Result<Option<ChapterInfo>, String> {
-    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
-    let chapter_path = manga_downloads_path
-        .join(&manga_uuid)
-        .join(&group_path_word)
-        .join(&chapter_uuid);
-    let info_file = chapter_path.join("info.json");
-
-    if !info_file.exists() {
-        return Ok(None);
-    }
-
-    let content = fs::read_to_string(&info_file)
-        .await
-        .map_err(|e| format!("读取章节信息失败: {}", e))?;
-
-    let chapter_info: ChapterInfo =
-        serde_json::from_str(&content).map_err(|e| format!("解析章节信息失败: {}", e))?;
-
-    Ok(Some(chapter_info))
-}
-
-#[tauri::command]
 pub async fn get_local_chapter_images(
     app_handle: AppHandle,
     manga_uuid: String,

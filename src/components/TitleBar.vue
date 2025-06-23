@@ -60,7 +60,7 @@
                 <router-link to="/topics" class="nav-link">专题</router-link>
                 <router-link to="/settings" class="nav-link settings-link">
                     <SettingFilled class="nav-icon" />
-                    <span class="settings-text">设置</span>
+                    <span class="settings-text"></span>
                     <span v-if="hasUpdate" class="nav-update-indicator"></span>
                 </router-link>
                 <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
