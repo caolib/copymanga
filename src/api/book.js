@@ -109,16 +109,20 @@ function getBookChapterContent(pathWord, chapterId) {
  * @param {string} keyword 关键词
  * @param {number} limit 每页数量
  * @param {number} offset 偏移量
+ * @param {string} q_type 搜索类型 '' - 全部, 'name' - 名称, 'author' - 作者
  * @returns {Promise} 搜索结果
  */
-function searchBooks(keyword, limit = 12, offset = 0) {
-    return request.get('/api/kb/web/searchbd/books', {
+function searchBooks(keyword, limit = 18, offset = 0, q_type = '') {
+    return request.get('/api/v3/search/books', {
         params: {
             q: keyword,
-            q_type: '',
+            q_type,
             offset,
             platform: 3,
             limit
+        },
+        headers: {
+            'platform': '3'
         }
     })
 }

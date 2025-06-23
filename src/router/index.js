@@ -10,7 +10,7 @@ const routes = [
     {
         path: '/books',
         name: 'BookHome',
-        component: () => import('../views/BookHomeView.vue')
+        component: () => import('../views/BookTabView.vue')
     },
     {
         path: '/posts',
