@@ -9,6 +9,81 @@ export class CartoonDownloadManager {
         this.activeDownloads = new Map()
         this.pausedDownloads = new Map()
         this.progressIntervals = new Map() // 添加进度监控管理
+        this.progressData = new Map() // 存储实时进度数据
+        this.progressTexts = new Map() // 存储进度文本
+        this.downloadSizes = new Map() // 存储下载大小信息 {downloadedSize, totalSize}
+        this.initialized = false // 标记是否已初始化
+    }
+
+    /**
+     * 初始化下载管理器，恢复正在进行的下载任务
+     */
+    async initialize() {
+        if (this.initialized) {
+            return
+        }
+
+        try {
+            console.log('初始化下载管理器，恢复下载任务状态...')
+
+            // 从后端获取正在进行的下载任务
+            const activeTasks = await invoke('get_active_download_tasks')
+
+            for (const task of activeTasks) {
+                const key = `${task.cartoon_uuid}|${task.chapter_uuid}`
+
+                const taskInfo = {
+                    cartoonUuid: task.cartoon_uuid,
+                    cartoonName: task.cartoon_name,
+                    chapterUuid: task.chapter_uuid,
+                    chapterName: task.chapter_name,
+                    videoUrl: task.video_url,
+                    cover: task.cover,
+                    cartoonDetail: task.cartoon_detail,
+                    startTime: task.start_time
+                }
+
+                // 检查任务进度，如果已完成则自动清理
+                if (task.progress >= 100 || task.status === 'completed') {
+                    console.log(`发现已完成任务 ${task.chapter_name}，自动清理`)
+                    try {
+                        await this.removeTask(task.cartoon_uuid, task.chapter_uuid)
+                    } catch (error) {
+                        console.error('清理完成任务失败:', error)
+                    }
+                    continue
+                }
+
+                // 根据任务状态恢复到对应的Map
+                if (task.status === 'downloading') {
+                    this.activeDownloads.set(key, taskInfo)
+                    // 恢复进度监控
+                    this.startProgressMonitoring(task.cartoon_uuid, task.chapter_uuid, (progressInfo) => {
+                        this.progressData.set(key, progressInfo.percent || 0)
+                        this.progressTexts.set(key, progressInfo.current_file || progressInfo.currentFile || '下载中...')
+                        this.downloadSizes.set(key, {
+                            downloadedSize: progressInfo.downloadedSize || 0,
+                            totalSize: progressInfo.totalSize || 0
+                        })
+                    })
+                } else if (task.status === 'paused') {
+                    this.pausedDownloads.set(key, taskInfo)
+                    this.progressData.set(key, task.progress || 0)
+                    this.progressTexts.set(key, '已暂停')
+                    this.downloadSizes.set(key, {
+                        downloadedSize: 0,
+                        totalSize: 0
+                    })
+                }
+            }
+
+            this.initialized = true
+            console.log(`下载管理器初始化完成，恢复了 ${activeTasks.length} 个任务`)
+
+        } catch (error) {
+            console.error('初始化下载管理器失败:', error)
+            this.initialized = true // 即使失败也标记为已初始化，避免重复尝试
+        }
     }
 
     /**
@@ -109,6 +184,15 @@ export class CartoonDownloadManager {
 
                 console.log('动画下载进度:', progress) // 添加调试日志
 
+                // 存储进度数据
+                const key = `${cartoonUuid}|${chapterUuid}`
+                this.progressData.set(key, progress.percent || 0)
+                this.progressTexts.set(key, progress.current_file || '下载中...')
+                this.downloadSizes.set(key, {
+                    downloadedSize: progress.downloaded_size || 0,
+                    totalSize: progress.total_size || 0
+                })
+
                 // 处理进度数据，使用后端返回的进度信息
                 const percent = progress.percent || 0
 
@@ -120,8 +204,13 @@ export class CartoonDownloadManager {
                     totalSize: progress.total_size || 0
                 })
 
-                // 如果下载完成或出错，停止监控
-                if (progress.completed || progress.status === 'completed' || progress.status === 'error' || progress.status === 'paused') {
+                // 如果下载完成或出错，停止监控并处理任务状态
+                if (progress.completed || progress.status === 'completed' || progress.percent >= 100) {
+                    console.log(`任务 ${cartoonUuid}|${chapterUuid} 下载完成，自动清理`)
+                    this.stopProgressMonitoring(cartoonUuid, chapterUuid)
+                    // 自动清理已完成的任务
+                    await this.removeTask(cartoonUuid, chapterUuid)
+                } else if (progress.status === 'error' || progress.status === 'paused') {
                     this.stopProgressMonitoring(cartoonUuid, chapterUuid)
                 }
             } catch (error) {
@@ -172,6 +261,17 @@ export class CartoonDownloadManager {
                 this.activeDownloads.delete(chapterKey)
             }
 
+            // 更新后端任务状态
+            try {
+                await invoke('update_download_task_status', {
+                    cartoonUuid,
+                    chapterUuid,
+                    status: 'paused'
+                })
+            } catch (error) {
+                console.error('更新任务状态失败:', error)
+            }
+
             console.log('暂停动画下载成功:', chapterKey)
         } catch (error) {
             console.error('暂停动画下载失败:', error)
@@ -198,6 +298,27 @@ export class CartoonDownloadManager {
                 this.activeDownloads.set(chapterKey, this.pausedDownloads.get(chapterKey))
                 this.pausedDownloads.delete(chapterKey)
             }
+
+            // 更新后端任务状态
+            try {
+                await invoke('update_download_task_status', {
+                    cartoonUuid,
+                    chapterUuid,
+                    status: 'downloading'
+                })
+            } catch (error) {
+                console.error('更新任务状态失败:', error)
+            }
+
+            // 重新启动进度监控
+            this.startProgressMonitoring(cartoonUuid, chapterUuid, (progressInfo) => {
+                this.progressData.set(chapterKey, progressInfo.percent || 0)
+                this.progressTexts.set(chapterKey, progressInfo.current_file || progressInfo.currentFile || '下载中...')
+                this.downloadSizes.set(chapterKey, {
+                    downloadedSize: progressInfo.downloadedSize || 0,
+                    totalSize: progressInfo.totalSize || 0
+                })
+            })
 
             console.log('继续动画下载成功:', chapterKey)
         } catch (error) {
@@ -290,6 +411,256 @@ export class CartoonDownloadManager {
             console.error('获取已下载动画列表失败:', error)
             throw error
         }
+    }
+
+    /**
+     * 获取活跃下载任务
+     * @returns {Map}
+     */
+    async getActiveDownloads() {
+        await this.initialize()
+        return this.activeDownloads
+    }
+
+    /**
+     * 获取暂停的下载任务
+     * @returns {Map}
+     */
+    async getPausedDownloads() {
+        await this.initialize()
+        return this.pausedDownloads
+    }
+
+    /**
+     * 获取下载进度
+     * @param {string} cartoonUuid 动画UUID
+     * @param {string} chapterUuid 章节UUID
+     * @returns {number}
+     */
+    getProgress(cartoonUuid, chapterUuid) {
+        const key = `${cartoonUuid}|${chapterUuid}`
+        return this.progressData.get(key) || 0
+    }
+
+    /**
+     * 获取下载进度文本
+     * @param {string} cartoonUuid 动画UUID
+     * @param {string} chapterUuid 章节UUID
+     * @returns {string}
+     */
+    getProgressText(cartoonUuid, chapterUuid) {
+        const key = `${cartoonUuid}|${chapterUuid}`
+        return this.progressTexts.get(key) || '准备下载...'
+    }
+
+    /**
+     * 获取下载大小信息
+     * @param {string} cartoonUuid 动画UUID
+     * @param {string} chapterUuid 章节UUID
+     * @returns {object} {downloadedSize, totalSize}
+     */
+    getDownloadSizes(cartoonUuid, chapterUuid) {
+        const key = `${cartoonUuid}|${chapterUuid}`
+        return this.downloadSizes.get(key) || { downloadedSize: 0, totalSize: 0 }
+    }
+
+    /**
+     * 删除任务
+     * @param {string} cartoonUuid 动画UUID
+     * @param {string} chapterUuid 章节UUID
+     */
+    async removeTask(cartoonUuid, chapterUuid) {
+        const key = `${cartoonUuid}|${chapterUuid}`
+
+        try {
+            // 先停止下载（如果正在下载）
+            if (this.activeDownloads.has(key)) {
+                await invoke('cancel_cartoon_download', {
+                    cartoonUuid,
+                    chapterUuid
+                })
+            }
+
+            // 从后端删除任务记录
+            await invoke('remove_download_task', {
+                cartoonUuid,
+                chapterUuid
+            })
+        } catch (error) {
+            console.error('从后端删除任务失败:', error)
+            // 即使后端删除失败，也继续清理前端状态
+        }
+
+        // 从活跃和暂停任务中移除
+        this.activeDownloads.delete(key)
+        this.pausedDownloads.delete(key)
+
+        // 清理进度监控
+        if (this.progressIntervals.has(key)) {
+            clearInterval(this.progressIntervals.get(key))
+            this.progressIntervals.delete(key)
+        }
+
+        // 清理进度数据
+        this.progressData.delete(key)
+        this.progressTexts.delete(key)
+        this.downloadSizes.delete(key)
+
+        console.log(`任务 ${key} 已删除`)
+    }
+
+    /**
+     * 添加下载任务
+     * @param {Object} downloadInfo 下载信息
+     */
+    async addDownloadTask(downloadInfo) {
+        await this.initialize() // 确保已初始化
+
+        const {
+            cartoonUuid,
+            cartoonName,
+            chapterUuid,
+            chapterName,
+            videoUrl,
+            cover,
+            cartoonDetail,
+            startTime
+        } = downloadInfo
+
+        const chapterKey = `${cartoonUuid}|${chapterUuid}`
+
+        // 检查是否已经在下载队列中
+        if (this.activeDownloads.has(chapterKey) || this.pausedDownloads.has(chapterKey)) {
+            throw new Error('该章节已在下载队列中')
+        }
+
+        // 添加到活跃下载列表，但不立即开始下载
+        const taskInfo = {
+            cartoonUuid,
+            cartoonName,
+            chapterUuid,
+            chapterName,
+            videoUrl,
+            cover,
+            cartoonDetail,
+            startTime: startTime || new Date().toISOString()
+        }
+
+        this.activeDownloads.set(chapterKey, taskInfo)
+
+        // 设置初始进度
+        this.progressData.set(chapterKey, 0)
+        this.progressTexts.set(chapterKey, '准备下载...')
+        this.downloadSizes.set(chapterKey, {
+            downloadedSize: 0,
+            totalSize: 0
+        })
+
+        try {
+            // 将任务保存到后端存储
+            await invoke('save_download_task', {
+                cartoonUuid,
+                cartoonName,
+                chapterUuid,
+                chapterName,
+                videoUrl,
+                cover: cover || '',
+                cartoonDetail: cartoonDetail || {},
+                status: 'downloading',
+                progress: 0,
+                startTime: taskInfo.startTime
+            })
+        } catch (error) {
+            console.error('保存下载任务到后端失败:', error)
+            // 如果保存失败，也继续执行，只是任务不会被持久化
+        }
+
+        console.log('下载任务已添加到队列:', chapterKey)
+
+        // 立即开始下载（可以考虑后续添加队列管理）
+        this.startDownload(downloadInfo)
+
+        return { success: true, message: '任务已添加到下载队列' }
+    }
+
+    /**
+     * 开始下载任务
+     * @param {Object} downloadInfo 下载信息
+     */
+    async startDownload(downloadInfo) {
+        const {
+            cartoonUuid,
+            cartoonName,
+            chapterUuid,
+            chapterName,
+            videoUrl,
+            cover,
+            cartoonDetail
+        } = downloadInfo
+
+        const chapterKey = `${cartoonUuid}|${chapterUuid}`
+
+        try {
+            // 启动进度监控
+            this.startProgressMonitoring(cartoonUuid, chapterUuid, (progressInfo) => {
+                // 更新进度数据
+                this.progressData.set(chapterKey, progressInfo.percent || 0)
+                this.progressTexts.set(chapterKey, progressInfo.current_file || progressInfo.currentFile || '下载中...')
+                this.downloadSizes.set(chapterKey, {
+                    downloadedSize: progressInfo.downloadedSize || 0,
+                    totalSize: progressInfo.totalSize || 0
+                })
+
+                // 检查是否下载完成
+                if (progressInfo.status === 'completed' || progressInfo.percent >= 100) {
+                    this.activeDownloads.delete(chapterKey)
+                    console.log('下载完成:', chapterKey)
+                }
+            })
+
+            // 调用后端下载API
+            const result = await invoke('download_cartoon_chapter', {
+                cartoonUuid,
+                cartoonName,
+                chapterUuid,
+                chapterName,
+                videoUrl,
+                videoFile: downloadInfo.videoFile || `${chapterName}.mp4`,
+                fileSize: downloadInfo.fileSize || 0,
+                cover,
+                cartoonDetail
+            })
+
+            // 下载完成，从活跃列表移除
+            this.activeDownloads.delete(chapterKey)
+            this.stopProgressMonitoring(cartoonUuid, chapterUuid)
+
+            console.log('动画下载完成:', chapterKey)
+            return result
+        } catch (error) {
+            // 下载失败，从活跃列表移除
+            this.activeDownloads.delete(chapterKey)
+            this.stopProgressMonitoring(cartoonUuid, chapterUuid)
+            console.error('动画下载失败:', error)
+            throw error
+        }
+    }
+
+    /**
+     * 重置初始化状态，用于强制重新初始化
+     */
+    resetInitialization() {
+        this.initialized = false
+        this.activeDownloads.clear()
+        this.pausedDownloads.clear()
+        this.progressData.clear()
+        this.progressTexts.clear()
+        this.downloadSizes.clear()
+        // 清理所有进度监控
+        this.progressIntervals.forEach((intervalId) => {
+            clearInterval(intervalId)
+        })
+        this.progressIntervals.clear()
     }
 }
 

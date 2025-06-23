@@ -35,44 +35,13 @@
     background-color: $success-color;
 }
 
-/* 自定义滚动条样式 */
-/* Webkit浏览器滚动条 */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-    border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-    background-color: rgba(0, 0, 0, 0.1);
-    border-radius: 3px;
-    transition: background-color 0.2s ease;
-
-    &:hover {
-        background-color: rgba(0, 0, 0, 0.2);
-    }
-}
-
-/* 暗色主题滚动条 */
-[data-theme="dark"] {
-    ::-webkit-scrollbar-thumb {
-        background-color: rgba(255, 255, 255, 0.1);
-
-        &:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-    }
-}
-
+/* 全局滚动条样式 */    
 * {
-    scrollbar-width: thin;
     scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
+
+    @include dark-theme {
+        scrollbar-color: rgb(255 255 255 / 10%) #ffffff00;
+    }
 }
 
-[data-theme="dark"] * {
-    scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
-}
+

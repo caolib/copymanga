@@ -178,6 +178,159 @@
     }
 }
 
+// 任务列表样式
+.task-downloads {
+    .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        padding: 16px;
+        background: $bg-color-white;
+        border-radius: $border-radius-medium;
+        border: 1px solid $border-color;
+
+        .task-stats {
+            display: flex;
+            gap: 32px;
+
+            .ant-statistic {
+                .ant-statistic-title {
+                    color: $text-secondary;
+                    font-size: 14px;
+                }
+
+                .ant-statistic-content {
+                    color: $text-primary;
+                    font-size: 20px;
+                    font-weight: 600;
+                }
+            }
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 48px 0;
+    }
+
+    .task-list {
+        .ant-list-item {
+            padding: 16px;
+            border-bottom: 1px solid $border-color;
+
+            &:hover {
+                background-color: $bg-color-hover;
+            }
+        }
+
+        .task-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+
+            .content-name {
+                font-size: 16px;
+                font-weight: 600;
+                color: $text-primary;
+            }
+
+            .chapter-name {
+                font-size: 14px;
+                color: $text-secondary;
+                padding: 2px 8px;
+                background: $bg-color-light;
+                border-radius: $border-radius-small;
+            }
+        }
+
+        .task-description {
+            .task-progress {
+                margin-bottom: 12px;
+
+                .ant-progress {
+                    margin-bottom: 8px;
+                }
+
+                .progress-info {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    font-size: 12px;
+
+                    .progress-text {
+                        color: $text-secondary;
+                        flex: 1;
+                    }
+
+                    .download-size {
+                        color: $text-tertiary;
+                        font-size: 11px;
+                        margin-left: 8px;
+                        white-space: nowrap;
+                    }
+
+                    .task-status {
+                        padding: 2px 6px;
+                        border-radius: $border-radius-small;
+                        font-weight: 500;
+
+                        &.downloading {
+                            background: $bg-color-hover;
+                            color: $primary-color;
+                        }
+
+                        &.paused {
+                            background: #fff7e6;
+                            color: $warning-color;
+                        }
+
+                        &.completed {
+                            background: #f6ffed;
+                            color: $success-color;
+                        }
+
+                        &.error {
+                            background: #fff2f0;
+                            color: $error-color;
+                        }
+                    }
+                }
+            }
+
+            .task-meta {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                font-size: 12px;
+                color: $text-tertiary;
+
+                .task-type {
+                    padding: 2px 6px;
+                    background: $bg-color-light;
+                    border-radius: $border-radius-small;
+                }
+
+                .task-time {
+                    color: $text-tertiary;
+                }
+            }
+        }
+
+        .ant-list-item-action {
+            .ant-btn {
+                margin-left: 8px;
+            }
+        }
+    }
+}
+
 // 深色模式适配
 .downloads-container {
     @include dark-theme {

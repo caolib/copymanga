@@ -12,63 +12,6 @@ pub fn get_webview_data_dir(app_handle: AppHandle) -> Result<String, String> {
     Ok(webview_dir.to_string_lossy().to_string())
 }
 
-/// 清除 WebView 缓存
-#[tauri::command]
-pub async fn clear_webview_cache(app_handle: AppHandle) -> Result<String, String> {
-    use std::thread;
-    use std::time::Duration;
-
-    let app_local_data_dir = app_handle
-        .path()
-        .app_local_data_dir()
-        .map_err(|e| format!("无法获取应用本地数据目录: {}", e))?;
-
-    let webview_dir = app_local_data_dir.join("EBWebView");
-
-    if !webview_dir.exists() {
-        return Ok("WebView 缓存目录不存在".to_string());
-    }
-
-    let cache_size = calculate_dir_size(&webview_dir).unwrap_or(0);
-    let cache_size_mb = cache_size as f64 / 1024.0 / 1024.0;
-
-    // 尝试多次删除，处理文件被占用的情况
-    let max_retries = 3;
-    let mut deleted_files = 0;
-    let mut total_files = 0;
-
-    for retry in 0..max_retries {
-        match clear_directory_contents(&webview_dir, &mut deleted_files, &mut total_files) {
-            Ok(_) => {
-                return Ok(format!(
-                    "已清除 {:.2} MB 的 WebView 缓存 ({}/{} 个文件)",
-                    cache_size_mb, deleted_files, total_files
-                ));
-            }
-            Err(_e) if retry < max_retries - 1 => {
-                // 等待一下再重试
-                thread::sleep(Duration::from_millis(500));
-                continue;
-            }
-            Err(e) => {
-                if deleted_files > 0 {
-                    return Ok(format!(
-                        "部分清除成功：删除了 {}/{} 个文件。剩余文件可能正在被使用，建议重启应用后再次清理。错误: {}",
-                        deleted_files, total_files, e
-                    ));
-                } else {
-                    return Err(format!(
-                        "清除缓存失败: {}。请关闭应用的所有窗口后重试，或重启应用后再次尝试。",
-                        e
-                    ));
-                }
-            }
-        }
-    }
-
-    Ok("缓存清理完成".to_string())
-}
-
 /// 获取 WebView 缓存大小
 #[tauri::command]
 pub fn get_cache_size(app_handle: AppHandle) -> Result<u64, String> {

@@ -12,6 +12,20 @@
                         <div class="description">
                             doki是一个集漫画、轻小说、动画于一体的桌面应用，提供简洁快速的漫画阅读体验。
                         </div>
+                        <div class="credits-info">
+                            <a-typography-text type="secondary" style="font-size: 12px;">
+                                作者：<a-button type="link" size="small" @click="openLink('authorGithub')"
+                                    style="padding: 0; height: auto; font-size: 12px; margin: 0;">caolib</a-button> |
+                                开源协议：AGPL-3.0
+                            </a-typography-text>
+                            <br />
+                            <a-typography-text type="secondary" style="font-size: 12px;">
+                                应用图标取自<a-button type="link" size="small" @click="openLink('iconAuthor')"
+                                    style="padding: 0; height: auto; font-size: 12px; margin: 0;">薄荷银针</a-button>在Pixiv上的作品<a-button
+                                    type="link" size="small" @click="openLink('iconSource')"
+                                    style="padding: 0; height: auto; font-size: 12px; margin: 0;">《草，但是是山田凉的食物》</a-button>
+                            </a-typography-text>
+                        </div>
                     </div>
                 </div>
 
@@ -22,10 +36,10 @@
                         <a-button type="primary" @click="checkUpdate" :loading="checkingUpdate" :icon="h(SyncOutlined)">
                             检查更新
                         </a-button>
-                        <a-button @click="openRepository" :icon="h(GithubOutlined)">
+                        <a-button @click="openLink('repository')" :icon="h(GithubOutlined)">
                             项目仓库
                         </a-button>
-                        <a-button @click="openFeedback" :icon="h(BugOutlined)">
+                        <a-button @click="openLink('feedback')" :icon="h(BugOutlined)">
                             问题反馈
                         </a-button>
                     </a-space>
@@ -36,7 +50,9 @@
                     <a-alert message="使用声明" type="warning" show-icon style="margin-bottom: 12px;">
                         <template #description>
                             <div>
-                                <p>本应用是基于拷贝漫画官方API的第三方客户端，免费无广告，仅供学习交流使用。所有漫画内容版权归原作者和平台所有。</p>
+                                <p>本应用是基于<a-button type="link" @click="openLink('copyManga')"
+                                        style="padding: 0; height: auto; font-size: inherit;">拷贝漫画</a-button>官方API的第三方客户端，免费无广告，仅供学习交流使用。所有漫画内容版权归原作者和平台所有。
+                                </p>
                                 <p style="margin-bottom: 0; color: #d46b08; font-weight: 500;">
                                     <strong>⚠️
                                         重要提醒：</strong>本应用可能包含不适宜未成年人观看的内容，请用户自行判断并承担相应责任。使用本应用即表示您已年满18周岁，并同意遵守当地法律法规。
@@ -99,7 +115,7 @@
 
                 <div style="margin-top: 16px;">
                     <a-space wrap>
-                        <a-button v-if="updateInfo.hasUpdate" @click="openDownloadPage" type="default"
+                        <a-button v-if="updateInfo.hasUpdate" @click="openLink('downloadPage')" type="default"
                             :icon="h(DownloadOutlined)">
                             前往下载
                         </a-button>
@@ -134,11 +150,9 @@ import {
 import { getVersion } from '@tauri-apps/api/app'
 import { checkForUpdates } from '@/api/github'
 import { useAppStore } from '@/stores/app'
-import { openExternalUrl } from '@/utils/external-link'
+import { openLink, openExternalUrl } from '@/utils/external-link'
 import { formatDate } from '@/utils/date'
 
-// github仓库地址
-const repoUrl = 'https://github.com/caolib/doki'
 
 // 关于页面信息
 const appVersion = ref('')
@@ -167,16 +181,6 @@ onMounted(() => {
         })
     }
 })
-
-// 打开仓库地址
-const openRepository = () => {
-    openExternalUrl(repoUrl, '打开项目仓库失败')
-}
-
-// 打开反馈页面
-const openFeedback = () => {
-    openExternalUrl(`${repoUrl}/issues`, '打开反馈页面失败')
-}
 
 // 获取应用版本
 const fetchAppVersion = () => {
@@ -214,11 +218,6 @@ const checkUpdate = () => {
 const onAutoCheckUpdateChange = (checked) => {
     appStore.setAutoCheckUpdate(checked)
     message.success(checked ? '已启用启动时自动检查更新' : '已禁用启动时自动检查更新')
-}
-
-// 打开下载页面
-const openDownloadPage = () => {
-    openExternalUrl(`${repoUrl}/releases/latest`, '打开下载页面失败')
 }
 
 // 打开完整更新日志

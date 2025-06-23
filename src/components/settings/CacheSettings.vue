@@ -157,9 +157,7 @@ const forceClearCache = () => {
 // 打开缓存目录
 const openCacheDirectory = () => {
     if (cacheDirectory.value) {
-        invoke('open_file_explorer', { path: cacheDirectory.value }).then(() => {
-            message.success('已打开缓存目录')
-        }).catch(error => {
+        invoke('open_file_explorer', { path: cacheDirectory.value }).catch(error => {
             console.error('打开缓存目录失败:', error)
             message.error('打开缓存目录失败')
         })

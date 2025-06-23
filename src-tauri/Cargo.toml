@@ -37,7 +37,6 @@ futures-util = "0.3"
 futures = "0.3"
 tauri = { version = "2", features = [
     "protocol-asset",
-    "devtools",
     "tray-icon",
     "image-png",
 ] }

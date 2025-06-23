@@ -76,66 +76,12 @@
                 </a-form-item>
             </a-form> </a-card>
 
-        <!-- 轻小说API源配置 -->
-        <a-card title="轻小说API源配置" class="setting-card" id="book-api-config">
-            <a-form layout="vertical">
-                <!-- 当前轻小说API源选择 -->
-                <a-form-item label="当前轻小说API源">
-                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange"
-                        style="width:fit-content">
-                        <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
-                            {{ source }}
-                        </a-select-option>
-                    </a-select>
-                    <div class="help-text">
-                        选择要使用的轻小说API源
-                    </div>
-                </a-form-item>
-
-                <!-- 添加新轻小说API源 -->
-                <a-form-item label="添加新轻小说API源">
-                    <a-input-group compact>
-                        <a-input v-model:value="newBookApiSource.url"
-                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: fit-content" />
-                        <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
-                            style="width: fit-content">
-                            添加
-                        </a-button>
-                    </a-input-group>
-                </a-form-item>
-
-                <!-- 轻小说API源管理 -->
-                <a-form-item label="轻小说API源管理">
-                    <a-list :data-source="bookApiSources" bordered size="small">
-                        <template #renderItem="{ item, index }">
-                            <a-list-item>
-                                <template #actions>
-                                    <a-button v-if="bookApiSources.length > 1" type="text" danger size="small"
-                                        :icon="h(DeleteOutlined)" @click="removeBookApiSource(index)"
-                                        :loading="removingBookIndex === index"></a-button>
-                                </template>
-                                <a-list-item-meta>
-                                    <template #title>
-                                        <span :class="{ 'current-source': index === currentBookApiIndex }">
-                                            {{ item }}
-                                            <a-tag v-if="index === currentBookApiIndex" color="orange"
-                                                size="small">当前</a-tag>
-                                        </span>
-                                    </template>
-                                </a-list-item-meta>
-                            </a-list-item>
-                        </template>
-                    </a-list>
-                </a-form-item>
-            </a-form>
-        </a-card>
-
         <!-- 请求头配置 -->
         <a-card title="请求头配置" class="setting-card" id="headers-config">
             <a-form layout="vertical">
                 <a-alert type="info" show-icon style="width:fit-content;margin-bottom:10px">
                     <template #message>
-                        配置API请求时的自定义请求头
+                        自定义API请求头（一般不要动，除非你清楚自己在干什么）
                     </template>
                 </a-alert>
 
@@ -205,7 +151,67 @@
             </a-form>
         </a-card>
 
-        <a-card title="当前状态" class="setting-card" id="status">
+        <!-- 轻小说API源配置 -->
+        <a-card title="轻小说API源配置" class="setting-card" id="book-api-config">
+            <a-form layout="vertical">
+                <a-alert type="info" show-icon style="width:fit-content;margin-bottom:10px">
+                    <template #message>
+                        官方目前好像就只有这一个源
+                    </template>
+                </a-alert>
+                <!-- 当前轻小说API源选择 -->
+                <a-form-item label="当前轻小说API源">
+
+                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange"
+                        style="width:fit-content">
+                        <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
+                            {{ source }}
+                        </a-select-option>
+                    </a-select>
+                    <div class="help-text">
+                        选择要使用的轻小说API源
+                    </div>
+                </a-form-item>
+
+                <!-- 添加新轻小说API源 -->
+                <a-form-item label="添加新轻小说API源">
+                    <a-input-group compact>
+                        <a-input v-model:value="newBookApiSource.url"
+                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: fit-content" />
+                        <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
+                            style="width: fit-content">
+                            添加
+                        </a-button>
+                    </a-input-group>
+                </a-form-item>
+
+                <!-- 轻小说API源管理 -->
+                <a-form-item label="轻小说API源管理">
+                    <a-list :data-source="bookApiSources" bordered size="small">
+                        <template #renderItem="{ item, index }">
+                            <a-list-item>
+                                <template #actions>
+                                    <a-button v-if="bookApiSources.length > 1" type="text" danger size="small"
+                                        :icon="h(DeleteOutlined)" @click="removeBookApiSource(index)"
+                                        :loading="removingBookIndex === index"></a-button>
+                                </template>
+                                <a-list-item-meta>
+                                    <template #title>
+                                        <span :class="{ 'current-source': index === currentBookApiIndex }">
+                                            {{ item }}
+                                            <a-tag v-if="index === currentBookApiIndex" color="orange"
+                                                size="small">当前</a-tag>
+                                        </span>
+                                    </template>
+                                </a-list-item-meta>
+                            </a-list-item>
+                        </template>
+                    </a-list>
+                </a-form-item>
+            </a-form>
+        </a-card>
+
+        <a-card class="setting-card" id="status">
             <div class="restart-section">
                 <a-alert v-if="appStore.needsRestart" type="warning" message="配置已更改，需要重启应用以生效" show-icon
                     style="margin-bottom: 16px" />
@@ -217,7 +223,6 @@
                     <a-button @click="openConfigDirectory" :icon="h(SettingOutlined)" :loading="openingDirectory">
                         打开配置目录
                     </a-button>
-                    <span class="restart-help">重启应用以应用所有配置更改</span>
                 </a-space>
             </div>
         </a-card>
@@ -410,14 +415,14 @@ const onSubmitServer = () => {
 const handleRestart = async () => {
     restarting.value = true
 
-    try {
-        appStore.setNeedsRestart(false)
-        await restartApp()
-    } catch (error) {
+    appStore.setNeedsRestart(false)
+
+    await restartApp().catch(error => {
         console.error('重启应用失败:', error)
         message.error('重启应用失败')
         restarting.value = false
-    }
+    })
+
 }
 
 // 新增：API源切换

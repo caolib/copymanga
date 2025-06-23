@@ -4,9 +4,6 @@
             <div class="settings-layout">
                 <!-- 侧边栏导航 -->
                 <div class="settings-sidebar">
-                    <div class="settings-title">
-                        <h1>设置</h1>
-                    </div>
                     <a-menu v-model:selectedKeys="selectedMenu" mode="inline" style="border-right: 0">
                         <a-menu-item key="server" :icon="h(CloudServerOutlined)">
                             服务设置

@@ -242,34 +242,7 @@ export class DownloadManager {
         }
     }
 
-    /**
-     * 获取下载统计信息
-     */
-    async getDownloadStats() {
-        try {
-            return await invoke('get_download_stats')
-        } catch (error) {
-            console.error('获取下载统计失败:', error)
-            return {
-                totalMangas: 0,
-                totalChapters: 0,
-                totalImages: 0,
-                totalSize: 0
-            }
-        }
-    }
 
-    /**
-     * 清理无效的下载数据
-     */
-    async cleanupDownloads() {
-        try {
-            return await invoke('cleanup_downloads')
-        } catch (error) {
-            console.error('清理下载数据失败:', error)
-            throw error
-        }
-    }
 
     /**
      * 获取已下载的漫画列表

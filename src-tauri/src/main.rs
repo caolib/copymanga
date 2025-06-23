@@ -176,7 +176,6 @@ fn main() {
             stop_proxy_server,
             check_proxy_server_status,
             cache::get_webview_data_dir,
-            cache::clear_webview_cache,
             cache::get_cache_size,
             cache::open_file_explorer,
             cache::force_clear_webview_cache,
@@ -186,7 +185,6 @@ fn main() {
             download::check_incomplete_download,
             download::check_chapter_download_detail,
             download::get_download_progress,
-            download::get_downloaded_chapter_info,
             download::get_local_chapter_images,
             download::delete_downloaded_chapter,
             download::get_downloaded_manga_list,
@@ -195,14 +193,18 @@ fn main() {
             download::download_cartoon_chapter,
             download::pause_cartoon_download,
             download::resume_cartoon_download,
-            download::check_incomplete_cartoon_download,
             download::get_cartoon_download_progress,
             download::delete_downloaded_cartoon_chapter,
             download::get_downloaded_cartoon_list,
             download::get_local_cartoon_detail,
             download::get_local_cartoon_chapters,
             download::open_local_video_directory,
-            download::debug_find_downloaded_files
+            download::debug_find_downloaded_files,
+            download::get_active_download_tasks,
+            download::save_download_task,
+            download::update_download_task_status,
+            download::remove_download_task,
+            download::cancel_cartoon_download
         ])
         .setup(|_app| {
             println!("Tauri 应用已启动，等待前端初始化配置文件...");

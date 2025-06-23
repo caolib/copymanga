@@ -3,6 +3,30 @@
 $white: #ffffff;
 $black: #000000;
 
+// 登录界面专用颜色
+$login-primary-start: #667eea;
+$login-primary-end: #764ba2;
+$login-primary-alpha-10: rgba(102, 126, 234, 0.1);
+$login-primary-alpha-20: rgba(102, 126, 234, 0.2);
+$login-primary-alpha-40: rgba(102, 126, 234, 0.4);
+$login-primary-shadow-hover: rgba(118, 75, 162, 0.5);
+
+// 深色模式下的紫色渐变（保持紫色系一致性，但稍微亮一些适配深色背景）
+$login-dark-primary-start: #8b9aff;
+$login-dark-primary-end: #9370db;
+$login-dark-primary-alpha-10: rgba(139, 154, 255, 0.1);
+$login-dark-primary-alpha-20: rgba(139, 154, 255, 0.2);
+$login-dark-primary-alpha-40: rgba(139, 154, 255, 0.4);
+$login-dark-primary-shadow-hover: rgba(147, 112, 219, 0.5);
+
+// 登录界面输入框颜色
+$login-input-bg: #f8fafc;
+$login-input-border: #e1e8ed;
+$login-input-placeholder: #94a3b8;
+
+// 登录界面文本颜色
+$login-text-secondary: #64748b;
+
 // 主色调
 $primary-color: #1890ff;
 $primary-hover: #40a9ff;

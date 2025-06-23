@@ -58,27 +58,22 @@ const compareVersions = (version1, version2) => {
  * @returns {Promise<Object>} 包含是否有更新和发布信息
  */
 const checkForUpdates = async (currentVersion) => {
-    try {
-        // 参数验证
-        if (!currentVersion) {
-            throw new Error('当前版本号不能为空');
-        }
-
-        const release = await getLatestRelease();
-        const latestVersion = release.tag_name;
-
-        const hasUpdate = compareVersions(latestVersion, currentVersion) > 0;
-
-        return {
-            hasUpdate,
-            currentVersion,
-            latestVersion,
-            release: release // 总是返回release信息，不管是否有更新
-        };
-    } catch (error) {
-        console.error('检查更新失败:', error);
-        throw new Error('检查更新失败');
+    // 参数验证
+    if (!currentVersion) {
+        throw new Error('当前版本号不能为空');
     }
+
+    const release = await getLatestRelease();
+    const latestVersion = release.tag_name;
+
+    const hasUpdate = compareVersions(latestVersion, currentVersion) > 0;
+
+    return {
+        hasUpdate,
+        currentVersion,
+        latestVersion,
+        release: release // 总是返回release信息，不管是否有更新
+    };
 };
 
 export {
