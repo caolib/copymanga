@@ -28,7 +28,9 @@
                     </a-space>
                 </a-form-item>
             </a-form>
-        </a-card> <a-card title="API 域名配置" class="setting-card" id="api-config">
+        </a-card>
+
+        <a-card title="API源配置" class="setting-card" id="api-config">
             <a-form layout="vertical"> <!-- 当前API源选择 -->
                 <a-form-item label="当前API源">
                     <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" style="width: fit-content">
@@ -50,7 +52,42 @@
                             添加
                         </a-button>
                     </a-input-group>
-                </a-form-item> <!-- API源管理 -->
+                </a-form-item>
+
+                <!-- 官方API源 -->
+                <a-collapse @change="onCollapseChange" class="setting-card-collapse">
+                    <a-collapse-panel key="official-sources" header="从官方源添加">
+                        <template #extra>
+                            <a-button type="link" size="small" @click.stop="fetchOfficialApiSources"
+                                :loading="loadingOfficialSources">
+                                <template #icon>
+                                    <ReloadOutlined />
+                                </template>
+                                刷新
+                            </a-button>
+                        </template>
+                        <a-spin :spinning="loadingOfficialSources">
+                            <div v-if="officialApiSources.length === 0" class="empty-list">
+                                <a-empty description="暂无官方源" :image="false" />
+                            </div>
+                            <a-list v-else :data-source="officialApiSources" bordered size="small">
+                                <template #renderItem="{ item }">
+                                    <a-list-item>
+                                        <template #actions>
+                                            <a-button type="link" @click="quickAddApiSource(item)"
+                                                :disabled="isApiSourceExist(item)">
+                                                {{ isApiSourceExist(item) ? '已添加' : '添加' }}
+                                            </a-button>
+                                        </template>
+                                        {{ item }}
+                                    </a-list-item>
+                                </template>
+                            </a-list>
+                        </a-spin>
+                    </a-collapse-panel>
+                </a-collapse>
+
+                <!-- API源管理 -->
                 <a-form-item label="API源管理">
                     <a-list :data-source="apiSources" bordered size="small">
                         <template #renderItem="{ item, index }">
@@ -74,7 +111,8 @@
                         </template>
                     </a-list>
                 </a-form-item>
-            </a-form> </a-card>
+            </a-form>
+        </a-card>
 
         <!-- 请求头配置 -->
         <a-card title="请求头配置" class="setting-card" id="headers-config">
@@ -258,6 +296,7 @@ import { appDataDir } from '@tauri-apps/api/path'
 import { restartApp } from '@/utils/restart-helper'
 import { exportHeaders as exportHeadersConfig, importHeaders as importHeadersConfig } from '@/utils/export-helper'
 import { PlusOutlined, DeleteOutlined, SettingOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons-vue'
+import { getOfficialApiSources } from '@/api/api-source'
 
 const serverForm = ref({
     serverPort: 5001
@@ -278,6 +317,11 @@ const currentApiIndex = ref(0)
 const newApiSource = ref({ url: '' })
 const addingSource = ref(false)
 const removingIndex = ref(-1)
+
+// 新增：官方API源相关状态
+const officialApiSources = ref([])
+const loadingOfficialSources = ref(false)
+const activeCollapseKey = ref([])
 
 // 新增：轻小说API源管理相关状态
 const bookApiSources = ref([])
@@ -771,6 +815,50 @@ const stopServer = async () => {
     }
 }
 
+// 新增: 折叠面板变化
+const onCollapseChange = async (keys) => {
+    if (keys.includes('official-sources') && officialApiSources.value.length === 0) {
+        await fetchOfficialApiSources()
+    }
+}
+
+// 新增: 获取官方API源
+const fetchOfficialApiSources = async () => {
+    loadingOfficialSources.value = true
+    try {
+        // 使用API获取官方源
+        const sources = await getOfficialApiSources()
+        officialApiSources.value = sources
+    } catch (error) {
+        message.error('获取官方API源失败')
+        console.error('获取官方API源失败:', error)
+        // 获取失败时显示空列表
+        officialApiSources.value = []
+    } finally {
+        loadingOfficialSources.value = false
+    }
+}
+
+// 新增: 快速添加API源
+const quickAddApiSource = async (url) => {
+    // 检查是否已存在
+    if (isApiSourceExist(url)) {
+        message.info('该API源已存在')
+        return
+    }
+
+    // 使用现有逻辑添加
+    newApiSource.value.url = url
+    await addNewApiSource()
+    // 添加后清空输入框，以免影响手动添加
+    newApiSource.value.url = ''
+}
+
+// 新增: 检查API源是否存在
+const isApiSourceExist = (url) => {
+    return apiSources.value.includes(url)
+}
+
 onMounted(() => {
     loadConfig()
     startStatusCheck()
@@ -782,3 +870,8 @@ onUnmounted(() => {
 </script>
 
 <style src="../../assets/styles/server-settings.scss" lang="scss" scoped></style>
+<style lang="scss" scoped>
+.setting-card-collapse {
+    margin-bottom: 16px;
+}
+</style>

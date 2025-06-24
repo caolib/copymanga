@@ -512,7 +512,7 @@ async fn download_hls_stream(
             }
         }
 
-        eprintln!("下载片段 {}/{}: {}", index + 1, segment_urls.len(), url);
+        // eprintln!("下载片段 {}/{}: {}", index + 1, segment_urls.len(), url);
 
         let segment_response = client
             .get(url)

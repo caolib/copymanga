@@ -7,5 +7,5 @@ pub mod cartoon;
 
 pub use manga::*;
 pub use task_manager::*;
-pub use types::*;
+pub use types::*; 
 pub use cartoon::*;
