@@ -240,6 +240,15 @@ async function getLocalMangaChapters(mangaUuid) {
 }
 
 /**
+ * 删除整个本地漫画（包括所有章节和详情）
+ * @param {string} mangaUuid 漫画UUID
+ * @returns {Promise<boolean>}
+ */
+async function deleteLocalManga(mangaUuid) {
+    return await downloadManager.deleteLocalManga(mangaUuid)
+}
+
+/**
  * 检查章节下载的详细状态
  * @param {string} mangaUuid 漫画UUID
  * @param {string} chapterUuid 章节UUID
@@ -266,5 +275,6 @@ export {
     getDownloadedMangaList,
     getLocalMangaDetail,
     getLocalMangaChapters,
+    deleteLocalManga,
     checkChapterDownloadDetail
 }

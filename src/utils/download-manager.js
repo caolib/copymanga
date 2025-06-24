@@ -242,7 +242,28 @@ export class DownloadManager {
         }
     }
 
+    /**
+     * 删除整个本地漫画（包括所有章节和详情）
+     * @param {string} mangaUuid 漫画UUID
+     * @returns {Promise<boolean>}
+     */
+    async deleteLocalManga(mangaUuid) {
+        try {
+            const result = await invoke('delete_local_manga', {
+                mangaUuid
+            })
 
+            if (result.success) {
+                console.log('漫画删除成功:', result.message)
+                return true
+            } else {
+                throw new Error(result.message)
+            }
+        } catch (error) {
+            console.error('删除漫画失败:', error)
+            throw error
+        }
+    }
 
     /**
      * 获取已下载的漫画列表

@@ -80,7 +80,7 @@
 
                         <!-- 批量删除按钮 -->
                         <a-popconfirm title="批量删除确认" :description="`此操作将删除 ${chapters.length} 个章节，确定？`" ok-text="确认删除"
-                            cancel-text="取消" ok-type="danger" @confirm="deleteAllChapters" v-if="chapters.length > 0">
+                            cancel-text="取消" ok-type="danger" @confirm="deleteAllChapters">
                             <a-button danger size="small" :icon="h(DeleteOutlined)">
                                 批量删除
                             </a-button>
@@ -178,31 +178,6 @@ const displayChapters = computed(() => {
     }
 })
 
-// 监听章节列表变化，当章节为空时删除漫画详情并返回下载中心
-watch(chapters, (newChapters) => {
-    if (newChapters.length === 0 && !chaptersLoading.value && !loading.value) {
-        // 延迟执行，确保UI已更新
-        setTimeout(() => {
-            message.info('所有章节已删除，即将删除动画详情并返回下载中心')
-            // 删除动画本身
-            deleteLocalCartoon(cartoon.value.uuid)
-                .then(() => {
-                    setTimeout(() => {
-                        goBack()
-                    }, 1000)
-                })
-                .catch(error => {
-                    console.error('删除动画详情失败:', error)
-                    message.error('删除动画详情失败: ' + error.message)
-                    // 即使删除失败也返回下载中心
-                    setTimeout(() => {
-                        goBack()
-                    }, 1000)
-                })
-        }, 100)
-    }
-}, { deep: true })
-
 // 页面生命周期
 onMounted(() => {
     loadCartoonData()
@@ -232,14 +207,16 @@ const loadCartoonData = async () => {
         // 如果章节列表为空，删除动画详情并返回下载中心
         if (chaptersList.length === 0) {
             message.info('该动画没有已下载的章节，即将删除动画详情并返回下载中心')
-
-            await deleteLocalCartoon(cartoonUuid).then(() => {
-                goBack()
-            }).catch(error => {
+            try {
+                await deleteLocalCartoon(cartoonUuid)
+                message.success('动画删除成功')
+            } catch (error) {
                 console.error('删除动画详情失败:', error)
                 message.error('删除动画详情失败: ' + error.message)
-            })
-
+            }
+            setTimeout(() => {
+                goBack()
+            }, 1000)
             return
         }
 
@@ -293,38 +270,17 @@ const deleteChapter = async (chapter) => {
     }
 }
 
-// 批量删除所有章节
+// 批量删除所有章节（修改为直接删除动画文件夹）
 const deleteAllChapters = async () => {
-    if (chapters.value.length === 0) {
-        message.info('没有可删除的章节')
-        return
-    }
-
     try {
         chaptersLoading.value = true
-        message.loading('正在删除所有章节，请稍候...', 0)
+        message.loading('正在删除动画，请稍候...', 0)
 
-        // 创建所有章节的删除Promise
-        const deletePromises = chapters.value.map(chapter =>
-            deleteCartoonChapter(cartoon.value.uuid, chapter.chapter_uuid)
-        )
-
-        // 等待所有删除操作完成
-        await Promise.all(deletePromises)
+        // 直接删除动画本身
+        await deleteLocalCartoon(cartoon.value.uuid)
 
         message.destroy() // 关闭loading消息
-        message.success('所有章节删除成功')
-
-        // 清空章节列表
-        chapters.value = []
-
-        // 删除动画本身
-        try {
-            await deleteLocalCartoon(cartoon.value.uuid)
-        } catch (error) {
-            console.error('删除动画详情失败:', error)
-            message.error('删除动画详情失败: ' + error.message)
-        }
+        message.success('动画删除成功')
 
         // 延迟返回下载中心
         setTimeout(() => {
@@ -332,8 +288,8 @@ const deleteAllChapters = async () => {
         }, 1000)
     } catch (error) {
         message.destroy() // 关闭loading消息
-        console.error('批量删除章节失败:', error)
-        message.error('批量删除章节失败: ' + error.message)
+        console.error('删除动画失败:', error)
+        message.error('删除动画失败: ' + error.message)
 
         // 重新加载章节列表，查看还有哪些章节
         loadCartoonData()

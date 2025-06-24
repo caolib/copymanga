@@ -187,6 +187,7 @@ fn main() {
             download::get_download_progress,
             download::get_local_chapter_images,
             download::delete_downloaded_chapter,
+            download::delete_local_manga,
             download::get_downloaded_manga_list,
             download::get_local_manga_detail,
             download::get_local_manga_chapters,

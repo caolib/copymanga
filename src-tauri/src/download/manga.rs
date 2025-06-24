@@ -265,6 +265,29 @@ pub async fn delete_downloaded_chapter(
 }
 
 #[tauri::command]
+pub async fn delete_local_manga(
+    app_handle: AppHandle,
+    manga_uuid: String,
+) -> Result<Value, String> {
+    let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
+    let manga_path = manga_downloads_path.join(&manga_uuid);
+
+    if !manga_path.exists() {
+        return Err("本地漫画不存在".to_string());
+    }
+
+    // 删除整个漫画目录
+    fs::remove_dir_all(&manga_path)
+        .await
+        .map_err(|e| format!("删除漫画失败: {}", e))?;
+
+    Ok(json!({
+        "success": true,
+        "message": "漫画删除成功"
+    }))
+}
+
+#[tauri::command]
 pub async fn get_downloaded_manga_list(app_handle: AppHandle) -> Result<Vec<Value>, String> {
     let manga_downloads_path = get_manga_downloads_path(&app_handle).await?;
 

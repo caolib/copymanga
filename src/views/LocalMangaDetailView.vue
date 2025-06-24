@@ -112,6 +112,14 @@
                         <a-button @click="goBack" :icon="h(ArrowLeftOutlined)" size="small">
                             返回下载中心
                         </a-button>
+
+                        <!-- 批量删除按钮 -->
+                        <a-popconfirm title="批量删除确认" :description="`此操作将删除所有章节，确定？`" ok-text="确认删除" cancel-text="取消"
+                            ok-type="danger" @confirm="deleteAllChapters" v-if="chapters.length > 0">
+                            <a-button danger size="small" :icon="h(DeleteOutlined)">
+                                批量删除
+                            </a-button>
+                        </a-popconfirm>
                     </a-space>
                 </a-col>
             </a-row>
@@ -138,12 +146,7 @@
                         <a-card :hoverable="true" style="text-align:center; padding:0;" size="small"
                             :body-style="{ padding: '12px 6px' }" class="chapter-card">
 
-                            <!-- 下载完成标签 -->
-                            <a-tag color="success" class="download-status-tag">
-                                <template #icon>
-                                    <check-circle-outlined />
-                                </template>
-                            </a-tag>
+
 
                             <!-- 章节名称 -->
                             <div style="cursor:pointer; margin-bottom: 8px;" @click="readChapter(chapter)">
@@ -183,7 +186,7 @@ import { message } from 'ant-design-vue'
 import { ReloadOutlined, ArrowLeftOutlined, CheckCircleOutlined, DeleteOutlined } from '@ant-design/icons-vue'
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
-import { getLocalMangaDetail, getLocalMangaChapters } from '../api/manga'
+import { getLocalMangaDetail, getLocalMangaChapters, deleteLocalManga } from '../api/manga'
 import { downloadManager } from '../utils/download-manager'
 
 const router = useRouter()
@@ -292,6 +295,29 @@ const loadChapters = async (mangaUuid) => {
         if (chapters.value.length > 0) {
             const availableGroups = [...new Set(chapters.value.map(chapter => chapter.group_path_word || chapter.group || 'default'))]
             selectedGroup.value = availableGroups.includes('default') ? 'default' : availableGroups[0]
+        } else {
+            // 如果章节列表为空，删除漫画详情并返回下载中心
+            message.info('该漫画没有已下载的章节，即将删除漫画详情并返回下载中心')
+            try {
+                deleteLocalManga(mangaUuid).then(() => {
+                    message.success('漫画删除成功')
+                    setTimeout(() => {
+                        goBack()
+                    }, 1000)
+                }).catch(error => {
+                    console.error('删除漫画详情失败:', error)
+                    message.error('删除漫画详情失败: ' + error.message)
+                    setTimeout(() => {
+                        goBack()
+                    }, 1000)
+                })
+            } catch (error) {
+                console.error('删除漫画失败:', error)
+                message.error('删除漫画失败: ' + error.message)
+                setTimeout(() => {
+                    goBack()
+                }, 1000)
+            }
         }
     }).catch(error => {
         console.error('获取本地章节列表失败:', error)
@@ -340,6 +366,39 @@ const deleteChapter = async (chapter) => {
         console.error('删除章节失败:', error)
         message.error(`删除失败: ${error.message || '未知错误'}`)
     })
+}
+
+// 批量删除所有章节（修改为直接删除漫画文件夹）
+const deleteAllChapters = async () => {
+    if (chapters.value.length === 0) {
+        message.info('没有可删除的章节')
+        return
+    }
+
+    try {
+        chaptersLoading.value = true
+        message.loading('正在删除漫画，请稍候...', 0)
+
+        // 直接删除整个漫画文件夹
+        await deleteLocalManga(manga.value.uuid)
+
+        message.destroy() // 关闭loading消息
+        message.success('漫画删除成功')
+
+        // 延迟返回下载中心
+        setTimeout(() => {
+            goBack()
+        }, 1000)
+    } catch (error) {
+        message.destroy() // 关闭loading消息
+        console.error('删除漫画失败:', error)
+        message.error('删除漫画失败: ' + error.message)
+
+        // 重新加载章节列表，查看还有哪些章节
+        loadChapters(manga.value.uuid)
+    } finally {
+        chaptersLoading.value = false
+    }
 }
 
 // 返回下载中心
