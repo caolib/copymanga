@@ -42,6 +42,7 @@ body {
 .main-content {
     flex: 1;
     overflow-y: auto;
+    background-color: $white;
     padding: 65px $spacing-sm $spacing-sm $spacing-sm; /* 上边距为标题栏高度 + 20px */
     position: relative;
     height: calc(100vh - 65px); /* 确保高度正确 */

@@ -46,6 +46,24 @@ function getMangaGroupChapters(pathWord, groupPathWord = 'default', limit = 100,
 }
 
 /**
+ * 获取最新上架漫画
+ * @param {string} date 日期，格式为YYYY-MM-DD，默认为当前日期
+ * @param {number} limit 每页数量，默认18
+ * @param {number} offset 偏移量，默认0
+ * @returns {Promise} 最新漫画数据
+ */
+function getNewestManga(date = '', limit = 18, offset = 0) {
+    return request.get('/api/v3/update/newest', {
+        params: {
+            date,
+            limit,
+            offset,
+            platform: 3
+        }
+    });
+}
+
+/**
  * 获取漫画章节图片
  * @param {string} pathWord 漫画路径标识
  * @param {string} chapterId 章节ID
@@ -185,22 +203,8 @@ async function downloadChapter(pathWord, chapterId, chapterInfo, onProgress) {
         }
     }).catch(error => {
         console.error('下载章节失败:', error)
-        // 检查错误类型并提供更有意义的错误信息
-        if (error.message && error.message.includes('invoke')) {
-            throw new Error('文件系统操作失败，请检查应用权限')
-        } else if (error.message && error.message.includes('fetch')) {
-            throw new Error('网络请求失败，请检查网络连接')
-        } else if (error.code === 'ERR_NETWORK') {
-            throw new Error('网络连接失败，请检查代理服务器是否正常运行')
-        } else if (error.response && error.response.status === 502) {
-            throw new Error('代理服务器错误(502)，请稍后重试')
-        } else {
-            throw error
-        }
     })
 }
-
-// isChapterDownloaded 已删除，请使用 getLocalMangaChapters 批量获取本地章节
 
 /**
  * 获取已下载的章节信息
@@ -259,6 +263,39 @@ async function checkChapterDownloadDetail(mangaUuid, chapterUuid, groupPathWord 
     return await downloadManager.checkChapterDownloadDetail(mangaUuid, chapterUuid, groupPathWord)
 }
 
+/**
+ * 获取漫画发现列表
+ * @param {Object} params 请求参数
+ * @param {String} params.ordering 排序方式 -popular: 人气排序 -datetime_updated: 更新时间排序
+ * @param {Number} params.limit 每页数量
+ * @param {Number} params.offset 偏移量
+ * @param {String} params.theme 主题分类
+ * @param {String} params.top 地区分类
+ * @returns {Promise}
+ */
+function getMangaDiscover(params = {}) {
+    return request.get('/api/v3/comics', {
+        params: {
+            limit: 18,
+            offset: 0,
+            ordering: '-popular',
+            platform: 3,
+            ...params
+        }
+    })
+}
+
+/**
+ * 获取漫画过滤标签（主题、排序方式、地区）
+ * @returns {Promise}
+ */
+function getMangaFilterTags() {
+    // 由于没有专门的漫画标签接口，我们借用书籍标签接口，结构应该是类似的
+    return request.get('/api/v3/h5/filter/book/tags', {
+        params: { platform: 3 }
+    })
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
@@ -270,11 +307,13 @@ export {
     getHomeIndex,
     getAuthorMangaList,
     downloadChapter,
-    // isChapterDownloaded - 已删除，请使用 getLocalMangaChapters 批量获取本地章节
     getDownloadedChapterInfo,
     getDownloadedMangaList,
     getLocalMangaDetail,
     getLocalMangaChapters,
     deleteLocalManga,
+    getNewestManga,
+    getMangaDiscover,
+    getMangaFilterTags,
     checkChapterDownloadDetail
 }

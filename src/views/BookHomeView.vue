@@ -5,12 +5,12 @@
                 <div class="filter-label">排序方式</div>
                 <div class="filter-buttons">
                     <a-button :type="currentOrdering === '-popular' ? 'primary' : 'default'" size="small"
-                        @click="changeOrdering('-popular')">
-                        人气排序
+                        :icon="h(FireOutlined)" @click="changeOrdering('-popular')">
+                        热门
                     </a-button>
                     <a-button :type="currentOrdering === '-datetime_updated' ? 'primary' : 'default'" size="small"
-                        @click="changeOrdering('-datetime_updated')">
-                        更新时间
+                        :icon="h(FieldTimeOutlined)" @click="changeOrdering('-datetime_updated')">
+                        最新
                     </a-button>
                 </div>
                 <div class="filter-actions">
@@ -31,7 +31,7 @@
                 <div class="filter-buttons">
                     <a-button :type="currentTheme === '' ? 'primary' : 'default'" size="small"
                         @click="handleThemeChange('')">
-                        全部主题
+                        全部
                     </a-button>
                     <a-button v-for="theme in themes" :key="theme.path_word"
                         :type="currentTheme === theme.path_word ? 'primary' : 'default'" size="small"
@@ -75,7 +75,7 @@ import { useBookHomeStore } from '@/stores/book-home'
 import { useBookThemeStore } from '@/stores/book-theme'
 import { message } from 'ant-design-vue'
 import { formatDate } from '@/utils/date'
-import { ReloadOutlined } from '@ant-design/icons-vue'
+import { ReloadOutlined, FireOutlined, FieldTimeOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 
 const router = useRouter()

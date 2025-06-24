@@ -31,17 +31,24 @@ const noTokenPaths = [
     '/register',
     '/system/network2',
     '/h5/homeIndex',
+    '/update/newest'
 ]
 
 // 根据请求路径决定是否返回token
 const getTokenByPath = (url) => {
-    if (url && noTokenPaths.some(path => url.includes(path))) {
+    if (!url) return getToken()
+
+    // 提取路径部分，去除查询参数
+    const pathPart = url.split('?')[0]
+
+    // 检查路径是否以指定路径结尾
+    if (noTokenPaths.some(path => pathPart.endsWith(path))) {
         return ''
     }
     return getToken()
 }
 
-// 请求拦截器 TODO 区分那些请求不需要token
+// 请求拦截器
 request.interceptors.request.use(
     async (config) => {
         // 确保 baseURL 已更新
