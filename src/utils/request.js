@@ -25,17 +25,32 @@ const goToLogin = () => {
     router.push('/login')
 }
 
+// 不需要token的路径列表
+const noTokenPaths = [
+    '/login',
+    '/register',
+    '/system/network2',
+    '/h5/homeIndex',
+]
+
+// 根据请求路径决定是否返回token
+const getTokenByPath = (url) => {
+    if (url && noTokenPaths.some(path => url.includes(path))) {
+        return ''
+    }
+    return getToken()
+}
+
 // 请求拦截器 TODO 区分那些请求不需要token
 request.interceptors.request.use(
     async (config) => {
         // 确保 baseURL 已更新
         await updateBaseURL()
 
-        // 添加认证令牌
-        const token = getToken()
-        if (token) {
-            config.headers['Authorization'] = `Token ${token}`
-        }
+        // 添加认证令牌，根据路径判断
+        const token = getTokenByPath(config.url)
+        config.headers['Authorization'] = `Token ${token}`
+
 
         // 动态生成 dt 字段 (日期)
         config.headers['dt'] = getCurrentDate()
