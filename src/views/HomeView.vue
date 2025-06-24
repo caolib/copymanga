@@ -3,8 +3,9 @@
         <!-- Tab切换 -->
         <a-tabs v-model:activeKey="activeTab" @change="handleTabChange">
             <template #rightExtra>
-                <a-button type="primary" @click="refreshCurrentData" :icon="h(ReloadOutlined)" :loading="loading"
-                    :disabled="loading" size="small" style="margin-right: 10px;">
+                <a-button v-if="activeTab !== 'ranking'" type="primary" @click="refreshCurrentData"
+                    :icon="h(ReloadOutlined)" :loading="loading" :disabled="loading" size="small"
+                    style="margin-right: 10px;">
                     刷新
                 </a-button>
                 <span v-if="lastUpdateTime" class="update-time">
@@ -23,6 +24,10 @@
             <a-tab-pane key="discover" tab="发现">
                 <MangaDiscoverTabContent />
             </a-tab-pane>
+
+            <a-tab-pane key="ranking" tab="排行榜">
+                <RankingTabContent />
+            </a-tab-pane>
         </a-tabs>
     </div>
 </template>
@@ -32,22 +37,26 @@ import { ref, onMounted, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHomeStore } from '../stores/home'
 import { useMangaDiscoverStore } from '../stores/manga-discover'
+import { useMangaRankingStore } from '../stores/manga-ranking'
 import { formatDate } from '../utils/date'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import HomeTabContent from '../components/home/HomeTabContent.vue'
 import NewestTabContent from '../components/home/NewestTabContent.vue'
 import MangaDiscoverTabContent from '../components/home/MangaDiscoverTabContent.vue'
+import RankingTabContent from '../components/home/RankingTabContent.vue'
 
 const router = useRouter()
 const homeStore = useHomeStore()
 const mangaDiscoverStore = useMangaDiscoverStore()
+const mangaRankingStore = useMangaRankingStore()
 
 // 加载状态
 const loading = computed(() => {
     if (activeTab.value === 'home') return homeStore.isLoading
     if (activeTab.value === 'newest') return homeStore.isNewestLoading
     if (activeTab.value === 'discover') return mangaDiscoverStore.isLoading
+    if (activeTab.value === 'ranking') return mangaRankingStore.isLoading
     return false
 })
 
@@ -56,6 +65,7 @@ const lastUpdateTime = computed(() => {
     if (activeTab.value === 'home') return homeStore.lastUpdateTime
     if (activeTab.value === 'newest') return homeStore.lastNewestUpdateTime
     if (activeTab.value === 'discover') return mangaDiscoverStore.lastListUpdateTime
+    // 排行榜不保存更新时间，每次都获取最新数据
     return null
 })
 
@@ -68,6 +78,8 @@ const refreshCurrentData = () => {
     } else if (activeTab.value === 'discover') {
         mangaDiscoverStore.fetchFilterTags(true)
         mangaDiscoverStore.fetchMangaList(true)
+    } else if (activeTab.value === 'ranking') {
+        mangaRankingStore.fetchRankingData()
     }
 }
 
@@ -89,6 +101,9 @@ const handleTabChange = (key) => {
         if (!mangaDiscoverStore.hasTagsCache || mangaDiscoverStore.isTagsCacheExpired) {
             mangaDiscoverStore.fetchFilterTags()
         }
+    } else if (key === 'ranking') {
+        // 排行榜每次都获取最新数据
+        mangaRankingStore.fetchRankingData()
     }
 }
 
@@ -115,6 +130,9 @@ onMounted(() => {
         if (!mangaDiscoverStore.hasTagsCache || mangaDiscoverStore.isTagsCacheExpired) {
             mangaDiscoverStore.fetchFilterTags()
         }
+    } else if (activeTab.value === 'ranking') {
+        // 排行榜每次都获取最新数据
+        mangaRankingStore.fetchRankingData()
     }
 })
 </script>

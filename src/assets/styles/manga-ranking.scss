@@ -1,0 +1,291 @@
+@use "./variables" as *;
+
+.ranking-tab {
+  margin-top: 10px;
+
+  .filters-section {
+    margin-bottom: 15px;
+    border-radius: $border-radius-medium;
+    padding: 12px;
+    box-shadow: $shadow-light;
+    background: $card-bg;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+
+    .filter-group {
+      margin-bottom: 0;
+      flex-shrink: 0;
+      padding: 0 16px;
+      position: relative;
+
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 20px;
+        width: 1px;
+        background-color: $border-color;
+      }
+
+      .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+    }
+  }
+
+  .manga-list {
+    margin-bottom: 15px;
+  }
+
+  .manga-col {
+    margin-bottom: 16px;
+  }
+
+  .manga-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.2s;
+    border-radius: $border-radius-medium;
+    background: $card-bg;
+    box-shadow: $shadow-light;
+
+    &:hover {
+      transform: translateY(-5px);
+      box-shadow: $shadow-medium;
+    }
+  }
+
+  .manga-cover {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+  }
+
+  .rank-number {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    z-index: 1;
+    border-bottom-right-radius: $border-radius-small;
+  }
+
+  .rank-number.top3 {
+    width: 28px;
+    height: 28px;
+  }
+
+  // 金牌
+  .manga-col:nth-child(1) .rank-number {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #d68e00;
+  }
+
+  // 银牌
+  .manga-col:nth-child(2) .rank-number {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #666;
+  }
+
+  // 铜牌
+  .manga-col:nth-child(3) .rank-number {
+    background: linear-gradient(135deg, #cd7f32, #daa555);
+    color: #8b4513;
+  }
+
+  // 其他排名
+  .manga-col:nth-child(n+4) .rank-number {
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+  }
+
+  .manga-info {
+    padding: 10px;
+  }
+
+  .manga-title {
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .manga-author {
+    color: $text-secondary;
+    font-size: 12px;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .manga-stats {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: $text-secondary;
+  }
+
+  .rise.up {
+    color: $success-color;
+  }
+
+  .rise.down {
+    color: $error-color;
+  }
+
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 300px;
+  }
+
+  .load-more-container {
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    background: $card-bg;
+    border-radius: $border-radius-medium;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background: $bg-color-hover;
+    }
+
+    .load-more-text {
+      font-size: 14px;
+      color: $text-primary;
+
+      &.loading {
+        color: $primary-color;
+      }
+
+      &.no-more {
+        cursor: default;
+        color: $text-secondary;
+      }
+    }
+  }
+}
+
+// 暗色主题适配
+html.dark {
+  .ranking-tab {
+    .filters-section {
+      background: $dark-card-bg;
+      box-shadow: $shadow-dark-light;
+
+      .filter-group {
+        &:not(:last-child)::after {
+          background-color: $dark-border-color;
+        }
+      }
+    }
+
+    .manga-card {
+      background: $dark-card-bg;
+      box-shadow: $shadow-dark-light;
+
+      &:hover {
+        box-shadow: $shadow-dark-medium;
+      }
+    }
+
+    // 暗色主题下的排名颜色调整
+    .manga-col:nth-child(n+4) .rank-number {
+      background-color: rgba(0, 0, 0, 0.7);
+      color: white;
+    }
+
+    .manga-author {
+      color: $dark-text-secondary;
+    }
+
+    .manga-stats {
+      color: $dark-text-secondary;
+    }
+
+    .load-more-container {
+      background: $dark-card-bg;
+
+      &:hover {
+        background: $dark-bg-secondary;
+      }
+
+      .load-more-text {
+        color: $dark-text-primary;
+
+        &.no-more {
+          color: $dark-text-secondary;
+        }
+      }
+    }
+  }
+}
+
+// 响应式适配
+@media (max-width: $breakpoint-sm) {
+  .ranking-tab {
+    .filters-section {
+      padding: 10px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 10px;
+      
+      .filter-group {
+        width: 100%;
+        padding: 8px 0;
+        
+        &:not(:last-child) {
+          border-bottom: 1px solid $border-color;
+          
+          &::after {
+            display: none;
+          }
+        }
+      }
+    }
+
+    .manga-list {
+      margin: 0 -5px;
+    }
+
+    .manga-col {
+      padding: 0 5px;
+      margin-bottom: 10px;
+    }
+
+    .manga-cover {
+      height: 180px;
+    }
+  }
+}
+
+html.dark {
+  @media (max-width: $breakpoint-sm) {
+    .ranking-tab {
+      .filters-section {
+        .filter-group {
+          &:not(:last-child) {
+            border-bottom: 1px solid $dark-border-color;
+          }
+        }
+      }
+    }
+  }
+} 

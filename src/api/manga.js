@@ -296,10 +296,33 @@ function getMangaFilterTags() {
     })
 }
 
+/**
+ * 获取漫画排行榜
+ * @param {number} type 类型：1(漫画), 5(轻小说)
+ * @param {string} dateType 时间类型：'day'(日榜), 'week'(周榜), 'month'(月榜), 'total'(总榜)
+ * @param {string} audienceType 受众类型：''(全部), 'male'(男频), 'female'(女频)
+ * @param {number} limit 每页数量，默认18
+ * @param {number} offset 偏移量，默认0
+ * @returns {Promise} 排行榜数据
+ */
+function getMangaRanking(type = 1, dateType = 'week', audienceType = '', limit = 18, offset = 0) {
+    return request.get('/api/v3/ranks', {
+        params: {
+            type,
+            date_type: dateType,
+            audience_type: audienceType,
+            limit,
+            offset,
+            platform: 3
+        }
+    });
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
     getMangaGroupChapters,
+    getNewestManga,
     getChapterImages,
     searchManga,
     collectManga,
@@ -312,8 +335,8 @@ export {
     getLocalMangaDetail,
     getLocalMangaChapters,
     deleteLocalManga,
-    getNewestManga,
+    checkChapterDownloadDetail,
     getMangaDiscover,
     getMangaFilterTags,
-    checkChapterDownloadDetail
+    getMangaRanking
 }
