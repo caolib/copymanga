@@ -57,7 +57,6 @@
                     <StarFilled class="nav-icon collection-icon" />书架
                 </router-link>
                 <router-link to="/downloads" class="nav-link">下载</router-link>
-                <router-link to="/topics" class="nav-link">专题</router-link>
                 <router-link to="/settings" class="nav-link settings-link">
                     <SettingFilled class="nav-icon" />
                     <span v-if="hasUpdate" class="nav-update-indicator"></span>

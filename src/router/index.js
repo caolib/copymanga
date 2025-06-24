@@ -48,11 +48,6 @@ const routes = [
         component: () => import('../views/LocalCartoonDetailView.vue')
     },
     {
-        path: '/topics',
-        name: 'Topics',
-        component: () => import('../views/TopicsView.vue')
-    },
-    {
         path: '/topic/:pathWord',
         name: 'TopicDetail',
         component: () => import('../views/TopicDetailView.vue')
