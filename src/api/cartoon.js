@@ -235,6 +235,15 @@ async function deleteCartoonChapter(cartoonUuid, chapterUuid) {
 }
 
 /**
+ * 删除整个本地动画（包括所有章节和详情）
+ * @param {string} cartoonUuid 动画UUID
+ * @returns {Promise<boolean>}
+ */
+async function deleteLocalCartoon(cartoonUuid) {
+    return await cartoonDownloadManager.deleteLocalCartoon(cartoonUuid)
+}
+
+/**
  * 获取本地动画详情
  * @param {string} cartoonUuid 动画UUID
  * @returns {Promise<Object>}
@@ -281,6 +290,7 @@ export {
     searchCartoon,
     downloadCartoonChapter,
     deleteCartoonChapter,
+    deleteLocalCartoon,
     getLocalCartoonDetail,
     getLocalCartoonChapters,
     openLocalVideoDirectory,

@@ -61,7 +61,6 @@
                             :style="{ cursor: manga.path_word ? 'pointer' : 'default', color: manga.path_word ? '#1890ff' : 'inherit' }"
                             @click="goToOnlineDetail">
                             {{ manga.name || '本地漫画' }}
-                            <a-tag v-if="manga.path_word" color="blue" style="margin-left: 8px;">在线版本</a-tag>
                         </a-typography-title>
                         <a-descriptions :column="1" size="small" bordered>
                             <a-descriptions-item label="作者" v-if="manga.author && manga.author.length">
@@ -149,7 +148,7 @@
                             <!-- 章节名称 -->
                             <div style="cursor:pointer; margin-bottom: 8px;" @click="readChapter(chapter)">
                                 <span style="font-size:14px;">{{ chapter.chapter_name || chapter.name || '未知章节'
-                                    }}</span>
+                                }}</span>
                             </div>
 
                             <!-- 章节信息 -->

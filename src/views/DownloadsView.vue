@@ -69,7 +69,7 @@
                                                             <a-progress :stroke-color="{
                                                                 '0%': '#108ee9',
                                                                 '100%': '#87d068',
-                                                            }" :percent="Number(item.progress).toFixed(2)"
+                                                            }" :percent="Number(item.progress.toFixed(2))"
                                                                 :status="getProgressStatus(item.status)"
                                                                 :stroke-width="6" :show-info="true" />
                                                             <div class="progress-info">
@@ -279,7 +279,7 @@ const loadTaskList = async () => {
             const progressText = cartoonDownloadManager.getProgressText(cartoonUuid, chapterUuid) || '下载中...'
             const downloadSizes = cartoonDownloadManager.getDownloadSizes(cartoonUuid, chapterUuid)
 
-            console.log(`任务 ${taskInfo.chapterName} 进度:`, progress, progressText, downloadSizes) // 添加调试日志
+            // console.log(`任务 ${taskInfo.chapterName} 进度:`, progress, progressText, downloadSizes) // 添加调试日志
 
             allTasks.push({
                 id: key,

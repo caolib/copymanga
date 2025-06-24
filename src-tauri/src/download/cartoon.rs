@@ -814,6 +814,46 @@ pub async fn delete_downloaded_cartoon_chapter(
 }
 
 #[tauri::command]
+pub async fn delete_local_cartoon(
+    cartoon_uuid: String,
+    app_handle: AppHandle,
+) -> Result<DeleteChapterResult, String> {
+    // 获取应用资源目录
+    let resource_dir = app_handle
+        .path()
+        .resource_dir()
+        .map_err(|e| format!("获取资源目录失败: {}", e))?;
+
+    // 检查两个可能的路径：新的 cartoons 和旧的 anime（向后兼容）
+    let possible_paths = vec![
+        resource_dir
+            .join("downloads")
+            .join("cartoons")
+            .join(&cartoon_uuid),
+        resource_dir
+            .join("downloads")
+            .join("anime")
+            .join(&cartoon_uuid),
+    ];
+
+    for cartoon_path in possible_paths {
+        if cartoon_path.exists() {
+            // 删除整个动画目录
+            fs::remove_dir_all(&cartoon_path)
+                .await
+                .map_err(|e| format!("删除动画目录失败: {}", e))?;
+
+            return Ok(DeleteChapterResult {
+                success: true,
+                message: "动画删除成功".to_string(),
+            });
+        }
+    }
+
+    Err("动画不存在".to_string())
+}
+
+#[tauri::command]
 pub async fn get_downloaded_cartoon_list(
     app_handle: AppHandle,
 ) -> Result<Vec<DownloadedCartoonInfo>, String> {
