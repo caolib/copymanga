@@ -8,12 +8,16 @@
     "layout": "rtl",
     "columnsPerRow": 2,
     "imageSize": 100,
-    "imageGap": 0
+    "imageGap": 0,
+    "blankPagePosition": "start"
   },
   "textReader": {
     "fontFamily": "var(--font-family)",
     "fontSize": 16,
     "lineHeight": 1.8,
     "addedFonts": []
+  },
+  "system": {
+    "showTrayIcon": false
   }
 }
