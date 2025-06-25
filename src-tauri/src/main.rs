@@ -179,6 +179,8 @@ fn main() {
             cache::get_cache_size,
             cache::open_file_explorer,
             cache::force_clear_webview_cache,
+            cache::open_or_create_custom_css,
+            cache::get_custom_css_content,
             download::download_chapter,
             download::pause_chapter_download,
             download::resume_chapter_download,
@@ -208,10 +210,6 @@ fn main() {
             download::update_download_task_status,
             download::remove_download_task,
         ])
-        .setup(|_app| {
-            println!("Tauri 应用已启动，等待前端初始化配置文件...");
-            Ok(())
-        })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

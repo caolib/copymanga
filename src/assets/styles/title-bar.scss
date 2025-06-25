@@ -203,6 +203,25 @@
     }
 }
 
+// 自定义CSS重载按钮样式
+.reload-css-btn {
+    color: $primary-color;
+    
+    &:hover {
+        color: $primary-hover;
+        background-color: rgba($primary-color, 0.1);
+    }
+    
+    @include dark-theme {
+        color: $primary-hover;
+        
+        &:hover {
+            color: lighten($primary-hover, 10%);
+            background-color: rgba($primary-hover, 0.2);
+        }
+    }
+}
+
 // 用户区域
 .user-section {
     @include flex-center;

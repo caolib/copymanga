@@ -33,6 +33,23 @@ app.use(Antd)
 // 挂载应用
 app.mount('#app')
 
+// 加载自定义CSS
+const loadCustomCss = async () => {
+    try {
+        const customCss = await invoke('get_custom_css_content')
+        if (customCss && customCss.trim() !== '') {
+            // 创建style元素并添加到head
+            const styleElement = document.createElement('style')
+            styleElement.id = 'custom-css'
+            styleElement.textContent = customCss
+            document.head.appendChild(styleElement)
+            console.log('已加载自定义CSS样式')
+        }
+    } catch (error) {
+        console.error('加载自定义CSS失败:', error)
+    }
+}
+
 // 恢复窗口状态
 restoreStateCurrent(StateFlags.ALL).then(() => {
     console.log('窗口状态已恢复')
@@ -96,6 +113,9 @@ const initPromise = Promise.all([
         console.log('托盘图标未启用或初始化失败')
     }
     configStore.setInitialized()
+    // 加载自定义CSS
+    return loadCustomCss()
+}).then(() => {
     // console.log('所有初始化完成')
 }).catch(error => {
     console.error('初始化失败:', error)

@@ -1,11 +1,35 @@
-@use "./variables" as *;
+@use "./variables.scss" as *;
 
 .setting-card {
-    margin-bottom: $spacing-lg;
+    margin-bottom: 16px;
 }
 
 .font-family-container {
     width: 100%;
+
+    .font-preview {
+        margin-top: 8px;
+        padding: 8px 12px;
+        border-radius: $border-radius-small;
+        background-color: $bg-color-light;
+        
+        @include dark-theme {
+            background-color: $dark-bg-secondary;
+        }
+        
+        .preview-label {
+            color: $text-secondary;
+            margin-right: 8px;
+            
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+        
+        .preview-text {
+            font-size: 16px;
+        }
+    }
 }
 
 .preview-label {
@@ -44,8 +68,7 @@
 }
 
 .slider {
-    width: 80%;
-    margin-left: $spacing-lg;
+    width: 100%;
 }
 
 .system-setting-item {
@@ -59,6 +82,25 @@
         color: $text-secondary;
         line-height: 1.4;
 
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+}
+
+.custom-css-section {
+    margin-top: 16px;
+    
+    .custom-css-buttons {
+        display: flex;
+        gap: 8px;
+    }
+    
+    .custom-css-help {
+        margin-top: 8px;
+        font-size: 12px;
+        color: $text-secondary;
+        
         @include dark-theme {
             color: $dark-text-secondary;
         }

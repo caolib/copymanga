@@ -71,6 +71,10 @@
                     :icon="h(ArrowRightOutlined)"></a-button>
                 <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)">
                 </a-button>
+                <!-- 自定义CSS重载按钮 -->
+                <a-button v-if="themeStore.showReloadCssButton" type="text" class="nav-link reload-css-btn" @click="reloadCustomCss" 
+                    :loading="reloadingCss" title="重新加载自定义样式" :icon="h(FormatPainterOutlined)">
+                </a-button>
             </nav>
         </div>
 
@@ -118,15 +122,28 @@ import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
 import { useAppStore } from '../stores/app'
 import { message } from 'ant-design-vue'
-import { UserOutlined, LogoutOutlined, ArrowLeftOutlined, ArrowRightOutlined, ReloadOutlined, StarFilled, SettingFilled, DownloadOutlined, PlusOutlined } from '@ant-design/icons-vue'
+import { 
+    UserOutlined, 
+    LogoutOutlined, 
+    ArrowLeftOutlined, 
+    ArrowRightOutlined, 
+    ReloadOutlined, 
+    StarFilled, 
+    SettingFilled, 
+    DownloadOutlined, 
+    PlusOutlined,
+    FormatPainterOutlined
+} from '@ant-design/icons-vue'
 import { h } from 'vue'
 import { goBack, goForward } from '@/router/go'
+import { invoke } from '@tauri-apps/api/core'
 
 const router = useRouter()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 const appStore = useAppStore()
 const isMaximized = ref(false)
+const reloadingCss = ref(false)
 
 // 检查是否有可用更新
 const hasUpdate = computed(() => appStore.hasUpdate)
@@ -147,6 +164,20 @@ const refreshPage = () => {
     } else {
         // 回退方案
         router.go(0)
+    }
+}
+
+// 重新加载自定义CSS
+const reloadCustomCss = async () => {
+    reloadingCss.value = true
+    try {
+        await themeStore.reloadCustomCss()
+        message.success('自定义样式已重新加载')
+    } catch (error) {
+        console.error('重新加载自定义CSS失败:', error)
+        message.error('重新加载自定义CSS失败')
+    } finally {
+        reloadingCss.value = false
     }
 }
 

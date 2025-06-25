@@ -28,6 +28,21 @@
                         调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
                     </div>
                 </a-form-item>
+
+                <a-form-item label="自定义CSS样式">
+                    <div>
+                        <a-space>
+                            <a-button type="primary" @click="openCustomCssFile">
+                                编辑自定义样式
+                            </a-button>
+                            <a-switch v-model:checked="showReloadButton" checked-children="显示重载按钮"
+                                un-checked-children="隐藏重载按钮" @change="toggleReloadButton" />
+                        </a-space>
+                        <div style="margin-top: 8px; font-size: 12px; color: #666;">
+                            编辑自定义CSS文件，保存后点击顶部重载按钮即可应用样式。
+                        </div>
+                    </div>
+                </a-form-item>
             </a-form>
         </a-card>
 
@@ -97,8 +112,10 @@ import { message } from 'ant-design-vue'
 import { loadUIConfig, updateReaderConfig, updateSystemConfig, DEFAULT_UI_CONFIG } from '@/config/ui-config'
 import { useThemeStore } from '@/stores/theme'
 import { initTray, destroyTray } from '@/utils/tray'
+import { invoke } from '@tauri-apps/api/core'
 
 const themeStore = useThemeStore()
+const showReloadButton = ref(themeStore.showReloadCssButton)
 
 // 主题配置
 const themeConfig = reactive({
@@ -185,6 +202,27 @@ const saveUISettings = () => {
 const resetUIToDefault = () => {
     Object.assign(uiConfig, DEFAULT_UI_CONFIG.reader)
     message.info('已恢复默认设置')
+}
+
+// 打开自定义CSS文件
+const openCustomCssFile = async () => {
+    try {
+        await invoke('open_or_create_custom_css')
+        message.success('已打开自定义CSS文件')
+    } catch (error) {
+        console.error('打开自定义CSS文件失败:', error)
+        message.error('打开自定义CSS文件失败')
+    }
+}
+
+// 切换顶部栏重载按钮显示状态
+const toggleReloadButton = (checked) => {
+    themeStore.setShowReloadCssButton(checked)
+    if (checked) {
+        message.success('已在顶部栏显示重载样式按钮')
+    } else {
+        message.info('已隐藏顶部栏重载样式按钮')
+    }
 }
 
 onMounted(() => {
