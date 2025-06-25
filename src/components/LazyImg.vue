@@ -9,7 +9,7 @@
         <!-- 错误状态 -->
         <div v-else-if="error" class="error-placeholder">
             <div class="error-content">
-                <a-button @click="retryLoad" size="small" type="primary">重试</a-button>
+                <a-button @click="retryLoad" :icon="h(ReloadOutlined)" size="large" type="primary">重试</a-button>
             </div>
         </div> <!-- 实际图片 -->
         <div v-else :class="[
@@ -25,6 +25,8 @@
 </template>
 
 <script setup>
+import { ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import { ref, onMounted, onUnmounted } from 'vue'
 
 const props = defineProps({
