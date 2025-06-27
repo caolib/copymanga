@@ -68,9 +68,6 @@
 
             <!-- 专题推荐 -->
             <a-collapse-panel key="topics" header="专题推荐">
-                <template #extra>
-                    <router-link to="/topics" class="view-more-link">查看更多</router-link>
-                </template>
                 <a-row :gutter="16">
                     <a-col v-for="topic in homeData.topics?.list?.slice(0, 6) || []" :key="topic.path_word" :xs="24"
                         :sm="12" :md="8" :lg="4">
@@ -85,7 +82,7 @@
                                 <template #description>
                                     <div class="topic-meta-mini">
                                         <span v-if="topic.period" class="topic-period-mini">{{ topic.period
-                                            }}</span>
+                                        }}</span>
                                         <span v-if="topic.datetime_created" class="topic-date-mini">
                                             {{ formatDate(topic.datetime_created) }}
                                         </span>

@@ -33,7 +33,7 @@
                         <!-- 导航按钮 -->
                         <div class="topic-actions">
                             <a-button @click="goBack" :icon="h(ArrowLeftOutlined)">
-                                返回专题列表
+                                返回
                             </a-button>
                             <a-button v-if="currentTopic.last" type="default" @click="goToPrevTopic">
                                 上一期：{{ currentTopic.last.title }}
@@ -151,6 +151,7 @@ import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { formatDate } from '../utils/date'
 import { ArrowLeftOutlined } from '@ant-design/icons-vue'
 import { formatNumber } from '@/utils/number'
+import { goBack } from '@/router/go'
 
 const route = useRoute()
 const router = useRouter()
@@ -219,11 +220,6 @@ const handlePageSizeChange = (current, size) => {
     currentPage.value = 1
     pageSize.value = size
     fetchTopicContent()
-}
-
-// 返回专题列表
-const goBack = () => {
-    router.push('/topics')
 }
 
 // 跳转到上一期专题

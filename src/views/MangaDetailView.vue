@@ -156,7 +156,8 @@
         <a-skeleton :loading="loading || groupLoading" active>
             <a-row :gutter="[12, 12]">
                 <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in sortedChapters" :key="chapter.id">
-                    <a-card :hoverable="true" style="text-align:center; padding:0; position: relative;" size="small"
+                    <a-card :hoverable="true" @click="goToChapter(chapter)"
+                        style="text-align:center; padding:0; position: relative;" size="small"
                         :body-style="{ padding: '12px 6px' }"
                         :class="{ 'last-read-chapter': isLastReadChapter(chapter) }">
 
@@ -188,7 +189,7 @@
                         </a-tag>
 
                         <!-- 章节名称 -->
-                        <div @click="goToChapter(chapter)" style="cursor:pointer; margin-bottom: 8px;">
+                        <div style="cursor:pointer; margin-bottom: 8px;">
                             <span style="font-size:14px;">{{ chapter.name }}</span>
                             <!-- 显示"上次阅读"标记 -->
                             <div v-if="isLastReadChapter(chapter)" class="last-read-tag">

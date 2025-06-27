@@ -64,11 +64,9 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useHomeStore } from '../../stores/home'
-import { useTopicStore } from '../../stores/topic'
 
 const router = useRouter()
 const homeStore = useHomeStore()
-const topicStore = useTopicStore()
 
 const loading = ref(false)
 

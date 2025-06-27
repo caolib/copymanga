@@ -1,3 +1,4 @@
+#![allow(unused_imports)]
 // 导出所有下载相关的函数
 pub mod manga;
 pub mod task_manager;

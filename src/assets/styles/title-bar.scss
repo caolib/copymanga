@@ -1,4 +1,5 @@
 @use "./variables" as *;
+@use "sass:color";
 
 .title-bar {
     display: flex;
@@ -206,17 +207,17 @@
 // 自定义CSS重载按钮样式
 .reload-css-btn {
     color: $primary-color;
-    
+
     &:hover {
         color: $primary-hover;
         background-color: rgba($primary-color, 0.1);
     }
-    
+
     @include dark-theme {
         color: $primary-hover;
-        
+
         &:hover {
-            color: lighten($primary-hover, 10%);
+            color: color.adjust($primary-hover, $lightness: 10%);
             background-color: rgba($primary-hover, 0.2);
         }
     }

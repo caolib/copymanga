@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 use tauri::{AppHandle, Manager};
 use std::fs;
 use std::path::Path;
