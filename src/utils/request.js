@@ -90,6 +90,7 @@ request.interceptors.response.use(
                     placement: 'bottomRight',
                     duration: null,
                 })
+                router.push('/settings')
                 return Promise.reject(new Error('需要配置请求头'))
             }
         }
