@@ -1,8 +1,7 @@
 #![allow(unused_imports)]
 
-use tauri::{AppHandle, Manager};
 use std::fs;
-use std::path::Path;
+use tauri::{AppHandle, Manager};
 
 /// 获取 WebView 缓存目录路径
 #[tauri::command]
@@ -23,23 +22,25 @@ pub fn open_or_create_custom_css(app_handle: AppHandle) -> Result<(), String> {
         .path()
         .app_data_dir()
         .map_err(|e| format!("无法获取应用数据目录: {}", e))?;
-    
+
     // 确保config目录存在
     let config_dir = app_data_dir.join("config");
     if !config_dir.exists() {
-        fs::create_dir_all(&config_dir)
-            .map_err(|e| format!("无法创建配置目录: {}", e))?;
+        fs::create_dir_all(&config_dir).map_err(|e| format!("无法创建配置目录: {}", e))?;
     }
-    
+
     // 创建自定义CSS文件路径
     let css_file_path = config_dir.join("custom.css");
-    
+
     // 如果文件不存在，创建一个空文件
     if !css_file_path.exists() {
-        fs::write(&css_file_path, "/* 在此处添加您的自定义CSS样式 */\n/* 样式将全局应用于整个应用 */\n")
-            .map_err(|e| format!("无法创建自定义CSS文件: {}", e))?;
+        fs::write(
+            &css_file_path,
+            "/* 在此处添加您的自定义CSS样式 */\n/* 样式将全局应用于整个应用 */\n",
+        )
+        .map_err(|e| format!("无法创建自定义CSS文件: {}", e))?;
     }
-    
+
     // 使用系统默认程序打开文件
     open_file_explorer(css_file_path.to_string_lossy().to_string())
 }
@@ -51,15 +52,14 @@ pub fn get_custom_css_content(app_handle: AppHandle) -> Result<String, String> {
         .path()
         .app_data_dir()
         .map_err(|e| format!("无法获取应用数据目录: {}", e))?;
-    
+
     let css_file_path = app_data_dir.join("config").join("custom.css");
-    
+
     if !css_file_path.exists() {
         return Ok("".to_string());
     }
-    
-    fs::read_to_string(&css_file_path)
-        .map_err(|e| format!("无法读取自定义CSS文件: {}", e))
+
+    fs::read_to_string(&css_file_path).map_err(|e| format!("无法读取自定义CSS文件: {}", e))
 }
 
 /// 获取 WebView 缓存大小
@@ -145,20 +145,20 @@ pub async fn force_clear_webview_cache(app_handle: AppHandle) -> Result<String, 
             }
             Err(_e) if retry < max_retries - 1 => {
                 // 等待更长时间再重试
-                thread::sleep(Duration::from_millis(1000));
+                tokio::time::sleep(Duration::from_millis(1000)).await;
                 continue;
             }
             Err(e) => {
-                if deleted_files > 0 {
-                    return Ok(format!(
+                return if deleted_files > 0 {
+                    Ok(format!(
                         "部分强制清除成功：删除了 {}/{} 个文件 ({:.2} MB)。建议重启应用以完全清理剩余文件。",
                         deleted_files, total_files, cache_size_mb
-                    ));
+                    ))
                 } else {
-                    return Err(format!(
+                    Err(format!(
                         "强制清除缓存失败: {}。建议关闭应用后手动删除缓存目录，或等待应用完全关闭后重试。",
                         e
-                    ));
+                    ))
                 }
             }
         }
@@ -171,7 +171,7 @@ pub async fn force_clear_webview_cache(app_handle: AppHandle) -> Result<String, 
 fn calculate_dir_size(dir: &std::path::Path) -> std::io::Result<u64> {
     let mut size = 0;
     if dir.is_dir() {
-        for entry in std::fs::read_dir(dir)? {
+        for entry in fs::read_dir(dir)? {
             let entry = entry?;
             let path = entry.path();
             if path.is_dir() {

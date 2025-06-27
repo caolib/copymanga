@@ -4,8 +4,7 @@
 .reader-container {
     max-width: 95vw;
     margin: 0 auto;
-    padding: 20px;
-    padding-top: 0;
+    padding: 0 20px 20px;
 
     &.dark-mode {
         background-color: $dark-bg-primary;
@@ -328,8 +327,7 @@
 /* 评论区样式 - 独立模块 */
 .comments-section {
     margin-top: 40px;
-    padding: 10px;
-    padding-top: 20px;
+    padding: 20px 10px 10px;
     border-top: 1px solid $border-color;
 
     @include dark-theme {

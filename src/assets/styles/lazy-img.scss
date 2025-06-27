@@ -133,8 +133,8 @@
     // 页码标志样式
     .page-number {
         position: absolute;
-        top: 0px;
-        right: 0px;
+        top: 0;
+        right: 0;
         background: rgba(0, 0, 0, 0.5);
         color: $white;
         font-size: 12px;

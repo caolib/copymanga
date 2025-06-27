@@ -12,15 +12,15 @@ import { getServerConfig } from '@/config/server-config'
  * @returns {Promise}
  */
 function getBookHome(params = {}) {
-    return request.get('/api/v3/books', {
-        params: {
-            limit: 18,
-            offset: 0,
-            ordering: '-popular',
-            platform: 3,
-            ...params
-        }
-    })
+  return request.get('/api/v3/books', {
+    params: {
+      limit: 18,
+      offset: 0,
+      ordering: '-popular',
+      platform: 3,
+      ...params,
+    },
+  })
 }
 
 /**
@@ -29,16 +29,16 @@ function getBookHome(params = {}) {
  * @returns {Promise}
  */
 function getMyBookCollection(params = {}) {
-    return request.get('/api/v3/member/collect/books', {
-        params: {
-            limit: 18,
-            offset: 0,
-            free_type: 1,
-            ordering: '-datetime_modifier',
-            platform: 3,
-            ...params
-        }
-    })
+  return request.get('/api/v3/member/collect/books', {
+    params: {
+      limit: 18,
+      offset: 0,
+      free_type: 1,
+      ordering: '-datetime_modifier',
+      platform: 3,
+      ...params,
+    },
+  })
 }
 
 /**
@@ -47,9 +47,9 @@ function getMyBookCollection(params = {}) {
  * @returns {Promise}
  */
 function getBookDetail(pathWord) {
-    return request.get(`/api/v3/book/${pathWord}`, {
-        params: { platform: 3 }
-    })
+  return request.get(`/api/v3/book/${pathWord}`, {
+    params: { platform: 3 },
+  })
 }
 
 /**
@@ -58,9 +58,9 @@ function getBookDetail(pathWord) {
  * @returns {Promise} 轻小说卷数据
  */
 function getBookVolumes(pathWord) {
-    return request.get(`/api/v3/book/${pathWord}/volumes`, {
-        params: { platform: 3 }
-    })
+  return request.get(`/api/v3/book/${pathWord}/volumes`, {
+    params: { platform: 3 },
+  })
 }
 
 /**
@@ -70,9 +70,9 @@ function getBookVolumes(pathWord) {
  * @returns {Promise} 该卷的详情数据（包含contents、txt_addr等）
  */
 function getVolumeDetail(pathWord, volumeId) {
-    return request.get(`/api/v3/book/${pathWord}/volume/${volumeId}`, {
-        params: { platform: 3 }
-    })
+  return request.get(`/api/v3/book/${pathWord}/volume/${volumeId}`, {
+    params: { platform: 3 },
+  })
 }
 
 /**
@@ -81,15 +81,15 @@ function getVolumeDetail(pathWord, volumeId) {
  * @returns {Promise} 文本内容
  */
 async function getBookTextContent(txtUrl) {
-    // 创建 axios 实例
-    const r = axios.create({
-        timeout: 40000,
-        withCredentials: true
-    })
-    await getServerConfig().then(config => {
-        r.defaults.baseURL = `http://localhost:${config.serverPort}/proxy`
-    })
-    return r.get(`/proxy?url=${encodeURIComponent(txtUrl)}`)
+  // 创建 axios 实例
+  const r = axios.create({
+    timeout: 40000,
+    withCredentials: true,
+  })
+  await getServerConfig().then((config) => {
+    r.defaults.baseURL = `http://localhost:${config.serverPort}/proxy`
+  })
+  return r.get(`/proxy?url=${encodeURIComponent(txtUrl)}`)
 }
 
 /**
@@ -99,9 +99,9 @@ async function getBookTextContent(txtUrl) {
  * @returns {Promise} 章节内容数据
  */
 function getBookChapterContent(pathWord, chapterId) {
-    return request.get(`/api/v3/book/${pathWord}/chapter/${chapterId}`, {
-        params: { platform: 3 }
-    })
+  return request.get(`/api/v3/book/${pathWord}/chapter/${chapterId}`, {
+    params: { platform: 3 },
+  })
 }
 
 /**
@@ -113,18 +113,18 @@ function getBookChapterContent(pathWord, chapterId) {
  * @returns {Promise} 搜索结果
  */
 function searchBooks(keyword, limit = 18, offset = 0, q_type = '') {
-    return request.get('/api/v3/search/books', {
-        params: {
-            q: keyword,
-            q_type,
-            offset,
-            platform: 3,
-            limit
-        },
-        headers: {
-            'platform': '3'
-        }
-    })
+  return request.get('/api/v3/search/books', {
+    params: {
+      q: keyword,
+      q_type,
+      offset,
+      platform: 3,
+      limit,
+    },
+    headers: {
+      platform: '3',
+    },
+  })
 }
 
 /**
@@ -134,11 +134,11 @@ function searchBooks(keyword, limit = 18, offset = 0, q_type = '') {
  * @returns {Promise}
  */
 function collectBook(bookId, isCollect = true) {
-    const data = new URLSearchParams()
-    data.append('book_id', bookId)
-    data.append('is_collect', isCollect ? '1' : '0')
-    data.append('platform', '3')
-    return request.post('/api/v3/member/collect/book', data)
+  const data = new URLSearchParams()
+  data.append('book_id', bookId)
+  data.append('is_collect', isCollect ? '1' : '0')
+  data.append('platform', '3')
+  return request.post('/api/v3/member/collect/book', data)
 }
 
 /**
@@ -146,20 +146,19 @@ function collectBook(bookId, isCollect = true) {
  * @returns {Promise}
  */
 function getBookThemes() {
-    return request.get('/api/v3/h5/filter/book/tags', {
-        params: { platform: 3 }
-    })
+  return request.get('/api/v3/h5/filter/book/tags', {
+    params: { platform: 3 },
+  })
 }
 
 export {
-    getBookHome,
-    getMyBookCollection,
-    getBookDetail,
-    getBookVolumes,
-    getVolumeDetail,
-    getBookTextContent,
-    getBookChapterContent,
-    searchBooks,
-    collectBook,
-    getBookThemes
+  getBookHome,
+  getMyBookCollection,
+  getBookDetail,
+  getBookVolumes,
+  getVolumeDetail,
+  getBookTextContent,
+  searchBooks,
+  collectBook,
+  getBookThemes,
 }

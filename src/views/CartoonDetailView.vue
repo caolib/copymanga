@@ -149,7 +149,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, h } from 'vue'
+import { ref, onMounted, h } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { PlayCircleOutlined, HeartOutlined, HeartFilled, DownloadOutlined, FolderOpenOutlined } from '@ant-design/icons-vue'
@@ -359,7 +359,7 @@ const downloadChapter = async (chapter) => {
     }
 
     // 调用下载API
-    return downloadCartoonChapter(
+    const res = downloadCartoonChapter(
         route.params.pathWord,
         chapter.uuid,
         defaultLine,
@@ -370,6 +370,8 @@ const downloadChapter = async (chapter) => {
         console.error('添加下载任务失败:', error)
         message.error(`添加下载任务失败: ${error.message || '未知错误'}`)
     })
+
+    return res
 }
 
 // 打开本地视频目录

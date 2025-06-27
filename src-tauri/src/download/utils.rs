@@ -7,7 +7,7 @@ pub async fn get_downloads_path(app_handle: &AppHandle) -> Result<PathBuf, Strin
         .path()
         .resource_dir()
         .map_err(|e| format!("获取资源目录失败: {}", e))?;
-    
+
     Ok(resource_dir.join("downloads"))
 }
 

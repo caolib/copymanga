@@ -1276,7 +1276,7 @@ pub async fn get_local_cartoon_chapters(
                                         if let Some(obj) = chapter_info.as_object_mut() {
                                             obj.insert(
                                                 "is_completed".to_string(),
-                                                serde_json::Value::Bool(true),
+                                                Value::Bool(true),
                                             );
                                         }
                                     }
@@ -1286,7 +1286,7 @@ pub async fn get_local_cartoon_chapters(
                                         if let Some(obj) = chapter_info.as_object_mut() {
                                             obj.insert(
                                                 "is_completed".to_string(),
-                                                serde_json::Value::Bool(false),
+                                                Value::Bool(false),
                                             );
                                         }
                                     }
@@ -1300,7 +1300,7 @@ pub async fn get_local_cartoon_chapters(
                                 if let Some(obj) = chapter_info.as_object_mut() {
                                     obj.insert(
                                         "is_completed".to_string(),
-                                        serde_json::Value::Bool(false),
+                                        Value::Bool(false),
                                     );
                                 }
                             }

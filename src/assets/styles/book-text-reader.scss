@@ -127,7 +127,6 @@
 
 .text-line {
     // 移除固定的font-size和line-height，让Vue组件控制
-    padding: 4px 0;
     text-align: justify;
     letter-spacing: 0.5px;
     text-indent: 2em;
@@ -136,8 +135,7 @@
     min-height: auto;
     display: block; // 改为block以支持文本自然换行
     margin: 0 auto;
-    padding-left: $spacing-md;
-    padding-right: $spacing-md;
+    padding: 4px $spacing-md;
     word-wrap: break-word; // 长单词自动换行
     overflow-wrap: break-word; // 更好的换行支持
     white-space: pre-wrap; // 保持空格和换行
@@ -235,123 +233,4 @@
     }
 }
 
-/* 设置抽屉样式覆盖 */
-:deep(.ant-drawer) {
-    .ant-drawer-header {
-        background-color: $bg-color-paper;
-        border-bottom: 1px solid $border-color;
 
-        .ant-drawer-title {
-            color: $text-primary;
-            font-weight: 600;
-        }
-
-        @include dark-theme {
-            background-color: $dark-bg-secondary;
-            border-bottom-color: $dark-border-color;
-
-            .ant-drawer-title {
-                color: $dark-text-primary;
-            }
-        }
-    }
-
-    .ant-drawer-body {
-        background-color: $bg-color-paper;
-        padding: $spacing-lg;
-
-        @include dark-theme {
-            background-color: $dark-bg-secondary;
-        }
-    }
-
-    .ant-form-item-label > label {
-        color: $text-primary;
-        font-weight: 500;
-
-        @include dark-theme {
-            color: $dark-text-primary;
-        }
-    }
-
-    .ant-slider-rail {
-        background-color: $border-color;
-
-        @include dark-theme {
-            background-color: $dark-border-color;
-        }
-    }
-
-    .ant-slider-track {
-        background-color: $primary-color;
-    }
-
-    .ant-slider-handle {
-        border-color: $primary-color;
-
-        &:hover {
-            border-color: $primary-hover;
-        }
-
-        &:focus {
-            border-color: $primary-hover;
-            box-shadow: 0 0 0 3px rgba($primary-color, 0.12);
-        }
-    }
-
-    .ant-slider-mark-text {
-        color: $text-secondary;
-        font-size: 12px;
-
-        @include dark-theme {
-            color: $dark-text-secondary;
-        }
-    }
-
-    .ant-select {
-        .ant-select-selector {
-            background-color: $bg-color-paper;
-            border-color: $border-color;
-
-            @include dark-theme {
-                background-color: $dark-bg-primary;
-                border-color: $dark-border-color;
-            }
-        }
-
-        .ant-select-selection-item {
-            color: $text-primary;
-
-            @include dark-theme {
-                color: $dark-text-primary;
-            }
-        }
-    }
-
-    .ant-btn {
-        &.ant-btn-primary {
-            background-color: $primary-color;
-            border-color: $primary-color;
-
-            &:hover {
-                background-color: $primary-hover;
-                border-color: $primary-hover;
-            }
-        }
-
-        &:not(.ant-btn-primary) {
-            color: $text-primary;
-            border-color: $border-color;
-
-            @include dark-theme {
-                color: $dark-text-primary;
-                border-color: $dark-border-color;
-            }
-
-            &:hover {
-                color: $primary-hover;
-                border-color: $primary-hover;
-            }
-        }
-    }
-}

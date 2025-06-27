@@ -74,23 +74,15 @@ const isReaderRoute = computed(() => {
 // 处理鼠标移动事件
 const handleMouseMove = (event) => {
   // 只在阅读页面处理该逻辑
-  if (!isReaderRoute.value) return;
+  if (!isReaderRoute.value) return
 
   // 当鼠标在页面顶部 60px 范围内时显示导航栏
-  if (event.clientY <= 60) {
-    showHeader.value = true;
-  } else {
-    showHeader.value = false;
-  }
+  showHeader.value = event.clientY <= 60
 }
 
 // 监听路由变化，在阅读页面隐藏顶部栏
 watchEffect(() => {
-  if (isReaderRoute.value) {
-    showHeader.value = false
-  } else {
-    showHeader.value = true
-  }
+  showHeader.value = !isReaderRoute.value
 })
 
 // 重启应用
@@ -128,11 +120,9 @@ onMounted(async () => {
       <div v-if="appStore.needsRestart" class="restart-banner">
         <a-alert type="warning" show-icon closable @close="appStore.setNeedsRestart(false)">
           <template #description>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; justify-content: space-between; align-items: center">
               <span>服务器配置已更新，请重启应用以使更改生效。</span>
-              <a-button type="primary" @click="handleRestart">
-                立即重启
-              </a-button>
+              <a-button type="primary" @click="handleRestart"> 立即重启 </a-button>
             </div>
           </template>
         </a-alert>
@@ -147,8 +137,14 @@ onMounted(async () => {
       </main>
 
       <!-- 免责声明弹窗 -->
-      <a-modal v-model:open="showDisclaimer" title="重要声明" :closable="false" :maskClosable="false" width="600px"
-        centered>
+      <a-modal
+        v-model:open="showDisclaimer"
+        title="重要声明"
+        :closable="false"
+        :maskClosable="false"
+        width="600px"
+        centered
+      >
         <div class="disclaimer-content">
           <div class="warning-header">
             <div class="warning-icon">⚠️</div>
@@ -176,9 +172,7 @@ onMounted(async () => {
 
         <template #footer>
           <div class="disclaimer-footer">
-            <a-button type="default" @click="rejectDisclaimer">
-              不同意并退出
-            </a-button>
+            <a-button type="default" @click="rejectDisclaimer"> 不同意并退出 </a-button>
             <a-button type="primary" @click="acceptDisclaimer">
               我已年满18周岁，同意并继续
             </a-button>
@@ -189,4 +183,4 @@ onMounted(async () => {
   </a-config-provider>
 </template>
 
-<style src='./assets/styles/app.scss' lang="scss"></style>
+<style src="./assets/styles/app.scss" lang="scss"></style>

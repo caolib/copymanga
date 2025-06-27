@@ -3,7 +3,7 @@
 use axum::{
     body::Body,
     extract::{Request, State},
-    http::{HeaderMap, Method, StatusCode, HeaderName, HeaderValue},
+    http::{HeaderMap, HeaderName, HeaderValue, Method, StatusCode},
     response::Response,
 };
 use reqwest::Client;
@@ -324,7 +324,7 @@ pub async fn handle_internal_request(
         if !["host", "origin", "content-length"].contains(&k.as_str()) {
             headers.insert(k, v.clone());
         }
-    }    // 添加配置文件中的请求头（必须从配置读取，没有默认值）
+    } // 添加配置文件中的请求头（必须从配置读取，没有默认值）
     if let Some(config_headers) = request_headers {
         // 直接遍历配置中的所有请求头并添加到headers中
         for (key, value) in &config_headers.0 {

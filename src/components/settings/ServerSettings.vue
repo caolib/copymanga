@@ -1,310 +1,405 @@
 <template>
+  <div>
+    <a-card title="转发服务配置" class="setting-card" id="server-config">
+      <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
+        <a-form-item label="服务器端口（1-65535）" name="serverPort">
+          <a-input-group compact>
+            <a-input-number
+              v-model:value="serverForm.serverPort"
+              placeholder="输入一个端口号"
+              :min="1"
+              :max="65535"
+              style="width: fit-content"
+            />
+            <a-button
+              type="primary"
+              html-type="submit"
+              :loading="savingServer"
+              style="width: fit-content"
+            >
+              保存
+            </a-button>
+          </a-input-group>
+        </a-form-item>
 
-    <div>
-        <a-card title="转发服务配置" class="setting-card" id="server-config">
-            <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
-                <a-form-item label="服务器端口（1-65535）" name="serverPort">
-                    <a-input-group compact>
-                        <a-input-number v-model:value="serverForm.serverPort" placeholder="输入一个端口号" :min="1"
-                            :max="65535" style="width: fit-content" />
-                        <a-button type="primary" html-type="submit" :loading="savingServer" style="width: fit-content">
-                            保存
-                        </a-button>
-                    </a-input-group>
-                </a-form-item>
+        <!-- Rust服务器状态监控 -->
+        <a-form-item>
+          <a-space>
+            <a-badge :status="serverStatus.status" :text="serverStatus.text" />
+            <span class="status-info">{{ serverStatus.info }}</span>
+            <a-button
+              v-if="serverStatus.status === 'error'"
+              type="primary"
+              size="small"
+              :loading="startingServer"
+              @click="startServer"
+            >
+              启动服务器
+            </a-button>
+            <a-button
+              v-if="serverStatus.status === 'success'"
+              type="default"
+              size="small"
+              :loading="stoppingServer"
+              @click="stopServer"
+            >
+              停止服务器
+            </a-button>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
 
-                <!-- Rust服务器状态监控 -->
-                <a-form-item>
-                    <a-space>
-                        <a-badge :status="serverStatus.status" :text="serverStatus.text" />
-                        <span class="status-info">{{ serverStatus.info }}</span>
-                        <a-button v-if="serverStatus.status === 'error'" type="primary" size="small"
-                            :loading="startingServer" @click="startServer">
-                            启动服务器
-                        </a-button>
-                        <a-button v-if="serverStatus.status === 'success'" type="default" size="small"
-                            :loading="stoppingServer" @click="stopServer">
-                            停止服务器
-                        </a-button>
-                    </a-space>
-                </a-form-item>
-            </a-form>
-        </a-card>
+    <a-card title="API源配置" class="setting-card" id="api-config">
+      <a-form layout="vertical">
+        <!-- 当前API源选择 -->
+        <a-form-item label="当前API源">
+          <a-select
+            v-model:value="currentApiIndex"
+            @change="onApiSourceChange"
+            style="width: fit-content"
+          >
+            <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
+              {{ source }}
+            </a-select-option>
+          </a-select>
+          <div class="help-text">选择要使用的API源</div>
+        </a-form-item>
 
-        <a-card title="API源配置" class="setting-card" id="api-config">
-            <a-form layout="vertical"> <!-- 当前API源选择 -->
-                <a-form-item label="当前API源">
-                    <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" style="width: fit-content">
-                        <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
-                            {{ source }}
-                        </a-select-option>
-                    </a-select>
-                    <div class="help-text">
-                        选择要使用的API源
-                    </div>
-                </a-form-item>
+        <!-- 添加新API源 -->
+        <a-form-item label="添加新API源">
+          <a-input-group compact>
+            <a-input
+              v-model:value="newApiSource.url"
+              placeholder="API域名"
+              style="width: fit-content"
+            />
+            <a-button
+              type="primary"
+              @click="addNewApiSource"
+              :loading="addingSource"
+              style="width: fit-content"
+            >
+              添加
+            </a-button>
+          </a-input-group>
+        </a-form-item>
 
-                <!-- 添加新API源 -->
-                <a-form-item label="添加新API源">
-                    <a-input-group compact>
-                        <a-input v-model:value="newApiSource.url" placeholder="API域名" style="width: fit-content" />
-                        <a-button type="primary" @click="addNewApiSource" :loading="addingSource"
-                            style="width: fit-content">
-                            添加
-                        </a-button>
-                    </a-input-group>
-                </a-form-item>
-
-                <!-- 官方API源 -->
-                <a-collapse @change="onCollapseChange" class="setting-card-collapse">
-                    <a-collapse-panel key="official-sources" header="从官方源添加">
-                        <template #extra>
-                            <a-button type="link" size="small" @click.stop="fetchOfficialApiSources"
-                                :loading="loadingOfficialSources">
-                                <template #icon>
-                                    <ReloadOutlined />
-                                </template>
-                                刷新
-                            </a-button>
-                        </template>
-                        <a-spin :spinning="loadingOfficialSources">
-                            <div v-if="officialApiSources.length === 0" class="empty-list">
-                                <a-empty description="暂无官方源" :image="false" />
-                            </div>
-                            <a-list v-else :data-source="officialApiSources" bordered size="small">
-                                <template #renderItem="{ item }">
-                                    <a-list-item>
-                                        <template #actions>
-                                            <a-button type="link" @click="quickAddApiSource(item)"
-                                                :disabled="isApiSourceExist(item)">
-                                                {{ isApiSourceExist(item) ? '已添加' : '添加' }}
-                                            </a-button>
-                                        </template>
-                                        {{ item }}
-                                    </a-list-item>
-                                </template>
-                            </a-list>
-                        </a-spin>
-                    </a-collapse-panel>
-                </a-collapse>
-
-                <!-- API源管理 -->
-                <a-form-item label="API源管理">
-                    <a-list :data-source="apiSources" bordered size="small">
-                        <template #renderItem="{ item, index }">
-                            <a-list-item>
-                                <template #actions>
-                                    <a-button v-if="apiSources.length > 1" type="text" danger size="small"
-                                        :icon="h(DeleteOutlined)" @click="removeApiSource(index)"
-                                        :loading="removingIndex === index">
-                                    </a-button>
-                                </template>
-                                <a-list-item-meta>
-                                    <template #title>
-                                        <span :class="{ 'current-source': index === currentApiIndex }">
-                                            {{ item }}
-                                            <a-tag v-if="index === currentApiIndex" color="green"
-                                                size="small">当前</a-tag>
-                                        </span>
-                                    </template>
-                                </a-list-item-meta>
-                            </a-list-item>
-                        </template>
-                    </a-list>
-                </a-form-item>
-            </a-form>
-        </a-card>
-
-        <!-- 请求头配置 -->
-        <a-card title="请求头配置" class="setting-card" id="headers-config">
-            <a-form layout="vertical">
-                <a-alert type="info" show-icon style="width:fit-content;margin-bottom:10px">
-                    <template #message>
-                        自定义API请求头（失效时使用github导入的配置并保存）
+        <!-- 官方API源 -->
+        <a-collapse @change="onCollapseChange" class="setting-card-collapse">
+          <a-collapse-panel key="official-sources" header="从官方源添加">
+            <template #extra>
+              <a-button
+                type="link"
+                size="small"
+                @click.stop="fetchOfficialApiSources"
+                :loading="loadingOfficialSources"
+              >
+                <template #icon>
+                  <ReloadOutlined />
+                </template>
+                刷新
+              </a-button>
+            </template>
+            <a-spin :spinning="loadingOfficialSources">
+              <div v-if="officialApiSources.length === 0" class="empty-list">
+                <a-empty description="暂无官方源" :image="false" />
+              </div>
+              <a-list v-else :data-source="officialApiSources" bordered size="small">
+                <template #renderItem="{ item }">
+                  <a-list-item>
+                    <template #actions>
+                      <a-button
+                        type="link"
+                        @click="quickAddApiSource(item)"
+                        :disabled="isApiSourceExist(item)"
+                      >
+                        {{ isApiSourceExist(item) ? '已添加' : '添加' }}
+                      </a-button>
                     </template>
-                </a-alert>
+                    {{ item }}
+                  </a-list-item>
+                </template>
+              </a-list>
+            </a-spin>
+          </a-collapse-panel>
+        </a-collapse>
 
-                <!-- 添加新请求头 -->
-                <a-form-item label="添加新请求头">
-                    <a-row :gutter="16">
-                        <a-col :span="8">
-                            <a-input v-model:value="newHeader.key" placeholder="请求头名称" @keyup.enter="addNewHeader" />
-                        </a-col>
-                        <a-col :span="14">
-                            <a-input v-model:value="newHeader.value" placeholder="请求头值" @keyup.enter="addNewHeader" />
-                        </a-col>
-                        <a-col :span="2">
-                            <a-button type="primary" @click="addNewHeader" :icon="h(PlusOutlined)"
-                                :disabled="!newHeader.key || !newHeader.value" block>
-                            </a-button>
-                        </a-col>
-                    </a-row>
-                </a-form-item>
+        <!-- API源管理 -->
+        <a-form-item label="API源管理">
+          <a-list :data-source="apiSources" bordered size="small">
+            <template #renderItem="{ item, index }">
+              <a-list-item>
+                <template #actions>
+                  <a-button
+                    v-if="apiSources.length > 1"
+                    type="text"
+                    danger
+                    size="small"
+                    :icon="h(DeleteOutlined)"
+                    @click="removeApiSource(index)"
+                    :loading="removingIndex === index"
+                  >
+                  </a-button>
+                </template>
+                <a-list-item-meta>
+                  <template #title>
+                    <span :class="{ 'current-source': index === currentApiIndex }">
+                      {{ item }}
+                      <a-tag v-if="index === currentApiIndex" color="green" size="small"
+                        >当前</a-tag
+                      >
+                    </span>
+                  </template>
+                </a-list-item-meta>
+              </a-list-item>
+            </template>
+          </a-list>
+        </a-form-item>
+      </a-form>
+    </a-card>
 
-                <!-- 现有请求头列表 -->
-                <a-form-item>
-                    <div v-if="headersList.length === 0" class="empty-headers">
-                        <a-empty description="暂无请求头配置" :image="false" />
-                    </div>
-                    <div v-else class="headers-list">
-                        <div v-for="(header, index) in headersList" :key="index" class="header-item">
-                            <a-row :gutter="16" align="middle">
-                                <a-col :span="8">
-                                    <a-input v-model:value="header.key" placeholder="请求头名称"
-                                        @change="onHeaderChange(index)" />
-                                </a-col>
-                                <a-col :span="14">
-                                    <a-input v-model:value="header.value" placeholder="请求头值"
-                                        @change="onHeaderChange(index)" />
-                                </a-col>
-                                <a-col :span="2">
-                                    <a-button type="text" danger @click="removeHeader(index)" :icon="h(DeleteOutlined)"
-                                        block>
-                                    </a-button>
-                                </a-col>
-                            </a-row>
-                        </div>
-                    </div>
-                </a-form-item>
+    <!-- 请求头配置 -->
+    <a-card title="请求头配置" class="setting-card" id="headers-config">
+      <a-form layout="vertical">
+        <a-alert type="info" show-icon style="width: fit-content; margin-bottom: 10px">
+          <template #message> 自定义API请求头（失效时使用github导入的配置并保存） </template>
+        </a-alert>
 
-                <a-form-item>
-                    <a-space>
-                        <a-button @click="fetchRemoteHeaders" :loading="fetchingRemoteHeaders" type="primary"
-                            :icon="h(GithubOutlined)">
-                            从github导入
-                        </a-button>
+        <!-- 添加新请求头 -->
+        <a-form-item label="添加新请求头">
+          <a-row :gutter="16">
+            <a-col :span="8">
+              <a-input
+                v-model:value="newHeader.key"
+                placeholder="请求头名称"
+                @keyup.enter="addNewHeader"
+              />
+            </a-col>
+            <a-col :span="14">
+              <a-input
+                v-model:value="newHeader.value"
+                placeholder="请求头值"
+                @keyup.enter="addNewHeader"
+              />
+            </a-col>
+            <a-col :span="2">
+              <a-button
+                type="primary"
+                @click="addNewHeader"
+                :icon="h(PlusOutlined)"
+                :disabled="!newHeader.key || !newHeader.value"
+                block
+              >
+              </a-button>
+            </a-col>
+          </a-row>
+        </a-form-item>
 
-                        <a-button @click="saveAllHeaders" :loading="savingHeaders">
-                            保存
-                        </a-button>
-
-                        <a-button @click="exportHeaders" :loading="exportingHeaders" :icon="h(DownloadOutlined)">
-                            导出
-                        </a-button>
-
-                        <a-button @click="importHeaders" :loading="importingHeaders" :icon="h(UploadOutlined)">
-                            从文件导入
-                        </a-button>
-
-                        <a-popconfirm title="你确定?" ok-text="对的" cancel-text="不对" @confirm="resetHeaders">
-                            <a-button>恢复默认</a-button>
-                        </a-popconfirm>
-
-                    </a-space>
-                </a-form-item>
-            </a-form>
-        </a-card>
-
-        <!-- 轻小说API源配置 -->
-        <a-card title="轻小说API源配置" class="setting-card" id="book-api-config">
-            <a-form layout="vertical">
-                <a-alert type="info" show-icon style="width:fit-content;margin-bottom:10px">
-                    <template #message>
-                        官方目前好像就只有这一个源
-                    </template>
-                </a-alert>
-                <!-- 当前轻小说API源选择 -->
-                <a-form-item label="当前轻小说API源">
-
-                    <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange"
-                        style="width:fit-content">
-                        <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
-                            {{ source }}
-                        </a-select-option>
-                    </a-select>
-                    <div class="help-text">
-                        选择要使用的轻小说API源
-                    </div>
-                </a-form-item>
-
-                <!-- 添加新轻小说API源 -->
-                <a-form-item label="添加新轻小说API源">
-                    <a-input-group compact>
-                        <a-input v-model:value="newBookApiSource.url"
-                            placeholder="轻小说API域名 (如: https://api.copy-manga.com)" style="width: fit-content" />
-                        <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
-                            style="width: fit-content">
-                            添加
-                        </a-button>
-                    </a-input-group>
-                </a-form-item>
-
-                <!-- 轻小说API源管理 -->
-                <a-form-item label="轻小说API源管理">
-                    <a-list :data-source="bookApiSources" bordered size="small">
-                        <template #renderItem="{ item, index }">
-                            <a-list-item>
-                                <template #actions>
-                                    <a-button v-if="bookApiSources.length > 1" type="text" danger size="small"
-                                        :icon="h(DeleteOutlined)" @click="removeBookApiSource(index)"
-                                        :loading="removingBookIndex === index"></a-button>
-                                </template>
-                                <a-list-item-meta>
-                                    <template #title>
-                                        <span :class="{ 'current-source': index === currentBookApiIndex }">
-                                            {{ item }}
-                                            <a-tag v-if="index === currentBookApiIndex" color="orange"
-                                                size="small">当前</a-tag>
-                                        </span>
-                                    </template>
-                                </a-list-item-meta>
-                            </a-list-item>
-                        </template>
-                    </a-list>
-                </a-form-item>
-            </a-form>
-        </a-card>
-
-        <a-card class="setting-card" id="status">
-            <div class="restart-section">
-                <a-space>
-                    <a-button type="primary" @click="handleRestart" :loading="restarting" danger
-                        :icon="h(ReloadOutlined)">
-                        重启应用
-                    </a-button>
-                    <a-button @click="openConfigDirectory" :icon="h(SettingOutlined)" :loading="openingDirectory">
-                        打开配置目录
-                    </a-button>
-                </a-space>
+        <!-- 现有请求头列表 -->
+        <a-form-item>
+          <div v-if="headersList.length === 0" class="empty-headers">
+            <a-empty description="暂无请求头配置" :image="false" />
+          </div>
+          <div v-else class="headers-list">
+            <div v-for="(header, index) in headersList" :key="index" class="header-item">
+              <a-row :gutter="16" align="middle">
+                <a-col :span="8">
+                  <a-input
+                    v-model:value="header.key"
+                    placeholder="请求头名称"
+                    @change="onHeaderChange(index)"
+                  />
+                </a-col>
+                <a-col :span="14">
+                  <a-input
+                    v-model:value="header.value"
+                    placeholder="请求头值"
+                    @change="onHeaderChange(index)"
+                  />
+                </a-col>
+                <a-col :span="2">
+                  <a-button
+                    type="text"
+                    danger
+                    @click="removeHeader(index)"
+                    :icon="h(DeleteOutlined)"
+                    block
+                  >
+                  </a-button>
+                </a-col>
+              </a-row>
             </div>
-        </a-card>
-    </div>
+          </div>
+        </a-form-item>
+
+        <a-form-item>
+          <a-space>
+            <a-button
+              @click="fetchRemoteHeaders"
+              :loading="fetchingRemoteHeaders"
+              type="primary"
+              :icon="h(GithubOutlined)"
+            >
+              从github导入
+            </a-button>
+
+            <a-button @click="saveAllHeaders" :loading="savingHeaders"> 保存 </a-button>
+
+            <a-button
+              @click="exportHeaders"
+              :loading="exportingHeaders"
+              :icon="h(DownloadOutlined)"
+            >
+              导出
+            </a-button>
+
+            <a-button @click="importHeaders" :loading="importingHeaders" :icon="h(UploadOutlined)">
+              从文件导入
+            </a-button>
+
+            <a-popconfirm title="你确定?" ok-text="对的" cancel-text="不对" @confirm="resetHeaders">
+              <a-button>恢复默认</a-button>
+            </a-popconfirm>
+          </a-space>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <!-- 轻小说API源配置 -->
+    <a-card title="轻小说API源配置" class="setting-card" id="book-api-config">
+      <a-form layout="vertical">
+        <a-alert type="info" show-icon style="width: fit-content; margin-bottom: 10px">
+          <template #message> 官方目前好像就只有这一个源 </template>
+        </a-alert>
+        <!-- 当前轻小说API源选择 -->
+        <a-form-item label="当前轻小说API源">
+          <a-select
+            v-model:value="currentBookApiIndex"
+            @change="onBookApiSourceChange"
+            style="width: fit-content"
+          >
+            <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
+              {{ source }}
+            </a-select-option>
+          </a-select>
+          <div class="help-text">选择要使用的轻小说API源</div>
+        </a-form-item>
+
+        <!-- 添加新轻小说API源 -->
+        <a-form-item label="添加新轻小说API源">
+          <a-input-group compact>
+            <a-input
+              v-model:value="newBookApiSource.url"
+              placeholder="轻小说API域名 (如: https://api.copy-manga.com)"
+              style="width: fit-content"
+            />
+            <a-button
+              type="primary"
+              @click="addNewBookApiSource"
+              :loading="addingBookSource"
+              style="width: fit-content"
+            >
+              添加
+            </a-button>
+          </a-input-group>
+        </a-form-item>
+
+        <!-- 轻小说API源管理 -->
+        <a-form-item label="轻小说API源管理">
+          <a-list :data-source="bookApiSources" bordered size="small">
+            <template #renderItem="{ item, index }">
+              <a-list-item>
+                <template #actions>
+                  <a-button
+                    v-if="bookApiSources.length > 1"
+                    type="text"
+                    danger
+                    size="small"
+                    :icon="h(DeleteOutlined)"
+                    @click="removeBookApiSource(index)"
+                    :loading="removingBookIndex === index"
+                  ></a-button>
+                </template>
+                <a-list-item-meta>
+                  <template #title>
+                    <span :class="{ 'current-source': index === currentBookApiIndex }">
+                      {{ item }}
+                      <a-tag v-if="index === currentBookApiIndex" color="orange" size="small"
+                        >当前</a-tag
+                      >
+                    </span>
+                  </template>
+                </a-list-item-meta>
+              </a-list-item>
+            </template>
+          </a-list>
+        </a-form-item>
+      </a-form>
+    </a-card>
+
+    <a-card class="setting-card" id="status">
+      <div class="restart-section">
+        <a-space>
+          <a-button
+            type="primary"
+            @click="handleRestart"
+            :loading="restarting"
+            danger
+            :icon="h(ReloadOutlined)"
+          >
+            重启应用
+          </a-button>
+          <a-button
+            @click="openConfigDirectory"
+            :icon="h(SettingOutlined)"
+            :loading="openingDirectory"
+          >
+            打开配置目录
+          </a-button>
+        </a-space>
+      </div>
+    </a-card>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
-import { message, notification } from 'ant-design-vue'
-import { ReloadOutlined, GithubOutlined } from '@ant-design/icons-vue'
-import { h } from 'vue'
+import { h, onMounted, onUnmounted, ref } from 'vue'
+import { message } from 'ant-design-vue'
 import {
-    getServerConfig,
-    saveServerConfig,
-    validateServerPort,
-    getAppConfig,
-    saveAppConfig,
-    validateApiDomain,
-    addApiSource,
-    removeApiSource as removeApiSourceConfig,
-    switchApiSource,
-    addBookApiSource,
-    removeBookApiSource as removeBookApiSourceConfig,
-    switchBookApiSource,
-    getRequestHeaders,
-    saveRequestHeaders,
-    getDefaultRequestHeaders
+  DeleteOutlined,
+  DownloadOutlined,
+  GithubOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+  SettingOutlined,
+  UploadOutlined,
+} from '@ant-design/icons-vue'
+import {
+  addApiSource,
+  addBookApiSource,
+  getAppConfig,
+  getDefaultRequestHeaders,
+  getRequestHeaders,
+  getServerConfig,
+  removeApiSource as removeApiSourceConfig,
+  removeBookApiSource as removeBookApiSourceConfig,
+  saveAppConfig,
+  saveRequestHeaders,
+  saveServerConfig,
+  switchApiSource,
+  switchBookApiSource,
 } from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
 import { invoke } from '@tauri-apps/api/core'
-import { dirname } from '@tauri-apps/api/path'
 import { appDataDir } from '@tauri-apps/api/path'
 import { restartApp } from '@/utils/restart-helper'
-import { exportHeaders as exportHeadersConfig, importHeaders as importHeadersConfig } from '@/utils/export-helper'
-import { PlusOutlined, DeleteOutlined, SettingOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons-vue'
+import {
+  exportHeaders as exportHeadersConfig,
+  importHeaders as importHeadersConfig,
+} from '@/utils/export-helper'
 import { getOfficialApiSources } from '@/api/api-source'
 import { getHeadersConfig } from '@/api/github'
-
-
-
 
 const serverForm = ref({ serverPort: 12121 })
 const appForm = ref({ apiDomain: '' })
@@ -325,7 +420,7 @@ const removingIndex = ref(-1)
 // 新增：官方API源相关状态
 const officialApiSources = ref([])
 const loadingOfficialSources = ref(false)
-const activeCollapseKey = ref([])
+ref([])
 
 // 新增：轻小说API源管理相关状态
 const bookApiSources = ref([])
@@ -345,11 +440,11 @@ const fetchingRemoteHeaders = ref(false)
 
 // Rust服务器状态监控
 const serverStatus = ref({
-    status: 'default',
-    text: '检查中...',
-    color: 'default',
-    displayText: '检查中',
-    info: '正在检查服务器状态...'
+  status: 'default',
+  text: '检查中...',
+  color: 'default',
+  displayText: '检查中',
+  info: '正在检查服务器状态...',
 })
 let statusCheckInterval = null
 const startingServer = ref(false)
@@ -359,544 +454,561 @@ const stoppingServer = ref(false)
 
 // 加载当前配置
 const loadConfig = () => {
-    // 加载服务器配置
-    getServerConfig().then(config => {
-        currentServerPort.value = config.serverPort
-        serverForm.value.serverPort = parseInt(config.serverPort)
-    }).catch(error => {
-        message.error('加载服务器配置失败', error)
+  // 加载服务器配置
+  getServerConfig()
+    .then((config) => {
+      currentServerPort.value = config.serverPort
+      serverForm.value.serverPort = parseInt(config.serverPort)
+    })
+    .catch((error) => {
+      message.error('加载服务器配置失败', error)
     })
 
-    // 加载应用配置
-    getAppConfig().then(config => {
-        // 加载漫画API源
-        apiSources.value = config.apiSources || []
+  // 加载应用配置
+  getAppConfig()
+    .then((config) => {
+      // 加载漫画API源
+      apiSources.value = config.apiSources || []
 
-        // 如果有API源，确保索引有效
-        if (apiSources.value.length > 0) {
-            // 如果索引无效，重置为0
-            if (config.currentApiIndex < 0 || config.currentApiIndex >= apiSources.value.length) {
-                currentApiIndex.value = 0
-                // 同时保存更新后的配置
-                saveAppConfig({
-                    apiSources: apiSources.value,
-                    currentApiIndex: 0,
-                    bookApiSources: config.bookApiSources || [],
-                    currentBookApiIndex: config.currentBookApiIndex || 0
-                }).catch(error => {
-                    console.warn('保存修正后的配置失败:', error)
-                })
-            } else {
-                currentApiIndex.value = config.currentApiIndex
-            }
-
-            // 设置当前域名
-            const currentSource = apiSources.value[currentApiIndex.value]
-            currentApiDomain.value = currentSource
-            appForm.value.apiDomain = currentSource
+      // 如果有API源，确保索引有效
+      if (apiSources.value.length > 0) {
+        // 如果索引无效，重置为0
+        if (config.currentApiIndex < 0 || config.currentApiIndex >= apiSources.value.length) {
+          currentApiIndex.value = 0
+          // 同时保存更新后的配置
+          saveAppConfig({
+            apiSources: apiSources.value,
+            currentApiIndex: 0,
+            bookApiSources: config.bookApiSources || [],
+            currentBookApiIndex: config.currentBookApiIndex || 0,
+          }).catch((error) => {
+            console.warn('保存修正后的配置失败:', error)
+          })
         } else {
-            // 没有API源时，重置索引
-            currentApiIndex.value = -1
-            currentApiDomain.value = '未配置'
-            appForm.value.apiDomain = ''
+          currentApiIndex.value = config.currentApiIndex
         }
 
-        // 加载轻小说API源
-        bookApiSources.value = config.bookApiSources || []
+        // 设置当前域名
+        const currentSource = apiSources.value[currentApiIndex.value]
+        currentApiDomain.value = currentSource
+        appForm.value.apiDomain = currentSource
+      } else {
+        // 没有API源时，重置索引
+        currentApiIndex.value = -1
+        currentApiDomain.value = '未配置'
+        appForm.value.apiDomain = ''
+      }
 
-        // 如果有轻小说API源，确保索引有效
-        if (bookApiSources.value.length > 0) {
-            // 如果索引无效，重置为0
-            if (config.currentBookApiIndex < 0 || config.currentBookApiIndex >= bookApiSources.value.length) {
-                currentBookApiIndex.value = 0
-                // 同时保存更新后的配置
-                saveAppConfig({
-                    apiSources: config.apiSources || [],
-                    currentApiIndex: config.currentApiIndex || 0,
-                    bookApiSources: bookApiSources.value,
-                    currentBookApiIndex: 0
-                }).catch(error => {
-                    console.warn('保存修正后的轻小说配置失败:', error)
-                })
-            } else {
-                currentBookApiIndex.value = config.currentBookApiIndex
-            }
+      // 加载轻小说API源
+      bookApiSources.value = config.bookApiSources || []
 
-            // 设置当前轻小说域名
-            const currentBookSource = bookApiSources.value[currentBookApiIndex.value]
-            currentBookApiDomain.value = currentBookSource
+      // 如果有轻小说API源，确保索引有效
+      if (bookApiSources.value.length > 0) {
+        // 如果索引无效，重置为0
+        if (
+          config.currentBookApiIndex < 0 ||
+          config.currentBookApiIndex >= bookApiSources.value.length
+        ) {
+          currentBookApiIndex.value = 0
+          // 同时保存更新后的配置
+          saveAppConfig({
+            apiSources: config.apiSources || [],
+            currentApiIndex: config.currentApiIndex || 0,
+            bookApiSources: bookApiSources.value,
+            currentBookApiIndex: 0,
+          }).catch((error) => {
+            console.warn('保存修正后的轻小说配置失败:', error)
+          })
         } else {
-            // 没有轻小说API源时，重置索引
-            currentBookApiIndex.value = -1
-            currentBookApiDomain.value = '未配置'
+          currentBookApiIndex.value = config.currentBookApiIndex
         }
-    }).catch(error => {
-        message.error('加载应用配置失败')
+
+        // 设置当前轻小说域名
+        currentBookApiDomain.value = bookApiSources.value[currentBookApiIndex.value]
+      } else {
+        // 没有轻小说API源时，重置索引
+        currentBookApiIndex.value = -1
+        currentBookApiDomain.value = '未配置'
+      }
+    })
+    .catch((error) => {
+      message.error('加载应用配置失败')
     })
 
-    // 加载请求头配置
-    getRequestHeaders().then(headers => {
-        // 将对象转换为键值对数组
-        headersList.value = Object.entries(headers || {}).map(([key, value]) => ({
-            key,
-            value
-        }))
-    }).catch(error => {
-        console.warn('加载请求头配置失败:', error)
-        headersList.value = []
+  // 加载请求头配置
+  getRequestHeaders()
+    .then((headers) => {
+      // 将对象转换为键值对数组
+      headersList.value = Object.entries(headers || {}).map(([key, value]) => ({
+        key,
+        value,
+      }))
+    })
+    .catch((error) => {
+      console.warn('加载请求头配置失败:', error)
+      headersList.value = []
     })
 }
 
 // 保存服务器配置
 const onSubmitServer = () => {
-    savingServer.value = true
+  savingServer.value = true
 
-    saveServerConfig(serverForm.value.serverPort).then(() => {
-        message.success('服务器配置保存成功！')
-        appStore.setNeedsRestart(true)
-        loadConfig()
-    }).catch(error => {
-        message.error(error.message || '保存服务器配置失败')
-    }).finally(() => {
-        savingServer.value = false
+  saveServerConfig(serverForm.value.serverPort)
+    .then(() => {
+      message.success('服务器配置保存成功！')
+      appStore.setNeedsRestart(true)
+      loadConfig()
+    })
+    .catch((error) => {
+      message.error(error.message || '保存服务器配置失败')
+    })
+    .finally(() => {
+      savingServer.value = false
     })
 }
 
 // 处理重启应用
 const handleRestart = async () => {
-    restarting.value = true
+  restarting.value = true
 
-    appStore.setNeedsRestart(false)
+  appStore.setNeedsRestart(false)
 
-    await restartApp().catch(error => {
-        console.error('重启应用失败:', error)
-        message.error('重启应用失败')
-        restarting.value = false
-    })
-
+  await restartApp().catch((error) => {
+    console.error('重启应用失败:', error)
+    message.error('重启应用失败')
+    restarting.value = false
+  })
 }
 
 // 新增：API源切换
 const onApiSourceChange = async (index) => {
-    try {
-        const source = await switchApiSource(index)
-        currentApiDomain.value = source
-        appForm.value.apiDomain = source
-        appStore.setNeedsRestart(true)
-        message.success(`已切换到: ${source}`)
-    } catch (error) {
-        message.error(error.message || '切换API源失败')
-        // 切换失败时恢复原值
-        loadConfig()
-    }
+  try {
+    const source = await switchApiSource(index)
+    currentApiDomain.value = source
+    appForm.value.apiDomain = source
+    appStore.setNeedsRestart(true)
+    message.success(`已切换到: ${source}`)
+  } catch (error) {
+    message.error(error.message || '切换API源失败')
+    // 切换失败时恢复原值
+    loadConfig()
+  }
 }
 
 // 新增：添加API源
 const addNewApiSource = async () => {
-    if (!newApiSource.value.url) {
-        message.error('请输入URL')
-        return
-    }
+  if (!newApiSource.value.url) {
+    message.error('请输入URL')
+    return
+  }
 
-    addingSource.value = true
-    try {
-        await addApiSource(newApiSource.value.url)
-        message.success('API源添加成功')
-        newApiSource.value = { url: '' }
-        loadConfig() // 重新加载配置
-    } catch (error) {
-        message.error(error.message || '添加API源失败')
-    } finally {
-        addingSource.value = false
-    }
+  addingSource.value = true
+  try {
+    await addApiSource(newApiSource.value.url)
+    message.success('API源添加成功')
+    newApiSource.value = { url: '' }
+    loadConfig() // 重新加载配置
+  } catch (error) {
+    message.error(error.message || '添加API源失败')
+  } finally {
+    addingSource.value = false
+  }
 }
 
 // 新增：删除API源
 const removeApiSource = async (index) => {
-    if (apiSources.value.length <= 1) {
-        message.error('至少需要保留一个API源')
-        return
-    }
+  if (apiSources.value.length <= 1) {
+    message.error('至少需要保留一个API源')
+    return
+  }
 
-    removingIndex.value = index
-    try {
-        await removeApiSourceConfig(index)
-        message.success('API源删除成功')
-        loadConfig() // 重新加载配置
-    } catch (error) {
-        message.error(error.message || '删除API源失败')
-    } finally {
-        removingIndex.value = -1
-    }
+  removingIndex.value = index
+  try {
+    await removeApiSourceConfig(index)
+    message.success('API源删除成功')
+    loadConfig() // 重新加载配置
+  } catch (error) {
+    message.error(error.message || '删除API源失败')
+  } finally {
+    removingIndex.value = -1
+  }
 }
 
 // 新增：轻小说API源切换
 const onBookApiSourceChange = async (index) => {
-    try {
-        const source = await switchBookApiSource(index)
-        currentBookApiDomain.value = source
-        appStore.setNeedsRestart(true)
-        message.success(`已切换轻小说API源到: ${source}`)
-    } catch (error) {
-        message.error(error.message || '切换轻小说API源失败')
-        // 切换失败时恢复原值
-        loadConfig()
-    }
+  try {
+    const source = await switchBookApiSource(index)
+    currentBookApiDomain.value = source
+    appStore.setNeedsRestart(true)
+    message.success(`已切换轻小说API源到: ${source}`)
+  } catch (error) {
+    message.error(error.message || '切换轻小说API源失败')
+    // 切换失败时恢复原值
+    loadConfig()
+  }
 }
 
 // 新增：添加轻小说API源
 const addNewBookApiSource = async () => {
-    if (!newBookApiSource.value.url) {
-        message.error('请输入轻小说API URL')
-        return
-    }
+  if (!newBookApiSource.value.url) {
+    message.error('请输入轻小说API URL')
+    return
+  }
 
-    addingBookSource.value = true
-    try {
-        await addBookApiSource(newBookApiSource.value.url)
-        message.success('轻小说API源添加成功')
-        newBookApiSource.value = { url: '' }
-        loadConfig() // 重新加载配置
-    } catch (error) {
-        message.error(error.message || '添加轻小说API源失败')
-    } finally {
-        addingBookSource.value = false
-    }
+  addingBookSource.value = true
+  try {
+    await addBookApiSource(newBookApiSource.value.url)
+    message.success('轻小说API源添加成功')
+    newBookApiSource.value = { url: '' }
+    loadConfig() // 重新加载配置
+  } catch (error) {
+    message.error(error.message || '添加轻小说API源失败')
+  } finally {
+    addingBookSource.value = false
+  }
 }
 
 // 新增：删除轻小说API源
 const removeBookApiSource = async (index) => {
-    if (bookApiSources.value.length <= 1) {
-        message.error('至少需要保留一个轻小说API源')
-        return
-    }
+  if (bookApiSources.value.length <= 1) {
+    message.error('至少需要保留一个轻小说API源')
+    return
+  }
 
-    removingBookIndex.value = index
-    try {
-        await removeBookApiSourceConfig(index)
-        message.success('轻小说API源删除成功')
-        loadConfig() // 重新加载配置
-    } catch (error) {
-        message.error(error.message || '删除轻小说API源失败')
-    } finally {
-        removingBookIndex.value = -1
-    }
+  removingBookIndex.value = index
+  try {
+    await removeBookApiSourceConfig(index)
+    message.success('轻小说API源删除成功')
+    loadConfig() // 重新加载配置
+  } catch (error) {
+    message.error(error.message || '删除轻小说API源失败')
+  } finally {
+    removingBookIndex.value = -1
+  }
 }
 
 // 添加新请求头
 const addNewHeader = () => {
-    if (!newHeader.value.key || !newHeader.value.value) {
-        message.error('请输入完整的请求头名称和值')
-        return
-    }
+  if (!newHeader.value.key || !newHeader.value.value) {
+    message.error('请输入完整的请求头名称和值')
+    return
+  }
 
-    // 检查是否已存在相同的键
-    const existingIndex = headersList.value.findIndex(header => header.key === newHeader.value.key)
-    if (existingIndex !== -1) {
-        message.error('该请求头已存在，请使用不同的名称')
-        return
-    }
+  // 检查是否已存在相同的键
+  const existingIndex = headersList.value.findIndex((header) => header.key === newHeader.value.key)
+  if (existingIndex !== -1) {
+    message.error('该请求头已存在，请使用不同的名称')
+    return
+  }
 
-    headersList.value.push({
-        key: newHeader.value.key,
-        value: newHeader.value.value
-    })
+  headersList.value.push({
+    key: newHeader.value.key,
+    value: newHeader.value.value,
+  })
 
-    // 清空输入框
-    newHeader.value = { key: '', value: '' }
-    message.success('请求头已添加')
+  // 清空输入框
+  newHeader.value = { key: '', value: '' }
+  message.success('请求头已添加')
 }
 
 // 删除请求头
 const removeHeader = (index) => {
-    headersList.value.splice(index, 1)
-    message.success('请求头已删除')
+  headersList.value.splice(index, 1)
+  message.success('请求头已删除')
 }
 
 // 请求头值变化时的处理
 const onHeaderChange = (index) => {
-    // 这里可以添加实时验证逻辑
-    const header = headersList.value[index]
-    if (!header.key || !header.value) {
-        console.warn(`请求头 ${index} 的键或值为空`)
-    }
+  // 这里可以添加实时验证逻辑
+  const header = headersList.value[index]
+  if (!header.key || !header.value) {
+    console.warn(`请求头 ${index} 的键或值为空`)
+  }
 }
 
 // 保存所有请求头配置
 const saveAllHeaders = async () => {
-    savingHeaders.value = true
+  savingHeaders.value = true
 
-    try {
-        // 验证所有请求头
-        const invalidHeaders = headersList.value.filter(header => !header.key || !header.value)
-        if (invalidHeaders.length > 0) {
-            message.error('存在空的请求头键或值，请检查配置')
-            savingHeaders.value = false
-            return
-        }
-
-        // 检查重复的键
-        const keys = headersList.value.map(header => header.key)
-        const uniqueKeys = new Set(keys)
-        if (keys.length !== uniqueKeys.size) {
-            message.error('存在重复的请求头键，请检查配置')
-            savingHeaders.value = false
-            return
-        }
-
-        // 转换为对象格式保存
-        const headersObject = {}
-        headersList.value.forEach(header => {
-            headersObject[header.key] = header.value
-        })
-
-        await saveRequestHeaders(headersObject)
-        message.success('请求头配置保存成功！')
-        appStore.setNeedsRestart(true)
-    } catch (error) {
-        message.error(error.message || '保存请求头配置失败')
-    } finally {
-        savingHeaders.value = false
+  try {
+    // 验证所有请求头
+    const invalidHeaders = headersList.value.filter((header) => !header.key || !header.value)
+    if (invalidHeaders.length > 0) {
+      message.error('存在空的请求头键或值，请检查配置')
+      savingHeaders.value = false
+      return
     }
+
+    // 检查重复的键
+    const keys = headersList.value.map((header) => header.key)
+    const uniqueKeys = new Set(keys)
+    if (keys.length !== uniqueKeys.size) {
+      message.error('存在重复的请求头键，请检查配置')
+      savingHeaders.value = false
+      return
+    }
+
+    // 转换为对象格式保存
+    const headersObject = {}
+    headersList.value.forEach((header) => {
+      headersObject[header.key] = header.value
+    })
+
+    await saveRequestHeaders(headersObject)
+    message.success('请求头配置保存成功！')
+    appStore.setNeedsRestart(true)
+  } catch (error) {
+    message.error(error.message || '保存请求头配置失败')
+  } finally {
+    savingHeaders.value = false
+  }
 }
 
 // 重置请求头为默认值
 const resetHeaders = async () => {
-    try {
-        const defaultHeaders = getDefaultRequestHeaders()
-        headersList.value = Object.entries(defaultHeaders).map(([key, value]) => ({
-            key,
-            value
-        }))
-        await saveRequestHeaders(defaultHeaders)
-        message.success('已恢复默认请求头配置')
-        appStore.setNeedsRestart(true)
-    } catch (error) {
-        message.error('重置请求头配置失败')
-    }
+  try {
+    const defaultHeaders = getDefaultRequestHeaders()
+    headersList.value = Object.entries(defaultHeaders).map(([key, value]) => ({
+      key,
+      value,
+    }))
+    await saveRequestHeaders(defaultHeaders)
+    message.success('已恢复默认请求头配置')
+    appStore.setNeedsRestart(true)
+  } catch (error) {
+    message.error('重置请求头配置失败')
+  }
 }
 
 // 导出请求头配置
 const exportHeaders = async () => {
-    try {
-        exportingHeaders.value = true
-        await exportHeadersConfig(headersList.value)
-    } catch (error) {
-        console.error('导出请求头配置失败:', error)
-    } finally {
-        exportingHeaders.value = false
-    }
+  try {
+    exportingHeaders.value = true
+    await exportHeadersConfig(headersList.value)
+  } catch (error) {
+    console.error('导出请求头配置失败:', error)
+  } finally {
+    exportingHeaders.value = false
+  }
 }
 
 // 导入请求头配置
 const importHeaders = async () => {
-    try {
-        importingHeaders.value = true
+  try {
+    importingHeaders.value = true
 
-        const importedData = await importHeadersConfig()
-        if (importedData) {
-            // 将导入的对象转换为 headersList 格式
-            headersList.value = Object.entries(importedData).map(([key, value]) => ({
-                key,
-                value
-            }))
+    const importedData = await importHeadersConfig()
+    if (importedData) {
+      // 将导入的对象转换为 headersList 格式
+      headersList.value = Object.entries(importedData).map(([key, value]) => ({
+        key,
+        value,
+      }))
 
-            // 自动保存导入的配置
-            try {
-                await saveRequestHeaders(importedData)
-                message.success('请求头配置已导入并保存')
-                appStore.setNeedsRestart(true)
-            } catch (saveError) {
-                message.error('导入成功但保存失败，请手动保存配置')
-                console.error('保存导入的配置失败:', saveError)
-            }
-        }
-    } catch (error) {
-        console.error('导入请求头配置失败:', error)
-    } finally {
-        importingHeaders.value = false
+      // 自动保存导入的配置
+      try {
+        await saveRequestHeaders(importedData)
+        message.success('请求头配置已导入并保存')
+        appStore.setNeedsRestart(true)
+      } catch (saveError) {
+        message.error('导入成功但保存失败，请手动保存配置')
+        console.error('保存导入的配置失败:', saveError)
+      }
     }
+  } catch (error) {
+    console.error('导入请求头配置失败:', error)
+  } finally {
+    importingHeaders.value = false
+  }
 }
 
 // 获取远程请求头配置
 const fetchRemoteHeaders = async () => {
-    fetchingRemoteHeaders.value = true
-    getHeadersConfig().then(headers => {
-        if (headers && typeof headers === 'object' && Object.keys(headers).length > 0) {
-            headersList.value = Object.entries(headers).map(([key, value]) => ({ key, value }))
-            saveAllHeaders()
-            appStore.setNeedsRestart(true)
-        } else {
-            message.error('远程配置为空或格式不正确')
-        }
-    }).catch(err => {
-        message.error('获取远程配置失败')
-        console.error('获取远程headers.json失败:', err)
-    }).finally(() => {
-        fetchingRemoteHeaders.value = false
+  fetchingRemoteHeaders.value = true
+  getHeadersConfig()
+    .then((headers) => {
+      if (headers && typeof headers === 'object' && Object.keys(headers).length > 0) {
+        headersList.value = Object.entries(headers).map(([key, value]) => ({ key, value }))
+        saveAllHeaders()
+        appStore.setNeedsRestart(true)
+      } else {
+        message.error('远程配置为空或格式不正确')
+      }
+    })
+    .catch((err) => {
+      message.error('获取远程配置失败')
+      console.error('获取远程headers.json失败:', err)
+    })
+    .finally(() => {
+      fetchingRemoteHeaders.value = false
     })
 }
 
 // 打开配置目录
 const openConfigDirectory = async () => {
-    openingDirectory.value = true
+  openingDirectory.value = true
 
-    await appDataDir().then(appDataPath => {
-        const configDir = appDataPath + '\\config'
-        return invoke('open_file_explorer', { path: configDir })
-    }).catch(error => {
-        message.error('打开配置目录失败: ' + (error.message || error))
-        console.error('打开配置目录失败:', error)
-    }).finally(() => {
-        openingDirectory.value = false
+  await appDataDir()
+    .then((appDataPath) => {
+      const configDir = appDataPath + '\\config'
+      return invoke('open_file_explorer', { path: configDir })
+    })
+    .catch((error) => {
+      message.error('打开配置目录失败: ' + (error.message || error))
+      console.error('打开配置目录失败:', error)
+    })
+    .finally(() => {
+      openingDirectory.value = false
     })
 }
 
 // 检查Rust服务器状态
 const checkServerStatus = async () => {
-    try {
-        const config = await getServerConfig()
-        const port = config.serverPort
+  try {
+    const config = await getServerConfig()
+    const port = config.serverPort
 
-        // 使用专门的状态检查命令
-        const result = await invoke('check_proxy_server_status')
+    // 使用专门的状态检查命令
+    const result = await invoke('check_proxy_server_status')
 
-        if (result === "代理服务器正在运行") {
-            serverStatus.value = {
-                status: 'success',
-                text: '运行中',
-                info: `代理服务器正在端口 ${port} 上运行`
-            }
-        } else {
-            serverStatus.value = {
-                status: 'error',
-                text: '已停止',
-                info: '代理服务器未运行'
-            }
-        }
-    } catch (error) {
-        // 如果检查失败，尝试启动服务器来获取更详细的错误信息
-        try {
-            await invoke('start_proxy_server')
-            // 如果启动成功，重新检查状态
-            setTimeout(checkServerStatus, 1000)
-        } catch (startError) {
-            const config = await getServerConfig()
-            const port = config.serverPort
-            serverStatus.value = {
-                status: 'error',
-                text: '启动失败',
-                info: startError.includes('端口') ? startError : `端口 ${port} 被占用或启动失败，请尝试更换端口`
-            }
-        }
+    if (result === '代理服务器正在运行') {
+      serverStatus.value = {
+        status: 'success',
+        text: '运行中',
+        info: `代理服务器正在端口 ${port} 上运行`,
+      }
+    } else {
+      serverStatus.value = {
+        status: 'error',
+        text: '已停止',
+        info: '代理服务器未运行',
+      }
     }
+  } catch (error) {
+    // 如果检查失败，尝试启动服务器来获取更详细的错误信息
+    try {
+      await invoke('start_proxy_server')
+      // 如果启动成功，重新检查状态
+      setTimeout(checkServerStatus, 1000)
+    } catch (startError) {
+      const config = await getServerConfig()
+      const port = config.serverPort
+      serverStatus.value = {
+        status: 'error',
+        text: '启动失败',
+        info: startError.includes('端口')
+          ? startError
+          : `端口 ${port} 被占用或启动失败，请尝试更换端口`,
+      }
+    }
+  }
 }
 
 // 启动状态检查定时器 5秒检查一次
 const startStatusCheck = () => {
-    checkServerStatus()
-    statusCheckInterval = setInterval(checkServerStatus, 5000)
+  checkServerStatus()
+  statusCheckInterval = setInterval(checkServerStatus, 5000)
 }
 
 // 停止状态检查定时器
 const stopStatusCheck = () => {
-    if (statusCheckInterval) {
-        clearInterval(statusCheckInterval)
-        statusCheckInterval = null
-    }
+  if (statusCheckInterval) {
+    clearInterval(statusCheckInterval)
+    statusCheckInterval = null
+  }
 }
 
 // 手动启动服务器
 const startServer = async () => {
-    startingServer.value = true
-    try {
-        const result = await invoke('start_proxy_server')
-        message.success('服务器启动成功')
-        // 延迟一下再检查状态，给服务器启动时间
-        setTimeout(checkServerStatus, 1000)
-    } catch (error) {
-        message.error(error || '启动服务器失败')
-        serverStatus.value = {
-            status: 'error',
-            text: '启动失败',
-            info: error || '启动服务器失败'
-        }
-    } finally {
-        startingServer.value = false
+  startingServer.value = true
+  try {
+    await invoke('start_proxy_server')
+    message.success('服务器启动成功')
+    // 延迟一下再检查状态，给服务器启动时间
+    setTimeout(checkServerStatus, 1000)
+  } catch (error) {
+    message.error(error || '启动服务器失败')
+    serverStatus.value = {
+      status: 'error',
+      text: '启动失败',
+      info: error || '启动服务器失败',
     }
+  } finally {
+    startingServer.value = false
+  }
 }
 
 // 手动停止服务器
 const stopServer = async () => {
-    stoppingServer.value = true
-    try {
-        await invoke('stop_proxy_server')
-        // 延迟一下再检查状态，给服务器关闭时间
-        setTimeout(checkServerStatus, 2000)
-    } catch (error) {
-        message.error(error || '停止服务器失败')
-    } finally {
-        stoppingServer.value = false
-    }
+  stoppingServer.value = true
+  try {
+    await invoke('stop_proxy_server')
+    // 延迟一下再检查状态，给服务器关闭时间
+    setTimeout(checkServerStatus, 2000)
+  } catch (error) {
+    message.error(error || '停止服务器失败')
+  } finally {
+    stoppingServer.value = false
+  }
 }
 
 // 新增: 折叠面板变化
 const onCollapseChange = async (keys) => {
-    if (keys.includes('official-sources') && officialApiSources.value.length === 0) {
-        await fetchOfficialApiSources()
-    }
+  if (keys.includes('official-sources') && officialApiSources.value.length === 0) {
+    await fetchOfficialApiSources()
+  }
 }
 
 // 新增: 获取官方API源
 const fetchOfficialApiSources = async () => {
-    loadingOfficialSources.value = true
-    try {
-        // 使用API获取官方源
-        const sources = await getOfficialApiSources()
-        officialApiSources.value = sources
-    } catch (error) {
-        message.error('获取官方API源失败')
-        console.error('获取官方API源失败:', error)
-        // 获取失败时显示空列表
-        officialApiSources.value = []
-    } finally {
-        loadingOfficialSources.value = false
-    }
+  loadingOfficialSources.value = true
+  try {
+    // 使用API获取官方源
+    officialApiSources.value = await getOfficialApiSources()
+  } catch (error) {
+    message.error('获取官方API源失败')
+    console.error('获取官方API源失败:', error)
+    // 获取失败时显示空列表
+    officialApiSources.value = []
+  } finally {
+    loadingOfficialSources.value = false
+  }
 }
 
 // 新增: 快速添加API源
 const quickAddApiSource = async (url) => {
-    // 检查是否已存在
-    if (isApiSourceExist(url)) {
-        message.info('该API源已存在')
-        return
-    }
+  // 检查是否已存在
+  if (isApiSourceExist(url)) {
+    message.info('该API源已存在')
+    return
+  }
 
-    // 使用现有逻辑添加
-    newApiSource.value.url = url
-    await addNewApiSource()
-    // 添加后清空输入框，以免影响手动添加
-    newApiSource.value.url = ''
+  // 使用现有逻辑添加
+  newApiSource.value.url = url
+  await addNewApiSource()
+  // 添加后清空输入框，以免影响手动添加
+  newApiSource.value.url = ''
 }
 
 // 新增: 检查API源是否存在
 const isApiSourceExist = (url) => {
-    return apiSources.value.includes(url)
+  return apiSources.value.includes(url)
 }
 
 onMounted(() => {
-    loadConfig()
-    startStatusCheck()
+  loadConfig()
+  startStatusCheck()
 })
 
 onUnmounted(() => {
-    stopStatusCheck()
+  stopStatusCheck()
 })
 </script>
 
 <style src="../../assets/styles/server-settings.scss" lang="scss" scoped></style>
 <style lang="scss" scoped>
 .setting-card-collapse {
-    margin-bottom: 16px;
+  margin-bottom: 16px;
 }
 </style>

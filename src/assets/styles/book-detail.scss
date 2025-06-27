@@ -145,15 +145,6 @@
             background: $dark-bg-elevated;
             border-color: $dark-border-color-light;
 
-            .ant-card-head {
-                background: $dark-bg-secondary;
-                border-color: $dark-border-color;
-
-                .ant-card-head-title {
-                    color: $dark-text-primary;
-                }
-            }
-
             .ant-card-body {
                 background: $dark-bg-elevated;
             }
@@ -177,29 +168,6 @@
         @include dark-theme {
             background: $dark-bg-elevated;
             border-color: $dark-border-color-light;
-
-            .ant-card-head {
-                background: $dark-bg-secondary;
-                border-color: $dark-border-color;
-
-                .ant-card-head-title {
-                    color: $dark-text-primary;
-                }
-
-                .ant-card-extra {
-                    .ant-select {
-                        .ant-select-selector {
-                            background: $dark-bg-primary;
-                            border-color: $dark-border-color;
-                            color: $dark-text-primary;
-                        }
-
-                        .ant-select-arrow {
-                            color: $dark-text-secondary;
-                        }
-                    }
-                }
-            }
 
             .ant-card-body {
                 background: $dark-bg-elevated;

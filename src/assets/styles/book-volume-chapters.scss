@@ -48,41 +48,6 @@
         }
     }
 
-    .back-button {
-        margin-bottom: $spacing-lg;
-    }
-
-    .volume-header {
-        margin-bottom: $spacing-lg;
-        padding: $spacing-lg;
-        background: $bg-color-white;
-        border-radius: $border-radius-large;
-        border: 1px solid $border-color;
-
-        @include dark-theme {
-            background: $dark-bg-secondary;
-            border-color: $dark-border-color;
-        }
-
-        .volume-title {
-            margin: 0 0 $spacing-md 0;
-            color: $text-primary;
-            font-size: 24px;
-            font-weight: 600;
-
-            @include dark-theme {
-                color: $dark-text-primary;
-            }
-        }
-
-        .volume-meta {
-            color: $text-secondary;
-
-            @include dark-theme {
-                color: $dark-text-secondary;
-            }
-        }
-    }
 
     .volume-contents {
         .content-count {
@@ -165,70 +130,9 @@
     }
 }
 
-// 全文阅读模态框样式
-.text-modal {
-    :deep(.ant-modal-content) {
-        @include dark-theme {
-            background: $dark-bg-primary;
-            color: $dark-text-primary;
-        }
-    }
-
-    :deep(.ant-modal-header) {
-        @include dark-theme {
-            background: $dark-bg-primary;
-            border-bottom: 1px solid $dark-border-color;
-
-            .ant-modal-title {
-                color: $dark-text-primary;
-            }
-        }
-    }
-
-    .full-text-content {
-        max-height: 70vh;
-        overflow-y: auto;
-
-        pre {
-            white-space: pre-wrap;
-            word-wrap: break-word;
-            line-height: 1.8;
-            font-family: $font-family-base;
-            font-size: 14px;
-            color: $text-primary;
-            margin: 0;
-            padding: $spacing-md;
-            background: $bg-color;
-            border-radius: $border-radius-medium;
-
-            @include dark-theme {
-                color: $dark-text-primary;
-                background: $dark-bg-secondary;
-            }
-        }
-    }
-}
 
 // 插图查看模态框样式
 .image-modal {
-    :deep(.ant-modal-content) {
-        @include dark-theme {
-            background: $dark-bg-primary;
-            color: $dark-text-primary;
-        }
-    }
-
-    :deep(.ant-modal-header) {
-        @include dark-theme {
-            background: $dark-bg-primary;
-            border-bottom: 1px solid $dark-border-color;
-
-            .ant-modal-title {
-                color: $dark-text-primary;
-            }
-        }
-    }
-
     .image-content {
         text-align: center;
 

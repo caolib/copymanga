@@ -1,7 +1,5 @@
 @use "./variables" as *;
 
-
-
 .downloads-card {
     .ant-card-head {
         border-bottom: 1px solid $border-color;
@@ -177,7 +175,6 @@
 
 // 任务列表样式
 .task-downloads {
-
     .task-header {
         display: flex;
         justify-content: space-between;
@@ -220,10 +217,6 @@
         .ant-list-item {
             padding: 16px;
             border-bottom: 1px solid $border-color;
-
-            &:hover {
-                background-color: $bg-color-hover;
-            }
         }
 
         .task-title {
@@ -235,14 +228,11 @@
             .content-name {
                 font-size: 16px;
                 font-weight: 600;
-                color: $text-primary;
             }
 
             .chapter-name {
                 font-size: 14px;
-                color: $text-secondary;
                 padding: 2px 8px;
-                background: $bg-color-light;
                 border-radius: $border-radius-small;
             }
         }
@@ -262,12 +252,10 @@
                     font-size: 12px;
 
                     .progress-text {
-                        color: $text-secondary;
                         flex: 1;
                     }
 
                     .download-size {
-                        color: $text-tertiary;
                         font-size: 11px;
                         margin-left: 8px;
                         white-space: nowrap;
@@ -277,26 +265,6 @@
                         padding: 2px 6px;
                         border-radius: $border-radius-small;
                         font-weight: 500;
-
-                        &.downloading {
-                            background: $bg-color-hover;
-                            color: $primary-color;
-                        }
-
-                        &.paused {
-                            background: #fff7e6;
-                            color: $warning-color;
-                        }
-
-                        &.completed {
-                            background: #f6ffed;
-                            color: $success-color;
-                        }
-
-                        &.error {
-                            background: #fff2f0;
-                            color: $error-color;
-                        }
                     }
                 }
             }

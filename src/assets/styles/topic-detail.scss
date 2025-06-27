@@ -111,9 +111,7 @@
                 margin-bottom: $spacing-lg;
                 padding: $spacing-md;
                 background: $bg-color;
-                border-radius: $border-radius-medium;
-                border-top-left-radius: 0;
-                border-bottom-left-radius: 0;
+                border-radius: 0 $border-radius-medium $border-radius-medium 0;
                 border-left: 4px solid $primary-color;
 
                 @include dark-theme {

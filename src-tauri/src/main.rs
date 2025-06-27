@@ -51,10 +51,10 @@ async fn start_proxy_server(app_handle: AppHandle) -> Result<String, String> {
             // 端口可用，关闭测试连接
         }
         Err(e) => {
-            if e.kind() == std::io::ErrorKind::AddrInUse {
-                return Err(format!("端口 {} 已被占用，可能服务器已在运行", port));
+            return if e.kind() == std::io::ErrorKind::AddrInUse {
+                Err(format!("端口 {} 已被占用，可能服务器已在运行", port))
             } else {
-                return Err(format!("无法绑定到端口 {}: {}", port, e));
+                Err(format!("无法绑定到端口 {}: {}", port, e))
             }
         }
     }
@@ -282,11 +282,11 @@ async fn start_proxy(
             if e.kind() == std::io::ErrorKind::AddrInUse {
                 let msg = format!("端口 {} 已被占用，可能服务器已在运行", port);
                 println!("{}", msg);
-                return Err(msg);
+                Err(msg)
             } else {
                 let msg = format!("无法绑定到端口 {}: {}", port, e);
                 eprintln!("{}", msg);
-                return Err(msg);
+                Err(msg)
             }
         }
     }

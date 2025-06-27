@@ -1,9 +1,8 @@
 @use "./variables" as *;
 
 .local-manga-container {
-    padding: 24px;
     min-height: 100vh;
-    padding-top: 0;
+    padding: 0 24px 24px;
 }
 
 .local-manga-card {
