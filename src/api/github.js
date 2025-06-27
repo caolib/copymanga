@@ -15,7 +15,7 @@ const getLatestRelease = async () => {
  */
 const getLatestReleaseVersion = async () => {
     const release = await getLatestRelease();
-    console.log('Latest release version:', release.tag_name);
+    // console.log('Latest release version:', release.tag_name);
     return release.tag_name;
 };
 
@@ -76,9 +76,17 @@ const checkForUpdates = async (currentVersion) => {
     };
 };
 
+async function getHeadersConfig() {
+    const response = await axios.get('https://raw.githubusercontent.com/caolib/doki/main/docs/config/headers.json');
+    // console.log(JSON.stringify(response))
+    return response.data;
+}
+
+
 export {
     getLatestRelease,
     getLatestReleaseVersion,
     compareVersions,
-    checkForUpdates
+    checkForUpdates,
+    getHeadersConfig
 };

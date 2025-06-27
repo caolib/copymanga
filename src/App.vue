@@ -127,13 +127,10 @@ onMounted(async () => {
       <!-- 重启提示横幅 -->
       <div v-if="appStore.needsRestart" class="restart-banner">
         <a-alert type="warning" show-icon closable @close="appStore.setNeedsRestart(false)">
-          <template #message>
-            <span>配置已更改</span>
-          </template>
           <template #description>
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span>服务器配置已更新，请重启应用以使更改生效。</span>
-              <a-button type="primary" size="small" @click="handleRestart" style="margin-left: 12px;">
+              <a-button type="primary" @click="handleRestart">
                 立即重启
               </a-button>
             </div>

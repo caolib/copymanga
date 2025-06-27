@@ -1,4 +1,5 @@
 <template>
+
     <div>
         <a-card title="转发服务配置" class="setting-card" id="server-config">
             <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
@@ -119,7 +120,7 @@
             <a-form layout="vertical">
                 <a-alert type="info" show-icon style="width:fit-content;margin-bottom:10px">
                     <template #message>
-                        自定义API请求头（一般不要动，除非你清楚自己在干什么）
+                        自定义API请求头（失效时使用github导入的配置并保存）
                     </template>
                 </a-alert>
 
@@ -168,16 +169,21 @@
 
                 <a-form-item>
                     <a-space>
-                        <a-button type="primary" @click="saveAllHeaders" :loading="savingHeaders">
-                            保存配置
+                        <a-button @click="fetchRemoteHeaders" :loading="fetchingRemoteHeaders" type="primary"
+                            :icon="h(GithubOutlined)">
+                            从github导入
+                        </a-button>
+
+                        <a-button @click="saveAllHeaders" :loading="savingHeaders">
+                            保存
                         </a-button>
 
                         <a-button @click="exportHeaders" :loading="exportingHeaders" :icon="h(DownloadOutlined)">
-                            导出配置
+                            导出
                         </a-button>
 
                         <a-button @click="importHeaders" :loading="importingHeaders" :icon="h(UploadOutlined)">
-                            导入配置
+                            从文件导入
                         </a-button>
 
                         <a-popconfirm title="你确定?" ok-text="对的" cancel-text="不对" @confirm="resetHeaders">
@@ -251,8 +257,6 @@
 
         <a-card class="setting-card" id="status">
             <div class="restart-section">
-                <a-alert v-if="appStore.needsRestart" type="warning" message="配置已更改，需要重启应用以生效" show-icon
-                    style="margin-bottom: 16px" />
                 <a-space>
                     <a-button type="primary" @click="handleRestart" :loading="restarting" danger
                         :icon="h(ReloadOutlined)">
@@ -268,9 +272,9 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { message } from 'ant-design-vue'
-import { ReloadOutlined } from '@ant-design/icons-vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { message, notification } from 'ant-design-vue'
+import { ReloadOutlined, GithubOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import {
     getServerConfig,
@@ -297,13 +301,13 @@ import { restartApp } from '@/utils/restart-helper'
 import { exportHeaders as exportHeadersConfig, importHeaders as importHeadersConfig } from '@/utils/export-helper'
 import { PlusOutlined, DeleteOutlined, SettingOutlined, DownloadOutlined, UploadOutlined } from '@ant-design/icons-vue'
 import { getOfficialApiSources } from '@/api/api-source'
+import { getHeadersConfig } from '@/api/github'
 
-const serverForm = ref({
-    serverPort: 5001
-})
 
+
+
+const serverForm = ref({ serverPort: 12121 })
 const appForm = ref({ apiDomain: '' })
-
 const currentServerPort = ref('')
 const currentApiDomain = ref('')
 const savingServer = ref(false)
@@ -337,6 +341,7 @@ const newHeader = ref({ key: '', value: '' })
 const savingHeaders = ref(false)
 const exportingHeaders = ref(false)
 const importingHeaders = ref(false)
+const fetchingRemoteHeaders = ref(false)
 
 // Rust服务器状态监控
 const serverStatus = ref({
@@ -349,6 +354,8 @@ const serverStatus = ref({
 let statusCheckInterval = null
 const startingServer = ref(false)
 const stoppingServer = ref(false)
+
+// 监听应用配置是否需要重启
 
 // 加载当前配置
 const loadConfig = () => {
@@ -711,13 +718,31 @@ const importHeaders = async () => {
     }
 }
 
+// 获取远程请求头配置
+const fetchRemoteHeaders = async () => {
+    fetchingRemoteHeaders.value = true
+    getHeadersConfig().then(headers => {
+        if (headers && typeof headers === 'object' && Object.keys(headers).length > 0) {
+            headersList.value = Object.entries(headers).map(([key, value]) => ({ key, value }))
+            saveAllHeaders()
+            appStore.setNeedsRestart(true)
+        } else {
+            message.error('远程配置为空或格式不正确')
+        }
+    }).catch(err => {
+        message.error('获取远程配置失败')
+        console.error('获取远程headers.json失败:', err)
+    }).finally(() => {
+        fetchingRemoteHeaders.value = false
+    })
+}
+
 // 打开配置目录
 const openConfigDirectory = async () => {
     openingDirectory.value = true
 
     await appDataDir().then(appDataPath => {
         const configDir = appDataPath + '\\config'
-        // console.log('配置目录:', configDir)
         return invoke('open_file_explorer', { path: configDir })
     }).catch(error => {
         message.error('打开配置目录失败: ' + (error.message || error))
