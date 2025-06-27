@@ -112,9 +112,18 @@
     <!-- 请求头配置 -->
     <a-card title="请求头配置" class="setting-card" id="headers-config">
       <a-form layout="vertical">
-        <a-alert type="info" show-icon style="width: fit-content; margin-bottom: 10px">
-          <template #message> 自定义API请求头（失效时使用github导入的配置并保存） </template>
+        <!-- 版本检查状态 -->
+        <a-alert v-if="remoteAppVersion" type="warning" show-icon style="width: fit-content; margin-bottom: 10px">
+          <template #message>
+            检测到官方APP版本：{{ remoteAppVersion }}，
+            <span v-if="versionDiff">当前请求头版本与官方不一致。</span>
+            <span v-else>当前请求头版本已与官方一致。</span>
+            <a-button v-if="versionDiff" type="primary" size="small" style="margin-left: 12px"
+              @click="applyRemoteVersion">一键同步</a-button>
+          </template>
         </a-alert>
+        <a-button @click="checkAppVersion" :loading="checkingAppVersion" type="primary"
+          style="margin-bottom: 10px">获取官方APP版本</a-button>
 
         <!-- 添加新请求头 -->
         <a-form-item label="添加新请求头">
@@ -166,7 +175,7 @@
             <a-button @click="saveAllHeaders" :loading="savingHeaders"> 保存 </a-button>
 
             <a-button @click="exportHeaders" :loading="exportingHeaders" :icon="h(DownloadOutlined)">
-              导出
+              导出到文件
             </a-button>
 
             <a-button @click="importHeaders" :loading="importingHeaders" :icon="h(UploadOutlined)">
@@ -249,7 +258,7 @@
 
 <script setup>
 import { h, onMounted, onUnmounted, ref } from 'vue'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -284,6 +293,7 @@ import {
 } from '@/utils/export-helper'
 import { getOfficialApiSources } from '@/api/api-source'
 import { getHeadersConfig } from '@/api/github'
+import { getAppVersion } from '@/api/system'
 
 const serverForm = ref({ serverPort: 12121 })
 const appForm = ref({ apiDomain: '' })
@@ -294,19 +304,20 @@ const restarting = ref(false)
 const openingDirectory = ref(false)
 const appStore = useAppStore()
 
-// 新增：API源管理相关状态
+// API源管理相关状态
 const apiSources = ref([])
 const currentApiIndex = ref(0)
 const newApiSource = ref({ url: '' })
 const addingSource = ref(false)
 const removingIndex = ref(-1)
 
-// 新增：官方API源相关状态
+// 官方API源相关状态
 const officialApiSources = ref([])
 const loadingOfficialSources = ref(false)
-ref([])
+const checkingAppVersion = ref(false)
 
-// 新增：轻小说API源管理相关状态
+
+// 轻小说API源管理相关状态
 const bookApiSources = ref([])
 const currentBookApiIndex = ref(0)
 const currentBookApiDomain = ref('未配置')
@@ -334,7 +345,9 @@ let statusCheckInterval = null
 const startingServer = ref(false)
 const stoppingServer = ref(false)
 
-// 监听应用配置是否需要重启
+// 版本检查相关状态
+const remoteAppVersion = ref('')
+const versionDiff = ref(false)
 
 // 加载当前配置
 const loadConfig = () => {
@@ -465,7 +478,7 @@ const handleRestart = async () => {
   })
 }
 
-// 新增：API源切换
+// API源切换
 const onApiSourceChange = async (index) => {
   try {
     const source = await switchApiSource(index)
@@ -480,7 +493,7 @@ const onApiSourceChange = async (index) => {
   }
 }
 
-// 新增：添加API源
+// 添加API源
 const addNewApiSource = async () => {
   if (!newApiSource.value.url) {
     message.error('请输入URL')
@@ -500,7 +513,7 @@ const addNewApiSource = async () => {
   }
 }
 
-// 新增：删除API源
+// 删除API源
 const removeApiSource = async (index) => {
   if (apiSources.value.length <= 1) {
     message.error('至少需要保留一个API源')
@@ -519,7 +532,7 @@ const removeApiSource = async (index) => {
   }
 }
 
-// 新增：轻小说API源切换
+// 轻小说API源切换
 const onBookApiSourceChange = async (index) => {
   try {
     const source = await switchBookApiSource(index)
@@ -533,7 +546,7 @@ const onBookApiSourceChange = async (index) => {
   }
 }
 
-// 新增：添加轻小说API源
+// 添加轻小说API源
 const addNewBookApiSource = async () => {
   if (!newBookApiSource.value.url) {
     message.error('请输入轻小说API URL')
@@ -553,7 +566,7 @@ const addNewBookApiSource = async () => {
   }
 }
 
-// 新增：删除轻小说API源
+// 删除轻小说API源
 const removeBookApiSource = async (index) => {
   if (bookApiSources.value.length <= 1) {
     message.error('至少需要保留一个轻小说API源')
@@ -878,6 +891,46 @@ const quickAddApiSource = async (url) => {
 // 新增: 检查API源是否存在
 const isApiSourceExist = (url) => {
   return apiSources.value.includes(url)
+}
+
+// 获取app版本并对比请求头
+const checkAppVersion = () => {
+  checkingAppVersion.value = true
+  getAppVersion().then(res => {
+    if (res.results && res.results.android) {
+      const remoteVersion = res.results.android.version
+      remoteAppVersion.value = remoteVersion
+      const versionHeader = headersList.value.find(h => h.key.toLowerCase() === 'version')
+      const currentVersion = versionHeader ? versionHeader.value : ''
+      versionDiff.value = remoteVersion && remoteVersion !== currentVersion
+    } else {
+      remoteAppVersion.value = ''
+      versionDiff.value = false
+      message.error('获取版本信息失败')
+    }
+  }).finally(() => {
+    checkingAppVersion.value = false
+  })
+}
+
+const applyRemoteVersion = () => {
+  const versionHeader = headersList.value.find(h => h.key.toLowerCase() === 'version')
+  const currentVersion = versionHeader ? versionHeader.value : ''
+  if (remoteAppVersion.value && currentVersion && remoteAppVersion.value !== currentVersion) {
+    if (versionHeader) versionHeader.value = remoteAppVersion.value
+    headersList.value.forEach(h => {
+      if (h.key.toLowerCase() === 'user-agent' || h.key.toLowerCase() === 'referer') {
+        if (currentVersion && h.value.includes(currentVersion)) {
+          h.value = h.value.replaceAll(currentVersion, remoteAppVersion.value)
+        }
+      }
+    })
+    versionDiff.value = false
+    message.success('版本号已替换为最新')
+    saveAllHeaders().catch(error => {
+      message.error('保存请求头失败: ' + (error.message || error))
+    })
+  }
 }
 
 onMounted(() => {
