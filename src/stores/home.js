@@ -36,52 +36,46 @@ export const useHomeStore = defineStore('home', {
     async fetchHomeData(forceRefresh = false) {
       // 如果有缓存且未过期且不是强制刷新，直接返回
       if (this.hasCache && !this.isCacheExpired && !forceRefresh) {
-        return Promise.resolve({ success: true, fromCache: true })
+        return { success: true, fromCache: true }
       }
 
       this.isLoading = true
-
-      return getHomeIndex()
-        .then((res) => {
-          if (res && res.code === 200 && res.results) {
-            this.homeData = res.results
-            this.lastUpdateTime = Date.now()
-            return { success: true, fromCache: false }
-          }
-          return { success: false, fromCache: false }
-        })
-        .catch((error) => {
-          console.error('获取主页数据失败:', error)
-          return { success: false, error, fromCache: false }
-        })
-        .finally(() => {
-          this.isLoading = false
-        })
+      try {
+        const res = await getHomeIndex()
+        if (res?.code === 200 && res.results) {
+          this.homeData = res.results
+          this.lastUpdateTime = Date.now()
+          return { success: true, fromCache: false }
+        }
+        return { success: false, fromCache: false }
+      } catch (error) {
+        console.error('获取主页数据失败:', error)
+        return { success: false, error, fromCache: false }
+      } finally {
+        this.isLoading = false
+      }
     },
     async fetchNewestData(forceRefresh = false) {
       // 如果有缓存且未过期且不是强制刷新，直接返回
       if (this.hasNewestCache && !this.isNewestCacheExpired && !forceRefresh) {
-        return Promise.resolve({ success: true, fromCache: true })
+        return { success: true, fromCache: true }
       }
 
       this.isNewestLoading = true
-
-      return getNewestManga()
-        .then((res) => {
-          if (res && res.code === 200 && res.results) {
-            this.newestData = res.results
-            this.lastNewestUpdateTime = Date.now()
-            return { success: true, fromCache: false }
-          }
-          return { success: false, fromCache: false }
-        })
-        .catch((error) => {
-          console.error('获取最新漫画数据失败:', error)
-          return { success: false, error, fromCache: false }
-        })
-        .finally(() => {
-          this.isNewestLoading = false
-        })
+      try {
+        const res = await getNewestManga()
+        if (res?.code === 200 && res.results) {
+          this.newestData = res.results
+          this.lastNewestUpdateTime = Date.now()
+          return { success: true, fromCache: false }
+        }
+        return { success: false, fromCache: false }
+      } catch (error) {
+        console.error('获取最新漫画数据失败:', error)
+        return { success: false, error, fromCache: false }
+      } finally {
+        this.isNewestLoading = false
+      }
     },
     clearCache() {
       this.homeData = {}

@@ -51,11 +51,7 @@ const loadCustomCss = async () => {
 }
 
 // 恢复窗口状态
-restoreStateCurrent(StateFlags.ALL).then(() => {
-    console.log('窗口状态已恢复')
-}).catch((error) => {
-    console.warn('恢复窗口状态失败:', error)
-})
+restoreStateCurrent(StateFlags.ALL)
 
 // 监听窗口关闭事件，保存状态
 window.addEventListener('beforeunload', () => {
@@ -99,19 +95,10 @@ const initPromise = Promise.all([
     // 根据配置决定是否初始化托盘图标
     return loadUIConfig().then(config => {
         const shouldShowTray = config.system?.showTrayIcon || false
-        if (shouldShowTray) {
-            return initTray()
-        } else {
-            console.log('托盘图标已禁用，跳过初始化')
-            return false
-        }
+        return shouldShowTray ? initTray() : false
     })
 }).then((trayResult) => {
-    if (trayResult) {
-        console.log('托盘图标初始化成功')
-    } else {
-        console.log('托盘图标未启用或初始化失败')
-    }
+    console.log(trayResult ? '托盘图标已启用' : '托盘图标未启用')
     configStore.setInitialized()
     // 加载自定义CSS
     return loadCustomCss()

@@ -4,19 +4,9 @@
       <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
         <a-form-item label="服务器端口（1-65535）" name="serverPort">
           <a-input-group compact>
-            <a-input-number
-              v-model:value="serverForm.serverPort"
-              placeholder="输入一个端口号"
-              :min="1"
-              :max="65535"
-              style="width: fit-content"
-            />
-            <a-button
-              type="primary"
-              html-type="submit"
-              :loading="savingServer"
-              style="width: fit-content"
-            >
+            <a-input-number v-model:value="serverForm.serverPort" placeholder="输入一个端口号" :min="1" :max="65535"
+              style="width: fit-content" />
+            <a-button type="primary" html-type="submit" :loading="savingServer" style="width: fit-content">
               保存
             </a-button>
           </a-input-group>
@@ -27,22 +17,12 @@
           <a-space>
             <a-badge :status="serverStatus.status" :text="serverStatus.text" />
             <span class="status-info">{{ serverStatus.info }}</span>
-            <a-button
-              v-if="serverStatus.status === 'error'"
-              type="primary"
-              size="small"
-              :loading="startingServer"
-              @click="startServer"
-            >
+            <a-button v-if="serverStatus.status === 'error'" type="primary" size="small" :loading="startingServer"
+              @click="startServer">
               启动服务器
             </a-button>
-            <a-button
-              v-if="serverStatus.status === 'success'"
-              type="default"
-              size="small"
-              :loading="stoppingServer"
-              @click="stopServer"
-            >
+            <a-button v-if="serverStatus.status === 'success'" type="default" size="small" :loading="stoppingServer"
+              @click="stopServer">
               停止服务器
             </a-button>
           </a-space>
@@ -54,11 +34,7 @@
       <a-form layout="vertical">
         <!-- 当前API源选择 -->
         <a-form-item label="当前API源">
-          <a-select
-            v-model:value="currentApiIndex"
-            @change="onApiSourceChange"
-            style="width: fit-content"
-          >
+          <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" style="width: fit-content">
             <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
               {{ source }}
             </a-select-option>
@@ -69,17 +45,8 @@
         <!-- 添加新API源 -->
         <a-form-item label="添加新API源">
           <a-input-group compact>
-            <a-input
-              v-model:value="newApiSource.url"
-              placeholder="API域名"
-              style="width: fit-content"
-            />
-            <a-button
-              type="primary"
-              @click="addNewApiSource"
-              :loading="addingSource"
-              style="width: fit-content"
-            >
+            <a-input v-model:value="newApiSource.url" placeholder="API域名" style="width: fit-content" />
+            <a-button type="primary" @click="addNewApiSource" :loading="addingSource" style="width: fit-content">
               添加
             </a-button>
           </a-input-group>
@@ -89,12 +56,8 @@
         <a-collapse @change="onCollapseChange" class="setting-card-collapse">
           <a-collapse-panel key="official-sources" header="从官方源添加">
             <template #extra>
-              <a-button
-                type="link"
-                size="small"
-                @click.stop="fetchOfficialApiSources"
-                :loading="loadingOfficialSources"
-              >
+              <a-button type="link" size="small" @click.stop="fetchOfficialApiSources"
+                :loading="loadingOfficialSources">
                 <template #icon>
                   <ReloadOutlined />
                 </template>
@@ -109,11 +72,7 @@
                 <template #renderItem="{ item }">
                   <a-list-item>
                     <template #actions>
-                      <a-button
-                        type="link"
-                        @click="quickAddApiSource(item)"
-                        :disabled="isApiSourceExist(item)"
-                      >
+                      <a-button type="link" @click="quickAddApiSource(item)" :disabled="isApiSourceExist(item)">
                         {{ isApiSourceExist(item) ? '已添加' : '添加' }}
                       </a-button>
                     </template>
@@ -131,24 +90,15 @@
             <template #renderItem="{ item, index }">
               <a-list-item>
                 <template #actions>
-                  <a-button
-                    v-if="apiSources.length > 1"
-                    type="text"
-                    danger
-                    size="small"
-                    :icon="h(DeleteOutlined)"
-                    @click="removeApiSource(index)"
-                    :loading="removingIndex === index"
-                  >
+                  <a-button v-if="apiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
+                    @click="removeApiSource(index)" :loading="removingIndex === index">
                   </a-button>
                 </template>
                 <a-list-item-meta>
                   <template #title>
                     <span :class="{ 'current-source': index === currentApiIndex }">
                       {{ item }}
-                      <a-tag v-if="index === currentApiIndex" color="green" size="small"
-                        >当前</a-tag
-                      >
+                      <a-tag v-if="index === currentApiIndex" color="green" size="small">当前</a-tag>
                     </span>
                   </template>
                 </a-list-item-meta>
@@ -170,27 +120,14 @@
         <a-form-item label="添加新请求头">
           <a-row :gutter="16">
             <a-col :span="8">
-              <a-input
-                v-model:value="newHeader.key"
-                placeholder="请求头名称"
-                @keyup.enter="addNewHeader"
-              />
+              <a-input v-model:value="newHeader.key" placeholder="请求头名称" @keyup.enter="addNewHeader" />
             </a-col>
             <a-col :span="14">
-              <a-input
-                v-model:value="newHeader.value"
-                placeholder="请求头值"
-                @keyup.enter="addNewHeader"
-              />
+              <a-input v-model:value="newHeader.value" placeholder="请求头值" @keyup.enter="addNewHeader" />
             </a-col>
             <a-col :span="2">
-              <a-button
-                type="primary"
-                @click="addNewHeader"
-                :icon="h(PlusOutlined)"
-                :disabled="!newHeader.key || !newHeader.value"
-                block
-              >
+              <a-button type="primary" @click="addNewHeader" :icon="h(PlusOutlined)"
+                :disabled="!newHeader.key || !newHeader.value" block>
               </a-button>
             </a-col>
           </a-row>
@@ -205,27 +142,13 @@
             <div v-for="(header, index) in headersList" :key="index" class="header-item">
               <a-row :gutter="16" align="middle">
                 <a-col :span="8">
-                  <a-input
-                    v-model:value="header.key"
-                    placeholder="请求头名称"
-                    @change="onHeaderChange(index)"
-                  />
+                  <a-input v-model:value="header.key" placeholder="请求头名称" @change="onHeaderChange(index)" />
                 </a-col>
                 <a-col :span="14">
-                  <a-input
-                    v-model:value="header.value"
-                    placeholder="请求头值"
-                    @change="onHeaderChange(index)"
-                  />
+                  <a-input v-model:value="header.value" placeholder="请求头值" @change="onHeaderChange(index)" />
                 </a-col>
                 <a-col :span="2">
-                  <a-button
-                    type="text"
-                    danger
-                    @click="removeHeader(index)"
-                    :icon="h(DeleteOutlined)"
-                    block
-                  >
+                  <a-button type="text" danger @click="removeHeader(index)" :icon="h(DeleteOutlined)" block>
                   </a-button>
                 </a-col>
               </a-row>
@@ -235,22 +158,14 @@
 
         <a-form-item>
           <a-space>
-            <a-button
-              @click="fetchRemoteHeaders"
-              :loading="fetchingRemoteHeaders"
-              type="primary"
-              :icon="h(GithubOutlined)"
-            >
+            <a-button @click="fetchRemoteHeaders" :loading="fetchingRemoteHeaders" type="primary"
+              :icon="h(GithubOutlined)">
               从github导入
             </a-button>
 
             <a-button @click="saveAllHeaders" :loading="savingHeaders"> 保存 </a-button>
 
-            <a-button
-              @click="exportHeaders"
-              :loading="exportingHeaders"
-              :icon="h(DownloadOutlined)"
-            >
+            <a-button @click="exportHeaders" :loading="exportingHeaders" :icon="h(DownloadOutlined)">
               导出
             </a-button>
 
@@ -274,11 +189,7 @@
         </a-alert>
         <!-- 当前轻小说API源选择 -->
         <a-form-item label="当前轻小说API源">
-          <a-select
-            v-model:value="currentBookApiIndex"
-            @change="onBookApiSourceChange"
-            style="width: fit-content"
-          >
+          <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange" style="width: fit-content">
             <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
               {{ source }}
             </a-select-option>
@@ -289,17 +200,9 @@
         <!-- 添加新轻小说API源 -->
         <a-form-item label="添加新轻小说API源">
           <a-input-group compact>
-            <a-input
-              v-model:value="newBookApiSource.url"
-              placeholder="轻小说API域名 (如: https://api.copy-manga.com)"
-              style="width: fit-content"
-            />
-            <a-button
-              type="primary"
-              @click="addNewBookApiSource"
-              :loading="addingBookSource"
-              style="width: fit-content"
-            >
+            <a-input v-model:value="newBookApiSource.url" style="width: fit-content" />
+            <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
+              style="width: fit-content">
               添加
             </a-button>
           </a-input-group>
@@ -311,23 +214,14 @@
             <template #renderItem="{ item, index }">
               <a-list-item>
                 <template #actions>
-                  <a-button
-                    v-if="bookApiSources.length > 1"
-                    type="text"
-                    danger
-                    size="small"
-                    :icon="h(DeleteOutlined)"
-                    @click="removeBookApiSource(index)"
-                    :loading="removingBookIndex === index"
-                  ></a-button>
+                  <a-button v-if="bookApiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
+                    @click="removeBookApiSource(index)" :loading="removingBookIndex === index"></a-button>
                 </template>
                 <a-list-item-meta>
                   <template #title>
                     <span :class="{ 'current-source': index === currentBookApiIndex }">
                       {{ item }}
-                      <a-tag v-if="index === currentBookApiIndex" color="orange" size="small"
-                        >当前</a-tag
-                      >
+                      <a-tag v-if="index === currentBookApiIndex" color="orange" size="small">当前</a-tag>
                     </span>
                   </template>
                 </a-list-item-meta>
@@ -341,20 +235,10 @@
     <a-card class="setting-card" id="status">
       <div class="restart-section">
         <a-space>
-          <a-button
-            type="primary"
-            @click="handleRestart"
-            :loading="restarting"
-            danger
-            :icon="h(ReloadOutlined)"
-          >
+          <a-button type="primary" @click="handleRestart" :loading="restarting" danger :icon="h(ReloadOutlined)">
             重启应用
           </a-button>
-          <a-button
-            @click="openConfigDirectory"
-            :icon="h(SettingOutlined)"
-            :loading="openingDirectory"
-          >
+          <a-button @click="openConfigDirectory" :icon="h(SettingOutlined)" :loading="openingDirectory">
             打开配置目录
           </a-button>
         </a-space>

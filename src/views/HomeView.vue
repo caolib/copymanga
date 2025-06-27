@@ -3,48 +3,47 @@
     <!-- Tab切换 -->
     <a-tabs v-model:activeKey="activeTab" @change="handleTabChange">
       <template #rightExtra>
-        <a-button v-if="activeTab !== 'ranking' && activeTab !== 'topics'" type="primary"
-                  @click="refreshCurrentData" :icon="h(ReloadOutlined)" :loading="loading" :disabled="loading"
-                  size="small" style="margin-right: 10px;">
+        <a-button v-if="activeTab !== 'ranking' && activeTab !== 'topics'" type="primary" @click="refreshCurrentData"
+          :icon="h(ReloadOutlined)" :loading="loading" size="small" style="margin-right: 10px;">
           刷新
         </a-button>
         <span v-if="lastUpdateTime" class="update-time">
-                    {{ formatDate(lastUpdateTime) }}
-                </span>
+          {{ formatDate(lastUpdateTime) }}
+        </span>
       </template>
 
       <a-tab-pane key="home" tab="主页">
-        <HomeTabContent/>
+        <HomeTabContent />
       </a-tab-pane>
 
       <a-tab-pane key="newest" tab="全新上架">
-        <NewestTabContent/>
+        <NewestTabContent />
       </a-tab-pane>
 
       <a-tab-pane key="discover" tab="发现">
-        <MangaDiscoverTabContent/>
+        <MangaDiscoverTabContent />
       </a-tab-pane>
 
       <a-tab-pane key="ranking" tab="排行榜">
-        <RankingTabContent/>
+        <RankingTabContent />
       </a-tab-pane>
 
       <a-tab-pane key="topics" tab="专题">
-        <TopicsTabContent/>
+        <TopicsTabContent />
       </a-tab-pane>
     </a-tabs>
   </div>
 </template>
 
 <script setup>
-import {ref, onMounted, computed, watch} from 'vue'
-import {useHomeStore} from '../stores/home'
-import {useMangaDiscoverStore} from '@/stores/index.js'
-import {useMangaRankingStore} from '@/stores/index.js'
-import {useTopicStore} from '../stores/topic'
-import {formatDate} from '../utils/date'
-import {ReloadOutlined} from '@ant-design/icons-vue'
-import {h} from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useHomeStore } from '../stores/home'
+import { useMangaDiscoverStore } from '@/stores/index.js'
+import { useMangaRankingStore } from '@/stores/index.js'
+import { useTopicStore } from '../stores/topic'
+import { formatDate } from '../utils/date'
+import { ReloadOutlined } from '@ant-design/icons-vue'
+import { h } from 'vue'
 import HomeTabContent from '../components/home/HomeTabContent.vue'
 import NewestTabContent from '../components/home/NewestTabContent.vue'
 import MangaDiscoverTabContent from '../components/home/MangaDiscoverTabContent.vue'
@@ -70,7 +69,6 @@ const lastUpdateTime = computed(() => {
   if (activeTab.value === 'home') return homeStore.lastUpdateTime
   if (activeTab.value === 'newest') return homeStore.lastNewestUpdateTime
   if (activeTab.value === 'discover') return mangaDiscoverStore.lastListUpdateTime
-  // 排行榜和专题不保存更新时间，每次都获取最新数据
   return null
 })
 
