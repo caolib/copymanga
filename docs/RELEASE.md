@@ -1,16 +1,20 @@
 ## Change
 
 ### feat
-- [ed7b0e9] ✨ feat: 添加批量删除章节功能，自动删除本地章节为空的本地动画信息
-- [8d74970] ✨ feat: 本地漫画章节添加批量删除功能
-- [b578183] ✨ feat: 添加获取官方API源功能
-- [7a55a5c] ✨ feat: 漫画主页添加全新上架、发现界面
-- [5bd5d0f] ✨ feat: 添加排行榜界面
-- [77630ad] ✨ feat: 专题界面移动到首页
+- [79b364a] ✨ feat: 可以添加自定义css样式
+- [1928647] ✨ feat: 可以从github获取请求头配置
+- [ec0d184] ✨ feat: 首页添加官方公告
+- [579acc5] ✨ feat: 现在可以快速修改请求头版本号为官方最新
 
 ### fix
-- [e4e46e9] 🐛 fix: 部分请求设置为不携带令牌
+- [b791b72] 🐛 fix: 去除漫画图片所有阴影
+- [9258e97] 🐛 fix: 修改默认配置文件
+- [eca1c7e] 🐛 fix: 修复一些警告，删除未使用代码
+
+### others
+- [fcb49d0] 📄 docs: 添加了一个请求头配置文件
+- [c00f0b4] 🦄 refactor: 优化代码格式，删除未使用代码
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v1.0.2...v1.1.0)
+📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v1.1.0...v1.1.1)
 
