@@ -23,7 +23,10 @@
                         <template #option="item">
                             <div
                                 style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                                <span>{{ item.value }}</span>
+                                <div>
+                                    <a-avatar :src="item.avatar" style="margin-right: 10px;" />
+                                    <span>{{ item.value }}</span>
+                                </div>
                                 <a-button type="text" size="small" danger @click.stop="removeSavedAccount(item.value)"
                                     :icon="h(CloseOutlined)"
                                     style="padding: 0; height: auto; border: none; font-size: 12px;">
@@ -112,7 +115,8 @@ const autoLoginEnabled = ref(true)
 const accountOptions = computed(() => {
     return userStore.savedAccounts.map(account => ({
         value: account.username,
-        label: account.username
+        label: account.username,
+        avatar: 'https://s3.mangafuna.xyz/' + account.userInfo.avatar
     }))
 })
 
@@ -228,7 +232,7 @@ const handleLogin = () => {
         if (result.code === 200 && result.results) {
             const userData = result.results
 
-            // 保存用户信息到 Pinia 存储并持久化（使用V3 API字段）
+            // 保存用户信息到 Pinia 存储并持久化
             userStore.setUser({
                 username: userData.username,
                 token: userData.token, // 根据登录.json，token在results内部
@@ -289,21 +293,6 @@ const handleRegister = () => {
         }
     }).catch(error => {
         console.error('注册失败', error)
-        // 优先展示后端返回的错误信息
-        if (error.response && error.response.data) {
-            if (error.response.data.detail) {
-                errorMessage.value = error.response.data.detail
-            } else if (error.response.data.message) {
-                errorMessage.value = error.response.data.message
-            } else {
-                errorMessage.value = '注册失败，请检查网络连接或稍后重试'
-            }
-        } else if (error.message) {
-            // 处理如超时等AxiosError
-            errorMessage.value = error.message
-        } else {
-            errorMessage.value = '注册失败，请检查网络连接或稍后重试'
-        }
     }).finally(() => {
         loading.value = false
     })

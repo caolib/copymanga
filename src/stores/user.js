@@ -39,7 +39,7 @@ export const useUserStore = defineStore('user', {
       cartoons: { list: [], total: 0, loading: false, hasMore: true },
     },
     // 多账号存储 - 保存完整的用户信息
-    savedAccounts: [], // [{username, password, userInfo, lastLoginTime}]
+    savedAccounts: [],
     autoLogin: false,
   }),
   actions: {
