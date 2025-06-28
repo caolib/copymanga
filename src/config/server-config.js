@@ -6,13 +6,13 @@ import { pathHelper, CONFIG_FILES } from '@/utils/path-helper'
 const DEFAULT_SERVER_CONFIG = {
   serverPort: 12121,
   requestHeaders: {
-    'user-agent': 'COPY/2.3.1',
+    'user-agent': 'COPY/2.3.2',
     source: 'copyApp',
     deviceinfo: 'PGEM10-star2qltechn',
     webp: '1',
     platform: '3',
-    referer: 'com.copymanga.app-2.3.1',
-    version: '2.3.1',
+    referer: 'com.copymanga.app-2.3.2',
+    version: '2.3.2',
     region: '1',
     device: 'PQ3B.190801.05281406',
     host: 'api.copy2000.online',
