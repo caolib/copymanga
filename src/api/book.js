@@ -144,10 +144,12 @@ function searchBooks(keyword, limit = 18, offset = 0, q_type = '') {
  * @returns {Promise}
  */
 function collectBook(bookId, isCollect = true) {
-  const data = new URLSearchParams()
-  data.append('book_id', bookId)
-  data.append('is_collect', isCollect ? '1' : '0')
-  data.append('platform', '3')
+  const data = new URLSearchParams({
+    book_id: bookId,
+    is_collect: isCollect ? '1' : '0',
+    platform: '3',
+  })
+
   return request.post('/api/v3/member/collect/book', data)
 }
 

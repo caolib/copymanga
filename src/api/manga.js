@@ -103,12 +103,14 @@ function searchManga(q, limit = 18, offset = 0, q_type = '') {
  * @returns {Promise}
  */
 function collectManga(comicId, isCollect = true) {
-    const data = new URLSearchParams();
-    data.append('comic_id', comicId);
-    data.append('is_collect', isCollect ? '1' : '0');
-    return request.post('/api/v2/web/collect', data, {
+    const data = new URLSearchParams({
+        comic_id: comicId,
+        is_collect: isCollect ? '1' : '0'
+    });
+
+    return request.post('/api/v3/member/collect/comic', data, {
         headers: {
-            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
+            platform: '3',
         }
     });
 }

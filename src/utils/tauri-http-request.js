@@ -27,6 +27,23 @@ class TauriHttpClient {
     }
 
     /**
+     * 将对象转换为 URL 编码的表单数据字符串
+     * @param {Object} obj 要转换的对象
+     * @returns {string} URL编码的字符串
+     */
+    objectToFormUrlEncoded(obj) {
+        return Object.keys(obj)
+            .map(key => {
+                const value = obj[key];
+                if (value === undefined || value === null) {
+                    return encodeURIComponent(key) + '=';
+                }
+                return encodeURIComponent(key) + '=' + encodeURIComponent(value);
+            })
+            .join('&');
+    }
+
+    /**
      * 通用请求方法
      * @param {Object} config 请求配置
      * @returns {Promise<any>} 响应数据
@@ -39,7 +56,7 @@ class TauriHttpClient {
                 params = {},
                 data,
                 headers = {},
-                baseURL = this.defaults.baseURL
+                timeout = this.defaults.timeout
             } = config
 
             // 检查URL是否包含/proxy/，如果包含则需要转换为直接API源URL
@@ -110,13 +127,74 @@ class TauriHttpClient {
                 finalUrl = urlObj.toString()
             }
 
-            // console.log(`[Tauri HTTP] ${method} ${finalUrl}`)
+            // 处理请求体数据
+            let bodyData = undefined;
+
+            if (data) {
+                // 处理URLSearchParams类型的数据
+                if (data instanceof URLSearchParams) {
+                    // 直接使用toString()方法获取URL编码的表单数据
+                    bodyData = data.toString();
+
+                    // 设置Content-Type为application/x-www-form-urlencoded
+                    mergedHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+                }
+                // 处理FormData类型的数据
+                else if (data instanceof FormData) {
+                    // 将FormData转换为对象
+                    const formDataObj = {};
+                    for (const [key, value] of data.entries()) {
+                        formDataObj[key] = value;
+                    }
+
+                    // 转换为URL编码的表单数据
+                    bodyData = this.objectToFormUrlEncoded(formDataObj);
+
+                    // 设置Content-Type为application/x-www-form-urlencoded
+                    mergedHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+                }
+                // 处理application/x-www-form-urlencoded类型
+                else if (mergedHeaders['Content-Type'] && mergedHeaders['Content-Type'].includes('application/x-www-form-urlencoded')) {
+                    // 如果是对象，转换为URL编码的表单数据
+                    if (typeof data === 'object' && data !== null) {
+                        bodyData = this.objectToFormUrlEncoded(data);
+                    } else {
+                        // 如果是字符串（例如qs.stringify的结果），直接使用
+                        bodyData = data;
+                    }
+                }
+                // 处理字符串类型（可能是qs.stringify的结果）
+                else if (typeof data === 'string') {
+                    bodyData = data;
+
+                    // 如果字符串看起来像URL编码的表单数据，设置相应的Content-Type
+                    if (data.includes('=') && data.includes('&')) {
+                        mergedHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
+                    }
+                }
+                // 处理JSON类型
+                else {
+                    // 如果是对象，转换为JSON字符串
+                    if (typeof data === 'object' && data !== null) {
+                        bodyData = JSON.stringify(data);
+                        // 如果没有设置Content-Type，默认设置为application/json
+                        if (!mergedHeaders['Content-Type']) {
+                            mergedHeaders['Content-Type'] = 'application/json';
+                        }
+                    } else {
+                        bodyData = data;
+                    }
+                }
+            }
+
+            // console.log(`[Tauri HTTP] ${method} ${finalUrl}`, bodyData)
 
             // 发送请求
             const response = await fetch(finalUrl, {
                 method,
                 headers: mergedHeaders,
-                body: data ? JSON.stringify(data) : undefined,
+                body: bodyData,
+                timeout,
                 unsafeSend: true
             })
 

@@ -135,9 +135,10 @@ function getPostCollection(offset = 0, limit = 10, free_type = 1, ordering = '-d
  * @returns 
  */
 function collectPost(post_id, isCollect = true) {
-    const data = new URLSearchParams();
-    data.append('post_id', post_id);
-    data.append('is_collect', isCollect ? '1' : '0');
+    const data = new URLSearchParams({
+        post_id: post_id,
+        is_collect: isCollect ? '1' : '0'
+    });
     return request.post('/api/v3/member/collect/post', data, {
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'

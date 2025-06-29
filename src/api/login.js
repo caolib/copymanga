@@ -33,7 +33,7 @@ function generateAuthParams() {
 }
 
 /**
- * 用户登录 - V3接口
+ * 用户登录 
  * @param {string} username 用户名
  * @param {string} password 密码
  * @returns {Promise} 登录结果
@@ -42,30 +42,32 @@ function login(username, password) {
     const authParams = generateAuthParams()
     const { defaultHeaders } = authParams
 
-    const formData = new FormData()
-    formData.append('username', username)
-    formData.append('password', btoa(`${password}-${authParams.salt}`))
-    formData.append('salt', authParams.salt)
-    formData.append('platform', defaultHeaders.platform || '3')
-    formData.append('authorization', 'Token ')
-    formData.append('version', defaultHeaders.version || '2.3.1')
-    formData.append('source', defaultHeaders.source || 'copyApp')
-    formData.append('region', defaultHeaders.region || '1')
-    formData.append('webp', defaultHeaders.webp || '1')
-    formData.append('userAgent', defaultHeaders["user-agent"] || 'COPY/2.3.1')
-    formData.append('isGoogle', 'false')
-    formData.append('pseudoID', authParams.pseudoID)
-    formData.append('dt', new Date().toISOString().slice(0, 10).replace(/-/g, '.'))
-    formData.append('umString', authParams.umString)
-    formData.append('AES', authParams.AES)
-    formData.append('_umString', authParams._umString)
-    formData.append('_ae', authParams._ae)
-    formData.append('buildTime', '2025.05.22')
-    formData.append('androidId', authParams.androidId)
-    formData.append('referer', defaultHeaders.referer || 'com.copymanga.app-2.3.1')
-    formData.append('deviceInfo', authParams.deviceInfo)
+    // 创建请求数据对象，不使用FormData
+    const loginData = {
+        username: username,
+        password: btoa(`${password}-${authParams.salt}`),
+        salt: authParams.salt,
+        platform: defaultHeaders.platform || '3',
+        authorization: 'Token ',
+        version: defaultHeaders.version || '2.3.1',
+        source: defaultHeaders.source || 'copyApp',
+        region: defaultHeaders.region || '1',
+        webp: defaultHeaders.webp || '1',
+        userAgent: defaultHeaders["user-agent"] || 'COPY/2.3.1',
+        isGoogle: 'false',
+        pseudoID: authParams.pseudoID,
+        dt: new Date().toISOString().slice(0, 10).replace(/-/g, '.'),
+        umString: authParams.umString,
+        AES: authParams.AES,
+        _umString: authParams._umString,
+        _ae: authParams._ae,
+        buildTime: '2025.05.22',
+        androidId: authParams.androidId,
+        referer: defaultHeaders.referer || 'com.copymanga.app-2.3.1',
+        deviceInfo: authParams.deviceInfo
+    }
 
-    return request.post('/api/v3/login', formData, {
+    return request.post('/api/v3/login', loginData, {
         params: {
             platform: defaultHeaders.platform || '3'
         },
@@ -77,7 +79,7 @@ function login(username, password) {
 }
 
 /**
- * 用户注册 - V3接口
+ * 用户注册 
  * @param {string} username 用户名 (6-36位英文数字混合)
  * @param {string} password 密码 (6-36位英文数字混合)
  * @param {object} options 可选参数 {mobile, code, invite_code, question, answer}
@@ -87,34 +89,36 @@ function register(username, password, options = {}) {
     const authParams = generateAuthParams()
     const { defaultHeaders } = authParams
 
-    const formData = new FormData()
-    formData.append('username', username)
-    formData.append('password', password)
-    formData.append('mobile', options.mobile || '')
-    formData.append('region', defaultHeaders.region || '1')
-    formData.append('code', options.code || '')
-    formData.append('source', defaultHeaders.source || 'copyApp')
-    formData.append('version', defaultHeaders.version || '2.3.1')
-    formData.append('platform', defaultHeaders.platform || '3')
-    formData.append('invite_code', options.invite_code || '')
-    formData.append('question', options.question || '')
-    formData.append('answer', options.answer || '')
-    formData.append('authorization', 'Token ')
-    formData.append('webp', defaultHeaders.webp || '1')
-    formData.append('userAgent', defaultHeaders["user-agent"] || 'COPY/2.3.1')
-    formData.append('isGoogle', 'false')
-    formData.append('pseudoID', authParams.pseudoID)
-    formData.append('dt', new Date().toISOString().slice(0, 10).replace(/-/g, '.'))
-    formData.append('umString', authParams.umString)
-    formData.append('AES', authParams.AES)
-    formData.append('_umString', authParams._umString)
-    formData.append('_ae', authParams._ae)
-    formData.append('buildTime', '2025.05.22')
-    formData.append('androidId', authParams.androidId)
-    formData.append('referer', defaultHeaders.referer || 'com.copymanga.app-2.3.1')
-    formData.append('deviceInfo', authParams.deviceInfo)
+    // 创建请求数据对象，不使用FormData
+    const registerData = {
+        username: username,
+        password: password,
+        mobile: options.mobile || '',
+        region: defaultHeaders.region || '1',
+        code: options.code || '',
+        source: defaultHeaders.source || 'copyApp',
+        version: defaultHeaders.version || '2.3.1',
+        platform: defaultHeaders.platform || '3',
+        invite_code: options.invite_code || '',
+        question: options.question || '',
+        answer: options.answer || '',
+        authorization: 'Token ',
+        webp: defaultHeaders.webp || '1',
+        userAgent: defaultHeaders["user-agent"] || 'COPY/2.3.1',
+        isGoogle: 'false',
+        pseudoID: authParams.pseudoID,
+        dt: new Date().toISOString().slice(0, 10).replace(/-/g, '.'),
+        umString: authParams.umString,
+        AES: authParams.AES,
+        _umString: authParams._umString,
+        _ae: authParams._ae,
+        buildTime: '2025.05.22',
+        androidId: authParams.androidId,
+        referer: defaultHeaders.referer || 'com.copymanga.app-2.3.1',
+        deviceInfo: authParams.deviceInfo
+    }
 
-    return request.post('/api/v3/register', formData, {
+    return request.post('/api/v3/register', registerData, {
         params: {
             platform: defaultHeaders.platform || '3'
         },

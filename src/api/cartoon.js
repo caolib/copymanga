@@ -75,9 +75,11 @@ function collectCartoon(cartoonId, isCollect = true) {
   const data = new URLSearchParams()
   data.append('cartoon_id', cartoonId)
   data.append('is_collect', isCollect ? '1' : '0')
+
   return request.post('/api/v3/member/collect/cartoon', data, {
     headers: {
       platform: '3',
+      'Content-Type': 'application/x-www-form-urlencoded'
     },
   })
 }

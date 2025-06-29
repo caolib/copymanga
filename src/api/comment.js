@@ -1,5 +1,4 @@
 import request from '../utils/request'
-import qs from 'qs'
 
 /**
  * 获取章节评论
@@ -45,7 +44,7 @@ function getMangaComments(comicId, limit = 10, offset = 0) {
  * @returns {Promise} 评论发送结果
  */
 function postMangaComment(comicId, comment, replyId = '') {
-    const data = qs.stringify({
+    const data = new URLSearchParams({
         comic_id: comicId,
         comment: comment,
         reply_id: replyId,
@@ -66,7 +65,7 @@ function postMangaComment(comicId, comment, replyId = '') {
  * @returns {Promise} 评论发送结果
  */
 function postChapterComment(chapterId, roast) {
-    const data = qs.stringify({
+    const data = new URLSearchParams({
         chapter_id: chapterId,
         roast: roast,
         _update: 'true'

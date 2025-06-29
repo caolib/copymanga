@@ -227,44 +227,46 @@ const handleLogin = () => {
     // 保存自动登录设置
     userStore.setAutoLogin(autoLoginEnabled.value)
 
+    console.log('正在尝试登录:', loginForm.username)
+
     login(loginForm.username, loginForm.password).then(result => {
-        // V3 API的响应结构：{code: 200, message: "请求成功", results: {...}}
-        if (result.code === 200 && result.results) {
-            const userData = result.results
-
-            // 保存用户信息到 Pinia 存储并持久化
-            userStore.setUser({
-                username: userData.username,
-                token: userData.token, // 根据登录.json，token在results内部
-                user_id: userData.user_id,
-                nickname: userData.nickname,
-                avatar: userData.avatar,
-                datetime_created: userData.datetime_created,
-                ticket: userData.ticket || 0,
-                reward_ticket: userData.reward_ticket || 0,
-                downloads: userData.downloads || 0,
-                vip_downloads: userData.vip_downloads || 0,
-                reward_downloads: userData.reward_downloads || 0,
-                ads_vip_end: userData.ads_vip_end,
-                post_vip_end: userData.post_vip_end,
-                invite_code: userData.invite_code,
-                invited: userData.invited,
-                scy_answer: userData.scy_answer || false,
-                day_downloads_refresh: userData.day_downloads_refresh || '',
-                day_downloads: userData.day_downloads || 0,
-                password: loginForm.password // 总是保存密码
-            })
-
-            message.success('登录成功')
-            // 登录成功后回到上个界面或首页
-            const redirectPath = router.currentRoute.value.query.redirect || '/'
-            router.push(redirectPath)
-        } else {
-            throw new Error(result.message || '登录失败')
+        console.log('登录响应:', result)
+        
+        // 检查结果是否包含错误信息
+        if (result.results && result.results.detail && result.results.detail.includes('Err')) {
+            throw new Error(result.results.detail || '登录失败')
         }
+
+        const userData = result.results
+
+        // 保存用户信息到 Pinia 存储并持久化
+        userStore.setUser({
+            username: userData.username,
+            token: userData.token,
+            user_id: userData.user_id,
+            nickname: userData.nickname,
+            avatar: userData.avatar,
+            datetime_created: userData.datetime_created,
+            ticket: userData.ticket || 0,
+            reward_ticket: userData.reward_ticket || 0,
+            downloads: userData.downloads || 0,
+            vip_downloads: userData.vip_downloads || 0,
+            reward_downloads: userData.reward_downloads || 0,
+            ads_vip_end: userData.ads_vip_end,
+            post_vip_end: userData.post_vip_end,
+            invite_code: userData.invite_code,
+            invited: userData.invited,
+            scy_answer: userData.scy_answer || false,
+            day_downloads_refresh: userData.day_downloads_refresh || '',
+            day_downloads: userData.day_downloads || 0,
+            password: loginForm.password
+        })
+        message.success('登录成功')
+        const redirectPath = router.currentRoute.value.query.redirect || '/'
+        router.push(redirectPath)
     }).catch(error => {
         console.error('登录失败', error)
-        errorMessage.value = error.message;
+        errorMessage.value = error.message || '登录失败，请检查用户名和密码';
     }).finally(() => {
         loading.value = false
     })

@@ -1,8 +1,6 @@
 import tauriRequest from './tauri-http-request'
-import { getToken } from './auth'
 import { message } from 'ant-design-vue'
 import router from '@/router'
-import { getCurrentDate } from './date'
 import { notification } from 'ant-design-vue'
 
 // 创建请求实例
