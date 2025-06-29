@@ -7,13 +7,8 @@
     <!-- 首页内容 -->
     <div v-else class="home-content">
       <div class="header-actions">
-        <a-button
-          type="primary"
-          :size="'small'"
-          :icon="h(ReloadOutlined)"
-          :loading="refreshLoading"
-          @click="refreshData"
-        >
+        <a-button type="primary" :size="'small'" :icon="h(ReloadOutlined)" :loading="refreshLoading"
+          @click="refreshData">
           刷新
         </a-button>
         <span v-if="lastUpdated" class="update-time">上次更新: {{ formatLastUpdated }}</span>
@@ -43,16 +38,9 @@
           <h2>最新写真</h2>
         </div>
         <a-row :gutter="[16, 16]">
-          <a-col
-            v-for="item in newPosts.slice(0, 8)"
-            :key="item.post.path_word"
-            :xs="12"
-            :sm="8"
-            :md="6"
-            :lg="4"
-            :xl="4"
-          >
-            <a-card hoverable class="post-card" @click="goToPostDetail(item.post)">
+          <a-col v-for="item in newPosts.slice(0, 8)" :key="item.post.path_word" :xs="12" :sm="8" :md="6" :lg="4"
+            :xl="4">
+            <a-card hoverable class="post-card" @click="goToPostDetail(item.post.uuid)">
               <template #cover>
                 <div class="post-cover">
                   <img :src="item.post.cover" :alt="item.post.name" @error="handleImageError" />
@@ -83,16 +71,9 @@
               <h2>周排行榜</h2>
             </div>
             <a-row :gutter="[16, 16]">
-              <a-col
-                v-for="item in weekRanking.slice(0, 8)"
-                :key="item.post.path_word"
-                :xs="12"
-                :sm="12"
-                :md="8"
-                :lg="12"
-                :xl="8"
-              >
-                <a-card hoverable class="post-card" @click="goToPostDetail(item.post)">
+              <a-col v-for="item in weekRanking.slice(0, 8)" :key="item.post.path_word" :xs="12" :sm="12" :md="8"
+                :lg="12" :xl="8">
+                <a-card hoverable class="post-card" @click="goToPostDetail(item.post.uuid)">
                   <template #cover>
                     <div class="post-cover">
                       <img :src="item.post.cover" :alt="item.post.name" @error="handleImageError" />
@@ -124,15 +105,8 @@
               <h2>月排行榜</h2>
             </div>
             <a-row :gutter="[16, 16]">
-              <a-col
-                v-for="item in monthRanking.slice(0, 8)"
-                :key="item.post.path_word"
-                :xs="12"
-                :sm="12"
-                :md="8"
-                :lg="12"
-                :xl="8"
-              >
+              <a-col v-for="item in monthRanking.slice(0, 8)" :key="item.post.path_word" :xs="12" :sm="12" :md="8"
+                :lg="12" :xl="8">
                 <a-card hoverable class="post-card" @click="goToPostDetail(item.post.uuid)">
                   <template #cover>
                     <div class="post-cover">
@@ -164,7 +138,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { formatDate } from '@/utils/date.js'
 import { message } from 'ant-design-vue'
 import { usePostHomeStore } from '@/stores/post-home.js'
@@ -173,7 +146,6 @@ import { h } from 'vue'
 import { formatNumber } from '@/utils/number'
 import { goToPostDetail } from '@/router/post-router'
 
-const router = useRouter()
 const postHomeStore = usePostHomeStore()
 
 const refreshLoading = ref(false)
