@@ -1,7 +1,7 @@
 <template>
     <div>
         <!-- 应用信息 -->
-        <a-card title="应用信息" class="setting-card">
+        <a-card class="setting-card">
             <div class="about-container">
                 <div class="about-header">
                     <div class="about-logo">

@@ -293,7 +293,7 @@ const deleteAllChapters = async () => {
 
 // 格式化文件大小
 const formatFileSize = (bytes) => {
-  if (!bytes) return '未知'
+  if (!bytes) return '未下载完成'
 
   const sizes = ['B', 'KB', 'MB', 'GB']
   const i = Math.floor(Math.log(bytes) / Math.log(1024))

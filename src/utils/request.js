@@ -70,10 +70,12 @@ const handleError = (error) => {
     }
 
     console.error(error)
-    message.error({
-        content: () => msg,
-        class: 'custom-msg-btn'
-    });
+    if (msg !== '请求失败，请稍后重试') {
+        message.error({
+            content: () => msg,
+            class: 'custom-msg-btn'
+        });
+    }
     return Promise.reject(error)
 }
 

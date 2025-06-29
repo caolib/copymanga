@@ -2,24 +2,27 @@
   <div>
     <a-card title="API源配置" class="setting-card" id="api-config">
       <a-form layout="vertical">
-        <!-- 当前API源选择 -->
-        <a-form-item label="当前API源">
-          <a-select v-model:value="currentApiIndex" @change="onApiSourceChange" style="width: fit-content">
-            <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
-              {{ source }}
-            </a-select-option>
-          </a-select>
-          <div class="help-text">选择要使用的API源</div>
-        </a-form-item>
-
-        <!-- 添加新API源 -->
-        <a-form-item label="添加新API源">
+        <!-- 当前API源选择 - 改为可输入的下拉菜单 -->
+        <a-form-item label="API源管理">
           <a-input-group compact>
-            <a-input v-model:value="newApiSource.url" placeholder="API域名" style="width: fit-content" />
-            <a-button type="primary" @click="addNewApiSource" :loading="addingSource" style="width: fit-content">
+            <a-input v-model:value="newApiInput" placeholder="输入API源" style="width: auto; min-width: 250px"
+              @pressEnter="addNewApiSource" />
+            <a-button type="primary" @click="addNewApiSource" :loading="addingSource">
               添加
             </a-button>
           </a-input-group>
+          <div style="margin-top: 8px">
+            <a-select v-model:value="currentApiIndex" style="width: auto; min-width: 250px" @change="onApiSourceChange"
+              placeholder="选择API源">
+              <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
+                {{ source }}
+                <a-button v-if="apiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
+                  style="margin-left: 8px" @click.stop="removeApiSource(index)"
+                  :loading="removingIndex === index"></a-button>
+              </a-select-option>
+            </a-select>
+            <div class="help-text">选择要使用的API源</div>
+          </div>
         </a-form-item>
 
         <!-- 官方API源 -->
@@ -53,48 +56,12 @@
             </a-spin>
           </a-collapse-panel>
         </a-collapse>
-
-        <!-- API源管理 -->
-        <a-form-item label="API源管理">
-          <a-list :data-source="apiSources" bordered size="small">
-            <template #renderItem="{ item, index }">
-              <a-list-item>
-                <template #actions>
-                  <a-button v-if="apiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
-                    @click="removeApiSource(index)" :loading="removingIndex === index">
-                  </a-button>
-                </template>
-                <a-list-item-meta>
-                  <template #title>
-                    <span :class="{ 'current-source': index === currentApiIndex }">
-                      {{ item }}
-                      <a-tag v-if="index === currentApiIndex" color="green" size="small">当前</a-tag>
-                    </span>
-                  </template>
-                </a-list-item-meta>
-              </a-list-item>
-            </template>
-          </a-list>
-        </a-form-item>
       </a-form>
     </a-card>
 
     <!-- 请求头配置 -->
     <a-card title="请求头配置" class="setting-card" id="headers-config">
       <a-form layout="vertical">
-        <!-- 版本检查状态 -->
-        <a-alert v-if="remoteAppVersion" type="warning" show-icon style="width: fit-content; margin-bottom: 10px">
-          <template #message>
-            检测到官方APP版本：{{ remoteAppVersion }}，
-            <span v-if="versionDiff">当前请求头版本与官方不一致。</span>
-            <span v-else>当前请求头版本已与官方一致。</span>
-            <a-button v-if="versionDiff" type="primary" size="small" style="margin-left: 12px"
-              @click="applyRemoteVersion">一键同步</a-button>
-          </template>
-        </a-alert>
-        <a-button @click="checkAppVersion" :loading="checkingAppVersion" type="primary"
-          style="margin-bottom: 10px">获取官方APP版本</a-button>
-
         <!-- 添加新请求头 -->
         <a-form-item label="添加新请求头">
           <a-row :gutter="16">
@@ -155,7 +122,24 @@
             <a-popconfirm title="你确定?" ok-text="对的" cancel-text="不对" @confirm="resetHeaders">
               <a-button>恢复默认</a-button>
             </a-popconfirm>
+
+            <a-button @click="checkAppVersion" :loading="checkingAppVersion" type="primary">
+              获取官方APP版本
+            </a-button>
           </a-space>
+        </a-form-item>
+
+        <!-- 版本检查状态 - 单独一行 -->
+        <a-form-item v-if="remoteAppVersion">
+          <a-alert :type="versionDiff ? 'warning' : 'success'" show-icon style="width: fit-content">
+            <template #message>
+              检测到官方APP版本：{{ remoteAppVersion }}，
+              <span v-if="versionDiff">当前请求头版本与官方不一致</span>
+              <span v-else>当前请求头版本已与官方一致</span>
+              <a-button v-if="versionDiff" type="primary" size="small" style="margin-left: 12px"
+                @click="applyRemoteVersion">一键同步</a-button>
+            </template>
+          </a-alert>
         </a-form-item>
       </a-form>
     </a-card>
@@ -166,47 +150,28 @@
         <a-alert type="info" show-icon style="width: fit-content; margin-bottom: 10px">
           <template #message> 官方目前好像就只有这一个源 </template>
         </a-alert>
-        <!-- 当前轻小说API源选择 -->
-        <a-form-item label="当前轻小说API源">
-          <a-select v-model:value="currentBookApiIndex" @change="onBookApiSourceChange" style="width: fit-content">
-            <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
-              {{ source }}
-            </a-select-option>
-          </a-select>
-          <div class="help-text">选择要使用的轻小说API源</div>
-        </a-form-item>
 
-        <!-- 添加新轻小说API源 -->
-        <a-form-item label="添加新轻小说API源">
+        <!-- 当前轻小说API源选择 -->
+        <a-form-item label="轻小说API源管理">
           <a-input-group compact>
-            <a-input v-model:value="newBookApiSource.url" style="width: fit-content" />
-            <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource"
-              style="width: fit-content">
+            <a-input v-model:value="newBookApiSource.url" placeholder="输入轻小说API源" style="width: auto; min-width: 250px"
+              @pressEnter="addNewBookApiSource" />
+            <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource">
               添加
             </a-button>
           </a-input-group>
-        </a-form-item>
-
-        <!-- 轻小说API源管理 -->
-        <a-form-item label="轻小说API源管理">
-          <a-list :data-source="bookApiSources" bordered size="small">
-            <template #renderItem="{ item, index }">
-              <a-list-item>
-                <template #actions>
-                  <a-button v-if="bookApiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
-                    @click="removeBookApiSource(index)" :loading="removingBookIndex === index"></a-button>
-                </template>
-                <a-list-item-meta>
-                  <template #title>
-                    <span :class="{ 'current-source': index === currentBookApiIndex }">
-                      {{ item }}
-                      <a-tag v-if="index === currentBookApiIndex" color="orange" size="small">当前</a-tag>
-                    </span>
-                  </template>
-                </a-list-item-meta>
-              </a-list-item>
-            </template>
-          </a-list>
+          <div style="margin-top: 8px">
+            <a-select v-model:value="currentBookApiIndex" style="width: auto; min-width: 250px"
+              @change="onBookApiSourceChange" placeholder="选择轻小说API源">
+              <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
+                {{ source }}
+                <a-button v-if="bookApiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
+                  style="margin-left: 8px" @click.stop="removeBookApiSource(index)"
+                  :loading="removingBookIndex === index"></a-button>
+              </a-select-option>
+            </a-select>
+            <div class="help-text">选择要使用的轻小说API源</div>
+          </div>
         </a-form-item>
       </a-form>
     </a-card>
@@ -246,6 +211,11 @@ import {
   saveRequestHeaders,
   switchApiSource,
   switchBookApiSource,
+  getDefaultRequestHeaders,
+  addApiSource,
+  removeApiSource as removeApiSourceFromConfig,
+  addBookApiSource,
+  removeBookApiSource as removeBookApiSourceFromConfig,
 } from '@/config/server-config'
 import { useAppStore } from '@/stores/app'
 import { invoke } from '@tauri-apps/api/core'
@@ -268,7 +238,7 @@ const appStore = useAppStore()
 // API源管理相关状态
 const apiSources = ref([])
 const currentApiIndex = ref(0)
-const newApiSource = ref({ url: '' })
+const newApiInput = ref('') // 用于存储输入的新API源
 const addingSource = ref(false)
 const removingIndex = ref(-1)
 
@@ -296,6 +266,13 @@ const fetchingRemoteHeaders = ref(false)
 // 版本检查相关状态
 const remoteAppVersion = ref('')
 const versionDiff = ref(false)
+
+// 处理API源搜索/输入
+const onApiSourceSearch = (value) => {
+  if (typeof value === 'string') {
+    newApiInput.value = value
+  }
+}
 
 // 加载当前配置
 const loadConfig = () => {
@@ -397,8 +374,15 @@ const handleRestart = async () => {
 }
 
 // API源切换
-const onApiSourceChange = async (index) => {
+const onApiSourceChange = async (value) => {
+  // 如果value是字符串，说明是用户输入，设置为newApiInput
+  if (typeof value === 'string') {
+    newApiInput.value = value
+    return
+  }
+
   try {
+    const index = Number(value)
     const source = await switchApiSource(index)
     currentApiDomain.value = source
     appForm.value.apiDomain = source
@@ -412,16 +396,17 @@ const onApiSourceChange = async (index) => {
 
 // 添加API源
 const addNewApiSource = async () => {
-  if (!newApiSource.value.url) {
-    message.error('请输入URL')
+  const url = newApiInput.value
+  if (!url) {
+    message.error('请输入API源URL')
     return
   }
 
   addingSource.value = true
   try {
-    await addApiSource(newApiSource.value.url)
+    await addApiSource(url)
     message.success('API源添加成功')
-    newApiSource.value = { url: '' }
+    newApiInput.value = ''
     loadConfig() // 重新加载配置
   } catch (error) {
     message.error(error.message || '添加API源失败')
@@ -439,7 +424,7 @@ const removeApiSource = async (index) => {
 
   removingIndex.value = index
   try {
-    await removeApiSourceConfig(index)
+    await removeApiSourceFromConfig(index)
     message.success('API源删除成功')
     loadConfig() // 重新加载配置
   } catch (error) {
@@ -491,7 +476,7 @@ const removeBookApiSource = async (index) => {
 
   removingBookIndex.value = index
   try {
-    await removeBookApiSourceConfig(index)
+    await removeBookApiSourceFromConfig(index)
     message.success('轻小说API源删除成功')
     loadConfig() // 重新加载配置
   } catch (error) {
@@ -589,6 +574,7 @@ const resetHeaders = async () => {
     message.success('已恢复默认请求头配置，如果没有生效请重启再尝试')
   } catch (error) {
     message.error('重置请求头配置失败')
+    console.error('重置请求头配置失败:', error)
   }
 }
 
@@ -745,10 +731,10 @@ const quickAddApiSource = async (url) => {
   }
 
   // 使用现有逻辑添加
-  newApiSource.value.url = url
+  newApiInput.value = url
   await addNewApiSource()
   // 添加后清空输入框，以免影响手动添加
-  newApiSource.value.url = ''
+  newApiInput.value = ''
 }
 
 //  检查API源是否存在

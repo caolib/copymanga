@@ -2,16 +2,8 @@
   <div class="book-search-tab">
     <!-- 搜索区域 -->
     <div class="search-section">
-      <a-input-search
-        v-model:value="searchKeyword"
-        placeholder="请输入轻小说名称..."
-        size="large"
-        enter-button=""
-        :loading="loading"
-        @search="handleSearch"
-        @pressEnter="handleSearch"
-        class="search-input"
-      />
+      <a-input-search v-model:value="searchKeyword" placeholder="请输入轻小说名称..." size="large" enter-button=""
+        :loading="loading" @search="handleSearch" @pressEnter="handleSearch" class="search-input" />
 
       <!-- 搜索类型选择 -->
       <div class="search-filters" v-if="searchKeyword">
@@ -47,19 +39,10 @@
 
       <!-- 实际搜索结果 -->
       <div v-else-if="books.length" class="book-grid">
-        <div
-          v-for="book in books"
-          :key="book.path_word"
-          class="book-card"
-          @click="goToDetail(book.path_word)"
-        >
+        <div v-for="book in books" :key="book.path_word" class="book-card" @click="goToDetail(book.path_word)">
           <div class="book-cover">
-            <a-image
-              :src="book.cover"
-              :alt="book.name"
-              :preview="false"
-              style="width: 100%; height: 100%; object-fit: cover"
-            />
+            <a-image :src="book.cover" :alt="book.name" :preview="false"
+              style="width: 100%; height: 100%; object-fit: cover" />
           </div>
           <div class="book-info">
             <h4 class="book-title" :title="book.name">{{ book.name }}</h4>
@@ -87,7 +70,7 @@
 
     <!-- 加载更多 -->
     <div class="load-more" v-if="books.length && hasMore">
-      <a-button @click="loadMore" :loading="loadingMore" type="default" block> 加载更多 </a-button>
+      <a-button @mouseenter="loadMore" :loading="loadingMore" type="default" block> 加载更多 </a-button>
     </div>
 
     <!-- 无更多数据提示 -->

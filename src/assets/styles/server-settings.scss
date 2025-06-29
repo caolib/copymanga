@@ -158,15 +158,8 @@
 // 重启部分样式优化
 .restart-section {
     padding: $spacing-md;
-    background-color: $bg-color-light;
     border-radius: $border-radius-medium;
-    border: 1px solid $border-color-light;
     transition: $transition-fast;
-
-    @include dark-theme {
-        background-color: $dark-fill-tertiary;
-        border-color: $dark-border-secondary;
-    }
 }
 
 // 表单项标签样式
