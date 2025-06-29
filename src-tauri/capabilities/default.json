@@ -51,6 +51,22 @@
         }
       ]
     },
+    "http:default",
+    "http:allow-fetch",
+    "http:allow-fetch-read-body",
+    "http:allow-fetch-send",
+    "http:allow-fetch-cancel",
+    {
+      "identifier": "http:allow-fetch",
+      "allow": [
+        {
+          "url": "https://**"
+        },
+        {
+          "url": "http://**"
+        }
+      ]
+    },
     "process:default",
     "dialog:default",
     "dialog:allow-save",

@@ -1,35 +1,5 @@
 <template>
   <div>
-    <a-card title="转发服务配置" class="setting-card" id="server-config">
-      <a-form :model="serverForm" layout="vertical" @finish="onSubmitServer">
-        <a-form-item label="服务器端口（1-65535）" name="serverPort">
-          <a-input-group compact>
-            <a-input-number v-model:value="serverForm.serverPort" placeholder="输入一个端口号" :min="1" :max="65535"
-              style="width: fit-content" />
-            <a-button type="primary" html-type="submit" :loading="savingServer" style="width: fit-content">
-              保存
-            </a-button>
-          </a-input-group>
-        </a-form-item>
-
-        <!-- Rust服务器状态监控 -->
-        <a-form-item>
-          <a-space>
-            <a-badge :status="serverStatus.status" :text="serverStatus.text" />
-            <span class="status-info">{{ serverStatus.info }}</span>
-            <a-button v-if="serverStatus.status === 'error'" type="primary" size="small" :loading="startingServer"
-              @click="startServer">
-              启动服务器
-            </a-button>
-            <a-button v-if="serverStatus.status === 'success'" type="default" size="small" :loading="stoppingServer"
-              @click="stopServer">
-              停止服务器
-            </a-button>
-          </a-space>
-        </a-form-item>
-      </a-form>
-    </a-card>
-
     <a-card title="API源配置" class="setting-card" id="api-config">
       <a-form layout="vertical">
         <!-- 当前API源选择 -->
@@ -257,8 +227,8 @@
 </template>
 
 <script setup>
-import { h, onMounted, onUnmounted, ref } from 'vue'
-import { message, Modal } from 'ant-design-vue'
+import { h, onBeforeUnmount, onMounted, ref } from 'vue'
+import { message } from 'ant-design-vue'
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -269,17 +239,11 @@ import {
   UploadOutlined,
 } from '@ant-design/icons-vue'
 import {
-  addApiSource,
-  addBookApiSource,
   getAppConfig,
-  getDefaultRequestHeaders,
   getRequestHeaders,
   getServerConfig,
-  removeApiSource as removeApiSourceConfig,
-  removeBookApiSource as removeBookApiSourceConfig,
   saveAppConfig,
   saveRequestHeaders,
-  saveServerConfig,
   switchApiSource,
   switchBookApiSource,
 } from '@/config/server-config'
@@ -295,11 +259,8 @@ import { getOfficialApiSources } from '@/api/api-source'
 import { getHeadersConfig } from '@/api/github'
 import { getAppVersion } from '@/api/system'
 
-const serverForm = ref({ serverPort: 12121 })
 const appForm = ref({ apiDomain: '' })
-const currentServerPort = ref('')
 const currentApiDomain = ref('')
-const savingServer = ref(false)
 const restarting = ref(false)
 const openingDirectory = ref(false)
 const appStore = useAppStore()
@@ -315,7 +276,6 @@ const removingIndex = ref(-1)
 const officialApiSources = ref([])
 const loadingOfficialSources = ref(false)
 const checkingAppVersion = ref(false)
-
 
 // 轻小说API源管理相关状态
 const bookApiSources = ref([])
@@ -333,34 +293,12 @@ const exportingHeaders = ref(false)
 const importingHeaders = ref(false)
 const fetchingRemoteHeaders = ref(false)
 
-// Rust服务器状态监控
-const serverStatus = ref({
-  status: 'default',
-  text: '检查中...',
-  color: 'default',
-  displayText: '检查中',
-  info: '正在检查服务器状态...',
-})
-let statusCheckInterval = null
-const startingServer = ref(false)
-const stoppingServer = ref(false)
-
 // 版本检查相关状态
 const remoteAppVersion = ref('')
 const versionDiff = ref(false)
 
 // 加载当前配置
 const loadConfig = () => {
-  // 加载服务器配置
-  getServerConfig()
-    .then((config) => {
-      currentServerPort.value = config.serverPort
-      serverForm.value.serverPort = parseInt(config.serverPort)
-    })
-    .catch((error) => {
-      message.error('加载服务器配置失败', error)
-    })
-
   // 加载应用配置
   getAppConfig()
     .then((config) => {
@@ -444,24 +382,6 @@ const loadConfig = () => {
     .catch((error) => {
       console.warn('加载请求头配置失败:', error)
       headersList.value = []
-    })
-}
-
-// 保存服务器配置
-const onSubmitServer = () => {
-  savingServer.value = true
-
-  saveServerConfig(serverForm.value.serverPort)
-    .then(() => {
-      message.success('服务器配置保存成功！')
-      appStore.setNeedsRestart(true)
-      loadConfig()
-    })
-    .catch((error) => {
-      message.error(error.message || '保存服务器配置失败')
-    })
-    .finally(() => {
-      savingServer.value = false
     })
 }
 
@@ -760,93 +680,43 @@ const openConfigDirectory = async () => {
     })
 }
 
-// 检查Rust服务器状态
-const checkServerStatus = async () => {
-  try {
-    const config = await getServerConfig()
-    const port = config.serverPort
-
-    // 使用专门的状态检查命令
-    const result = await invoke('check_proxy_server_status')
-
-    if (result === '代理服务器正在运行') {
-      serverStatus.value = {
-        status: 'success',
-        text: '运行中',
-        info: `代理服务器正在端口 ${port} 上运行`,
-      }
+// 获取app版本并对比请求头
+const checkAppVersion = () => {
+  checkingAppVersion.value = true
+  getAppVersion().then(res => {
+    if (res.results && res.results.android) {
+      const remoteVersion = res.results.android.version
+      remoteAppVersion.value = remoteVersion
+      const versionHeader = headersList.value.find(h => h.key.toLowerCase() === 'version')
+      const currentVersion = versionHeader ? versionHeader.value : ''
+      versionDiff.value = remoteVersion && remoteVersion !== currentVersion
     } else {
-      serverStatus.value = {
-        status: 'error',
-        text: '已停止',
-        info: '代理服务器未运行',
+      remoteAppVersion.value = ''
+      versionDiff.value = false
+      message.error('获取版本信息失败')
+    }
+  }).finally(() => {
+    checkingAppVersion.value = false
+  })
+}
+
+const applyRemoteVersion = () => {
+  const versionHeader = headersList.value.find(h => h.key.toLowerCase() === 'version')
+  const currentVersion = versionHeader ? versionHeader.value : ''
+  if (remoteAppVersion.value && currentVersion && remoteAppVersion.value !== currentVersion) {
+    if (versionHeader) versionHeader.value = remoteAppVersion.value
+    headersList.value.forEach(h => {
+      if (h.key.toLowerCase() === 'user-agent' || h.key.toLowerCase() === 'referer') {
+        if (currentVersion && h.value.includes(currentVersion)) {
+          h.value = h.value.replaceAll(currentVersion, remoteAppVersion.value)
+        }
       }
-    }
-  } catch (error) {
-    // 如果检查失败，尝试启动服务器来获取更详细的错误信息
-    try {
-      await invoke('start_proxy_server')
-      // 如果启动成功，重新检查状态
-      setTimeout(checkServerStatus, 1000)
-    } catch (startError) {
-      const config = await getServerConfig()
-      const port = config.serverPort
-      serverStatus.value = {
-        status: 'error',
-        text: '启动失败',
-        info: startError.includes('端口')
-          ? startError
-          : `端口 ${port} 被占用或启动失败，请尝试更换端口`,
-      }
-    }
-  }
-}
-
-// 启动状态检查定时器 5秒检查一次
-const startStatusCheck = () => {
-  checkServerStatus()
-  statusCheckInterval = setInterval(checkServerStatus, 5000)
-}
-
-// 停止状态检查定时器
-const stopStatusCheck = () => {
-  if (statusCheckInterval) {
-    clearInterval(statusCheckInterval)
-    statusCheckInterval = null
-  }
-}
-
-// 手动启动服务器
-const startServer = async () => {
-  startingServer.value = true
-  try {
-    await invoke('start_proxy_server')
-    message.success('服务器启动成功')
-    // 延迟一下再检查状态，给服务器启动时间
-    setTimeout(checkServerStatus, 1000)
-  } catch (error) {
-    message.error(error || '启动服务器失败')
-    serverStatus.value = {
-      status: 'error',
-      text: '启动失败',
-      info: error || '启动服务器失败',
-    }
-  } finally {
-    startingServer.value = false
-  }
-}
-
-// 手动停止服务器
-const stopServer = async () => {
-  stoppingServer.value = true
-  try {
-    await invoke('stop_proxy_server')
-    // 延迟一下再检查状态，给服务器关闭时间
-    setTimeout(checkServerStatus, 2000)
-  } catch (error) {
-    message.error(error || '停止服务器失败')
-  } finally {
-    stoppingServer.value = false
+    })
+    versionDiff.value = false
+    message.success('版本号已替换为最新')
+    saveAllHeaders().catch(error => {
+      message.error('保存请求头失败: ' + (error.message || error))
+    })
   }
 }
 
@@ -893,53 +763,12 @@ const isApiSourceExist = (url) => {
   return apiSources.value.includes(url)
 }
 
-// 获取app版本并对比请求头
-const checkAppVersion = () => {
-  checkingAppVersion.value = true
-  getAppVersion().then(res => {
-    if (res.results && res.results.android) {
-      const remoteVersion = res.results.android.version
-      remoteAppVersion.value = remoteVersion
-      const versionHeader = headersList.value.find(h => h.key.toLowerCase() === 'version')
-      const currentVersion = versionHeader ? versionHeader.value : ''
-      versionDiff.value = remoteVersion && remoteVersion !== currentVersion
-    } else {
-      remoteAppVersion.value = ''
-      versionDiff.value = false
-      message.error('获取版本信息失败')
-    }
-  }).finally(() => {
-    checkingAppVersion.value = false
-  })
-}
-
-const applyRemoteVersion = () => {
-  const versionHeader = headersList.value.find(h => h.key.toLowerCase() === 'version')
-  const currentVersion = versionHeader ? versionHeader.value : ''
-  if (remoteAppVersion.value && currentVersion && remoteAppVersion.value !== currentVersion) {
-    if (versionHeader) versionHeader.value = remoteAppVersion.value
-    headersList.value.forEach(h => {
-      if (h.key.toLowerCase() === 'user-agent' || h.key.toLowerCase() === 'referer') {
-        if (currentVersion && h.value.includes(currentVersion)) {
-          h.value = h.value.replaceAll(currentVersion, remoteAppVersion.value)
-        }
-      }
-    })
-    versionDiff.value = false
-    message.success('版本号已替换为最新')
-    saveAllHeaders().catch(error => {
-      message.error('保存请求头失败: ' + (error.message || error))
-    })
-  }
-}
-
 onMounted(() => {
   loadConfig()
-  startStatusCheck()
 })
 
-onUnmounted(() => {
-  stopStatusCheck()
+onBeforeUnmount(() => {
+  // 清理资源，如果有的话
 })
 </script>
 

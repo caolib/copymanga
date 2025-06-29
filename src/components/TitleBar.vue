@@ -6,11 +6,8 @@
         <template v-if="isLoggedInComputed">
           <a-dropdown trigger="hover" placement="bottomRight">
             <span class="user-avatar-dropdown">
-              <a-avatar
-                :src="getAvatarUrl(userInfo?.avatar) || '/logo.png'"
-                :alt="userInfo?.nickname || userInfo?.username || '用户头像'"
-                size="32"
-              />
+              <a-avatar :src="getAvatarUrl(userInfo?.avatar) || '/logo.png'"
+                :alt="userInfo?.nickname || userInfo?.username || '用户头像'" size="32" />
             </span>
             <template #overlay>
               <a-menu>
@@ -21,18 +18,14 @@
                 <!-- 多账号列表 -->
                 <template v-if="userStore.savedAccounts.length > 1">
                   <a-menu-item-group title="切换账号">
-                    <a-menu-item
-                      v-for="account in userStore.savedAccounts.filter(
-                        (acc) => acc.username !== userStore.username,
-                      )"
-                      :key="'switch-' + account.username"
-                      @click="switchAccount(account.username)"
-                    >
+                    <a-menu-item v-for="account in userStore.savedAccounts.filter(
+                      (acc) => acc.username !== userStore.username,
+                    )" :key="'switch-' + account.username" @click="switchAccount(account.username)">
                       <div class="account-switch-item">
                         <a-avatar :src="getAvatarUrl(account.userInfo?.avatar)" size="small" />
                         <span class="account-name">{{
                           account.userInfo?.nickname || account.username
-                        }}</span>
+                          }}</span>
                       </div>
                     </a-menu-item>
                   </a-menu-item-group>
@@ -64,49 +57,22 @@
           <StarFilled class="nav-icon collection-icon" />书架
         </router-link>
         <router-link to="/downloads" class="nav-link">下载</router-link>
+        <router-link to="/test/http" class="nav-link">HTTP测试</router-link>
         <router-link to="/settings" class="nav-link settings-link">
           <SettingFilled class="nav-icon" />
           <span v-if="hasUpdate" class="nav-update-indicator"></span>
         </router-link>
-        <button
-          @click="themeStore.toggleTheme"
-          class="theme-toggle-btn"
-          :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'"
-        >
+        <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
+          :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
           {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
         </button>
-        <a-button
-          type="text"
-          class="nav-link"
-          @click="goBack"
-          title="后退"
-          :icon="h(ArrowLeftOutlined)"
-        ></a-button>
-        <a-button
-          type="text"
-          class="nav-link"
-          @click="goForward"
-          title="前进"
-          :icon="h(ArrowRightOutlined)"
-        ></a-button>
-        <a-button
-          type="text"
-          class="nav-link"
-          @click="refreshPage"
-          title="刷新"
-          :icon="h(ReloadOutlined)"
-        >
+        <a-button type="text" class="nav-link" @click="goBack" title="后退" :icon="h(ArrowLeftOutlined)"></a-button>
+        <a-button type="text" class="nav-link" @click="goForward" title="前进" :icon="h(ArrowRightOutlined)"></a-button>
+        <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)">
         </a-button>
         <!-- 自定义CSS重载按钮 -->
-        <a-button
-          v-if="themeStore.showReloadCssButton"
-          type="text"
-          class="nav-link reload-css-btn"
-          @click="reloadCustomCss"
-          :loading="reloadingCss"
-          title="重新加载自定义样式"
-          :icon="h(FormatPainterOutlined)"
-        >
+        <a-button v-if="themeStore.showReloadCssButton" type="text" class="nav-link reload-css-btn"
+          @click="reloadCustomCss" :loading="reloadingCss" title="重新加载自定义样式" :icon="h(FormatPainterOutlined)">
         </a-button>
       </nav>
     </div>
@@ -121,52 +87,22 @@
           </svg>
         </button>
 
-        <button
-          class="title-bar-button maximize"
-          @click="toggleMaximize"
-          :title="isMaximized ? '还原' : '最大化'"
-        >
+        <button class="title-bar-button maximize" @click="toggleMaximize" :title="isMaximized ? '还原' : '最大化'">
           <svg width="12" height="12" viewBox="0 0 12 12" v-if="!isMaximized">
-            <rect
-              x="2"
-              y="2"
-              width="8"
-              height="8"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1"
-            />
+            <rect x="2" y="2" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1" />
           </svg>
           <svg width="12" height="12" viewBox="0 0 12 12" v-else>
             <!-- 后面的矩形，只显示未被遮挡的部分 -->
-            <path
-              d="M4 1 L10 1 L10 4 L8 4 L8 3 L4 3 Z"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1"
-            />
+            <path d="M4 1 L10 1 L10 4 L8 4 L8 3 L4 3 Z" fill="none" stroke="currentColor" stroke-width="1" />
             <path d="M8 4 L10 4 L10 7 L8 7 Z" fill="none" stroke="currentColor" stroke-width="1" />
             <!-- 前面的矩形 -->
-            <rect
-              x="2"
-              y="3"
-              width="6"
-              height="6"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1"
-            />
+            <rect x="2" y="3" width="6" height="6" fill="none" stroke="currentColor" stroke-width="1" />
           </svg>
         </button>
 
         <button class="title-bar-button close" @click="closeWindow" title="关闭">
           <svg width="12" height="12" viewBox="0 0 12 12">
-            <path
-              d="M2 2 L10 10 M10 2 L2 10"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-            />
+            <path d="M2 2 L10 10 M10 2 L2 10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           </svg>
         </button>
       </div>

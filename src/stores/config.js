@@ -4,6 +4,7 @@ import { ref } from 'vue'
 export const useConfigStore = defineStore('config', () => {
     const isInitialized = ref(false)
     const isServerStarted = ref(false)
+    const useTauriHttp = ref(true)
     const initPromise = ref(null)
 
     const setInitialized = () => {
@@ -30,10 +31,15 @@ export const useConfigStore = defineStore('config', () => {
     return {
         isInitialized,
         isServerStarted,
+        useTauriHttp,
         initPromise,
         setInitialized,
         setServerStarted,
         setInitPromise,
         waitForInit
+    }
+}, {
+    persist: {
+        paths: ['useTauriHttp']
     }
 })

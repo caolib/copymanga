@@ -82,14 +82,16 @@ const initPromise = Promise.all([
         })
     ])
 }).then(() => {
-    if (!configStore.isServerStarted) {
-        return invoke('start_proxy_server')
-    } else {
-        return '代理服务器已经在运行'
-    }
+    // 不再自动启动代理服务器
+    // if (!configStore.isServerStarted) {
+    //     return invoke('start_proxy_server')
+    // } else {
+    //     return '代理服务器已经在运行'
+    // }
+    return ''
 }).then((result) => {
-    console.log('代理服务器启动结果:', result)
-    configStore.setServerStarted()
+    // 不再设置服务器已启动状态
+    // configStore.setServerStarted()
     return themeStore.initTheme()
 }).then(() => {
     // 根据配置决定是否初始化托盘图标

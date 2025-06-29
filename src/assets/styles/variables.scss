@@ -139,6 +139,10 @@ $card-bg: #ffffff;
 $card-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 $card-hover-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 
+// 卡片背景颜色和文本颜色
+$card-background-color: #ffffff;
+$primary-text-color: #333333;
+
 // 暗色主题卡片样式
 $dark-card-bg: #3a3f4b;
 $dark-card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
@@ -183,5 +187,16 @@ $dark-card-hover-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 @mixin responsive($breakpoint) {
     @media (max-width: $breakpoint) {
         @content;
+    }
+}
+
+// 暗色主题适配
+@mixin theme-aware {
+    // 亮色主题样式
+    @content ($card-background-color, $primary-text-color);
+
+    // 暗色主题样式
+    @include dark-theme {
+        @content ($dark-card-bg, $dark-text-primary);
     }
 }

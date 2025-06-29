@@ -1,6 +1,8 @@
 @use "./variables" as *;
 
+/* 全局样式设置 */
 * {
+    cursor: url("../img/mouse/normal.cur"), auto;
     margin: 0;
     padding: 0;
     box-sizing: border-box;

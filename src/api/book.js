@@ -1,6 +1,8 @@
 import request from '../utils/request'
+import { fetch } from '@tauri-apps/plugin-http'
 import axios from 'axios'
 import { getServerConfig } from '@/config/server-config'
+import { useConfigStore } from '@/stores/config'
 
 /**
  * 获取轻小说主页数据
@@ -81,15 +83,26 @@ function getVolumeDetail(pathWord, volumeId) {
  * @returns {Promise} 文本内容
  */
 async function getBookTextContent(txtUrl) {
-  // 创建 axios 实例
-  const r = axios.create({
-    timeout: 40000,
-    withCredentials: true,
-  })
-  await getServerConfig().then((config) => {
-    r.defaults.baseURL = `http://localhost:${config.serverPort}/proxy`
-  })
-  return r.get(`/proxy?url=${encodeURIComponent(txtUrl)}`)
+  try {
+    console.log('使用Tauri HTTP插件直接请求文本内容:', txtUrl)
+    const response = await fetch(txtUrl, {
+      method: 'GET',
+      headers: {
+        'Accept': 'text/plain, */*'
+      },
+      unsafeSend: true
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP错误! 状态: ${response.status}`)
+    }
+
+    const text = await response.text()
+    return { data: text }
+  } catch (error) {
+    console.error('Tauri HTTP请求文本内容失败:', error)
+    throw error
+  }
 }
 
 /**

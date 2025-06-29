@@ -7,6 +7,9 @@
           :icon="h(ReloadOutlined)" :loading="loading" size="small" style="margin-right: 10px;">
           刷新
         </a-button>
+        <a-button type="default" @click="goToHttpTest" size="small" style="margin-right: 10px;">
+          HTTP测试
+        </a-button>
         <span v-if="lastUpdateTime" class="update-time">
           {{ formatDate(lastUpdateTime) }}
         </span>
@@ -44,12 +47,14 @@ import { useTopicStore } from '../stores/topic'
 import { formatDate } from '../utils/date'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
+import { useRouter } from 'vue-router'
 import HomeTabContent from '../components/home/HomeTabContent.vue'
 import NewestTabContent from '../components/home/NewestTabContent.vue'
 import MangaDiscoverTabContent from '../components/home/MangaDiscoverTabContent.vue'
 import RankingTabContent from '../components/home/RankingTabContent.vue'
 import TopicsTabContent from '../components/home/TopicsTabContent.vue'
 
+const router = useRouter()
 const homeStore = useHomeStore()
 const mangaDiscoverStore = useMangaDiscoverStore()
 const mangaRankingStore = useMangaRankingStore()
@@ -71,6 +76,11 @@ const lastUpdateTime = computed(() => {
   if (activeTab.value === 'discover') return mangaDiscoverStore.lastListUpdateTime
   return null
 })
+
+// 导航到HTTP测试页面
+const goToHttpTest = () => {
+  router.push('/test/http')
+}
 
 // 刷新当前激活tab的数据
 const refreshCurrentData = () => {
