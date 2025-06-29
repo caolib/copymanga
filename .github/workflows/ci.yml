@@ -130,6 +130,7 @@ jobs:
 
       - name: Set prerelease if tag contains beta
         id: set_prerelease
+        shell: bash
         run: |
           TAG_NAME=${GITHUB_REF#refs/tags/}
           if [[ "$TAG_NAME" == *beta* ]]; then
