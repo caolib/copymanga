@@ -1,8 +1,5 @@
 import request from '../utils/request'
 import { fetch } from '@tauri-apps/plugin-http'
-import axios from 'axios'
-import { getServerConfig } from '@/config/server-config'
-import { useConfigStore } from '@/stores/config'
 
 /**
  * 获取轻小说主页数据
@@ -174,4 +171,5 @@ export {
   searchBooks,
   collectBook,
   getBookThemes,
+  getBookChapterContent
 }

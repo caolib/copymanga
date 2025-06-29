@@ -173,7 +173,7 @@ export function useMangaDetail() {
       .then(async (res) => {
         // 处理章节数据，转换为与旧API相同的格式
         const chapterList = res.results.list || []
-        chapters.value = chapterList.map((chapter, index) => ({
+        chapters.value = chapterList.map((chapter) => ({
           id: chapter.uuid,
           uuid: chapter.uuid, // 保留 uuid 字段用于下载检查
           name: chapter.name,
@@ -391,17 +391,17 @@ export function useMangaDetail() {
         // 传递当前页面的漫画详情信息用于保存到本地
         mangaDetail: manga.value
           ? {
-              uuid: manga.value.uuid,
-              name: manga.value.name,
-              cover: manga.value.cover || '',
-              author: manga.value.author ? manga.value.author.map((a) => a.name || a) : [],
-              theme: manga.value.theme ? manga.value.theme.map((t) => t.name || t) : [],
-              status: manga.value.status?.display || null,
-              popular: manga.value.popular || null,
-              brief: manga.value.brief || null,
-              datetime_updated: manga.value.datetime_updated || null,
-              path_word: route.params.pathWord, // 添加当前的path_word
-            }
+            uuid: manga.value.uuid,
+            name: manga.value.name,
+            cover: manga.value.cover || '',
+            author: manga.value.author ? manga.value.author.map((a) => a.name || a) : [],
+            theme: manga.value.theme ? manga.value.theme.map((t) => t.name || t) : [],
+            status: manga.value.status?.display || null,
+            popular: manga.value.popular || null,
+            brief: manga.value.brief || null,
+            datetime_updated: manga.value.datetime_updated || null,
+            path_word: route.params.pathWord, // 添加当前的path_word
+          }
           : null,
       }
 

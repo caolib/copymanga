@@ -652,7 +652,7 @@ const fetchChapterImages = async () => {
         name: comicData.name,
         pathWord: route.params.pathWord,
         uuid: comicData.uuid,
-        ...(mangaStore.currentManga || {}),
+        ...mangaStore.currentManga,
       })
 
       // 更新章节索引

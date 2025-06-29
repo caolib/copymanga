@@ -23,24 +23,11 @@
 
     <!-- 轻小说列表 -->
     <a-row v-else :gutter="[20, 20]">
-      <a-col
-        v-for="item in bookList"
-        :key="item.uuid"
-        :xs="24"
-        :sm="12"
-        :md="8"
-        :lg="6"
-        :xl="6"
-        :xxl="4"
-      >
+      <a-col v-for="item in bookList" :key="item.uuid" :xs="24" :sm="12" :md="8" :lg="6" :xl="6" :xxl="4">
         <a-card hoverable class="book-card" @click="goToBook(item)">
           <div class="book-cover-container">
-            <img
-              :src="item.book.cover"
-              :alt="item.book.name"
-              class="book-cover"
-              @error="$event.target.src = '/logo.png'"
-            />
+            <img :src="item.book.cover" :alt="item.book.name" class="book-cover"
+              @error="$event.target.src = '/logo.png'" />
             <!-- 阅读进度 -->
             <div v-if="item.last_browse" class="reading-progress">
               <a-tag color="blue" size="small">
@@ -68,16 +55,10 @@
 
     <!-- 分页 -->
     <div v-if="totalCount > pageSize" class="pagination-container">
-      <a-pagination
-        v-model:current="currentPage"
-        v-model:page-size="pageSize"
-        :total="totalCount"
-        :show-size-changer="true"
-        :show-quick-jumper="true"
-        :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 本轻小说`"
-        @change="handlePageChange"
-        @show-size-change="handlePageSizeChange"
-      />
+      <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="totalCount"
+        :show-size-changer="true" :show-quick-jumper="true"
+        :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 本轻小说`" @change="handlePageChange"
+        @show-size-change="handlePageSizeChange" />
     </div>
   </div>
 </template>
@@ -93,12 +74,6 @@ const router = useRouter()
 
 const bookCollectionStore = useBookCollectionStore()
 
-const props = defineProps({
-  loading: {
-    type: Boolean,
-    default: false,
-  },
-})
 
 const emit = defineEmits(['update-count', 'update-time'])
 

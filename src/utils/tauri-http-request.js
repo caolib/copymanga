@@ -54,7 +54,7 @@ class TauriHttpClient {
 
                 // 获取API域名
                 apiDomain = await getCurrentApiSource()
-                console.log('转换代理URL为API源URL，当前API域名:', apiDomain)
+                // console.log('转换代理URL为API源URL，当前API域名:', apiDomain)
 
                 if (!apiDomain) {
                     throw new Error('未配置API域名')
@@ -62,13 +62,13 @@ class TauriHttpClient {
 
                 // 构建最终URL
                 finalUrl = `${apiDomain}${actualPath}`
-                console.log('转换后的URL:', finalUrl)
+                // console.log('转换后的URL:', finalUrl)
             }
             // 如果URL不包含http，则需要添加API域名
             else if (!url.startsWith('http')) {
                 // 获取API域名
                 apiDomain = await getCurrentApiSource()
-                console.log('当前API域名:', apiDomain)
+                // console.log('当前API域名:', apiDomain)
 
                 if (!apiDomain) {
                     throw new Error('未配置API域名')
@@ -110,7 +110,7 @@ class TauriHttpClient {
                 finalUrl = urlObj.toString()
             }
 
-            console.log(`[Tauri HTTP] ${method} ${finalUrl}`)
+            // console.log(`[Tauri HTTP] ${method} ${finalUrl}`)
 
             // 发送请求
             const response = await fetch(finalUrl, {

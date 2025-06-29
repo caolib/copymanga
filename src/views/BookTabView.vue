@@ -16,5 +16,7 @@ import { ref } from 'vue'
 import BookHomeView from './BookHomeView.vue'
 import BookSearchTab from '@/components/BookSearchTab.vue'
 
+const a = ref(1)
+
 const activeTab = ref('home')
 </script>

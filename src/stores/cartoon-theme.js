@@ -41,13 +41,13 @@ defineStore('cartoonTheme', {
           const responseData = response.data || response
 
           if (responseData && responseData.results && responseData.results.list) {
-            this.themes = filteredThemes
+            this.themes = responseData.results.list
             this.lastUpdateTime = Date.now()
 
             return {
               success: true,
               fromCache: false,
-              data: filteredThemes,
+              data: responseData.results.list,
             }
           } else {
             throw new Error('主题响应数据格式不正确')
