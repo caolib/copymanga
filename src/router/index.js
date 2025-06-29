@@ -128,11 +128,6 @@ const routes = [
         name: 'PostReader',
         component: () => import('../views/PostReaderView.vue'),
         meta: { requiresAuth: true }
-    },
-    {
-        path: '/test/http',
-        name: 'TauriHttpTest',
-        component: () => import('../views/TauriHttpTestView.vue')
     }
 ]
 

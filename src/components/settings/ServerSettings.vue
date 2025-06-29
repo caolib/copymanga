@@ -654,7 +654,7 @@ const fetchRemoteHeaders = async () => {
       }
     })
     .catch((err) => {
-      message.error('获取远程配置失败')
+      message.error('获取失败，请保证能正常访问github')
       console.error('获取远程headers.json失败:', err)
     })
     .finally(() => {

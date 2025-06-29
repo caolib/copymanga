@@ -7,9 +7,6 @@
           :icon="h(ReloadOutlined)" :loading="loading" size="small" style="margin-right: 10px;">
           刷新
         </a-button>
-        <a-button type="default" @click="goToHttpTest" size="small" style="margin-right: 10px;">
-          HTTP测试
-        </a-button>
         <span v-if="lastUpdateTime" class="update-time">
           {{ formatDate(lastUpdateTime) }}
         </span>
@@ -77,10 +74,6 @@ const lastUpdateTime = computed(() => {
   return null
 })
 
-// 导航到HTTP测试页面
-const goToHttpTest = () => {
-  router.push('/test/http')
-}
 
 // 刷新当前激活tab的数据
 const refreshCurrentData = () => {

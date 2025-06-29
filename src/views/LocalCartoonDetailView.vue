@@ -16,24 +16,15 @@
 
         <a-row :gutter="32">
           <a-col :xs="24" :sm="8">
-            <a-image
-              :src="cartoon.cover || '/logo.png'"
-              :alt="cartoon.name"
-              width="100%"
-              height="350px"
-              style="border-radius: 8px; object-fit: cover"
-            >
+            <a-image :src="cartoon.cover || '/logo.png'" :alt="cartoon.name" width="100%" height="350px"
+              style="border-radius: 8px; object-fit: cover">
             </a-image>
           </a-col>
           <a-col :xs="24" :sm="16">
-            <a-typography-title
-              :level="2"
-              :style="{
-                cursor: cartoon.path_word ? 'pointer' : 'default',
-                color: cartoon.path_word ? '#1890ff' : 'inherit',
-              }"
-              @click="goToOnlineDetail"
-            >
+            <a-typography-title :level="2" :style="{
+              cursor: cartoon.path_word ? 'pointer' : 'default',
+              color: cartoon.path_word ? '#1890ff' : 'inherit',
+            }" @click="goToOnlineDetail">
               {{ cartoon.name || '本地动画' }}
             </a-typography-title>
             <a-descriptions :column="1" size="small" bordered>
@@ -78,12 +69,7 @@
             </a-button>
 
             <!-- 刷新按钮 -->
-            <a-button
-              @click="loadCartoonData"
-              :loading="chaptersLoading"
-              :icon="h(ReloadOutlined)"
-              size="small"
-            >
+            <a-button @click="loadCartoonData" :loading="chaptersLoading" :icon="h(ReloadOutlined)" size="small">
               刷新
             </a-button>
 
@@ -93,14 +79,8 @@
             </a-button>
 
             <!-- 批量删除按钮 -->
-            <a-popconfirm
-              title="批量删除确认"
-              :description="`此操作将删除 ${chapters.length} 个章节，确定？`"
-              ok-text="确认删除"
-              cancel-text="取消"
-              ok-type="danger"
-              @confirm="deleteAllChapters"
-            >
+            <a-popconfirm title="批量删除确认" :description="`此操作将删除 ${chapters.length} 个章节，确定？`" ok-text="确认删除"
+              cancel-text="取消" ok-type="danger" @confirm="deleteAllChapters">
               <a-button danger size="small" :icon="h(DeleteOutlined)"> 批量删除 </a-button>
             </a-popconfirm>
           </a-space>
@@ -118,15 +98,8 @@
         </div>
         <div v-else class="chapters-grid">
           <a-row :gutter="[12, 12]">
-            <a-col
-              :xs="12"
-              :sm="8"
-              :md="6"
-              :lg="4"
-              :xl="3"
-              v-for="chapter in displayChapters"
-              :key="chapter.chapter_uuid"
-            >
+            <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in displayChapters"
+              :key="chapter.chapter_uuid">
               <a-card size="small" :hoverable="true" class="chapter-card">
                 <template #title>
                   <div class="chapter-title" :title="chapter.chapter_name">
@@ -137,22 +110,12 @@
                   <div class="file-size">大小: {{ formatFileSize(chapter.file_size) }}</div>
                   <div class="download-time">下载: {{ formatDate(chapter.download_time) }}</div>
                   <div class="chapter-actions">
-                    <a-button
-                      type="primary"
-                      size="small"
-                      @click="openVideoDirectory(chapter)"
-                      :icon="h(FolderOpenOutlined)"
-                    >
+                    <a-button type="primary" size="small" @click="openVideoDirectory(chapter)"
+                      :icon="h(FolderOpenOutlined)">
                       打开目录
                     </a-button>
-                    <a-popconfirm
-                      title="确认删除"
-                      :description="`确定要删除章节 '${chapter.chapter_name}' 吗？删除后无法恢复。`"
-                      ok-text="确认删除"
-                      cancel-text="取消"
-                      ok-type="danger"
-                      @confirm="deleteChapter(chapter)"
-                    >
+                    <a-popconfirm title="确认删除" :description="`确定要删除章节 '${chapter.chapter_name}' 吗？删除后无法恢复。`"
+                      ok-text="确认删除" cancel-text="取消" ok-type="danger" @confirm="deleteChapter(chapter)">
                       <a-button size="small" danger :icon="h(DeleteOutlined)"> 删除 </a-button>
                     </a-popconfirm>
                   </div>
@@ -315,7 +278,7 @@ const deleteAllChapters = async () => {
     // 延迟返回下载中心
     setTimeout(() => {
       goBack()
-    }, 1000)
+    }, 500)
   } catch (error) {
     message.destroy() // 关闭loading消息
     console.error('删除动画失败:', error)

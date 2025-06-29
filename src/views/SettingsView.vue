@@ -64,21 +64,21 @@ const appStore = useAppStore()
 const hasUpdate = computed(() => appStore.hasUpdate)
 
 // 首次加载时自动刷新
-onMounted(() => {
-    const hasRefreshed = sessionStorage.getItem('settings-page-refreshed')
+// onMounted(() => {
+//     const hasRefreshed = sessionStorage.getItem('settings-page-refreshed')
 
-    if (!hasRefreshed) {
-        // console.log('设置页面首次加载，准备刷新...')
-        // 标记已经刷新过
-        sessionStorage.setItem('settings-page-refreshed', 'true')
+//     if (!hasRefreshed) {
+//         // console.log('设置页面首次加载，准备刷新...')
+//         // 标记已经刷新过
+//         sessionStorage.setItem('settings-page-refreshed', 'true')
 
-        // 延迟一点再刷新，确保页面完全加载
-        setTimeout(() => {
-            console.log('执行页面刷新')
-            window.location.reload()
-        }, 500)
-    }
-})
+//         // 延迟一点再刷新，确保页面完全加载
+//         setTimeout(() => {
+//             console.log('执行页面刷新')
+//             window.location.reload()
+//         }, 500)
+//     }
+// })
 </script>
 
 <style src="../assets/styles/settings.scss" scoped></style>

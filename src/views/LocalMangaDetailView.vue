@@ -443,7 +443,7 @@ const deleteAllChapters = async () => {
     // 延迟返回下载中心
     setTimeout(() => {
       goBack()
-    }, 1000)
+    }, 500)
   } catch (error) {
     message.destroy() // 关闭loading消息
     console.error('删除漫画失败:', error)

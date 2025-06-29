@@ -25,7 +25,7 @@
                         <a-avatar :src="getAvatarUrl(account.userInfo?.avatar)" size="small" />
                         <span class="account-name">{{
                           account.userInfo?.nickname || account.username
-                          }}</span>
+                        }}</span>
                       </div>
                     </a-menu-item>
                   </a-menu-item-group>
@@ -57,7 +57,6 @@
           <StarFilled class="nav-icon collection-icon" />书架
         </router-link>
         <router-link to="/downloads" class="nav-link">下载</router-link>
-        <router-link to="/test/http" class="nav-link">HTTP测试</router-link>
         <router-link to="/settings" class="nav-link settings-link">
           <SettingFilled class="nav-icon" />
           <span v-if="hasUpdate" class="nav-update-indicator"></span>
