@@ -1,20 +1,20 @@
 ## Change
 
-### feat
-- [79b364a] ✨ feat: 可以添加自定义css样式
-- [1928647] ✨ feat: 可以从github获取请求头配置
-- [ec0d184] ✨ feat: 首页添加官方公告
-- [579acc5] ✨ feat: 现在可以快速修改请求头版本号为官方最新
-
 ### fix
-- [b791b72] 🐛 fix: 去除漫画图片所有阴影
-- [9258e97] 🐛 fix: 修改默认配置文件
-- [eca1c7e] 🐛 fix: 修复一些警告，删除未使用代码
+- [2fcac0f] 🐛 fix: 更新默认请求头
+- [4bb7b16] 🐛 fix: 修复漫画章节卡片下载等按钮点击后进入阅读漫画的错误
+- [a9c889b] 🐛 fix: 删除测试界面等
+- [5fa4f4d] 🐛 fix: 删除顶部重启提示
+- [3833747] 🐛 fix: 修复跳转逻辑
+- [ad2bf15] 🐛 fix: 修复eslint不生效问题
+- [980d9c0] 🐛 fix: 删除各种未使用代码
 
 ### others
-- [fcb49d0] 📄 docs: 添加了一个请求头配置文件
-- [c00f0b4] 🦄 refactor: 优化代码格式，删除未使用代码
+- [268428c] 🌈 style: 添加鼠标点击效果
+- [40d771e] 🌈 style: 用户名输入框下拉列表添加头像，便于区分多
+- [4781944] 🦄 refactor: 重构请求工具，引入tauri插件http，代替原有axios工具
+- [83fe87e] 🌈 style: 优化界面显示，修复背景色异常
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v1.1.0...v1.1.1)
+📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v1.1.1...v1.2.0-beta)
 
