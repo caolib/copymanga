@@ -1,28 +1,58 @@
-import { defineConfig, globalIgnores } from 'eslint/config'
-import globals from 'globals'
-import js from '@eslint/js'
-import pluginVue from 'eslint-plugin-vue'
-import pluginOxlint from 'eslint-plugin-oxlint'
-import skipFormatting from '@vue/eslint-config-prettier/skip-formatting'
+import js from "@eslint/js";
+import globals from "globals";
+import pluginVue from "eslint-plugin-vue";
+import css from "@eslint/css";
+import { defineConfig } from "eslint/config";
+import vueEslintParser from "vue-eslint-parser";
+import babelEslintParser from "@babel/eslint-parser";
 
 export default defineConfig([
+  // 忽略特定文件
   {
-    name: 'app/files-to-lint',
-    files: ['**/*.{js,mjs,jsx,vue}'],
+    ignores: [
+      "src/assets/scripts/anime.min.js",
+      "src/assets/scripts/fireworks.js"
+    ]
   },
 
-  globalIgnores(['**/dist/**', '**/dist-ssr/**', '**/coverage/**']),
+  // JS 配置
+  { files: ["**/*.{js,mjs,cjs}"], plugins: { js }, extends: ["js/recommended"] },
+  { files: ["**/*.{js,mjs,cjs}"], languageOptions: { globals: globals.browser } },
 
+  // Vue 推荐规则（必须单独作为一个对象）
+  ...pluginVue.configs["flat/recommended"],
+
+  // Vue 文件的 parser 配置，并关闭风格类规则
   {
+    files: ["**/*.vue"],
     languageOptions: {
-      globals: {
-        ...globals.browser,
-      },
+      parser: vueEslintParser,
+      parserOptions: {
+        parser: babelEslintParser,
+        ecmaVersion: 2022,
+        sourceType: "module",
+        requireConfigFile: false
+      }
     },
+    plugins: { vue: pluginVue },
+    rules: {
+      // 关闭所有风格类规则
+      "vue/html-indent": "off",
+      "vue/max-attributes-per-line": "off",
+      "vue/singleline-html-element-content-newline": "off",
+      "vue/multiline-html-element-content-newline": "off",
+      "vue/html-closing-bracket-newline": "off",
+      "vue/html-closing-bracket-spacing": "off",
+      "vue/first-attribute-linebreak": "off",
+      "vue/attribute-hyphenation": "off",
+      "vue/html-self-closing": "off",
+      "vue/prop-name-casing": "off",
+      "vue/attributes-order": "off",
+      "vue/order-in-components": "off",
+      "vue/this-in-template": "off"
+    }
   },
 
-  js.configs.recommended,
-  ...pluginVue.configs['flat/essential'],
-  pluginOxlint.configs.recommended,
-  skipFormatting,
-])
+  // CSS 配置
+  { files: ["**/*.css"], plugins: { css }, language: "css/css", extends: ["css/recommended"] },
+]);
