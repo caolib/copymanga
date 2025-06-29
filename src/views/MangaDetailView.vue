@@ -138,7 +138,7 @@
                     </template>
 
                     <!-- 下载章节控制按钮 -->
-                    <a-button @click="toggleDownloadControls" size="small">
+                    <a-button @click="toggleDownloadControls" style="cursor: pointer;" size="small">
                         {{ showDownloadControls ? '隐藏下载' : '下载章节' }}
                     </a-button>
 
@@ -205,19 +205,19 @@
                                 <!-- 下载按钮 -->
                                 <a-button
                                     v-if="!chapterDownloadStatus[chapter.id] || chapterDownloadStatus[chapter.id] === 'error'"
-                                    type="primary" size="small" @click="downloadChapter(chapter)"
+                                    type="primary" size="small" @click.stop="downloadChapter(chapter)"
                                     :icon="h(DownloadOutlined)">
                                 </a-button>
 
                                 <!-- 继续下载按钮（部分下载） -->
                                 <a-button v-if="chapterDownloadStatus[chapter.id] === 'partial'" type="primary"
-                                    size="small" @click="resumeDownload(chapter)" :icon="h(PlayCircleOutlined)"
+                                    size="small" @click.stop="resumeDownload(chapter)" :icon="h(PlayCircleOutlined)"
                                     title="继续下载">
                                 </a-button>
 
                                 <!-- 暂停下载按钮 -->
                                 <a-button v-if="chapterDownloadStatus[chapter.id] === 'downloading'" size="small"
-                                    @click="pauseDownload(chapter)" :icon="h(PauseCircleOutlined)" title="暂停下载">
+                                    @click.stop="pauseDownload(chapter)" :icon="h(PauseCircleOutlined)" title="暂停下载">
                                 </a-button>
 
                                 <!-- 暂停中显示（禁用状态） -->
@@ -228,13 +228,13 @@
 
                                 <!-- 继续下载按钮（暂停状态） -->
                                 <a-button v-if="chapterDownloadStatus[chapter.id] === 'paused'" type="primary"
-                                    size="small" @click="resumeDownload(chapter)" :icon="h(PlayCircleOutlined)"
+                                    size="small" @click.stop="resumeDownload(chapter)" :icon="h(PlayCircleOutlined)"
                                     title="继续下载">
                                 </a-button>
 
                                 <!-- 已下载章节的删除按钮 -->
                                 <a-button v-if="shouldShowDeleteButton(chapter.id)" size="small" danger
-                                    @click="deleteChapter(chapter)" :title="'删除章节'" :icon="h(DeleteOutlined)">
+                                    @click.stop="deleteChapter(chapter)" :title="'删除章节'" :icon="h(DeleteOutlined)">
                                 </a-button>
                             </div>
 
