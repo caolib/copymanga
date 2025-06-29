@@ -6,7 +6,6 @@ import { useThemeStore } from './stores/theme'
 import TitleBar from './components/TitleBar.vue'
 import { theme } from 'ant-design-vue'
 import { checkUpdateOnStartup } from './utils/auto-update'
-import { restartApp } from './utils/restart-helper'
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -85,9 +84,6 @@ watchEffect(() => {
   showHeader.value = !isReaderRoute.value
 })
 
-// 重启应用
-const handleRestart = restartApp
-
 // 刷新当前路由
 const refreshCurrentRoute = () => {
   routerKey.value += 1
@@ -116,18 +112,6 @@ onMounted(async () => {
       <!-- 自定义标题栏 -->
       <TitleBar v-show="showHeader" />
 
-      <!-- 重启提示横幅 -->
-      <div v-if="appStore.needsRestart" class="restart-banner">
-        <a-alert type="warning" show-icon closable @close="appStore.setNeedsRestart(false)">
-          <template #description>
-            <div style="display: flex; justify-content: space-between; align-items: center">
-              <span>服务器配置已更新，请重启应用以使更改生效。</span>
-              <a-button type="primary" @click="handleRestart"> 立即重启 </a-button>
-            </div>
-          </template>
-        </a-alert>
-      </div>
-
       <main class="main-content">
         <!-- 内容包装器 -->
         <div class="content-wrapper">
@@ -137,14 +121,8 @@ onMounted(async () => {
       </main>
 
       <!-- 免责声明弹窗 -->
-      <a-modal
-        v-model:open="showDisclaimer"
-        title="重要声明"
-        :closable="false"
-        :maskClosable="false"
-        width="600px"
-        centered
-      >
+      <a-modal v-model:open="showDisclaimer" title="重要声明" :closable="false" :maskClosable="false" width="600px"
+        centered>
         <div class="disclaimer-content">
           <div class="warning-header">
             <div class="warning-icon">⚠️</div>

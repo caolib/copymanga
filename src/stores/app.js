@@ -2,7 +2,6 @@ import { defineStore } from 'pinia'
 
 export const useAppStore = defineStore('app', {
   state: () => ({
-    needsRestart: false,
     disclaimerAccepted: false,
     autoCheckUpdate: true, // 默认启用自动检查更新
     hasUpdate: false, // 是否有可用更新
@@ -11,9 +10,6 @@ export const useAppStore = defineStore('app', {
   }),
 
   actions: {
-    setNeedsRestart(value) {
-      this.needsRestart = value
-    },
     setDisclaimerAccepted(value) {
       this.disclaimerAccepted = value
     },

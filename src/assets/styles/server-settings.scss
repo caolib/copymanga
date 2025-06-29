@@ -1,6 +1,10 @@
 @use "./variables" as *;
 @use "sass:color";
 
+.setting-card-collapse {
+    margin-bottom: 16px;
+}
+
 .help-text {
     color: $text-tertiary;
     font-size: $font-xs;

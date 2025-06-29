@@ -389,8 +389,6 @@ const loadConfig = () => {
 const handleRestart = async () => {
   restarting.value = true
 
-  appStore.setNeedsRestart(false)
-
   await restartApp().catch((error) => {
     console.error('重启应用失败:', error)
     message.error('重启应用失败')
@@ -404,8 +402,7 @@ const onApiSourceChange = async (index) => {
     const source = await switchApiSource(index)
     currentApiDomain.value = source
     appForm.value.apiDomain = source
-    appStore.setNeedsRestart(true)
-    message.success(`已切换到: ${source}`)
+    message.success(`已切换到: ${source}，如果没有生效请重启再尝试`)
   } catch (error) {
     message.error(error.message || '切换API源失败')
     // 切换失败时恢复原值
@@ -457,8 +454,7 @@ const onBookApiSourceChange = async (index) => {
   try {
     const source = await switchBookApiSource(index)
     currentBookApiDomain.value = source
-    appStore.setNeedsRestart(true)
-    message.success(`已切换轻小说API源到: ${source}`)
+    message.success(`已切换轻小说API源到: ${source}，如果没有生效请重启再尝试`)
   } catch (error) {
     message.error(error.message || '切换轻小说API源失败')
     // 切换失败时恢复原值
@@ -573,8 +569,7 @@ const saveAllHeaders = async () => {
     })
 
     await saveRequestHeaders(headersObject)
-    message.success('请求头配置保存成功！')
-    appStore.setNeedsRestart(true)
+    message.success('请求头配置保存成功！如果没有生效请重启再尝试')
   } catch (error) {
     message.error(error.message || '保存请求头配置失败')
   } finally {
@@ -591,8 +586,7 @@ const resetHeaders = async () => {
       value,
     }))
     await saveRequestHeaders(defaultHeaders)
-    message.success('已恢复默认请求头配置')
-    appStore.setNeedsRestart(true)
+    message.success('已恢复默认请求头配置，如果没有生效请重启再尝试')
   } catch (error) {
     message.error('重置请求头配置失败')
   }
@@ -626,8 +620,7 @@ const importHeaders = async () => {
       // 自动保存导入的配置
       try {
         await saveRequestHeaders(importedData)
-        message.success('请求头配置已导入并保存')
-        appStore.setNeedsRestart(true)
+        message.success('请求头配置已导入并保存，如果没有生效请重启再尝试')
       } catch (saveError) {
         message.error('导入成功但保存失败，请手动保存配置')
         console.error('保存导入的配置失败:', saveError)
@@ -648,7 +641,7 @@ const fetchRemoteHeaders = async () => {
       if (headers && typeof headers === 'object' && Object.keys(headers).length > 0) {
         headersList.value = Object.entries(headers).map(([key, value]) => ({ key, value }))
         saveAllHeaders()
-        appStore.setNeedsRestart(true)
+        message.success('远程请求头配置已应用，如果没有生效请重启再尝试')
       } else {
         message.error('远程配置为空或格式不正确')
       }
@@ -720,14 +713,14 @@ const applyRemoteVersion = () => {
   }
 }
 
-// 新增: 折叠面板变化
+//  折叠面板变化
 const onCollapseChange = async (keys) => {
   if (keys.includes('official-sources') && officialApiSources.value.length === 0) {
     await fetchOfficialApiSources()
   }
 }
 
-// 新增: 获取官方API源
+//  获取官方API源
 const fetchOfficialApiSources = async () => {
   loadingOfficialSources.value = true
   try {
@@ -743,7 +736,7 @@ const fetchOfficialApiSources = async () => {
   }
 }
 
-// 新增: 快速添加API源
+//  快速添加API源
 const quickAddApiSource = async (url) => {
   // 检查是否已存在
   if (isApiSourceExist(url)) {
@@ -758,7 +751,7 @@ const quickAddApiSource = async (url) => {
   newApiSource.value.url = ''
 }
 
-// 新增: 检查API源是否存在
+//  检查API源是否存在
 const isApiSourceExist = (url) => {
   return apiSources.value.includes(url)
 }
@@ -773,8 +766,3 @@ onBeforeUnmount(() => {
 </script>
 
 <style src="../../assets/styles/server-settings.scss" lang="scss" scoped></style>
-<style lang="scss" scoped>
-.setting-card-collapse {
-  margin-bottom: 16px;
-}
-</style>
