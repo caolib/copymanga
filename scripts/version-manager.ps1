@@ -55,6 +55,8 @@ function Update-TauriConfig {
 function Invoke-PreparationAndVersionBumping {
     param([string]$VersionNumber)
     
+    # 只保留主版本号部分（如 1.2.3-beta -> 1.2.3）
+    $VersionNumber = $VersionNumber -replace '^([0-9]+\.[0-9]+\.[0-9]+).*', '$1'
     Write-Host "Phase 1: Preparation and Version Bumping" -ForegroundColor Magenta
     Update-CargoVersion -VersionNumber $VersionNumber
     Update-TauriConfig -VersionNumber $VersionNumber
