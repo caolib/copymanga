@@ -39,7 +39,7 @@ const externalLinks = {
     errorMsg: '打开反馈页面失败',
   },
   downloadPage: {
-    url: 'https://github.com/caolib/doki/releases/latest',
+    url: 'https://github.com/caolib/doki/releases',
     errorMsg: '打开下载页面失败',
   },
   // 其他相关链接
