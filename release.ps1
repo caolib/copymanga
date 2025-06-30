@@ -175,7 +175,7 @@ try {
             # 执行完整流程
             Invoke-PreparationAndVersionBumping -VersionNumber $VersionNumber
             Invoke-ReleaseInformationGeneration -Version $Version
-            Write-Host "\n请在编辑器中审查并修改 docs/RELEASE.md 发布信息，确认无误后按回车继续..." -ForegroundColor Yellow
+            Write-Host "请审查 docs/RELEASE.md 发布信息，修改后按回车继续..." -ForegroundColor Yellow
             Read-Host | Out-Null
             Invoke-CommitChanges -Version $Version
             Invoke-PushCodeChanges

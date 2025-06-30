@@ -1,4 +1,3 @@
-# appveyor.yml
 version: 1.0.{build}
 
 # 构建环境
@@ -9,6 +8,14 @@ branches:
   only:
     - main
     - master
+
+# 跳过构建条件 - 如果提交消息不包含 "test:" 则跳过构建
+skip_commits:
+  message: /^(?!.*test:).*/
+
+# 或者使用以下方式 - 只有包含 "test:" 的提交才构建
+# only_commits:
+#   message: /test:/
 
 # 环境变量
 environment:
@@ -28,10 +35,10 @@ install:
         $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
         [Environment]::SetEnvironmentVariable("Path", $env:PATH, "Machine")
       }
-  
+
   # 刷新环境变量
   - refreshenv
-  
+
   # 安装 pnpm
   - ps: |
       if (!(Get-Command "pnpm" -ErrorAction SilentlyContinue)) {
@@ -40,7 +47,7 @@ install:
         $env:PNPM_HOME = "$env:USERPROFILE\.local\share\pnpm"
         $env:PATH = "$env:PNPM_HOME;$env:PATH"
       }
-  
+
   # 验证安装
   - rustc --version
   - cargo --version
@@ -65,11 +72,11 @@ artifacts:
   # Windows 安装包
   - path: 'src-tauri\target\release\bundle\msi\*.msi'
     name: msi-installer
-  
+
   # Windows 可执行文件
   - path: 'src-tauri\target\release\bundle\nsis\*.exe'
     name: exe-installer
-  
+
   # 备用：所有构建产物
   - path: 'src-tauri\target\release\bundle\**\*'
     name: all-bundles
@@ -86,4 +93,4 @@ on_failure:
 cache:
   - '%USERPROFILE%\.cargo\registry'
   - '%USERPROFILE%\.cargo\git'
-  - 'node_modules'
+  - "node_modules"
