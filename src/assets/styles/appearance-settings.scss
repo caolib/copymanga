@@ -1,7 +1,12 @@
 @use "./variables.scss" as *;
 
 .setting-card {
+    background-color: $bg-color;
     margin-bottom: 16px;
+
+    @include dark-theme {
+        background-color: $dark-card-bg;
+    }
 }
 
 .font-family-container {
@@ -12,20 +17,20 @@
         padding: 8px 12px;
         border-radius: $border-radius-small;
         background-color: $bg-color-light;
-        
+
         @include dark-theme {
             background-color: $dark-bg-secondary;
         }
-        
+
         .preview-label {
             color: $text-secondary;
             margin-right: 8px;
-            
+
             @include dark-theme {
                 color: $dark-text-secondary;
             }
         }
-        
+
         .preview-text {
             font-size: 16px;
         }

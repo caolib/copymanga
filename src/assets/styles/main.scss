@@ -5,6 +5,7 @@
 }
 
 *,
+pre,
 .ant-input,
 .ant-tag,
 .ant-typography {
@@ -35,7 +36,7 @@
     background-color: $success-color;
 }
 
-/* 全局滚动条样式 */    
+/* 全局滚动条样式 */
 * {
     scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
 
@@ -43,5 +44,3 @@
         scrollbar-color: rgb(255 255 255 / 10%) #ffffff00;
     }
 }
-
-

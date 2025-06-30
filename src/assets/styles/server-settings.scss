@@ -139,6 +139,7 @@
     border-radius: $border-radius-medium;
     box-shadow: $shadow-light;
     transition: $transition-normal;
+    background-color: $bg-color;
 
     @include dark-theme {
         background-color: $dark-card-bg;

@@ -15,17 +15,9 @@
             <div class="font-preview">
               <span class="preview-label">预览：</span>
               <span class="preview-text" :style="{ fontFamily: themeConfig.fontFamily }">
-                漫画 doki 0123456789
+                {{ themeConfig.fontFamily }}
               </span>
             </div>
-          </div>
-        </a-form-item>
-
-        <a-form-item label="暗色模式图片遮罩" v-if="themeConfig.isDarkMode">
-          <a-slider v-model:value="themeConfig.darkImageMask" class="slider" :min="0" :max="1" :step="0.1"
-            :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }" @change="onDarkImageMaskChange" />
-          <div style="margin-top: 8px; font-size: 12px; color: #666">
-            调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
           </div>
         </a-form-item>
 
@@ -44,6 +36,11 @@
 
     <!-- 阅读器设置 -->
     <a-card title="阅读器设置" class="setting-card">
+      <template #extra>
+        <a-alert type="info" show-icon style="width: fit-content;">
+          <template #message> 在漫画阅读界面设置更方便 </template>
+        </a-alert>
+      </template>
       <a-form layout="vertical">
         <a-form-item label="漫画布局">
           <a-radio-group v-model:value="uiConfig.layout" button-style="solid">
@@ -61,9 +58,18 @@
           <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="100" :step="10" class="slider"
             :marks="{ 50: '50%', 100: '100%' }" />
         </a-form-item>
+
         <a-form-item label="图片间距">
           <a-slider v-model:value="uiConfig.imageGap" :min="0" :max="30" :step="1" class="slider"
             :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
+        </a-form-item>
+
+        <a-form-item label="暗色模式图片遮罩" v-if="themeConfig.isDarkMode">
+          <a-slider v-model:value="themeConfig.darkImageMask" class="slider" :min="0" :max="1" :step="0.1"
+            :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }" @change="onDarkImageMaskChange" />
+          <div style="margin-top: 8px; font-size: 12px; color: #666">
+            调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
+          </div>
         </a-form-item>
 
         <a-form-item label="空白页位置">

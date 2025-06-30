@@ -125,7 +125,8 @@
                 <!-- 更新详情 -->
                 <div v-if="updateInfo.release && updateInfo.release.body" style="margin-top: 16px;">
                     <a-divider>更新内容</a-divider>
-                    <div v-html="formatChangeLog(updateInfo.release.body)" class="changelog-content">
+                    <div class="changelog-content">
+                        <pre>{{ formatChangeLog(updateInfo.release.body) }}</pre>
                     </div>
                     <div style="margin-top: 12px; text-align: right;">
                         <a-button type="link" size="small" @click="openChangelogUrl" style="padding: 0; height: auto;">
@@ -231,23 +232,33 @@ const openChangelogUrl = () => {
 const formatChangeLog = (body) => {
     if (!body) return ''
 
-    // 简单的markdown转换，只显示前50行
+    // 只显示前50行，并删除提交哈希和标题
     const lines = body.split('\n').slice(0, 50)
     return lines
         .map(line => {
-            if (line.startsWith('##')) {
-                return `<h3>${line.replace('##', '').trim()}</h3>`
+            // 删除提交哈希 [xxxxxx]
+            let processedLine = line.replace(/\[([0-9a-f]{6,})\]/g, '')
+
+            // 删除二三级标题 (## 和 ###)
+            if (processedLine.startsWith('##') || processedLine.startsWith('###')) {
+                return ''
             }
-            if (line.startsWith('- ')) {
-                return `<li>${line.replace('- ', '').trim()}</li>`
+
+            // 删除单独的破折号行
+            if (processedLine.trim() === '-' || processedLine.trim() === '---') {
+                return ''
             }
-            if (line.trim()) {
-                return `<p>${line.trim()}</p>`
-            }
-            return ''
+
+            // 删除条目开头的破折号
+            processedLine = processedLine.replace(/^- /, '')
+
+            // 转换链接格式 [文本](链接) 为文本
+            processedLine = processedLine.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
+
+            return processedLine
         })
-        .filter(line => line)
-        .join('')
+        .filter(line => line.trim()) // 过滤掉空行
+        .join('\n')
 }
 </script>
 

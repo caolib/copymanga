@@ -1,6 +1,11 @@
 <template>
   <div>
     <a-card title="API源配置" class="setting-card" id="api-config">
+      <template #extra>
+        <a-alert type="info" show-icon style="width: fit-content;">
+          <template #message> 建议使用默认第一个 </template>
+        </a-alert>
+      </template>
       <a-form layout="vertical">
         <!-- 当前API源选择 - 改为可输入的下拉菜单 -->
         <a-form-item>
@@ -63,6 +68,11 @@
 
     <!-- 请求头配置 -->
     <a-card title="请求头配置" class="setting-card" id="headers-config">
+      <template #extra>
+        <a-alert type="info" show-icon style="width: fit-content;">
+          <template #message> 出现破解警告时点击获取官方版本更新请求头 </template>
+        </a-alert>
+      </template>
       <a-form layout="vertical">
         <!-- 添加新请求头 -->
         <a-form-item label="添加新请求头">
@@ -148,11 +158,12 @@
 
     <!-- 轻小说API源配置 -->
     <a-card title="轻小说API源配置" class="setting-card" id="book-api-config">
-      <a-form layout="vertical">
-        <a-alert type="info" show-icon style="width: fit-content; margin-bottom: 10px">
-          <template #message> 官方目前好像就只有这一个源 </template>
+      <template #extra>
+        <a-alert type="info" show-icon style="width: fit-content;">
+          <template #message> 目前就这一个源 </template>
         </a-alert>
-
+      </template>
+      <a-form layout="vertical">
         <!-- 当前轻小说API源选择 -->
         <a-form-item>
           <a-row :gutter="16">

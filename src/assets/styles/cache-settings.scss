@@ -1,3 +1,5 @@
+@use "./variables.scss" as *;
+
 .cache-management {
     .cache-warning {
         color: #fa8c16;
@@ -10,10 +12,6 @@
 
     .cache-actions {
         margin-top: 16px;
-    }
-
-    .setting-card {
-        margin-bottom: 24px;
     }
 
     .ant-descriptions-item-label {
@@ -30,5 +28,14 @@
 
     .ant-form-item-label {
         font-weight: 500;
+    }
+}
+
+.setting-card {
+    background-color: $bg-color;
+    margin-bottom: 24px;
+
+    @include dark-theme {
+        background-color: $dark-card-bg;
     }
 }
