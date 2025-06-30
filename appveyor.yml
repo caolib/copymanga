@@ -1,0 +1,89 @@
+# appveyor.yml
+version: 1.0.{build}
+
+# 构建环境
+image: Visual Studio 2022
+
+# 只在这些分支构建
+branches:
+  only:
+    - main
+    - master
+
+# 环境变量
+environment:
+  RUST_BACKTRACE: 1
+
+# 克隆深度（加快克隆速度）
+clone_depth: 10
+
+# 安装阶段
+install:
+  # 安装 Rust
+  - ps: |
+      if (!(Get-Command "rustc" -ErrorAction SilentlyContinue)) {
+        Write-Host "Installing Rust..."
+        Invoke-WebRequest -Uri "https://win.rustup.rs/" -OutFile "rustup-init.exe"
+        .\rustup-init.exe -y --default-host x86_64-pc-windows-msvc --default-toolchain stable
+        $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+        [Environment]::SetEnvironmentVariable("Path", $env:PATH, "Machine")
+      }
+  
+  # 刷新环境变量
+  - refreshenv
+  
+  # 安装 pnpm
+  - ps: |
+      if (!(Get-Command "pnpm" -ErrorAction SilentlyContinue)) {
+        Write-Host "Installing pnpm..."
+        Invoke-WebRequest -Uri "https://get.pnpm.io/install.ps1" -UseBasicParsing | Invoke-Expression
+        $env:PNPM_HOME = "$env:USERPROFILE\.local\share\pnpm"
+        $env:PATH = "$env:PNPM_HOME;$env:PATH"
+      }
+  
+  # 验证安装
+  - rustc --version
+  - cargo --version
+  - pnpm --version
+
+# 构建前
+before_build:
+  # 安装前端依赖
+  - pnpm install --frozen-lockfile
+
+# 构建脚本
+build_script:
+  # 构建 Tauri 应用
+  - pnpm tauri build
+
+# 测试脚本（如果有的话）
+test_script:
+  - echo "Skipping tests for now"
+
+# 构建产物
+artifacts:
+  # Windows 安装包
+  - path: 'src-tauri\target\release\bundle\msi\*.msi'
+    name: msi-installer
+  
+  # Windows 可执行文件
+  - path: 'src-tauri\target\release\bundle\nsis\*.exe'
+    name: exe-installer
+  
+  # 备用：所有构建产物
+  - path: 'src-tauri\target\release\bundle\**\*'
+    name: all-bundles
+
+# 构建成功后的通知（可选）
+on_success:
+  - ps: Write-Host "Build completed successfully! 🎉"
+
+# 构建失败后的通知（可选）
+on_failure:
+  - ps: Write-Host "Build failed! 😞"
+
+# 缓存（可选，加速后续构建）
+cache:
+  - '%USERPROFILE%\.cargo\registry'
+  - '%USERPROFILE%\.cargo\git'
+  - 'node_modules'
