@@ -16,6 +16,7 @@ skip_commits:
 # 环境变量
 environment:
   RUST_BACKTRACE: 1
+  CI: true # 修复 Tauri CI 检测问题
 
 # 克隆深度（加快克隆速度）
 clone_depth: 10
@@ -60,6 +61,8 @@ before_build:
 
 # 构建脚本
 build_script:
+  # 设置正确的 CI 环境变量
+  - ps: $env:CI = "true"
   # 构建 Tauri 应用 - 只构建 Windows exe 安装包
   - pnpm tauri build --bundles nsis
 
