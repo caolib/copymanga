@@ -46,6 +46,7 @@ const handleResponse = (response) => {
 
 // 错误处理函数，保持与之前相同的逻辑
 const handleError = (error) => {
+    console.log(JSON.stringify(error))
     // 统一处理后端和网络异常
     let msg = '请求失败，请稍后重试'
 

@@ -230,8 +230,8 @@ const handleLogin = () => {
     console.log('正在尝试登录:', loginForm.username)
 
     login(loginForm.username, loginForm.password).then(result => {
-        console.log('登录响应:', result)
-        
+        // console.log('登录响应:', result)
+
         // 检查结果是否包含错误信息
         if (result.results && result.results.detail && result.results.detail.includes('Err')) {
             throw new Error(result.results.detail || '登录失败')
@@ -262,8 +262,11 @@ const handleLogin = () => {
             password: loginForm.password
         })
         message.success('登录成功')
-        const redirectPath = router.currentRoute.value.query.redirect || '/'
-        router.push(redirectPath)
+        if (autoLoginEnabled.value) {
+            router.back()
+        } else {
+            router.push('/')
+        }
     }).catch(error => {
         console.error('登录失败', error)
         errorMessage.value = error.message || '登录失败，请检查用户名和密码';
