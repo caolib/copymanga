@@ -3,24 +3,15 @@
     <a-card title="主题设置" class="setting-card">
       <a-form layout="vertical">
         <a-form-item label="主题模式">
-          <a-radio-group
-            v-model:value="themeConfig.isDarkMode"
-            button-style="solid"
-            @change="onThemeModeChange"
-          >
+          <a-radio-group v-model:value="themeConfig.isDarkMode" button-style="solid" @change="onThemeModeChange">
             <a-radio-button :value="false">浅色模式</a-radio-button>
             <a-radio-button :value="true">暗色模式</a-radio-button>
           </a-radio-group>
         </a-form-item>
         <a-form-item label="字体系列">
           <div class="font-family-container">
-            <a-textarea
-              v-model:value="themeConfig.fontFamily"
-              @change="onFontFamilyChange"
-              placeholder='请输入字体系列，如："微软雅黑", Arial, sans-serif'
-              :rows="2"
-              style="margin-bottom: 12px"
-            />
+            <a-textarea v-model:value="themeConfig.fontFamily" @change="onFontFamilyChange"
+              placeholder='请输入字体系列，如："微软雅黑", Arial, sans-serif' :rows="2" style="margin-bottom: 12px" />
             <div class="font-preview">
               <span class="preview-label">预览：</span>
               <span class="preview-text" :style="{ fontFamily: themeConfig.fontFamily }">
@@ -31,15 +22,8 @@
         </a-form-item>
 
         <a-form-item label="暗色模式图片遮罩" v-if="themeConfig.isDarkMode">
-          <a-slider
-            v-model:value="themeConfig.darkImageMask"
-            class="slider"
-            :min="0"
-            :max="1"
-            :step="0.1"
-            :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }"
-            @change="onDarkImageMaskChange"
-          />
+          <a-slider v-model:value="themeConfig.darkImageMask" class="slider" :min="0" :max="1" :step="0.1"
+            :marks="{ 0: '无遮罩', 0.3: '30%', 0.5: '50%', 1: '完全遮罩' }" @change="onDarkImageMaskChange" />
           <div style="margin-top: 8px; font-size: 12px; color: #666">
             调整暗色模式下图片遮罩的透明度，降低图片亮度以保护视力
           </div>
@@ -47,17 +31,11 @@
 
         <a-form-item label="自定义CSS样式">
           <div>
-            <a-space>
-              <a-button type="primary" @click="openCustomCssFile"> 编辑自定义样式 </a-button>
-              <a-switch
-                v-model:checked="showReloadButton"
-                checked-children="显示重载按钮"
-                un-checked-children="隐藏重载按钮"
-                @change="toggleReloadButton"
-              />
-            </a-space>
+            <a-button type="primary" @click="toggleCustomCssEditor">
+              {{ isEditingCss ? '完成编辑' : '编辑自定义样式' }}
+            </a-button>
             <div style="margin-top: 8px; font-size: 12px; color: #666">
-              编辑自定义CSS文件，保存后点击顶部重载按钮即可应用样式。
+              编辑自定义CSS文件，保存后点击顶部栏的重载样式按钮即可应用样式。
             </div>
           </div>
         </a-form-item>
@@ -75,35 +53,17 @@
         </a-form-item>
 
         <a-form-item label="每行列数">
-          <a-slider
-            v-model:value="uiConfig.columnsPerRow"
-            :min="1"
-            :max="4"
-            :step="1"
-            class="slider"
-            :marks="{ 1: '1列', 2: '2列', 3: '3列', 4: '4列' }"
-          />
+          <a-slider v-model:value="uiConfig.columnsPerRow" :min="1" :max="4" :step="1" class="slider"
+            :marks="{ 1: '1列', 2: '2列', 3: '3列', 4: '4列' }" />
         </a-form-item>
 
         <a-form-item label="图片大小">
-          <a-slider
-            v-model:value="uiConfig.imageSize"
-            :min="50"
-            :max="100"
-            :step="10"
-            class="slider"
-            :marks="{ 50: '50%', 100: '100%' }"
-          />
+          <a-slider v-model:value="uiConfig.imageSize" :min="50" :max="100" :step="10" class="slider"
+            :marks="{ 50: '50%', 100: '100%' }" />
         </a-form-item>
         <a-form-item label="图片间距">
-          <a-slider
-            v-model:value="uiConfig.imageGap"
-            :min="0"
-            :max="30"
-            :step="1"
-            class="slider"
-            :marks="{ 0: '0px', 10: '10px', 30: '30px' }"
-          />
+          <a-slider v-model:value="uiConfig.imageGap" :min="0" :max="30" :step="1" class="slider"
+            :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
         </a-form-item>
 
         <a-form-item label="空白页位置">
@@ -139,7 +99,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, h } from 'vue'
 import { message } from 'ant-design-vue'
 import {
   loadUIConfig,
@@ -150,9 +110,10 @@ import {
 import { useThemeStore } from '@/stores/theme'
 import { initTray, destroyTray } from '@/utils/tray'
 import { invoke } from '@tauri-apps/api/core'
+import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const themeStore = useThemeStore()
-const showReloadButton = ref(themeStore.showReloadCssButton)
+const isEditingCss = ref(false)
 
 // 主题配置
 const themeConfig = reactive({
@@ -254,24 +215,37 @@ const openCustomCssFile = async () => {
   try {
     await invoke('open_or_create_custom_css')
     message.success('已打开自定义CSS文件')
+    return true
   } catch (error) {
     console.error('打开自定义CSS文件失败:', error)
     message.error('打开自定义CSS文件失败')
+    return false
   }
 }
 
-// 切换顶部栏重载按钮显示状态
-const toggleReloadButton = (checked) => {
-  themeStore.setShowReloadCssButton(checked)
-  if (checked) {
-    message.success('已在顶部栏显示重载样式按钮')
+// 切换CSS编辑器状态
+const toggleCustomCssEditor = async () => {
+  if (isEditingCss.value) {
+    // 如果正在编辑，切换为完成编辑
+    isEditingCss.value = false
+    // 隐藏顶部重载按钮
+    themeStore.setShowReloadCssButton(false)
+    message.success('已完成编辑')
   } else {
-    message.info('已隐藏顶部栏重载样式按钮')
+    // 如果没有编辑，开始编辑
+    const success = await openCustomCssFile()
+    if (success) {
+      isEditingCss.value = true
+      // 显示顶部重载按钮
+      themeStore.setShowReloadCssButton(true)
+    }
   }
 }
 
 onMounted(() => {
   loadUISettings()
+  // 如果从其他页面回来，检查是否处于编辑状态
+  isEditingCss.value = themeStore.showReloadCssButton
 })
 </script>
 

@@ -3,26 +3,28 @@
     <a-card title="API源配置" class="setting-card" id="api-config">
       <a-form layout="vertical">
         <!-- 当前API源选择 - 改为可输入的下拉菜单 -->
-        <a-form-item label="API源管理">
-          <a-input-group compact>
-            <a-input v-model:value="newApiInput" placeholder="输入API源" style="width: auto; min-width: 250px"
-              @pressEnter="addNewApiSource" />
-            <a-button type="primary" @click="addNewApiSource" :loading="addingSource">
-              添加
-            </a-button>
-          </a-input-group>
-          <div style="margin-top: 8px">
-            <a-select v-model:value="currentApiIndex" style="width: auto; min-width: 250px" @change="onApiSourceChange"
-              placeholder="选择API源">
-              <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
-                {{ source }}
-                <a-button v-if="apiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
-                  style="margin-left: 8px" @click.stop="removeApiSource(index)"
-                  :loading="removingIndex === index"></a-button>
-              </a-select-option>
-            </a-select>
-            <div class="help-text">选择要使用的API源</div>
-          </div>
+        <a-form-item>
+          <a-row :gutter="16">
+            <a-col :span="8">
+              <a-select v-model:value="currentApiIndex" style="width: 100%;" @change="onApiSourceChange">
+                <a-select-option v-for="(source, index) in apiSources" :key="index" :value="index">
+                  {{ source }}
+                  <a-button v-if="apiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
+                    style="margin-left: 8px" @click.stop="removeApiSource(index)"
+                    :loading="removingIndex === index"></a-button>
+                </a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="16">
+              <a-input-group compact>
+                <a-input v-model:value="newApiInput" placeholder="输入API源" style="width: calc(100% - 80px);"
+                  @pressEnter="addNewApiSource" />
+                <a-button type="primary" @click="addNewApiSource" :loading="addingSource">
+                  添加
+                </a-button>
+              </a-input-group>
+            </a-col>
+          </a-row>
         </a-form-item>
 
         <!-- 官方API源 -->
@@ -152,26 +154,29 @@
         </a-alert>
 
         <!-- 当前轻小说API源选择 -->
-        <a-form-item label="轻小说API源管理">
-          <a-input-group compact>
-            <a-input v-model:value="newBookApiSource.url" placeholder="输入轻小说API源" style="width: auto; min-width: 250px"
-              @pressEnter="addNewBookApiSource" />
-            <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource">
-              添加
-            </a-button>
-          </a-input-group>
-          <div style="margin-top: 8px">
-            <a-select v-model:value="currentBookApiIndex" style="width: auto; min-width: 250px"
-              @change="onBookApiSourceChange" placeholder="选择轻小说API源">
-              <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
-                {{ source }}
-                <a-button v-if="bookApiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
-                  style="margin-left: 8px" @click.stop="removeBookApiSource(index)"
-                  :loading="removingBookIndex === index"></a-button>
-              </a-select-option>
-            </a-select>
-            <div class="help-text">选择要使用的轻小说API源</div>
-          </div>
+        <a-form-item>
+          <a-row :gutter="16">
+            <a-col :span="8">
+              <a-select v-model:value="currentBookApiIndex" style="width: 100%;" @change="onBookApiSourceChange"
+                placeholder="选择轻小说API源">
+                <a-select-option v-for="(source, index) in bookApiSources" :key="index" :value="index">
+                  {{ source }}
+                  <a-button v-if="bookApiSources.length > 1" type="text" danger size="small" :icon="h(DeleteOutlined)"
+                    style="margin-left: 8px" @click.stop="removeBookApiSource(index)"
+                    :loading="removingBookIndex === index"></a-button>
+                </a-select-option>
+              </a-select>
+            </a-col>
+            <a-col :span="16">
+              <a-input-group compact>
+                <a-input v-model:value="newBookApiSource.url" placeholder="输入轻小说API源" style="width: calc(100% - 80px);"
+                  @pressEnter="addNewBookApiSource" />
+                <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource">
+                  添加
+                </a-button>
+              </a-input-group>
+            </a-col>
+          </a-row>
         </a-form-item>
       </a-form>
     </a-card>

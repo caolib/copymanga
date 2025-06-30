@@ -25,7 +25,7 @@
                         <a-avatar :src="getAvatarUrl(account.userInfo?.avatar)" size="small" />
                         <span class="account-name">{{
                           account.userInfo?.nickname || account.username
-                        }}</span>
+                          }}</span>
                       </div>
                     </a-menu-item>
                   </a-menu-item-group>
@@ -70,7 +70,7 @@
         <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)">
         </a-button>
         <!-- 自定义CSS重载按钮 -->
-        <a-button v-if="themeStore.showReloadCssButton" type="text" class="nav-link reload-css-btn"
+        <a-button v-if="themeStore.showReloadCssButton" type="primary" class="nav-link reload-css-btn"
           @click="reloadCustomCss" :loading="reloadingCss" title="重新加载自定义样式" :icon="h(FormatPainterOutlined)">
         </a-button>
       </nav>
