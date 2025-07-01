@@ -2,16 +2,8 @@
   <div class="cartoon-search-tab">
     <!-- 搜索区域 -->
     <div class="search-section">
-      <a-input-search
-        v-model:value="searchKeyword"
-        placeholder="请输入动画名称..."
-        size="large"
-        enter-button
-        :loading="loading"
-        @search="handleSearch"
-        @pressEnter="handleSearch"
-        class="search-input"
-      />
+      <a-input-search v-model:value="searchKeyword" placeholder="请输入动画名称..." size="large" enter-button
+        :loading="loading" @search="handleSearch" @pressEnter="handleSearch" class="search-input" />
     </div>
 
     <!-- 搜索结果 -->
@@ -39,19 +31,11 @@
 
       <!-- 实际搜索结果 -->
       <div v-else-if="cartoons.length" class="cartoon-grid">
-        <div
-          v-for="cartoon in cartoons"
-          :key="cartoon.path_word"
-          class="cartoon-card"
-          @click="goToDetail(cartoon.path_word)"
-        >
+        <div v-for="cartoon in cartoons" :key="cartoon.path_word" class="cartoon-card"
+          @click="goToDetail(cartoon.path_word)">
           <div class="cartoon-cover">
-            <a-image
-              :src="cartoon.cover"
-              :alt="cartoon.name"
-              :preview="false"
-              style="width: 100%; height: 100%; object-fit: cover"
-            />
+            <a-image :src="cartoon.cover" :alt="cartoon.name" :preview="false"
+              style="width: 100%; height: 100%; object-fit: cover" />
             <div class="cartoon-year" v-if="cartoon.pub_year">{{ cartoon.pub_year }}年</div>
           </div>
           <div class="cartoon-info">
@@ -80,7 +64,7 @@
 
     <!-- 加载更多 -->
     <div class="load-more" v-if="cartoons.length && hasMore">
-      <a-button @click="loadMore" :loading="loadingMore" type="default" block> 加载更多 </a-button>
+      <a-button @mouseenter="loadMore" :loading="loadingMore" type="default" block> 加载更多 </a-button>
     </div>
 
     <!-- 无更多数据提示 -->

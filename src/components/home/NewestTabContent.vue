@@ -3,15 +3,8 @@
   <div>
     <!-- 全新上架漫画列表 -->
     <a-row :gutter="16">
-      <a-col
-        class="manga-col"
-        v-for="item in newestData.list || []"
-        :key="item.comic.path_word"
-        :xs="12"
-        :sm="8"
-        :md="6"
-        :lg="4"
-      >
+      <a-col class="manga-col" v-for="item in newestData.list || []" :key="item.comic.path_word" :xs="12" :sm="8"
+        :md="6" :lg="4">
         <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
           <img :src="item.comic.cover" :alt="item.comic.name" class="manga-cover" />
           <div class="manga-title">{{ item.comic.name }}</div>
@@ -26,14 +19,8 @@
 
     <!-- 加载更多区域 -->
     <div
-      v-if="
-        newestData.list &&
-        newestData.list.length > 0 &&
-        !(newestData.offset + newestData.limit >= newestData.total)
-      "
-      class="load-more-container"
-      @mouseenter="loadMoreNewest"
-    >
+      v-if="newestData.list && newestData.list.length > 0 && !(newestData.offset + newestData.limit >= newestData.total)"
+      class="load-more-container" @mouseenter="loadMoreNewest">
       <div class="load-more-text" :class="{ loading: homeStore.isNewestLoading }">
         {{ homeStore.isNewestLoading ? '加载中...' : '加载更多' }}
       </div>

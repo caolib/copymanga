@@ -84,8 +84,8 @@
                         <!-- 加载更多 -->
                         <div v-if="browseHistory.comics.hasMore && browseHistory.comics.list.length > 0"
                             class="load-more">
-                            <a-button type="primary" @click="loadMore('comics')" :loading="browseHistory.comics.loading"
-                                block>
+                            <a-button type="primary" @mouseenter="loadMore('comics')"
+                                :loading="browseHistory.comics.loading" block>
                                 加载更多
                             </a-button>
                         </div>
@@ -154,8 +154,8 @@
                         <!-- 加载更多 -->
                         <div v-if="browseHistory.books.hasMore && browseHistory.books.list.length > 0"
                             class="load-more">
-                            <a-button type="primary" @click="loadMore('books')" :loading="browseHistory.books.loading"
-                                block>
+                            <a-button type="primary" @mouseenter="loadMore('books')"
+                                :loading="browseHistory.books.loading" block>
                                 加载更多
                             </a-button>
                         </div>
@@ -224,8 +224,8 @@
                         <!-- 加载更多 -->
                         <div v-if="browseHistory.posts.hasMore && browseHistory.posts.list.length > 0"
                             class="load-more">
-                            <a-button type="primary" @click="loadMore('posts')" :loading="browseHistory.posts.loading"
-                                block>
+                            <a-button type="primary" @mouseenter="loadMore('posts')"
+                                :loading="browseHistory.posts.loading" block>
                                 加载更多
                             </a-button>
                         </div>
@@ -294,7 +294,7 @@
                         <!-- 加载更多 -->
                         <div v-if="browseHistory.cartoons.hasMore && browseHistory.cartoons.list.length > 0"
                             class="load-more">
-                            <a-button type="primary" @click="loadMore('cartoons')"
+                            <a-button type="primary" @mouseenter="loadMore('cartoons')"
                                 :loading="browseHistory.cartoons.loading" block>
                                 加载更多
                             </a-button>
