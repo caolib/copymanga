@@ -3,13 +3,18 @@
     <!-- Tab切换 -->
     <a-tabs v-model:activeKey="activeTab" @change="handleTabChange">
       <template #rightExtra>
-        <a-button v-if="activeTab !== 'ranking' && activeTab !== 'topics'" type="primary" @click="refreshCurrentData"
-          :icon="h(ReloadOutlined)" :loading="loading" size="small" style="margin-right: 10px;">
-          刷新
-        </a-button>
-        <span v-if="lastUpdateTime" class="update-time">
-          {{ formatDate(lastUpdateTime) }}
-        </span>
+        <div class="header-actions">
+          <!-- 搜索框 -->
+          <a-input-search v-model:value="searchKeyword" placeholder="输入漫画名进行搜索" enter-button="" @search="onSearch"
+            class="search-input" size="small" />
+          <a-button v-if="activeTab !== 'ranking' && activeTab !== 'topics'" type="primary" @click="refreshCurrentData"
+            :icon="h(ReloadOutlined)" :loading="loading" size="small">
+            刷新
+          </a-button>
+          <span v-if="lastUpdateTime" class="update-time">
+            {{ formatDate(lastUpdateTime) }}
+          </span>
+        </div>
       </template>
 
       <a-tab-pane key="home" tab="主页">
@@ -116,6 +121,21 @@ const handleTabChange = (key) => {
     // 专题使用主页数据，如果主页数据未加载，则加载主页数据
     homeStore.fetchHomeData()
   }
+}
+
+// 搜索相关
+const searchKeyword = ref('')
+
+// 处理搜索 - 跳转到搜索页面
+const onSearch = () => {
+  if (!searchKeyword.value.trim()) return
+
+  router.push({
+    name: 'Search',
+    query: {
+      q: searchKeyword.value,
+    },
+  })
 }
 
 // 监听activeTab变化

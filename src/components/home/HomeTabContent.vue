@@ -1,12 +1,6 @@
 <template>
   <!-- 主页标签页内容 -->
   <div>
-    <!-- 搜索框 -->
-    <div class="search-container">
-      <a-input-search v-model:value="searchKeyword" placeholder="输入漫画名进行搜索" enter-button="" size="large"
-        @search="onSearch" class="search-input" />
-    </div>
-
     <!-- 排行榜 -->
     <a-row :gutter="20" style="margin-bottom: 20px">
       <a-col :xs="24" :md="8">
@@ -169,20 +163,7 @@ const router = useRouter()
 const homeStore = useHomeStore()
 const { goToMangaDetail } = useMangaNavigation()
 
-// 搜索相关
-const searchKeyword = ref('')
 
-// 处理搜索 - 跳转到搜索页面
-const onSearch = () => {
-  if (!searchKeyword.value.trim()) return
-
-  router.push({
-    name: 'Search',
-    query: {
-      q: searchKeyword.value,
-    },
-  })
-}
 
 // 主页数据
 const homeData = computed(() => homeStore.homeData)

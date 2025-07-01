@@ -6,7 +6,7 @@
         <template v-if="isLoggedInComputed">
           <a-dropdown trigger="hover" placement="bottomRight">
             <span class="user-avatar-dropdown">
-              <a-avatar :src="getAvatarUrl(userInfo?.avatar) || '/logo.png'"
+              <a-avatar :src="getAvatarUrl(userInfo?.avatar) || '/logo.png'" @click="goToProfile"
                 :alt="userInfo?.nickname || userInfo?.username || '用户头像'" size="32" />
             </span>
             <template #overlay>
@@ -25,7 +25,7 @@
                         <a-avatar :src="getAvatarUrl(account.userInfo?.avatar)" size="small" />
                         <span class="account-name">{{
                           account.userInfo?.nickname || account.username
-                          }}</span>
+                        }}</span>
                       </div>
                     </a-menu-item>
                   </a-menu-item-group>

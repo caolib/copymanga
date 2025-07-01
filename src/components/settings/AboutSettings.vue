@@ -124,7 +124,7 @@
 
                 <!-- 更新详情 -->
                 <div v-if="updateInfo.release && updateInfo.release.body" style="margin-top: 16px;">
-                    <a-divider>更新内容</a-divider>
+                    <a-divider>更新日志</a-divider>
                     <div class="changelog-content">
                         <pre>{{ formatChangeLog(updateInfo.release.body) }}</pre>
                     </div>
@@ -249,11 +249,13 @@ const formatChangeLog = (body) => {
                 return ''
             }
 
+            // 跳过包含"查看完整更新日志"的行
+            if (processedLine.includes('查看完整更新日志') || processedLine.includes('compare/')) {
+                return ''
+            }
+
             // 删除条目开头的破折号
             processedLine = processedLine.replace(/^- /, '')
-
-            // 转换链接格式 [文本](链接) 为文本
-            processedLine = processedLine.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1')
 
             return processedLine
         })

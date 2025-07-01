@@ -5,6 +5,37 @@
     margin: 0 auto;
 }
 
+// 新增的header-actions样式
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .search-input {
+        flex: 1;
+        max-width: 300px;
+    }
+
+    .ant-btn {
+        margin-top: 0;
+        margin-bottom: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .update-time {
+        display: flex;
+        align-items: center;
+        color: #999;
+        font-size: 12px;
+
+        @include dark-theme {
+            color: #bbb;
+        }
+    }
+}
+
 .search-header {
     display: flex;
     align-items: center;
@@ -66,7 +97,7 @@
     height: 100%;
     overflow: hidden;
     transition: transform 0.3s;
-    
+
     &:hover {
         transform: translateY(-5px);
     }
@@ -353,7 +384,7 @@
     margin: 20px 0;
     padding: 10px 0;
     cursor: pointer;
-    
+
     .load-more-text {
         display: inline-block;
         padding: 8px 16px;
@@ -361,16 +392,16 @@
         background-color: #f0f0f0;
         color: #666;
         transition: all 0.3s;
-        
+
         &:hover {
             background-color: #e0e0e0;
         }
-        
+
         &.loading {
             background-color: #e6f7ff;
             color: #1890ff;
         }
-        
+
         &.no-more {
             background-color: #f5f5f5;
             color: #999;
@@ -381,7 +412,7 @@
 
 .search-container {
     margin-bottom: 20px;
-    
+
     .search-input {
         width: 100%;
         max-width: 600px;
