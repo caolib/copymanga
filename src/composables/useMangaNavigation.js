@@ -7,7 +7,9 @@ import { useMangaStore } from '@/stores/manga'
  */
 export function useMangaNavigation() {
     const router = useRouter()
-    const mangaStore = useMangaStore()    /**
+    const mangaStore = useMangaStore()
+
+    /**
      * 跳转到漫画详情页
      * @param {Object} manga 漫画对象
      * @param {Object} options 跳转选项

@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
 import { isLoggedIn } from '../utils/auth'
 
 const routes = [
@@ -132,17 +132,8 @@ const routes = [
 ]
 
 const router = createRouter({
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes
-})
-
-// 路由守卫
-router.beforeEach((to, from, next) => {
-    if (to.meta.requiresAuth && !isLoggedIn()) {
-        next('/login')
-    } else {
-        next()
-    }
 })
 
 export default router
