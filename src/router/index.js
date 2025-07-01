@@ -1,5 +1,4 @@
-import { createRouter, createWebHistory, createWebHashHistory } from 'vue-router'
-import { isLoggedIn } from '../utils/auth'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 const routes = [
     {
