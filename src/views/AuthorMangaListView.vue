@@ -3,16 +3,7 @@
   <a-card class="author-manga-list-container" :bordered="false">
     <a-skeleton :loading="loading" active>
       <a-row :gutter="[16, 16]">
-        <a-col
-          v-for="manga in mangaList"
-          :key="manga.path_word"
-          :xs="12"
-          :sm="12"
-          :md="6"
-          :lg="6"
-          :xl="6"
-          :xxl="6"
-        >
+        <a-col v-for="manga in mangaList" :key="manga.path_word" :xs="12" :sm="12" :md="6" :lg="6" :xl="6" :xxl="6">
           <a-card hoverable @click="goToMangaDetail(manga.path_word)" class="manga-card">
             <template #cover>
               <img :src="manga.cover" :alt="manga.name" class="manga-cover" />
@@ -27,7 +18,7 @@
                 <div class="manga-meta">
                   <div class="popular">
                     <a-typography-text type="secondary">
-                      人气: {{ formatPopular(manga.popular) }}
+                      人气: {{ formatNumber(manga.popular) }}
                     </a-typography-text>
                   </div>
                   <div class="update-time">
@@ -43,15 +34,9 @@
       </a-row>
 
       <div v-if="total > 12" class="pagination-container">
-        <a-pagination
-          v-model:current="currentPage"
-          :total="total"
-          :page-size="pageSize"
-          :show-size-changer="false"
-          :show-quick-jumper="true"
-          :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`"
-          @change="handlePageChange"
-        />
+        <a-pagination v-model:current="currentPage" :total="total" :page-size="pageSize" :show-size-changer="false"
+          :show-quick-jumper="true" :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`"
+          @change="handlePageChange" />
       </div>
 
       <a-empty v-if="!loading && mangaList.length === 0" description="暂无作品" />
@@ -64,6 +49,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getAuthorMangaList } from '../api/manga'
+import { formatNumber } from '@/utils/number'
 
 const route = useRoute()
 const router = useRouter()
