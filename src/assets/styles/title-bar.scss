@@ -404,3 +404,62 @@
         opacity: 0.8;
     }
 }
+
+// 历史菜单样式
+.history-menu-item {
+    .history-item-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: $spacing-xs;
+        padding: 4px 0;
+        width: fit-content;
+        max-width: 700px;
+
+        .history-title {
+            font-size: $font-sm;
+            font-weight: 500;
+            color: $text-primary;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        .history-path {
+            font-size: $font-xs;
+            color: $text-secondary;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: right;
+            flex-shrink: 0;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+    }
+
+    &:hover .history-item-content {
+        .history-title {
+            color: $primary-color;
+
+            @include dark-theme {
+                color: $primary-color;
+            }
+        }
+
+        .history-path {
+            color: $text-primary;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+    }
+}

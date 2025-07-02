@@ -1,0 +1,64 @@
+@use "./variables" as *;
+
+// 全局 Ant Design Vue 组件样式覆盖
+
+// 下拉菜单毛玻璃效果
+.ant-dropdown {
+    .ant-dropdown-menu {
+        @include glassmorphism;
+        border-radius: $border-radius-medium;
+        padding: $spacing-sm;
+        min-width: 200px;
+
+        .ant-dropdown-menu-item {
+            border-radius: $border-radius-small;
+            transition: $transition-fast;
+            margin-bottom: 2px;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            &:hover {
+                @include glassmorphism-hover;
+            }
+        }
+    }
+}
+
+// 用户头像下拉菜单
+.ant-dropdown-menu {
+    .ant-dropdown-menu-item-group-title {
+        color: $text-secondary;
+        font-size: $font-xs;
+        padding: $spacing-xs $spacing-sm;
+
+        @include dark-theme {
+            color: $dark-text-secondary;
+        }
+    }
+
+    .ant-dropdown-menu-item-divider {
+        background-color: $border-color;
+        margin: $spacing-xs 0;
+
+        @include dark-theme {
+            background-color: $dark-border-color;
+        }
+    }
+}
+
+// 历史菜单专用样式
+.history-dropdown-menu {
+    .ant-dropdown-menu {
+        max-width: 400px;
+
+        .ant-dropdown-menu-item {
+            padding: $spacing-sm;
+
+            &:hover {
+                background-color: transparent;
+            }
+        }
+    }
+}

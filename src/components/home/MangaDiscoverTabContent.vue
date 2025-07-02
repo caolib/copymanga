@@ -5,20 +5,12 @@
       <div class="filter-group filter-row">
         <div class="filter-section">
           <div class="filter-buttons">
-            <a-button
-              :type="currentFilter.ordering === '-popular' ? 'primary' : 'default'"
-              size="small"
-              :icon="h(FireOutlined)"
-              @click="changeOrdering('-popular')"
-            >
+            <a-button :type="currentFilter.ordering === '-popular' ? 'primary' : 'default'" size="small"
+              :icon="h(FireOutlined)" @click="changeOrdering('-popular')">
               热度
             </a-button>
-            <a-button
-              :type="currentFilter.ordering === '-datetime_updated' ? 'primary' : 'default'"
-              size="small"
-              :icon="h(FieldTimeOutlined)"
-              @click="changeOrdering('-datetime_updated')"
-            >
+            <a-button :type="currentFilter.ordering === '-datetime_updated' ? 'primary' : 'default'" size="small"
+              :icon="h(FieldTimeOutlined)" @click="changeOrdering('-datetime_updated')">
               最新
             </a-button>
           </div>
@@ -26,20 +18,12 @@
 
         <div class="filter-section">
           <div class="filter-buttons">
-            <a-button
-              :type="currentFilter.top === '' ? 'primary' : 'default'"
-              size="small"
-              @click="changeTop('')"
-            >
+            <a-button :type="currentFilter.top === '' ? 'primary' : 'default'" size="small" @click="changeTop('')">
               全部
             </a-button>
-            <a-button
-              v-for="top in filterTags.top"
-              :key="top.path_word"
-              :type="currentFilter.top === top.path_word ? 'primary' : 'default'"
-              size="small"
-              @click="changeTop(top.path_word)"
-            >
+            <a-button v-for="top in filterTags.top" :key="top.path_word"
+              :type="currentFilter.top === top.path_word ? 'primary' : 'default'" size="small"
+              @click="changeTop(top.path_word)">
               {{ top.name }}
             </a-button>
           </div>
@@ -48,20 +32,12 @@
 
       <div class="filter-group">
         <div class="filter-buttons">
-          <a-button
-            :type="currentFilter.theme === '' ? 'primary' : 'default'"
-            size="small"
-            @click="changeTheme('')"
-          >
+          <a-button :type="currentFilter.theme === '' ? 'primary' : 'default'" size="small" @click="changeTheme('')">
             全部
           </a-button>
-          <a-button
-            v-for="theme in filterTags.theme"
-            :key="theme.path_word"
-            :type="currentFilter.theme === theme.path_word ? 'primary' : 'default'"
-            size="small"
-            @click="changeTheme(theme.path_word)"
-          >
+          <a-button v-for="theme in filterTags.theme" :key="theme.path_word"
+            :type="currentFilter.theme === theme.path_word ? 'primary' : 'default'" size="small"
+            @click="changeTheme(theme.path_word)">
             {{ theme.name }} ({{ theme.count }})
           </a-button>
         </div>
@@ -71,15 +47,7 @@
     <!-- 漫画列表 -->
     <a-spin :spinning="loading && mangaList.length === 0">
       <a-row :gutter="16" class="manga-list">
-        <a-col
-          class="manga-col"
-          v-for="manga in mangaList"
-          :key="manga.path_word"
-          :xs="12"
-          :sm="8"
-          :md="6"
-          :lg="4"
-        >
+        <a-col class="manga-col" v-for="manga in mangaList" :key="manga.path_word" :xs="12" :sm="8" :md="6" :lg="4">
           <a-card hoverable class="manga-card" @click="goToMangaDetail(manga)">
             <img :src="manga.cover" :alt="manga.name" class="manga-cover" />
             <div class="manga-info">
@@ -94,9 +62,12 @@
 
     <!-- 加载更多 -->
     <div v-if="hasMore && !loading" class="load-more-container" @mouseenter="loadMore">
-      <div class="load-more-text" :class="{ loading: loading }">
-        {{ loading ? '加载中...' : '加载更多' }}
+      <div class="load-more-text">
+        {{ loading ? '加载中...' : '滑过加载更多' }}
       </div>
+    </div>
+    <div v-else-if="loading && mangaList.length > 0" class="load-more-container">
+      <div class="load-more-text loading">加载中...</div>
     </div>
     <div v-else-if="mangaList.length > 0" class="load-more-container">
       <div class="load-more-text no-more">没有更多了</div>
@@ -129,11 +100,6 @@ const hasTagsCache = computed(() => mangaDiscoverStore.hasTagsCache)
 
 // 初始化数据
 const initData = async () => {
-  console.log('初始化漫画发现数据, 缓存状态:', {
-    hasTagsCache: hasTagsCache.value,
-    hasCache: hasCache.value,
-  })
-
   // 先获取过滤标签
   const tagsResult = await mangaDiscoverStore.fetchFilterTags()
   if (!tagsResult.success && !tagsResult.fromCache) {

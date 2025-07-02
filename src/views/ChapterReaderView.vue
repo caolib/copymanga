@@ -1,30 +1,21 @@
 <template>
   <div class="reader-container" :class="{ 'dark-mode': isDarkMode }">
     <!-- 底部章节导航栏 - 固定在屏幕底部 -->
-    <div
-      class="bottom-navigation"
-      :class="{ visible: showBottomNav }"
-      @mouseenter="keepNavVisible"
-      @mouseleave="hideNavOnLeave"
-    >
+    <div class="bottom-navigation" :class="{ visible: showBottomNav }" @mouseenter="keepNavVisible"
+      @mouseleave="hideNavOnLeave">
       <div class="nav-content">
         <div class="reader-title">
           <a-typography-title :level="4" style="margin: 0">{{
             chapterInfo.comic_name || '漫画标题'
-          }}</a-typography-title>
+            }}</a-typography-title>
           <a-typography-text type="secondary">{{
             chapterInfo.name || '章节标题'
-          }}</a-typography-text>
+            }}</a-typography-text>
         </div>
         <div class="reader-controls">
           <a-space>
             <a-button @click="goBack" :icon="h(ArrowLeftOutlined)"> 返回 </a-button>
-            <a-button
-              @click="prevChapter"
-              type="primary"
-              :disabled="!hasPrevChapter"
-              :icon="h(LeftOutlined)"
-            >
+            <a-button @click="prevChapter" type="primary" :disabled="!hasPrevChapter" :icon="h(LeftOutlined)">
               上一话
             </a-button>
             <a-button @click="nextChapter" type="primary" :disabled="!hasNextChapter">
@@ -43,15 +34,8 @@
     <div class="bottom-trigger-area" @mouseenter="showNavigation"></div>
 
     <!-- 阅读器设置抽屉 -->
-    <a-drawer
-      title="阅读设置"
-      :width="300"
-      :visible="showSettingsDrawer"
-      @close="showSettingsDrawer = false"
-      :footer-style="{ textAlign: 'right' }"
-      :class="{ 'dark-drawer': isDarkMode }"
-      :mask="false"
-    >
+    <a-drawer title="阅读设置" :width="300" :visible="showSettingsDrawer" @close="showSettingsDrawer = false"
+      :footer-style="{ textAlign: 'right' }" :class="{ 'dark-drawer': isDarkMode }" :mask="false">
       <a-form layout="vertical">
         <a-form-item label="漫画布局">
           <a-radio-group v-model:value="readerConfig.layout">
@@ -61,33 +45,18 @@
         </a-form-item>
 
         <a-form-item label="每行列数">
-          <a-slider
-            v-model:value="readerConfig.columnsPerRow"
-            :min="1"
-            :max="4"
-            :step="1"
-            :marks="{ 1: '1列', 2: '2列', 3: '3列', 4: '4列' }"
-          />
+          <a-slider v-model:value="readerConfig.columnsPerRow" :min="1" :max="4" :step="1"
+            :marks="{ 1: '1列', 2: '2列', 3: '3列', 4: '4列' }" />
         </a-form-item>
 
         <a-form-item label="图片大小">
-          <a-slider
-            v-model:value="readerConfig.imageSize"
-            :min="50"
-            :max="100"
-            :step="10"
-            :marks="{ 50: '50%', 100: '100%' }"
-          />
+          <a-slider v-model:value="readerConfig.imageSize" :min="50" :max="100" :step="10"
+            :marks="{ 50: '50%', 100: '100%' }" />
         </a-form-item>
 
         <a-form-item label="图片间距">
-          <a-slider
-            v-model:value="readerConfig.imageGap"
-            :min="0"
-            :max="30"
-            :step="1"
-            :marks="{ 0: '0px', 10: '10px', 30: '30px' }"
-          />
+          <a-slider v-model:value="readerConfig.imageGap" :min="0" :max="30" :step="1"
+            :marks="{ 0: '0px', 10: '10px', 30: '30px' }" />
         </a-form-item>
 
         <a-form-item label="空白页位置">
@@ -101,13 +70,8 @@
         </a-form-item>
 
         <a-form-item label="暗色模式图片遮罩" v-if="isDarkMode">
-          <a-slider
-            v-model:value="darkImageMaskOpacity"
-            :min="0"
-            :max="1"
-            :step="0.1"
-            :marks="{ 0: '无遮罩', 0.5: '50%', 1: '完全遮罩' }"
-          />
+          <a-slider v-model:value="darkImageMaskOpacity" :min="0" :max="1" :step="0.1"
+            :marks="{ 0: '无遮罩', 0.5: '50%', 1: '完全遮罩' }" />
           <div style="margin-top: 8px; font-size: 12px; color: #666">
             添加图片遮罩降低亮度以保护视力
           </div>
@@ -144,78 +108,39 @@
         </div>
         <div class="image-container" :style="{ gap: `${readerConfig.imageGap}px` }">
           <!-- 动态列数和方向布局 -->
-          <a-row
-            v-for="(chunk, rowIndex) in imageChunks"
-            :key="rowIndex"
-            :gutter="16"
-            :class="[
-              'manga-row',
-              {
-                'row-rtl': readerConfig.layout === 'rtl',
-                'row-ltr': readerConfig.layout === 'ltr',
-              },
-            ]"
-            justify="center"
-            align="middle"
-          >
+          <a-row v-for="(chunk, rowIndex) in imageChunks" :key="rowIndex" :gutter="16" :class="[
+            'manga-row',
+            {
+              'row-rtl': readerConfig.layout === 'rtl',
+              'row-ltr': readerConfig.layout === 'ltr',
+            },
+          ]" justify="center" align="middle">
             <template v-if="readerConfig.layout === 'rtl'">
-              <a-col
-                :span="24 / readerConfig.columnsPerRow"
-                class="manga-column"
-                v-for="(image, colIndex) in chunk"
-                :key="colIndex"
-                :style="{
+              <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column" v-for="(image, colIndex) in chunk"
+                :key="colIndex" :style="{
                   paddingLeft: `${readerConfig.imageGap / 2}px`,
                   paddingRight: `${readerConfig.imageGap / 2}px`,
-                }"
-              >
-                <div
-                  v-if="!image.isPlaceholder"
-                  :data-page="
-                    rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
-                  "
-                  :style="{ width: `${readerConfig.imageSize}%` }"
-                >
-                  <LazyImg
-                    :src="image.url"
-                    :page-number="
-                      rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
-                    "
-                    :image-size="readerConfig.imageSize"
-                    :is-dark-mode="isDarkMode"
-                    :dark-image-mask-opacity="darkImageMaskOpacity"
-                  />
+                }">
+                <div v-if="!image.isPlaceholder" :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
+                  " :style="{ width: `${readerConfig.imageSize}%` }">
+                  <LazyImg :src="image.url" :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
+                    " :image-size="readerConfig.imageSize" :is-dark-mode="isDarkMode"
+                    :dark-image-mask-opacity="darkImageMaskOpacity" />
                 </div>
                 <div v-else class="placeholder"></div>
               </a-col>
             </template>
             <template v-else>
-              <a-col
-                :span="24 / readerConfig.columnsPerRow"
-                class="manga-column"
-                v-for="(image, colIndex) in chunk"
-                :key="colIndex"
-                :style="{
+              <a-col :span="24 / readerConfig.columnsPerRow" class="manga-column" v-for="(image, colIndex) in chunk"
+                :key="colIndex" :style="{
                   paddingLeft: `${readerConfig.imageGap / 2}px`,
                   paddingRight: `${readerConfig.imageGap / 2}px`,
-                }"
-              >
-                <div
-                  v-if="!image.isPlaceholder"
-                  :data-page="
-                    rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
-                  "
-                  :style="{ width: `${readerConfig.imageSize}%` }"
-                >
-                  <LazyImg
-                    :src="image.url"
-                    :page-number="
-                      rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
-                    "
-                    :image-size="readerConfig.imageSize"
-                    :is-dark-mode="isDarkMode"
-                    :dark-image-mask-opacity="darkImageMaskOpacity"
-                  />
+                }">
+                <div v-if="!image.isPlaceholder" :data-page="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
+                  " :style="{ width: `${readerConfig.imageSize}%` }">
+                  <LazyImg :src="image.url" :page-number="rowIndex * readerConfig.columnsPerRow + colIndex + 1 - (image.pageOffset || 0)
+                    " :image-size="readerConfig.imageSize" :is-dark-mode="isDarkMode"
+                    :dark-image-mask-opacity="darkImageMaskOpacity" />
                 </div>
                 <div v-else class="placeholder"></div>
               </a-col>
@@ -225,13 +150,8 @@
         <div class="reader-footer">
           <a-space>
             <a-button @click="goBack" size="large" :icon="h(ArrowLeftOutlined)"> 返回 </a-button>
-            <a-button
-              @click="prevChapter"
-              type="primary"
-              :disabled="!hasPrevChapter"
-              size="large"
-              :icon="h(LeftOutlined)"
-            >
+            <a-button @click="prevChapter" type="primary" :disabled="!hasPrevChapter" size="large"
+              :icon="h(LeftOutlined)">
               上一话
             </a-button>
             <a-button @click="nextChapter" type="primary" :disabled="!hasNextChapter" size="large">
@@ -249,22 +169,11 @@
 
       <!-- 评论输入框 -->
       <div class="comment-input-section" style="margin-bottom: 16px">
-        <a-textarea
-          v-model:value="newComment"
-          placeholder="这里是评论区，不是无人区..."
-          :rows="1"
-          :maxlength="200"
-          show-count
-          style="margin-bottom: 8px"
-        />
+        <a-textarea v-model:value="newComment" placeholder="这里是评论区，不是无人区..." :rows="1" :maxlength="200" show-count
+          style="margin-bottom: 8px" />
         <div style="display: flex; justify-content: space-between; align-items: center">
-          <a-button
-            type="primary"
-            @click="submitComment"
-            :loading="submitCommentLoading"
-            :disabled="!newComment.trim() || !isLoggedIn"
-            size="small"
-          >
+          <a-button type="primary" @click="submitComment" :loading="submitCommentLoading"
+            :disabled="!newComment.trim() || !isLoggedIn" size="small">
             发送
           </a-button>
         </div>
@@ -273,45 +182,24 @@
 
       <div v-if="commentsError" class="comments-error">
         <a-alert type="error" message="加载评论失败" :description="commentsError" />
-        <a-button
-          type="primary"
-          @click="fetchComments(1)"
-          style="margin-top: 8px"
-          :icon="h(ReloadOutlined)"
-        >
+        <a-button type="primary" @click="fetchComments(1)" style="margin-top: 8px" :icon="h(ReloadOutlined)">
           重试加载评论
         </a-button>
       </div>
 
       <a-spin :spinning="loadingComments" tip="加载评论中...">
         <div v-if="!commentsError && comments.length > 0" class="compact-comments-container">
-          <a-comment
-            v-for="(item, index) in comments"
-            :key="index"
-            :author="item.user_name"
-            :avatar="item.user_avatar"
-            :content="item.comment"
-            :datetime="formatDate(item.create_at)"
-            class="compact-comment-item"
-          />
+          <a-comment v-for="(item, index) in comments" :key="index" :author="item.user_name" :avatar="item.user_avatar"
+            :content="item.comment" :datetime="formatDate(item.create_at)" class="compact-comment-item" />
         </div>
         <a-empty v-else-if="!commentsError && comments.length === 0" description="暂无评论" />
 
         <!-- 评论分页 -->
-        <div
-          v-if="!commentsError && commentsTotal > commentsPageSize"
-          style="text-align: center; margin-top: 16px"
-        >
-          <a-pagination
-            v-model:current="commentsPage"
-            :total="commentsTotal"
-            :page-size="commentsPageSize"
-            :show-size-changer="false"
-            :show-quick-jumper="true"
-            :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条评论`"
-            size="small"
-            @change="handleCommentsPageChange"
-          />
+        <div v-if="!commentsError && commentsTotal > commentsPageSize" style="text-align: center; margin-top: 16px">
+          <a-pagination v-model:current="commentsPage" :total="commentsTotal" :page-size="commentsPageSize"
+            :show-size-changer="false" :show-quick-jumper="true"
+            :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条评论`" size="small"
+            @change="handleCommentsPageChange" />
         </div>
       </a-spin>
     </div>
@@ -338,7 +226,7 @@ import { useUserStore } from '../stores/user'
 import { DEFAULT_UI_CONFIG, loadUIConfig, updateReaderConfig } from '@/config/ui-config'
 import { formatDate } from '../utils/date'
 import { message } from 'ant-design-vue'
-import { goBack } from '../router/go'
+import { useRouteHistory } from '@/composables/useRouteHistory'
 import LazyImg from '@/components/LazyImg.vue'
 
 const route = useRoute()
@@ -346,6 +234,7 @@ const router = useRouter()
 const mangaStore = useMangaStore() // 使用漫画存储
 const themeStore = useThemeStore() // 使用主题存储
 const userStore = useUserStore() // 使用用户存储
+const { goBack } = useRouteHistory()
 const chapterInfo = ref({})
 const images = ref([])
 const allChapters = ref([])

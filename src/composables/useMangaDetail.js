@@ -131,7 +131,9 @@ export function useMangaDetail() {
       lastBrowseInfo.value &&
       lastBrowseInfo.value.last_browse_id === chapter.id
     )
-  } // 获取漫画详情信息
+  }
+
+  // 获取漫画详情信息
   const fetchMangaDetail = async () => {
     const pathWord = route.params.pathWord
 
@@ -285,14 +287,7 @@ export function useMangaDetail() {
 
   // 处理评论区展开/折叠
   const handleCommentsToggle = (activeKey) => {
-    console.log(
-      '评论区切换:',
-      activeKey,
-      '已加载:',
-      commentsLoaded.value,
-      'manga uuid:',
-      manga.value.uuid,
-    )
+    console.log('评论区切换:', activeKey, '已加载:', commentsLoaded.value, 'manga uuid:', manga.value.uuid,)
 
     // 当评论区被展开且还未加载过评论时，加载评论
     if (
@@ -306,27 +301,22 @@ export function useMangaDetail() {
 
   // 获取漫画评论
   const fetchMangaComments = async (page = 1) => {
-    if (!manga.value.uuid) {
-      console.log('没有 manga uuid，退出')
-      return
-    }
     commentsLoading.value = true
     const offset = (page - 1) * commentsPageSize.value
 
-    await getMangaComments(manga.value.uuid, commentsPageSize.value, offset)
-      .then((res) => {
-        comments.value = res.results.list || []
-        commentsTotal.value = res.results.total || 0
-        commentsPage.value = page
-        commentsLoaded.value = true
-      })
-      .catch((error) => {
-        console.error('获取评论失败:', error)
-        message.error('获取评论失败')
-      })
-      .finally(() => {
-        commentsLoading.value = false
-      })
+    await getMangaComments(manga.value.uuid, commentsPageSize.value, offset).then((res) => {
+      // console.log(JSON.stringify(res.results, null, 2))
+
+      comments.value = res.results.list || []
+      commentsTotal.value = res.results.total || 0
+      commentsPage.value = page
+      commentsLoaded.value = true
+    }).catch((error) => {
+      console.error('获取评论失败:', error)
+      message.error('获取评论失败')
+    }).finally(() => {
+      commentsLoading.value = false
+    })
   }
 
   // 处理评论分页

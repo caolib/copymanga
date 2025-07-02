@@ -21,7 +21,8 @@ export const useMangaDiscoverStore = defineStore('mangaDiscover', {
         pagination: {
             total: 0,
             limit: 18,
-            offset: 0
+            offset: 0,
+            loadedCount: 0 // 已加载的数据数量
         },
         // 加载状态
         isLoading: false,
@@ -54,7 +55,8 @@ export const useMangaDiscoverStore = defineStore('mangaDiscover', {
 
         // 是否有更多数据可加载
         hasMore: (state) => {
-            return state.pagination.offset + state.pagination.limit < state.pagination.total
+            // 使用已加载的数据数量而不是offset，避免在加载过程中状态错误
+            return state.pagination.loadedCount < state.pagination.total
         }
     },
 
@@ -93,6 +95,7 @@ export const useMangaDiscoverStore = defineStore('mangaDiscover', {
             // 重置偏移量（用于切换过滤条件时）
             if (resetOffset) {
                 this.pagination.offset = 0
+                this.pagination.loadedCount = 0
                 this.mangaList = []
             }
 
@@ -130,15 +133,18 @@ export const useMangaDiscoverStore = defineStore('mangaDiscover', {
             return getMangaDiscover(params)
                 .then(res => {
                     if (res && res.code === 200 && res.results) {
+                        const newItems = res.results.list || []
+
                         // 合并数据（加载更多时）或替换数据（切换过滤条件时）
                         this.mangaList = resetOffset
-                            ? res.results.list || []
-                            : [...this.mangaList, ...(res.results.list || [])]
+                            ? newItems
+                            : [...this.mangaList, ...newItems]
 
                         this.pagination = {
                             total: res.results.total || 0,
                             limit: res.results.limit || 18,
-                            offset: res.results.offset + (res.results.limit || 18)
+                            offset: res.results.offset + (res.results.limit || 18),
+                            loadedCount: this.mangaList.length // 更新已加载数量
                         }
 
                         this.lastListUpdateTime = Date.now()
@@ -174,6 +180,7 @@ export const useMangaDiscoverStore = defineStore('mangaDiscover', {
         // 清除缓存
         clearCache() {
             this.mangaList = []
+            this.pagination.loadedCount = 0
             this.lastListUpdateTime = null
             this.hasCache = false
         }

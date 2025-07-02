@@ -151,12 +151,13 @@ import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { formatDate } from '../utils/date'
 import { ArrowLeftOutlined } from '@ant-design/icons-vue'
 import { formatNumber } from '@/utils/number'
-import { goBack } from '@/router/go'
+import { useRouteHistory } from '@/composables/useRouteHistory'
 
 const route = useRoute()
 const router = useRouter()
 const topicStore = useTopicStore()
 const { goToMangaDetail } = useMangaNavigation()
+const { goBack } = useRouteHistory()
 
 const loading = ref(false)
 const contentLoading = computed(() => topicStore.contentLoading)

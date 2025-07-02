@@ -4,29 +4,17 @@
       <div class="filter-group">
         <div class="filter-label">排序方式</div>
         <div class="filter-buttons">
-          <a-button
-            :type="currentFilter.ordering === '-popular' ? 'primary' : 'default'"
-            size="small"
-            @click="changeOrdering('-popular')"
-          >
+          <a-button :type="currentFilter.ordering === '-popular' ? 'primary' : 'default'" size="small"
+            @click="changeOrdering('-popular')">
             热度排序
           </a-button>
-          <a-button
-            :type="currentFilter.ordering === '-datetime_updated' ? 'primary' : 'default'"
-            size="small"
-            @click="changeOrdering('-datetime_updated')"
-          >
+          <a-button :type="currentFilter.ordering === '-datetime_updated' ? 'primary' : 'default'" size="small"
+            @click="changeOrdering('-datetime_updated')">
             更新时间
           </a-button>
         </div>
         <div class="filter-actions">
-          <a-button
-            type="primary"
-            @click="refreshData"
-            :icon="h(ReloadOutlined)"
-            :loading="loading"
-            size="small"
-          >
+          <a-button type="primary" @click="refreshData" :icon="h(ReloadOutlined)" :loading="loading" size="small">
             刷新
           </a-button>
           <div v-if="lastUpdateTime" class="update-info">
@@ -40,20 +28,12 @@
       <div class="filter-group">
         <div class="filter-label">地区</div>
         <div class="filter-buttons">
-          <a-button
-            :type="currentFilter.top === '' ? 'primary' : 'default'"
-            size="small"
-            @click="changeTop('')"
-          >
+          <a-button :type="currentFilter.top === '' ? 'primary' : 'default'" size="small" @click="changeTop('')">
             全部地区
           </a-button>
-          <a-button
-            v-for="top in filterTags.top"
-            :key="top.path_word"
-            :type="currentFilter.top === top.path_word ? 'primary' : 'default'"
-            size="small"
-            @click="changeTop(top.path_word)"
-          >
+          <a-button v-for="top in filterTags.top" :key="top.path_word"
+            :type="currentFilter.top === top.path_word ? 'primary' : 'default'" size="small"
+            @click="changeTop(top.path_word)">
             {{ top.name }}
           </a-button>
         </div>
@@ -62,40 +42,22 @@
       <div class="filter-group">
         <div class="filter-label">主题分类</div>
         <div class="filter-buttons">
-          <a-button
-            :type="currentFilter.theme === '' ? 'primary' : 'default'"
-            size="small"
-            @click="changeTheme('')"
-          >
+          <a-button :type="currentFilter.theme === '' ? 'primary' : 'default'" size="small" @click="changeTheme('')">
             全部主题
           </a-button>
-          <a-button
-            v-for="theme in filterTags.theme"
-            :key="theme.path_word"
-            :type="currentFilter.theme === theme.path_word ? 'primary' : 'default'"
-            size="small"
-            @click="changeTheme(theme.path_word)"
-          >
+          <a-button v-for="theme in filterTags.theme" :key="theme.path_word"
+            :type="currentFilter.theme === theme.path_word ? 'primary' : 'default'" size="small"
+            @click="changeTheme(theme.path_word)">
             {{ theme.name }} ({{ theme.count }})
           </a-button>
         </div>
       </div>
     </div>
 
-    <a-skeleton
-      active
-      v-if="loading && mangaList.length === 0"
-      :paragraph="{ rows: 10 }"
-      :loading="loading"
-    />
+    <a-skeleton active v-if="loading && mangaList.length === 0" :paragraph="{ rows: 10 }" :loading="loading" />
 
     <div class="manga-grid" v-else>
-      <div
-        v-for="manga in mangaList"
-        :key="manga.path_word"
-        class="manga-card"
-        @click="goToMangaDetail(manga)"
-      >
+      <div v-for="manga in mangaList" :key="manga.path_word" class="manga-card" @click="goToMangaDetail(manga)">
         <div class="manga-cover">
           <img :src="manga.cover" :alt="manga.name" />
           <div class="manga-status" :class="{ completed: manga.status === 1 }">
@@ -112,9 +74,12 @@
 
     <!-- 加载更多 -->
     <div v-if="hasMore && !loading" class="load-more-container" @mouseenter="loadMore">
-      <div class="load-more-text" :class="{ loading: loading }">
-        {{ loading ? '加载中...' : '加载更多' }}
+      <div class="load-more-text">
+        {{ loading ? '加载中...' : '滑过加载更多' }}
       </div>
+    </div>
+    <div v-else-if="loading && mangaList.length > 0" class="load-more-container">
+      <div class="load-more-text loading">加载中...</div>
     </div>
     <div v-else-if="mangaList.length > 0" class="load-more-container">
       <div class="load-more-text no-more">没有更多了</div>

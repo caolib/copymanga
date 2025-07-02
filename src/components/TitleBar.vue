@@ -25,7 +25,7 @@
                         <a-avatar :src="getAvatarUrl(account.userInfo?.avatar)" size="small" />
                         <span class="account-name">{{
                           account.userInfo?.nickname || account.username
-                        }}</span>
+                          }}</span>
                       </div>
                     </a-menu-item>
                   </a-menu-item-group>
@@ -61,14 +61,30 @@
           <SettingFilled class="nav-icon" />
           <span v-if="hasUpdate" class="nav-update-indicator"></span>
         </router-link>
-        <button @click="themeStore.toggleTheme" class="theme-toggle-btn"
+        <a-button type="text" class="nav-link theme-toggle-btn" @click="themeStore.toggleTheme"
           :title="themeStore.isDarkMode ? '切换到浅色模式' : '切换到深色模式'">
           {{ themeStore.isDarkMode ? '🌞' : '🌙' }}
-        </button>
-        <a-button type="text" class="nav-link" @click="goBack" title="后退" :icon="h(ArrowLeftOutlined)"></a-button>
-        <a-button type="text" class="nav-link" @click="goForward" title="前进" :icon="h(ArrowRightOutlined)"></a-button>
-        <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)">
         </a-button>
+
+        <!-- 后退按钮 -->
+        <a-dropdown trigger="hover" placement="bottom" overlayClassName="history-dropdown-menu">
+          <a-button type="text" class="nav-link" @click="goBack" title="后退" :icon="h(ArrowLeftOutlined)"></a-button>
+          <template #overlay>
+            <a-menu v-if="backHistory.length > 0" @click="({ key }) => goToHistoryIndex(parseInt(key))">
+              <a-menu-item v-for="item in backHistory" :key="item.index" class="history-menu-item">
+                <div class="history-item-content">
+                  <span class="history-title">{{ item.title }}</span>
+                  <span class="history-path">{{ item.path }}</span>
+                </div>
+              </a-menu-item>
+            </a-menu>
+          </template>
+        </a-dropdown>
+
+        <!-- 前进按钮 -->
+        <a-button type="text" class="nav-link" @click="goForward" title="前进" :icon="h(ArrowRightOutlined)"></a-button>
+
+        <a-button type="text" class="nav-link" @click="refreshPage" title="刷新" :icon="h(ReloadOutlined)"></a-button>
         <!-- 自定义CSS重载按钮 -->
         <a-button v-if="themeStore.showReloadCssButton" type="primary" class="nav-link reload-css-btn"
           @click="reloadCustomCss" :loading="reloadingCss" title="重新加载自定义样式" :icon="h(FormatPainterOutlined)">
@@ -117,6 +133,7 @@ import { isLoggedIn, logout } from '../utils/auth'
 import { useUserStore } from '../stores/user'
 import { useThemeStore } from '../stores/theme'
 import { useAppStore } from '../stores/app'
+import { useRouteHistory } from '../composables/useRouteHistory'
 import { message } from 'ant-design-vue'
 import {
   UserOutlined,
@@ -130,14 +147,18 @@ import {
   FormatPainterOutlined,
 } from '@ant-design/icons-vue'
 import { h } from 'vue'
-import { goBack, goForward } from '@/router/go'
 
 const router = useRouter()
 const userStore = useUserStore()
 const themeStore = useThemeStore()
 const appStore = useAppStore()
+const { canGoBack, canGoForward, backHistory, goBack, goForward, goToHistoryIndex } = useRouteHistory()
 const isMaximized = ref(false)
 const reloadingCss = ref(false)
+
+console.log(router)
+
+
 
 // 检查是否有可用更新
 const hasUpdate = computed(() => appStore.hasUpdate)
@@ -176,6 +197,7 @@ const reloadCustomCss = async () => {
 
 // 用于存储监听器清理函数
 let unlisten = null
+
 
 onMounted(async () => {
   // 监听窗口状态变化

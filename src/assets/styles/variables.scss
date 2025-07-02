@@ -99,6 +99,19 @@ $transition-fast: 0.2s ease;
 $transition-normal: 0.3s ease;
 $transition-slow: 0.5s ease;
 
+// 毛玻璃效果
+$glassmorphism-bg: rgba(255, 255, 255, 0.85);
+$glassmorphism-bg-hover: rgba(255, 255, 255, 0.9);
+$glassmorphism-border: rgba(255, 255, 255, 0.2);
+$glassmorphism-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+$glassmorphism-backdrop-filter: blur(10px);
+
+// 暗色主题毛玻璃效果
+$dark-glassmorphism-bg: rgba(40, 44, 52, 0.85);
+$dark-glassmorphism-bg-hover: rgba(40, 44, 52, 0.9);
+$dark-glassmorphism-border: rgba(255, 255, 255, 0.1);
+$dark-glassmorphism-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+
 // 间距
 $spacing-xs: 4px;
 $spacing-sm: 8px;
@@ -198,5 +211,31 @@ $dark-card-hover-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     // 暗色主题样式
     @include dark-theme {
         @content ($dark-card-bg, $dark-text-primary);
+    }
+}
+
+// 毛玻璃效果混合器
+@mixin glassmorphism {
+    background: $glassmorphism-bg;
+    border: 1px solid $glassmorphism-border;
+    box-shadow: $glassmorphism-shadow;
+    backdrop-filter: $glassmorphism-backdrop-filter;
+    -webkit-backdrop-filter: $glassmorphism-backdrop-filter;
+
+    @include dark-theme {
+        background: $dark-glassmorphism-bg;
+        border: 1px solid $dark-glassmorphism-border;
+        box-shadow: $dark-glassmorphism-shadow;
+    }
+}
+
+// 毛玻璃悬停效果混合器
+@mixin glassmorphism-hover {
+    &:hover {
+        background: $glassmorphism-bg-hover;
+
+        @include dark-theme {
+            background: $dark-glassmorphism-bg-hover;
+        }
     }
 }

@@ -1,8 +1,9 @@
 <script setup>
-import { computed, ref, watchEffect, onMounted, provide } from 'vue'
+import { computed, ref, watchEffect, onMounted, provide, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from './stores/app'
 import { useThemeStore } from './stores/theme'
+import { useRouteHistory } from './composables/useRouteHistory'
 import TitleBar from './components/TitleBar.vue'
 import { theme } from 'ant-design-vue'
 import { checkUpdateOnStartup } from './utils/auto-update'
@@ -10,6 +11,7 @@ import { checkUpdateOnStartup } from './utils/auto-update'
 const route = useRoute()
 const appStore = useAppStore()
 const themeStore = useThemeStore()
+const { addToHistory } = useRouteHistory()
 const showHeader = ref(true)
 const routerKey = ref(0)
 
@@ -97,6 +99,9 @@ onMounted(async () => {
   checkDisclaimer()
   await themeStore.initTheme()
 
+  // 初始化路由历史
+  addToHistory(route)
+
   // 如果启用了自动检查更新，在启动时检查一次
   if (appStore.autoCheckUpdate) {
     setTimeout(() => {
@@ -104,6 +109,11 @@ onMounted(async () => {
     }, 3000) // 延迟3秒执行，避免影响应用启动速度
   }
 })
+
+// 监听路由变化，添加到历史记录
+watch(route, (newRoute) => {
+  addToHistory(newRoute)
+}, { immediate: false })
 </script>
 
 <template>
