@@ -57,19 +57,8 @@
     <a-skeleton active v-if="loading && mangaList.length === 0" :paragraph="{ rows: 10 }" :loading="loading" />
 
     <div class="manga-grid" v-else>
-      <div v-for="manga in mangaList" :key="manga.path_word" class="manga-card" @click="goToMangaDetail(manga)">
-        <div class="manga-cover">
-          <img :src="manga.cover" :alt="manga.name" />
-          <div class="manga-status" :class="{ completed: manga.status === 1 }">
-            {{ manga.status === 1 ? '已完结' : '连载中' }}
-          </div>
-        </div>
-        <div class="manga-info">
-          <h3 class="manga-title">{{ manga.name }}</h3>
-          <p class="manga-author">{{ getAuthors(manga.author) }}</p>
-          <p class="manga-date">更新: {{ formatDate(manga.datetime_updated) }}</p>
-        </div>
-      </div>
+      <MangaCard v-for="manga in mangaList" :key="manga.path_word" :manga="manga" display-type="grid"
+        :use-card-cover="false" :show-status="true" @click="goToMangaDetail(manga)" />
     </div>
 
     <!-- 加载更多 -->
@@ -88,6 +77,7 @@ import { ReloadOutlined } from '@ant-design/icons-vue'
 import { h } from 'vue'
 import { useMangaNavigation } from '@/composables/useMangaNavigation'
 import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
+import MangaCard from '@/components/manga/MangaCard.vue'
 
 const router = useRouter()
 const mangaDiscoverStore = useMangaDiscoverStore()

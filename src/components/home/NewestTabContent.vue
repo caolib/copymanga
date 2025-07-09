@@ -5,15 +5,8 @@
     <a-row :gutter="16">
       <a-col class="manga-col" v-for="item in newestData.list || []" :key="item.comic.path_word" :xs="12" :sm="8"
         :md="6" :lg="4">
-        <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
-          <img :src="item.comic.cover" :alt="item.comic.name" class="manga-cover" />
-          <div class="manga-title">{{ item.comic.name }}</div>
-          <div class="manga-meta">
-            <div class="manga-popular">人气: {{ item.comic.popular }}</div>
-            <div class="manga-date">{{ formatDate(item.datetime_created) }}</div>
-          </div>
-          <div class="manga-chapter">最新: {{ item.name }}</div>
-        </a-card>
+        <MangaCard :manga="item.comic" :item="item" click-type="online" :show-popular="true" :show-chapter="true"
+          :chapter-text="`最新: ${item.name}`" :date-text="formatDate(item.datetime_created)" />
       </a-col>
     </a-row>
 
@@ -27,9 +20,10 @@
 <script setup>
 import { computed } from 'vue'
 import { useHomeStore } from '@/stores/home.js'
-import { useMangaNavigation } from '@/composables/useMangaNavigation.js'
-import { formatDate } from '@/utils/date.js'
 import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
+import MangaCard from '@/components/manga/MangaCard.vue'
+import { useMangaNavigation } from '@/composables/useMangaNavigation'
+import { formatDate } from '@/utils/date'
 
 const homeStore = useHomeStore()
 const { goToMangaDetail } = useMangaNavigation()

@@ -3,33 +3,9 @@
   <a-card class="author-manga-list-container" :bordered="false">
     <a-skeleton :loading="loading" active>
       <a-row :gutter="[16, 16]">
-        <a-col v-for="manga in mangaList" :key="manga.path_word" :xs="12" :sm="12" :md="6" :lg="6" :xl="6" :xxl="6">
-          <a-card hoverable @click="goToMangaDetail(manga.path_word)" class="manga-card">
-            <template #cover>
-              <img :src="manga.cover" :alt="manga.name" class="manga-cover" />
-            </template>
-            <a-card-meta>
-              <template #title>
-                <a-tooltip :title="manga.name">
-                  <div class="manga-title">{{ manga.name }}</div>
-                </a-tooltip>
-              </template>
-              <template #description>
-                <div class="manga-meta">
-                  <div class="popular">
-                    <a-typography-text type="secondary">
-                      人气: {{ formatNumber(manga.popular) }}
-                    </a-typography-text>
-                  </div>
-                  <div class="update-time">
-                    <a-typography-text type="secondary">
-                      {{ manga.datetime_updated }}
-                    </a-typography-text>
-                  </div>
-                </div>
-              </template>
-            </a-card-meta>
-          </a-card>
+        <a-col v-for="manga in mangaList" :key="manga.path_word" :xs="12" :sm="8" :md="6" :lg="4">
+          <MangaCard :manga="manga" display-type="grid" :use-card-cover="true"
+            @click="goToMangaDetail(manga.path_word)" />
         </a-col>
       </a-row>
 
@@ -50,6 +26,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getAuthorMangaList } from '../api/manga'
 import { formatNumber } from '@/utils/number'
+import MangaCard from '@/components/manga/MangaCard.vue'
 
 const route = useRoute()
 const router = useRouter()

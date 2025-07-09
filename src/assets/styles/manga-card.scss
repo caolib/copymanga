@@ -1,0 +1,525 @@
+@use "./variables" as *;
+
+.manga-card {
+    height: 100%;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+
+        @include dark-theme {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+    }
+
+    // 热度标签
+    .popular-badge {
+        position: absolute;
+        bottom: 8px;
+        right: 0px;
+        padding: 4px 8px;
+        border-radius: 5px;
+        font-size: 11px;
+        font-weight: 500;
+        color: white;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+        z-index: 2;
+    }
+
+    // 排名标签
+    .ranking-badge {
+        position: absolute;
+        top: 0;
+        left: 0;
+        padding: 4px 8px;
+        border-bottom-right-radius: 10px;
+        font-size: 12px;
+        font-weight: bold;
+        z-index: 3;
+
+        // 前三名特殊颜色
+        &.rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        &.rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+            color: #333;
+        }
+
+        &.rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #daa520);
+            color: white;
+        }
+
+        // 其他排名
+        &:not(.rank-1):not(.rank-2):not(.rank-3) {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+        }
+    }
+
+    // 支持自然尺寸的封面容器
+    &.natural-size {
+        height: auto;
+
+        .manga-cover {
+            height: auto;
+            min-height: unset;
+
+            img {
+                height: auto;
+                width: 100%;
+            }
+        }
+
+        .manga-cover-container {
+            height: auto;
+
+            .manga-cover {
+                height: auto;
+                width: 100%;
+            }
+        }
+    }
+
+    .manga-cover-container {
+        position: relative;
+        overflow: hidden;
+
+        .manga-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .manga-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+            padding: 20px 12px 12px;
+            color: white;
+
+            .download-info {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .chapter-count {
+                    font-size: 12px;
+                    background: rgba(255, 255, 255, 0.2);
+                    padding: 2px 8px;
+                    border-radius: 12px;
+                }
+            }
+        }
+
+        .manga-status {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
+            background: $primary-color;
+
+            &.completed {
+                background: $success-color;
+            }
+        }
+
+        // 趋势标签（排名变化）- 固定在右上角
+        .trend-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            z-index: 3;
+            min-width: 20px;
+            text-align: center;
+
+            &.trend-up {
+                background: $success-color;
+                color: white;
+            }
+
+            &.trend-down {
+                background: $error-color;
+                color: white;
+            }
+
+            &.trend-same {
+                background: $text-tertiary;
+                color: white;
+
+                @include dark-theme {
+                    background: $dark-text-tertiary;
+                }
+            }
+        }
+    }
+
+    .manga-cover {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 6px;
+        margin-bottom: 8px;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .manga-status {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: white;
+            background: $primary-color;
+
+            &.completed {
+                background: $success-color;
+            }
+        }
+
+        // 趋势标签（排名变化）- 固定在右上角
+        .trend-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            z-index: 3;
+            min-width: 20px;
+            text-align: center;
+
+            &.trend-up {
+                background: $success-color;
+                color: white;
+            }
+
+            &.trend-down {
+                background: $error-color;
+                color: white;
+            }
+
+            &.trend-same {
+                background: $text-tertiary;
+                color: white;
+
+                @include dark-theme {
+                    background: $dark-text-tertiary;
+                }
+            }
+        }
+    }
+
+    .manga-info {
+        padding-top: 8px;
+
+        .manga-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            color: $text-primary;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        .manga-author {
+            font-size: 12px;
+            margin: 0 0 4px 0;
+            line-height: 1.3;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: $text-secondary;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+
+        .manga-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 12px;
+            color: $text-tertiary;
+
+            @include dark-theme {
+                color: $dark-text-tertiary;
+            }
+
+            .manga-popular,
+            .manga-date {
+                line-height: 1.3;
+            }
+        }
+
+        .manga-chapter {
+            font-size: 12px;
+            color: $primary-color;
+            margin-top: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .last-chapter {
+            font-size: 12px;
+            color: $text-secondary;
+            margin-bottom: 4px;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+
+        .browse-time {
+            font-size: 12px;
+            color: $text-tertiary;
+
+            @include dark-theme {
+                color: $dark-text-tertiary;
+            }
+        }
+    }
+
+    // 骨架屏样式
+    &.skeleton-card {
+        .ant-card-body {
+            padding: 12px;
+        }
+    }
+
+    // 响应式设计
+    @media (max-width: 768px) {
+        .manga-cover {
+            height: auto;
+            min-height: 160px;
+        }
+
+        .manga-cover-container .manga-cover {
+            height: 100%;
+            min-height: 200px;
+        }
+
+        .manga-info {
+            .manga-title {
+                font-size: 13px;
+            }
+
+            .manga-author,
+            .manga-meta,
+            .manga-chapter {
+                font-size: 11px;
+            }
+        }
+    }
+
+    // 统一信息显示样式
+    .manga-info-unified {
+        .manga-author {
+            font-size: 12px;
+            color: $text-secondary;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+
+        .manga-popular {
+            font-size: 11px;
+            color: $primary-color;
+            margin-bottom: 4px;
+
+            @include dark-theme {
+                color: $dark-primary-color;
+            }
+        }
+
+        .manga-date {
+            font-size: 11px;
+            color: $text-tertiary;
+            margin-bottom: 4px;
+
+            @include dark-theme {
+                color: $dark-text-tertiary;
+            }
+        }
+
+        .last-chapter {
+            font-size: 11px;
+            color: $warning-color;
+            margin-bottom: 4px;
+        }
+        .manga-chapter {
+            font-size: 11px;
+            color: $text-secondary;
+
+            @include dark-theme {
+                color: $dark-text-secondary;
+            }
+        }
+    }
+}
+
+// 本地漫画卡片特殊样式
+.local-manga-card {
+    .manga-overlay {
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    }
+}
+
+// 收藏漫画卡片特殊样式
+.collection-manga-card {
+    position: relative;
+
+    .update-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        z-index: 10;
+    }
+}
+
+// 排行榜项目样式
+.rank-item {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.02);
+
+        @include dark-theme {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+    }
+
+    .rank-number {
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 14px;
+        border-radius: 4px;
+        margin-right: 8px;
+        flex-shrink: 0;
+
+        &.rank-1 {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: white;
+        }
+
+        &.rank-2 {
+            background: linear-gradient(135deg, #c0c0c0, #e5e5e5);
+            color: white;
+        }
+
+        &.rank-3 {
+            background: linear-gradient(135deg, #cd7f32, #daa520);
+            color: white;
+        }
+
+        &:not(.rank-1):not(.rank-2):not(.rank-3) {
+            background: $text-tertiary;
+            color: white;
+
+            @include dark-theme {
+                background: $dark-text-tertiary;
+            }
+        }
+    }
+
+    .rank-cover {
+        width: 40px;
+        height: auto;
+        min-height: 52px;
+        object-fit: cover;
+        border-radius: 4px;
+        margin-right: 12px;
+        flex-shrink: 0;
+    }
+
+    .rank-info {
+        flex: 1;
+        min-width: 0;
+
+        .rank-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: $text-primary;
+            margin-bottom: 4px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            @include dark-theme {
+                color: $dark-text-primary;
+            }
+        }
+
+        .rank-popular {
+            font-size: 12px;
+            color: $primary-color;
+
+            @include dark-theme {
+                color: $dark-primary-color;
+            }
+        }
+    }
+}
+
+// 排行榜容器样式
+.rank-item-container {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    @include dark-theme {
+        border-bottom-color: rgba(255, 255, 255, 0.06);
+    }
+
+    &:last-child {
+        border-bottom: none;
+    }
+}

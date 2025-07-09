@@ -75,7 +75,7 @@
             <h4 class="cartoon-title" :title="cartoon.name">{{ cartoon.name }}</h4>
             <div class="cartoon-meta">
               <span class="cartoon-date">{{ formatDate(cartoon.datetime_updated) }}</span>
-              <span class="cartoon-popular">{{ formatNumber(cartoon.popular) }}人气</span>
+              <span class="cartoon-popular">{{ formatNumber(cartoon.popular) }}</span>
             </div>
             <div class="cartoon-themes" v-if="cartoon.theme && cartoon.theme.length">
               <a-tag v-for="theme in cartoon.theme.slice(0, 3)" :key="theme.name" size="small">

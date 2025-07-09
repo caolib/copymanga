@@ -153,13 +153,13 @@
 
                 .book-status {
                     position: absolute;
-                    top: 8px;
+                    top: 0;
                     right: 0;
+                    border-bottom-left-radius: 10px;
                     background-color: $success-color;
                     color: white;
                     font-size: 12px;
                     padding: 2px 8px;
-                    border-radius: 4px 0 0 4px;
 
                     &.completed {
                         background-color: $error-color;
@@ -226,7 +226,6 @@
         @include dark-theme {
             background-color: rgba(0, 0, 0, 0.7);
         }
-
     }
 }
 

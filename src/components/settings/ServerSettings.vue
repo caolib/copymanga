@@ -23,7 +23,7 @@
             <a-col :span="16">
               <a-input-group compact>
                 <a-input v-model:value="newApiInput" placeholder="输入API源" style="width: calc(100% - 80px);"
-                  @pressEnter="addNewApiSource" />
+                  @press-enter="addNewApiSource" />
                 <a-button type="primary" @click="addNewApiSource" :loading="addingSource">
                   添加
                 </a-button>
@@ -181,7 +181,7 @@
             <a-col :span="16">
               <a-input-group compact>
                 <a-input v-model:value="newBookApiSource.url" placeholder="输入轻小说API源" style="width: calc(100% - 80px);"
-                  @pressEnter="addNewBookApiSource" />
+                  @press-enter="addNewBookApiSource" />
                 <a-button type="primary" @click="addNewBookApiSource" :loading="addingBookSource">
                   添加
                 </a-button>
@@ -643,7 +643,6 @@ const fetchRemoteHeaders = async () => {
       if (headers && typeof headers === 'object' && Object.keys(headers).length > 0) {
         headersList.value = Object.entries(headers).map(([key, value]) => ({ key, value }))
         saveAllHeaders()
-        message.success('远程请求头配置已应用，如果没有生效请重启再尝试')
       } else {
         message.error('远程配置为空或格式不正确')
       }

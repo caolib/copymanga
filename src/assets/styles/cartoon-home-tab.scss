@@ -108,12 +108,12 @@
 
             .cartoon-count {
                 position: absolute;
-                top: 8px;
-                right: 8px;
-                background: rgba(0, 0, 0, 0.7);
+                top: 0;
+                right: 0;
+                background: rgba(0, 0, 0, 0.8);
                 color: white;
                 padding: 2px 8px;
-                border-radius: 12px;
+                border-bottom-left-radius: 10px;
                 font-size: 12px;
             }
         }

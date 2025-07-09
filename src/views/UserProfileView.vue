@@ -60,25 +60,9 @@
 
                         <!-- 浏览记录网格 -->
                         <div v-else-if="browseHistory.comics.list.length > 0" class="browse-grid">
-                            <a-card v-for="item in browseHistory.comics.list" :key="item.id" hoverable
-                                class="browse-card" @click="goToMangaDetail(item)">
-                                <div class="browse-cover">
-                                    <img :src="item.comic?.cover" :alt="item.comic?.name" />
-                                </div>
-                                <a-card-meta :title="item.comic?.name">
-                                    <template #description>
-                                        <div class="browse-author" v-if="item.comic?.author?.length">
-                                            {{item.comic.author.map(a => a.name).join(', ')}}
-                                        </div>
-                                        <div class="last-chapter">
-                                            上次看到：{{ item.last_chapter_name }}
-                                        </div>
-                                        <div class="browse-time">
-                                            更新时间：{{ formatDate(item.comic?.datetime_updated) }}
-                                        </div>
-                                    </template>
-                                </a-card-meta>
-                            </a-card>
+                            <MangaCard v-for="item in browseHistory.comics.list" :key="item.id" :manga="item.comic"
+                                :browsing="item" browsing-type="comic" display-type="card" class="browse-card"
+                                @click="goToMangaDetail(item)" />
                         </div>
 
                         <!-- 加载更多 -->
@@ -296,6 +280,7 @@ import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
+import MangaCard from '@/components/manga/MangaCard.vue'
 
 const router = useRouter()
 const userStore = useUserStore()

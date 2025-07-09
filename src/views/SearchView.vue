@@ -57,26 +57,8 @@
                 <a-row :gutter="[20, 20]">
                     <a-col v-for="manga in searchResults" :key="manga.path_word" :xs="12" :sm="8" :md="6" :lg="4"
                         :xl="3" :xxl="3">
-                        <a-card hoverable class="manga-card" @click="goToMangaDetail(manga)">
-                            <div class="manga-cover">
-                                <img :src="manga.cover" :alt="manga.name" @error="handleImageError" />
-                                <div class="manga-popular" v-if="manga.popular">
-                                    {{ formatNumber(manga.popular) }}
-                                </div>
-                            </div>
-                            <a-card-meta :title="manga.name">
-                                <template #description>
-                                    <div class="manga-info">
-                                        <div class="manga-alias" v-if="manga.alias">
-                                            {{ truncateText(manga.alias, 30) }}
-                                        </div>
-                                        <div class="manga-author" v-if="manga.author && manga.author.length">
-                                            {{manga.author.map(a => a.name).join(', ')}}
-                                        </div>
-                                    </div>
-                                </template>
-                            </a-card-meta>
-                        </a-card>
+                        <MangaCard :manga="manga" display-type="grid" :use-card-cover="true"
+                            @click="goToMangaDetail(manga)" />
                     </a-col>
                 </a-row>
             </div>
@@ -108,6 +90,7 @@ import { message } from 'ant-design-vue'
 import { searchManga } from '../api/manga'
 import { useMangaNavigation } from '../composables/useMangaNavigation'
 import { formatNumber } from '@/utils/number'
+import MangaCard from '@/components/manga/MangaCard.vue'
 
 const route = useRoute()
 const router = useRouter()

@@ -6,39 +6,27 @@
       <a-col :xs="24" :md="8">
         <a-card title="日排行榜" style="margin-bottom: 20px">
           <div v-for="(item, index) in homeData.rankDayComics?.list?.slice(0, 10) || []" :key="item.comic.path_word"
-            class="rank-item" @click="goToMangaDetail(item.comic)">
-            <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
-            <img :src="item.comic.cover" @error="handleImageError" :alt="item.comic.name" class="rank-cover" />
-            <div class="rank-info">
-              <div class="rank-title">{{ item.comic.name }}</div>
-              <div class="rank-popular">{{ item.comic.popular }}</div>
-            </div>
+            class="rank-item-container">
+            <MangaCard :manga="{ ...item.comic, popular: item.popular }" :item="item" :ranking="index + 1"
+              display-type="rank-item" click-type="online" class="rank-manga-card" />
           </div>
         </a-card>
       </a-col>
       <a-col :xs="24" :md="8">
         <a-card title="周排行榜" style="margin-bottom: 20px">
           <div v-for="(item, index) in homeData.rankWeekComics?.list?.slice(0, 10) || []" :key="item.comic.path_word"
-            class="rank-item" @click="goToMangaDetail(item.comic)">
-            <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
-            <img :src="item.comic.cover" @error="handleImageError" :alt="item.comic.name" class="rank-cover" />
-            <div class="rank-info">
-              <div class="rank-title">{{ item.comic.name }}</div>
-              <div class="rank-popular">{{ item.comic.popular }}</div>
-            </div>
+            class="rank-item-container">
+            <MangaCard :manga="{ ...item.comic, popular: item.popular }" :item="item" :ranking="index + 1"
+              display-type="rank-item" click-type="online" class="rank-manga-card" />
           </div>
         </a-card>
       </a-col>
       <a-col :xs="24" :md="8">
         <a-card title="月排行榜" style="margin-bottom: 20px">
           <div v-for="(item, index) in homeData.rankMonthComics?.list?.slice(0, 10) || []" :key="item.comic.path_word"
-            class="rank-item" @click="goToMangaDetail(item.comic)">
-            <span class="rank-number" :class="`rank-${index + 1}`">{{ index + 1 }}</span>
-            <img :src="item.comic.cover" @error="handleImageError" :alt="item.comic.name" class="rank-cover" />
-            <div class="rank-info">
-              <div class="rank-title">{{ item.comic.name }}</div>
-              <div class="rank-popular">{{ item.comic.popular }}</div>
-            </div>
+            class="rank-item-container">
+            <MangaCard :manga="{ ...item.comic, popular: item.popular }" :item="item" :ranking="index + 1"
+              display-type="rank-item" click-type="online" class="rank-manga-card" />
           </div>
         </a-card>
       </a-col>
@@ -98,11 +86,8 @@
         <a-row :gutter="16">
           <a-col v-for="item in homeData.recComics?.list || []" :key="item.comic.path_word" :xs="12" :sm="8" :md="6"
             :lg="4">
-            <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
-              <img :src="item.comic.cover" :alt="item.comic.name" class="manga-cover" />
-              <div class="manga-title">{{ item.comic.name }}</div>
-              <div class="manga-popular">人气: {{ item.comic.popular }}</div>
-            </a-card>
+            <MangaCard :manga="item.comic" :item="item" click-type="online" display-type="grid" :use-card-cover="true"
+              :natural-size="true" />
           </a-col>
         </a-row>
       </a-collapse-panel>
@@ -111,11 +96,8 @@
       <a-collapse-panel key="hotComics" header="热门漫画">
         <a-row :gutter="16">
           <a-col v-for="item in homeData.hotComics || []" :key="item.comic.path_word" :xs="12" :sm="8" :md="6" :lg="4">
-            <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
-              <img :src="item.comic.cover" :alt="item.comic.name" class="manga-cover" />
-              <div class="manga-title">{{ item.comic.name }}</div>
-              <div class="manga-popular">人气: {{ item.comic.popular }}</div>
-            </a-card>
+            <MangaCard :manga="item.comic" :item="item" click-type="online" display-type="grid" :use-card-cover="true"
+              :natural-size="true" />
           </a-col>
         </a-row>
       </a-collapse-panel>
@@ -124,11 +106,8 @@
       <a-collapse-panel key="newComics" header="新作漫画">
         <a-row :gutter="16">
           <a-col v-for="item in homeData.newComics || []" :key="item.comic.path_word" :xs="12" :sm="8" :md="6" :lg="4">
-            <a-card hoverable class="manga-card" @click="goToMangaDetail(item.comic)">
-              <img :src="item.comic.cover" :alt="item.comic.name" class="manga-cover" />
-              <div class="manga-title">{{ item.comic.name }}</div>
-              <div class="manga-popular">人气: {{ item.comic.popular }}</div>
-            </a-card>
+            <MangaCard :manga="item.comic" :item="item" click-type="online" display-type="grid" :use-card-cover="true"
+              :natural-size="true" />
           </a-col>
         </a-row>
       </a-collapse-panel>
@@ -138,11 +117,8 @@
         <a-row :gutter="16">
           <a-col v-for="comic in homeData.finishComics?.list || []" :key="comic.path_word" :xs="12" :sm="8" :md="6"
             :lg="4">
-            <a-card hoverable class="manga-card" @click="goToMangaDetail(comic)">
-              <img :src="comic.cover" :alt="comic.name" class="manga-cover" />
-              <div class="manga-title">{{ comic.name }}</div>
-              <div class="manga-popular">人气: {{ comic.popular }}</div>
-            </a-card>
+            <MangaCard :manga="comic" click-type="online" display-type="grid" :use-card-cover="true"
+              :natural-size="true" />
           </a-col>
         </a-row>
       </a-collapse-panel>
@@ -157,6 +133,7 @@ import { useHomeStore } from '@/stores/home.js'
 import { useMangaNavigation } from '@/composables/useMangaNavigation.js'
 import { getCurrentApiSource } from '@/config/server-config.js'
 import { openExternalUrl } from '@/utils/external-link.js'
+import MangaCard from '@/components/manga/MangaCard.vue'
 import { formatDate } from '@/utils/date.js'
 import { handleImageError } from '@/utils/image.js'
 import { getNotice } from '@/api/system'

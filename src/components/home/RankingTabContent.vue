@@ -61,68 +61,9 @@
     <a-spin :spinning="isLoading && rankingList.length === 0">
       <a-row :gutter="16" class="manga-list">
         <a-col class="manga-col" v-for="(item, index) in rankingList" :key="index" :xs="12" :sm="8" :md="6" :lg="4">
-          <a-card hoverable class="manga-card" @click="handleItemClick(item)">
-            <div class="rank-number" :class="{ top3: index < 3 }">{{ index + 1 }}</div>
-            <!-- 漫画和轻小说的数据结构不同，需要分别处理 -->
-            <template v-if="contentType === 1 && item.comic">
-              <img :src="item.comic.cover || ''" :alt="item.comic.name || '未知'" class="manga-cover" />
-              <div class="manga-info">
-                <div class="manga-title">{{ item.comic.name || '未知标题' }}</div>
-                <div class="manga-author">
-                  <template v-if="item.comic.author && item.comic.author.length">
-                    {{item.comic.author.map((a) => a.name).join(', ')}}
-                  </template>
-                </div>
-                <div class="manga-stats">
-                  <span class="popular">热度: {{ formatNumber(item.popular || 0) }}</span>
-                  <span class="rise" :class="{ up: item.rise_sort > 0, down: item.rise_sort < 0 }">
-                    <template v-if="item.rise_sort > 0">↑{{ item.rise_sort }}</template>
-                    <template v-else-if="item.rise_sort < 0">↓{{ Math.abs(item.rise_sort) }}</template>
-                    <template v-else>-</template>
-                  </span>
-                </div>
-              </div>
-            </template>
-            <template v-else-if="contentType === 5 && item.book">
-              <img :src="item.book.cover || ''" :alt="item.book.name || '未知'" class="manga-cover" />
-              <div class="manga-info">
-                <div class="manga-title">{{ item.book.name || '未知标题' }}</div>
-                <div class="manga-author">
-                  <template v-if="item.book.author && item.book.author.length">
-                    {{item.book.author.map((a) => a.name).join(', ')}}
-                  </template>
-                </div>
-                <div class="manga-stats">
-                  <span class="popular">热度: {{ formatNumber(item.popular || 0) }}</span>
-                  <span class="rise" :class="{ up: item.rise_sort > 0, down: item.rise_sort < 0 }">
-                    <template v-if="item.rise_sort > 0">↑{{ item.rise_sort }}</template>
-                    <template v-else-if="item.rise_sort < 0">↓{{ Math.abs(item.rise_sort) }}</template>
-                    <template v-else>-</template>
-                  </span>
-                </div>
-              </div>
-            </template>
-            <template v-else>
-              <!-- 数据异常时的备用显示 -->
-              <div class="manga-cover" style="
-                  height: 210px;
-                  background-color: #f0f0f0;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                ">
-                <span>数据加载中</span>
-              </div>
-              <div class="manga-info">
-                <div class="manga-title">加载中...</div>
-                <div class="manga-author"></div>
-                <div class="manga-stats">
-                  <span class="popular">热度: -</span>
-                  <span class="rise">-</span>
-                </div>
-              </div>
-            </template>
-          </a-card>
+          <MangaCard :manga="getMangaWithPopular(item)" :item="item" :ranking="index + 1"
+            :trend="getTrendType(item.rise_sort)" :trend-value="getTrendValue(item.rise_sort)" display-type="grid"
+            :use-card-cover="true" click-type="custom" :on-click="() => handleItemClick(item)" :natural-size="true" />
         </a-col>
       </a-row>
     </a-spin>
@@ -136,8 +77,8 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMangaRankingStore } from '@/stores/index.js'
-import { formatNumber } from '@/utils/number.js'
 import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
+import MangaCard from '@/components/manga/MangaCard.vue'
 
 const router = useRouter()
 const rankingStore = useMangaRankingStore()
@@ -194,6 +135,30 @@ const handleItemClick = (item) => {
       name: 'BookDetail',
       params: { pathWord: item.book.path_word },
     })
+  }
+}
+
+// 获取趋势类型
+const getTrendType = (riseSort) => {
+  if (riseSort > 0) return 'up'
+  if (riseSort < 0) return 'down'
+  return 'same'
+}
+
+// 获取趋势变化值
+const getTrendValue = (riseSort) => {
+  return Math.abs(riseSort || 0)
+}
+
+// 获取包含热度信息的漫画数据
+const getMangaWithPopular = (item) => {
+  const manga = contentType.value === 1 ? item.comic : item.book
+  if (!manga) return {}
+
+  // 将热度信息合并到漫画数据中
+  return {
+    ...manga,
+    popular: item.popular || 0
   }
 }
 

@@ -57,59 +57,12 @@
                     <div v-if="contentLoading" class="content-loading">
                         <a-skeleton active :paragraph="{ rows: 10 }" />
                     </div> <!-- 漫画列表 -->
-                    <div v-else-if="topicContent.length > 0" class="content-grid"> <a-row :gutter="[24, 24]">
+                    <div v-else-if="topicContent.length > 0" class="content-grid">
+                        <a-row :gutter="[24, 24]">
                             <a-col v-for="item in topicContent" :key="item.path_word" :xs="12" :sm="8" :md="6" :lg="4"
-                                :xl="4" :xxl="4"> <a-card hoverable class="manga-card" @click="goToDetail(item)">
-                                    <template #cover>
-                                        <div class="manga-cover">
-                                            <img :src="item.cover" :alt="item.name" @error="handleImageError" />
-                                            <div class="manga-overlay">
-                                                <div class="manga-meta">
-                                                    <span v-if="item.popular" class="manga-popular">
-                                                        人气: {{ formatNumber(item.popular) }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </template>
-
-                                    <a-card-meta>
-                                        <template #title>
-                                            <div class="manga-title" :title="item.name">
-                                                {{ item.name }}
-                                            </div>
-                                        </template> <template #description>
-                                            <div class="manga-info">
-                                                <!-- 写真专题显示不同信息 -->
-                                                <div v-if="currentTopic.type === 4">
-                                                    <div v-if="item.brief" class="post-brief">
-                                                        {{ item.brief }}
-                                                    </div>
-                                                    <div v-if="item.tags && item.tags.length > 0" class="post-tags">
-                                                        <a-tag v-for="tag in item.tags.slice(0, 3)" :key="tag.path_word"
-                                                            size="small">
-                                                            {{ tag.name || tag.path_word }}
-                                                        </a-tag>
-                                                    </div>
-                                                </div>
-                                                <!-- 漫画专题显示原有信息 -->
-                                                <div v-else>
-                                                    <div v-if="item.author && item.author.length > 0"
-                                                        class="manga-author">
-                                                        作者：{{item.author.map(a => a.name).join(', ')}}
-                                                    </div>
-                                                    <div v-if="item.theme && item.theme.length > 0"
-                                                        class="manga-themes">
-                                                        <a-tag v-for="theme in item.theme.slice(0, 3)"
-                                                            :key="theme.path_word" size="small">
-                                                            {{ theme.name }}
-                                                        </a-tag>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </template>
-                                    </a-card-meta>
-                                </a-card>
+                                :xl="4" :xxl="4">
+                                <MangaCard :manga="item" display-type="grid" :use-card-cover="true" click-type="custom"
+                                    :on-click="() => goToDetail(item)" :natural-size="true" />
                             </a-col>
                         </a-row>
 
@@ -152,6 +105,7 @@ import { formatDate } from '../utils/date'
 import { ArrowLeftOutlined } from '@ant-design/icons-vue'
 import { formatNumber } from '@/utils/number'
 import { useRouteHistory } from '@/composables/useRouteHistory'
+import MangaCard from '@/components/manga/MangaCard.vue'
 
 const route = useRoute()
 const router = useRouter()

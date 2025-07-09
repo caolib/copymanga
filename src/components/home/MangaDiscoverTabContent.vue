@@ -48,14 +48,8 @@
     <a-spin :spinning="loading && mangaList.length === 0">
       <a-row :gutter="16" class="manga-list">
         <a-col class="manga-col" v-for="manga in mangaList" :key="manga.path_word" :xs="12" :sm="8" :md="6" :lg="4">
-          <a-card hoverable class="manga-card" @click="goToMangaDetail(manga)">
-            <img :src="manga.cover" :alt="manga.name" class="manga-cover" />
-            <div class="manga-info">
-              <div class="manga-title">{{ manga.name }}</div>
-              <div class="manga-author">{{ getAuthors(manga.author) }}</div>
-              <div class="manga-date">更新: {{ formatDate(manga.datetime_updated) }}</div>
-            </div>
-          </a-card>
+          <MangaCard :manga="manga" click-type="online" :show-author="true" :show-date="true"
+            :date-text="`更新: ${formatDate(manga.datetime_updated)}`" />
         </a-col>
       </a-row>
     </a-spin>
@@ -75,6 +69,7 @@ import { useMangaNavigation } from '@/composables/useMangaNavigation'
 import { h } from 'vue'
 import { FireOutlined, FieldTimeOutlined } from '@ant-design/icons-vue'
 import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
+import MangaCard from '@/components/manga/MangaCard.vue'
 
 const router = useRouter()
 const mangaDiscoverStore = useMangaDiscoverStore()
