@@ -182,7 +182,7 @@ const handleNoticePanelChange = async (keys) => {
   if (keys.includes('notices') && !notice.value.length) {
     noticeLoading.value = true
     await getNotice().then(res => {
-      console.log('获取公告数据:', JSON.stringify(res))
+      // console.log('获取公告数据:', JSON.stringify(res))
       notice.value = res.results.code
     }).finally(() => {
       noticeLoading.value = false

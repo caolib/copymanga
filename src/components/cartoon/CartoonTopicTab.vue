@@ -29,19 +29,11 @@
       </div>
       <!-- 实际数据 -->
       <div v-else-if="topics.length" class="topic-grid">
-        <div
-          v-for="topic in topics"
-          :key="topic.path_word"
-          class="topic-card"
-          @click="goToTopicDetail(topic.path_word, topic.type)"
-        >
+        <div v-for="topic in topics" :key="topic.path_word" class="topic-card"
+          @click="goToTopicDetail(topic.path_word, topic.type)">
           <div class="topic-cover">
-            <a-image
-              :src="topic.cover"
-              :alt="topic.title"
-              :preview="false"
-              style="width: 100%; height: 100px; object-fit: cover"
-            />
+            <a-image :src="topic.cover" :alt="topic.title" :preview="false"
+              style="width: 100%; height: 100px; object-fit: cover" />
           </div>
           <div class="topic-info">
             <h4 class="topic-title" :title="topic.title">{{ topic.title }}</h4>
@@ -58,16 +50,7 @@
     </div>
 
     <!-- 加载更多 -->
-    <div class="load-more" v-if="topics.length && hasMore">
-      <a-button @mouseenter="loadMore" :loading="loadingMore" type="default" block>
-        加载更多
-      </a-button>
-    </div>
-
-    <!-- 无更多数据提示 -->
-    <div class="no-more" v-if="topics.length && !hasMore">
-      <a-divider>已加载全部内容</a-divider>
-    </div>
+    <LoadMoreButton v-if="topics.length > 0" :has-more="hasMore" :loading="loadingMore" @load-more="loadMore" />
   </div>
 </template>
 
@@ -77,6 +60,7 @@ import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { getCartoonTopics } from '@/api/cartoon.js'
 import { formatDate } from '@/utils/date.js'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 
 const router = useRouter()
 

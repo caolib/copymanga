@@ -18,16 +18,9 @@
     </a-row>
 
     <!-- 加载更多区域 -->
-    <div
-      v-if="newestData.list && newestData.list.length > 0 && !(newestData.offset + newestData.limit >= newestData.total)"
-      class="load-more-container" @mouseenter="loadMoreNewest">
-      <div class="load-more-text" :class="{ loading: homeStore.isNewestLoading }">
-        {{ homeStore.isNewestLoading ? '加载中...' : '加载更多' }}
-      </div>
-    </div>
-    <div v-else-if="newestData.list && newestData.list.length > 0" class="load-more-container">
-      <div class="load-more-text no-more">没有更多了</div>
-    </div>
+    <LoadMoreButton v-if="newestData.list && newestData.list.length > 0"
+      :has-more="!(newestData.offset + newestData.limit >= newestData.total)" :loading="homeStore.isNewestLoading"
+      @load-more="loadMoreNewest" />
   </div>
 </template>
 
@@ -36,6 +29,7 @@ import { computed } from 'vue'
 import { useHomeStore } from '@/stores/home.js'
 import { useMangaNavigation } from '@/composables/useMangaNavigation.js'
 import { formatDate } from '@/utils/date.js'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 
 const homeStore = useHomeStore()
 const { goToMangaDetail } = useMangaNavigation()
@@ -43,40 +37,31 @@ const { goToMangaDetail } = useMangaNavigation()
 // 数据
 const newestData = computed(() => homeStore.newestData)
 
-// 加载更多最新漫画（添加防抖）
-let loadMoreTimer = null
+// 加载更多最新漫画
 const loadMoreNewest = () => {
   if (homeStore.isNewestLoading) return
 
-  // 清除之前的定时器
-  if (loadMoreTimer) {
-    clearTimeout(loadMoreTimer)
-  }
+  const offset = newestData.value.offset + newestData.value.limit
+  homeStore.isNewestLoading = true
 
-  // 设置新的定时器，300ms后执行加载
-  loadMoreTimer = setTimeout(() => {
-    const offset = newestData.value.offset + newestData.value.limit
-    homeStore.isNewestLoading = true
-
-    import('../../api/manga').then(({ getNewestManga }) => {
-      getNewestManga('', newestData.value.limit, offset)
-        .then((res) => {
-          if (res && res.code === 200 && res.results) {
-            // 合并新数据到现有数据
-            homeStore.newestData = {
-              ...res.results,
-              list: [...(homeStore.newestData.list || []), ...(res.results.list || [])],
-            }
+  import('../../api/manga').then(({ getNewestManga }) => {
+    getNewestManga('', newestData.value.limit, offset)
+      .then((res) => {
+        if (res && res.code === 200 && res.results) {
+          // 合并新数据到现有数据
+          homeStore.newestData = {
+            ...res.results,
+            list: [...(homeStore.newestData.list || []), ...(res.results.list || [])],
           }
-        })
-        .catch((error) => {
-          console.error('加载更多最新漫画失败:', error)
-        })
-        .finally(() => {
-          homeStore.isNewestLoading = false
-        })
-    })
-  }, 300)
+        }
+      })
+      .catch((error) => {
+        console.error('加载更多最新漫画失败:', error)
+      })
+      .finally(() => {
+        homeStore.isNewestLoading = false
+      })
+  })
 }
 </script>
 

@@ -378,36 +378,10 @@
     }
 }
 
-// 加载更多容器
-.load-more-container {
-    text-align: center;
+// 新的加载更多样式，使用antdv按钮
+.load-more {
     margin: 20px 0;
-    padding: 10px 0;
-    cursor: pointer;
-
-    .load-more-text {
-        display: inline-block;
-        padding: 8px 16px;
-        border-radius: 4px;
-        background-color: #f0f0f0;
-        color: #666;
-        transition: all 0.3s;
-
-        &:hover {
-            background-color: #e0e0e0;
-        }
-
-        &.loading {
-            background-color: #e6f7ff;
-            color: #1890ff;
-        }
-
-        &.no-more {
-            background-color: #f5f5f5;
-            color: #999;
-            cursor: default;
-        }
-    }
+    text-align: center;
 }
 
 .search-container {

@@ -3,7 +3,7 @@
     <!-- 搜索区域 -->
     <div class="search-section">
       <a-input-search v-model:value="searchKeyword" placeholder="请输入动画名称..." size="large" enter-button
-        :loading="loading" @search="handleSearch" @pressEnter="handleSearch" class="search-input" />
+        :loading="loading" @search="handleSearch" @press-enter="handleSearch" class="search-input" />
     </div>
 
     <!-- 搜索结果 -->
@@ -63,14 +63,7 @@
     </div>
 
     <!-- 加载更多 -->
-    <div class="load-more" v-if="cartoons.length && hasMore">
-      <a-button @mouseenter="loadMore" :loading="loadingMore" type="default" block> 加载更多 </a-button>
-    </div>
-
-    <!-- 无更多数据提示 -->
-    <div class="no-more" v-if="cartoons.length && !hasMore && hasSearched">
-      <a-divider>已加载全部搜索结果</a-divider>
-    </div>
+    <LoadMoreButton v-if="cartoons.length > 0" :has-more="hasMore" :loading="loadingMore" @load-more="loadMore" />
   </div>
 </template>
 
@@ -78,6 +71,7 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 import { searchCartoon } from '@/api/cartoon.js'
 import { formatNumber } from '@/utils/number.js'
 

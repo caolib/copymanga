@@ -4,18 +4,10 @@
     <div class="filters-section">
       <div class="filter-group">
         <div class="filter-buttons">
-          <a-button
-            :type="contentType === 1 ? 'primary' : 'default'"
-            size="small"
-            @click="handleContentTypeChange(1)"
-          >
+          <a-button :type="contentType === 1 ? 'primary' : 'default'" size="small" @click="handleContentTypeChange(1)">
             漫画
           </a-button>
-          <a-button
-            :type="contentType === 5 ? 'primary' : 'default'"
-            size="small"
-            @click="handleContentTypeChange(5)"
-          >
+          <a-button :type="contentType === 5 ? 'primary' : 'default'" size="small" @click="handleContentTypeChange(5)">
             轻小说
           </a-button>
         </div>
@@ -23,32 +15,20 @@
 
       <div class="filter-group">
         <div class="filter-buttons">
-          <a-button
-            :type="dateType === 'day' ? 'primary' : 'default'"
-            size="small"
-            @click="handleDateTypeChange('day')"
-          >
+          <a-button :type="dateType === 'day' ? 'primary' : 'default'" size="small"
+            @click="handleDateTypeChange('day')">
             日榜
           </a-button>
-          <a-button
-            :type="dateType === 'week' ? 'primary' : 'default'"
-            size="small"
-            @click="handleDateTypeChange('week')"
-          >
+          <a-button :type="dateType === 'week' ? 'primary' : 'default'" size="small"
+            @click="handleDateTypeChange('week')">
             周榜
           </a-button>
-          <a-button
-            :type="dateType === 'month' ? 'primary' : 'default'"
-            size="small"
-            @click="handleDateTypeChange('month')"
-          >
+          <a-button :type="dateType === 'month' ? 'primary' : 'default'" size="small"
+            @click="handleDateTypeChange('month')">
             月榜
           </a-button>
-          <a-button
-            :type="dateType === 'total' ? 'primary' : 'default'"
-            size="small"
-            @click="handleDateTypeChange('total')"
-          >
+          <a-button :type="dateType === 'total' ? 'primary' : 'default'" size="small"
+            @click="handleDateTypeChange('total')">
             总榜
           </a-button>
         </div>
@@ -56,25 +36,16 @@
 
       <div class="filter-group">
         <div class="filter-buttons">
-          <a-button
-            :type="audienceType === '' ? 'primary' : 'default'"
-            size="small"
-            @click="handleAudienceTypeChange('')"
-          >
+          <a-button :type="audienceType === '' ? 'primary' : 'default'" size="small"
+            @click="handleAudienceTypeChange('')">
             全部
           </a-button>
-          <a-button
-            :type="audienceType === 'male' ? 'primary' : 'default'"
-            size="small"
-            @click="handleAudienceTypeChange('male')"
-          >
+          <a-button :type="audienceType === 'male' ? 'primary' : 'default'" size="small"
+            @click="handleAudienceTypeChange('male')">
             男频
           </a-button>
-          <a-button
-            :type="audienceType === 'female' ? 'primary' : 'default'"
-            size="small"
-            @click="handleAudienceTypeChange('female')"
-          >
+          <a-button :type="audienceType === 'female' ? 'primary' : 'default'" size="small"
+            @click="handleAudienceTypeChange('female')">
             女频
           </a-button>
         </div>
@@ -89,63 +60,43 @@
     <!-- 排行榜列表 -->
     <a-spin :spinning="isLoading && rankingList.length === 0">
       <a-row :gutter="16" class="manga-list">
-        <a-col
-          class="manga-col"
-          v-for="(item, index) in rankingList"
-          :key="index"
-          :xs="12"
-          :sm="8"
-          :md="6"
-          :lg="4"
-        >
+        <a-col class="manga-col" v-for="(item, index) in rankingList" :key="index" :xs="12" :sm="8" :md="6" :lg="4">
           <a-card hoverable class="manga-card" @click="handleItemClick(item)">
             <div class="rank-number" :class="{ top3: index < 3 }">{{ index + 1 }}</div>
             <!-- 漫画和轻小说的数据结构不同，需要分别处理 -->
             <template v-if="contentType === 1 && item.comic">
-              <img
-                :src="item.comic.cover || ''"
-                :alt="item.comic.name || '未知'"
-                class="manga-cover"
-              />
+              <img :src="item.comic.cover || ''" :alt="item.comic.name || '未知'" class="manga-cover" />
               <div class="manga-info">
                 <div class="manga-title">{{ item.comic.name || '未知标题' }}</div>
                 <div class="manga-author">
                   <template v-if="item.comic.author && item.comic.author.length">
-                    {{ item.comic.author.map((a) => a.name).join(', ') }}
+                    {{item.comic.author.map((a) => a.name).join(', ')}}
                   </template>
                 </div>
                 <div class="manga-stats">
                   <span class="popular">热度: {{ formatNumber(item.popular || 0) }}</span>
                   <span class="rise" :class="{ up: item.rise_sort > 0, down: item.rise_sort < 0 }">
                     <template v-if="item.rise_sort > 0">↑{{ item.rise_sort }}</template>
-                    <template v-else-if="item.rise_sort < 0"
-                      >↓{{ Math.abs(item.rise_sort) }}</template
-                    >
+                    <template v-else-if="item.rise_sort < 0">↓{{ Math.abs(item.rise_sort) }}</template>
                     <template v-else>-</template>
                   </span>
                 </div>
               </div>
             </template>
             <template v-else-if="contentType === 5 && item.book">
-              <img
-                :src="item.book.cover || ''"
-                :alt="item.book.name || '未知'"
-                class="manga-cover"
-              />
+              <img :src="item.book.cover || ''" :alt="item.book.name || '未知'" class="manga-cover" />
               <div class="manga-info">
                 <div class="manga-title">{{ item.book.name || '未知标题' }}</div>
                 <div class="manga-author">
                   <template v-if="item.book.author && item.book.author.length">
-                    {{ item.book.author.map((a) => a.name).join(', ') }}
+                    {{item.book.author.map((a) => a.name).join(', ')}}
                   </template>
                 </div>
                 <div class="manga-stats">
                   <span class="popular">热度: {{ formatNumber(item.popular || 0) }}</span>
                   <span class="rise" :class="{ up: item.rise_sort > 0, down: item.rise_sort < 0 }">
                     <template v-if="item.rise_sort > 0">↑{{ item.rise_sort }}</template>
-                    <template v-else-if="item.rise_sort < 0"
-                      >↓{{ Math.abs(item.rise_sort) }}</template
-                    >
+                    <template v-else-if="item.rise_sort < 0">↓{{ Math.abs(item.rise_sort) }}</template>
                     <template v-else>-</template>
                   </span>
                 </div>
@@ -153,16 +104,13 @@
             </template>
             <template v-else>
               <!-- 数据异常时的备用显示 -->
-              <div
-                class="manga-cover"
-                style="
+              <div class="manga-cover" style="
                   height: 210px;
                   background-color: #f0f0f0;
                   display: flex;
                   align-items: center;
                   justify-content: center;
-                "
-              >
+                ">
                 <span>数据加载中</span>
               </div>
               <div class="manga-info">
@@ -180,14 +128,7 @@
     </a-spin>
 
     <!-- 加载更多 -->
-    <div v-if="hasMore && !isLoading" class="load-more-container" @mouseenter="loadMore">
-      <div class="load-more-text" :class="{ loading: isLoading }">
-        {{ isLoading ? '加载中...' : '加载更多' }}
-      </div>
-    </div>
-    <div v-else-if="rankingList.length > 0" class="load-more-container">
-      <div class="load-more-text no-more">没有更多了</div>
-    </div>
+    <LoadMoreButton v-if="rankingList.length > 0" :has-more="hasMore" :loading="isLoading" @load-more="loadMore" />
   </div>
 </template>
 
@@ -196,6 +137,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useMangaRankingStore } from '@/stores/index.js'
 import { formatNumber } from '@/utils/number.js'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 
 const router = useRouter()
 const rankingStore = useMangaRankingStore()

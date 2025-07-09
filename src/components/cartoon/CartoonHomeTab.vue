@@ -5,29 +5,17 @@
       <div class="filter-group">
         <div class="filter-label">排序方式</div>
         <div class="filter-buttons">
-          <a-button
-            :type="ordering === '-datetime_updated' ? 'primary' : 'default'"
-            size="small"
-            @click="changeOrdering('-datetime_updated')"
-          >
+          <a-button :type="ordering === '-datetime_updated' ? 'primary' : 'default'" size="small"
+            @click="changeOrdering('-datetime_updated')">
             最新更新
           </a-button>
-          <a-button
-            :type="ordering === '-popular' ? 'primary' : 'default'"
-            size="small"
-            @click="changeOrdering('-popular')"
-          >
+          <a-button :type="ordering === '-popular' ? 'primary' : 'default'" size="small"
+            @click="changeOrdering('-popular')">
             人气排序
           </a-button>
         </div>
         <div class="filter-actions">
-          <a-button
-            type="primary"
-            @click="refreshCartoons"
-            :icon="h(ReloadOutlined)"
-            :loading="loading"
-            size="small"
-          >
+          <a-button type="primary" @click="refreshCartoons" :icon="h(ReloadOutlined)" :loading="loading" size="small">
             刷新
           </a-button>
           <div v-if="lastUpdateTime" class="update-info">
@@ -40,20 +28,12 @@
       <div class="filter-group">
         <div class="filter-label">主题分类</div>
         <div class="filter-buttons">
-          <a-button
-            :type="selectedTheme === '' ? 'primary' : 'default'"
-            size="small"
-            @click="handleThemeChange('')"
-          >
+          <a-button :type="selectedTheme === '' ? 'primary' : 'default'" size="small" @click="handleThemeChange('')">
             全部主题
           </a-button>
-          <a-button
-            v-for="theme in themes"
-            :key="theme.path_word"
-            :type="selectedTheme === theme.path_word ? 'primary' : 'default'"
-            size="small"
-            @click="handleThemeChange(theme.path_word)"
-          >
+          <a-button v-for="theme in themes" :key="theme.path_word"
+            :type="selectedTheme === theme.path_word ? 'primary' : 'default'" size="small"
+            @click="handleThemeChange(theme.path_word)">
             {{ theme.name }} ({{ theme.count }})
           </a-button>
         </div>
@@ -84,19 +64,11 @@
 
       <!-- 实际数据 -->
       <div v-else-if="cartoons.length" class="cartoon-grid">
-        <div
-          v-for="cartoon in cartoons"
-          :key="cartoon.path_word"
-          class="cartoon-card"
-          @click="goToDetail(cartoon.path_word)"
-        >
+        <div v-for="cartoon in cartoons" :key="cartoon.path_word" class="cartoon-card"
+          @click="goToDetail(cartoon.path_word)">
           <div class="cartoon-cover">
-            <a-image
-              :src="cartoon.cover"
-              :alt="cartoon.name"
-              :preview="false"
-              style="width: 100%; height: 100%; object-fit: cover"
-            />
+            <a-image :src="cartoon.cover" :alt="cartoon.name" :preview="false"
+              style="width: 100%; height: 100%; object-fit: cover" />
             <div class="cartoon-count">{{ cartoon.count }}集</div>
           </div>
           <div class="cartoon-info">
@@ -118,16 +90,7 @@
       <a-empty v-else description="暂无动画数据" />
     </div>
     <!-- 加载更多 -->
-    <div class="load-more" v-if="cartoons.length && hasMore">
-      <a-button @mouseenter="loadMore" :loading="loadingMore" type="default" block>
-        加载更多
-      </a-button>
-    </div>
-
-    <!-- 无更多数据提示 -->
-    <div class="no-more" v-if="cartoons.length && !hasMore">
-      <a-divider>已加载全部内容</a-divider>
-    </div>
+    <LoadMoreButton v-if="cartoons.length > 0" :has-more="hasMore" :loading="loadingMore" @load-more="loadMore" />
   </div>
 </template>
 
@@ -138,6 +101,7 @@ import { message } from 'ant-design-vue'
 import { useCartoonStore } from '@/stores/cartoon.js'
 import { formatDate } from '@/utils/date.js'
 import { formatNumber } from '@/utils/number.js'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 import { ReloadOutlined } from '@ant-design/icons-vue'
 
 const router = useRouter()

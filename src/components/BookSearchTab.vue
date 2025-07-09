@@ -3,7 +3,7 @@
     <!-- 搜索区域 -->
     <div class="search-section">
       <a-input-search v-model:value="searchKeyword" placeholder="请输入轻小说名称..." size="large" enter-button=""
-        :loading="loading" @search="handleSearch" @pressEnter="handleSearch" class="search-input" />
+        :loading="loading" @search="handleSearch" @press-enter="handleSearch" class="search-input" />
 
       <!-- 搜索类型选择 -->
       <div class="search-filters" v-if="searchKeyword">
@@ -69,14 +69,7 @@
     </div>
 
     <!-- 加载更多 -->
-    <div class="load-more" v-if="books.length && hasMore">
-      <a-button @mouseenter="loadMore" :loading="loadingMore" type="default" block> 加载更多 </a-button>
-    </div>
-
-    <!-- 无更多数据提示 -->
-    <div class="no-more" v-if="books.length && !hasMore && hasSearched">
-      <a-divider>已加载全部搜索结果</a-divider>
-    </div>
+    <LoadMoreButton v-if="books.length > 0" :has-more="hasMore" :loading="loadingMore" @load-more="loadMore" />
   </div>
 </template>
 
@@ -86,6 +79,7 @@ import { useRouter } from 'vue-router'
 import { message } from 'ant-design-vue'
 import { searchBooks } from '@/api/book'
 import { formatNumber } from '@/utils/number'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 
 const router = useRouter()
 

@@ -61,17 +61,7 @@
     </a-spin>
 
     <!-- 加载更多 -->
-    <div v-if="hasMore && !loading" class="load-more-container" @mouseenter="loadMore">
-      <div class="load-more-text">
-        {{ loading ? '加载中...' : '滑过加载更多' }}
-      </div>
-    </div>
-    <div v-else-if="loading && mangaList.length > 0" class="load-more-container">
-      <div class="load-more-text loading">加载中...</div>
-    </div>
-    <div v-else-if="mangaList.length > 0" class="load-more-container">
-      <div class="load-more-text no-more">没有更多了</div>
-    </div>
+    <LoadMoreButton v-if="mangaList.length > 0" :has-more="hasMore" :loading="loading" @load-more="loadMore" />
   </div>
 </template>
 
@@ -84,6 +74,7 @@ import { message } from 'ant-design-vue'
 import { useMangaNavigation } from '@/composables/useMangaNavigation'
 import { h } from 'vue'
 import { FireOutlined, FieldTimeOutlined } from '@ant-design/icons-vue'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 
 const router = useRouter()
 const mangaDiscoverStore = useMangaDiscoverStore()

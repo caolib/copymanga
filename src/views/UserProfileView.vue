@@ -82,13 +82,9 @@
                         </div>
 
                         <!-- 加载更多 -->
-                        <div v-if="browseHistory.comics.hasMore && browseHistory.comics.list.length > 0"
-                            class="load-more">
-                            <a-button type="primary" @mouseenter="loadMore('comics')"
-                                :loading="browseHistory.comics.loading" block>
-                                加载更多
-                            </a-button>
-                        </div>
+                        <LoadMoreButton v-if="browseHistory.comics.list.length > 0"
+                            :has-more="browseHistory.comics.hasMore" :loading="browseHistory.comics.loading"
+                            @load-more="loadMoreComics" />
                     </div>
                 </a-tab-pane>
 
@@ -152,13 +148,9 @@
                         </div>
 
                         <!-- 加载更多 -->
-                        <div v-if="browseHistory.books.hasMore && browseHistory.books.list.length > 0"
-                            class="load-more">
-                            <a-button type="primary" @mouseenter="loadMore('books')"
-                                :loading="browseHistory.books.loading" block>
-                                加载更多
-                            </a-button>
-                        </div>
+                        <LoadMoreButton v-if="browseHistory.books.list.length > 0"
+                            :has-more="browseHistory.books.hasMore" :loading="browseHistory.books.loading"
+                            @load-more="loadMoreBooks" />
                     </div>
                 </a-tab-pane>
 
@@ -222,13 +214,9 @@
                         </div>
 
                         <!-- 加载更多 -->
-                        <div v-if="browseHistory.posts.hasMore && browseHistory.posts.list.length > 0"
-                            class="load-more">
-                            <a-button type="primary" @mouseenter="loadMore('posts')"
-                                :loading="browseHistory.posts.loading" block>
-                                加载更多
-                            </a-button>
-                        </div>
+                        <LoadMoreButton v-if="browseHistory.posts.list.length > 0"
+                            :has-more="browseHistory.posts.hasMore" :loading="browseHistory.posts.loading"
+                            @load-more="loadMorePosts" />
                     </div>
                 </a-tab-pane>
 
@@ -292,13 +280,9 @@
                         </div>
 
                         <!-- 加载更多 -->
-                        <div v-if="browseHistory.cartoons.hasMore && browseHistory.cartoons.list.length > 0"
-                            class="load-more">
-                            <a-button type="primary" @mouseenter="loadMore('cartoons')"
-                                :loading="browseHistory.cartoons.loading" block>
-                                加载更多
-                            </a-button>
-                        </div>
+                        <LoadMoreButton v-if="browseHistory.cartoons.list.length > 0"
+                            :has-more="browseHistory.cartoons.hasMore" :loading="browseHistory.cartoons.loading"
+                            @load-more="loadMoreCartoons" />
                     </div>
                 </a-tab-pane>
             </a-tabs>
@@ -311,6 +295,7 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
+import LoadMoreButton from '@/components/common/LoadMoreButton.vue'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -383,8 +368,20 @@ const refreshCurrentBrowseHistory = async () => {
 }
 
 // 加载更多
-const loadMore = (type) => {
-    loadBrowseHistory(type, false)
+const loadMoreComics = () => {
+    loadBrowseHistory('comics', false)
+}
+
+const loadMoreBooks = () => {
+    loadBrowseHistory('books', false)
+}
+
+const loadMorePosts = () => {
+    loadBrowseHistory('posts', false)
+}
+
+const loadMoreCartoons = () => {
+    loadBrowseHistory('cartoons', false)
 }
 
 // 跳转到详情页
