@@ -1,18 +1,18 @@
 ## Change
 
-### fix
+### feat
+- [9ec6afe] ✨ feat: 回退按钮添加历史列表，方便快速回退
+- [aa71101] ✨ feat: 添加随机设备信息生成功能
 
-- [90daa56] 🐛 fix: 自动登录后返回上个界面
-- [38fed0a] 🐛 fix: 路由器工作模式改为使用hash模式
-- [d2f8429] 🐛 fix: 修改“加载更多”按钮的触发逻辑
-- [359c9b5] 🐛 fix(漫画): 修复作者界面
+### fix
+- [12c6597] 🐛 fix: 修复主页公告展示逻辑
 
 ### others
-
-- [622fc66] 🧪 test: 添加AppVeyor构建配置
-- [21c9f47] 🌈 style: 优化设置界面布局
-- [9d0a751] 🌈 style: 优化界面显示
-- [32d55e2] 🌈 style: 修改搜索框布局，优化界面显示
+- [9a6409b] 🦄 refactor: 统一加载更多按钮风格
+- [2d0ea86] 🦄 refactor: 统一漫画卡片显示
+- [2229abc] 🌈 style: 优化界面显示
+- [702a9be] 🌈 style: 删除多余代码
 
 ---
-📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v1.2.1...v1.2.2)
+📋 [查看完整更新日志](https://github.com/caolib/doki/compare/v1.2.2...v1.3.0)
+
