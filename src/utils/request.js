@@ -17,27 +17,28 @@ const goToLogin = () => {
 
 // 响应处理函数，保持与之前相同的逻辑
 const handleResponse = (response) => {
+    // console.log('Response:', response)
     // 处理响应数据
-    if (response.status === 401 || response.code === 401) {
+    if (response.code === 401) {
         goToLogin()
         return Promise.reject(new Error('请重新登录'))
     }
 
-    if (response.status === 500) {
+    if (response.code === 500) {
         console.error('服务器错误，请稍后再试')
         return Promise.reject(new Error('请求失败'))
     }
 
-    if (response.status === 210) {
+    if (response.code === 210) {
+        console.error(response.message)
         if (response.message && response.message.includes('破解')) {
             notification.warn({
-                message: '账号暂时封禁，建议先切换其他账号或者退出重新登录',
+                message: '不妙，账号暂时被封了！',
                 description: response.message,
                 placement: 'bottomRight',
-                duration: null,
+                duration: 5,
             })
-            router.push('/settings')
-            return Promise.reject(new Error('需要配置请求头'))
+            return Promise.reject()
         }
     }
 
@@ -94,7 +95,7 @@ const originalGet = request.get.bind(request)
 request.get = async function (url, config) {
     try {
         const response = await originalGet(url, config)
-        return response
+        return handleResponse(response)
     } catch (error) {
         return handleError(error)
     }
@@ -105,12 +106,11 @@ const originalPost = request.post.bind(request)
 request.post = async function (url, data, config) {
     try {
         const response = await originalPost(url, data, config)
-        return response
+        return handleResponse(response)
     } catch (error) {
         return handleError(error)
     }
 }
 
-// 其他HTTP方法也可以类似地重写
 
 export default request

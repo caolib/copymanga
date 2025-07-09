@@ -1,12 +1,8 @@
-// 使用Tauri HTTP插件，替代axios
 import { fetch } from '@tauri-apps/plugin-http'
 import { getRequestHeaders, getCurrentApiSource } from '@/config/server-config'
 import { getCurrentDate } from '@/utils/date'
 import { getToken } from '@/utils/auth'
 
-/**
- * 创建一个类似axios的请求工具
- */
 class TauriHttpClient {
     constructor() {
         this.defaults = {

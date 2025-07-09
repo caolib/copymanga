@@ -1,5 +1,21 @@
 import request from '../utils/request'
 import { downloadManager } from '../utils/manga-downloader'
+import { useUserStore } from '../stores/user'
+
+/**
+ * 获取请求ID的通用函数（每次都重新获取）
+ * @returns {Promise<string>} 请求ID
+ */
+async function getRequestIdForAPI() {
+    const userId = useUserStore().userInfo?.user_id
+
+    const requestIdResponse = await getRequestId(userId)
+    const request_id = requestIdResponse.results?.request_id
+
+    console.log('获取请求ID:', request_id)
+
+    return request_id
+}
 
 /**
  * 查询个人书架
@@ -19,31 +35,59 @@ function getMyCollectionRaw(params = {}) {
 }
 
 /**
- * 获取漫画章节列表
+ * 获取漫画章节列表 新API @see getMangaGroupChapters
  * @param {string} pathWord 漫画路径标识
  * @returns {Promise} 漫画章节数据
  */
 function getMangaChapters(pathWord) {
-    return request.get(`/comicdetail/${pathWord}/chapters`)
+    return request.get(`/comicdetail/${pathWord}/chapters`,
+        {
+            params: {
+                platform: 3,
+                in_mainland: true,
+                request_id: 'bwygrcje81'
+            }
+        }
+    )
 }
 
+
+
+// ------------------------------------------------------------
+
 /**
- * 获取漫画分组章节列表（新API）
+ * 获取漫画分组章节列表（新API）旧的 @see getMangaChapters
  * @param {string} pathWord 漫画路径标识
  * @param {string} groupPathWord 分组路径，默认为default
  * @param {number} limit 每页数量，默认100
  * @param {number} offset 偏移量，默认0
  * @returns {Promise} 漫画章节数据
  */
-function getMangaGroupChapters(pathWord, groupPathWord = 'default', limit = 100, offset = 0) {
+async function getMangaGroupChapters(pathWord, groupPathWord = 'default', limit = 100, offset = 0, request_id = '') {
     return request.get(`/api/v3/comic/${pathWord}/group/${groupPathWord}/chapters`, {
         params: {
             limit,
             offset,
-            platform: 3
+            platform: 3,
+            in_mainland: true,
+            request_id
         }
     });
 }
+
+
+/**
+ * 获取漫画详情
+ * @param {string} pathWord 漫画路径标识
+ * @returns {Promise}
+ */
+async function getMangaDetail(pathWord, request_id = '') {
+    return request.get(`/api/v3/comic2/${pathWord}`, {
+        params: { platform: 3, in_mainland: true, request_id }
+    });
+}
+
+// ------------------------------------------------------------
 
 /**
  * 获取最新上架漫画
@@ -115,16 +159,6 @@ function collectManga(comicId, isCollect = true) {
     });
 }
 
-/**
- * 获取漫画详情
- * @param {string} pathWord 漫画路径标识
- * @returns {Promise}
- */
-function getMangaDetail(pathWord) {
-    return request.get(`/api/v3/comic2/${pathWord}`, {
-        params: { platform: 3 }
-    });
-}
 
 /**
  * 获取主页漫画信息
@@ -320,6 +354,26 @@ function getMangaRanking(type = 1, dateType = 'week', audienceType = '', limit =
     });
 }
 
+/**
+ * 获取请求ID（使用不同的baseURL）
+ * @param {string} userId 用户ID，从用户信息中获取
+ * @returns {Promise} 请求ID响应，包含request_id和广告列表
+ */
+function getRequestId(userId) {
+    // 直接使用完整URL，避免baseURL被篡改
+    const fullUrl = 'https://marketing.aiacgn.com/api/v2/adopr/query2/'
+
+    return request.get(fullUrl, {
+        params: {
+            ident: '200100004',
+            channels: '2001,2007,2004,2005',
+            user_id: userId,
+            in_mainland: 'true',
+            platform: '3'
+        }
+    })
+}
+
 export {
     getMyCollectionRaw,
     getMangaChapters,
@@ -340,5 +394,6 @@ export {
     checkChapterDownloadDetail,
     getMangaDiscover,
     getMangaFilterTags,
-    getMangaRanking
+    getMangaRanking,
+    getRequestIdForAPI
 }

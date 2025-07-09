@@ -11,6 +11,7 @@ import { getMangaComments, postMangaComment } from '../api/comment'
 import { downloadManager } from '../utils/manga-downloader'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
+import { getRequestIdForAPI } from '@/api/manga'
 
 export function useMangaDetail() {
   const route = useRoute()
@@ -57,6 +58,8 @@ export function useMangaDetail() {
   const chapterDownloadProgress = ref({}) // 章节下载进度
   const chapterUuidMapping = ref({}) // 章节ID -> { mangaUuid, chapterUuid } 映射，用于暂停/继续功能
   const showDownloadControls = ref(false) // 控制是否显示下载操作按钮
+
+  const request_id = ref('')
 
   // 计算属性
   const isLoggedIn = computed(() => userStore.isLoggedIn)
@@ -137,7 +140,7 @@ export function useMangaDetail() {
   const fetchMangaDetail = async () => {
     const pathWord = route.params.pathWord
 
-    await getMangaDetail(pathWord)
+    await getMangaDetail(pathWord, request_id.value)
       .then((res) => {
         manga.value = res.results.comic
         groups.value = res.results.groups
@@ -161,8 +164,11 @@ export function useMangaDetail() {
   // 初始化数据加载
   const fetchMangaData = async () => {
     detailLoading.value = true
-    await fetchMangaDetail().finally(() => (detailLoading.value = false))
-    await fetchMangaChapter()
+
+    request_id.value = await getRequestIdForAPI().catch(() => detailLoading.value = false)
+
+    await fetchMangaDetail(request_id.value).finally(() => (detailLoading.value = false))
+    await fetchMangaChapter(request_id.value)
   }
 
   // 加载指定分组的章节
@@ -171,7 +177,7 @@ export function useMangaDetail() {
     const pathWord = route.params.pathWord
     const offset = (page - 1) * pageSize.value
 
-    await getMangaGroupChapters(pathWord, groupPathWord, pageSize.value, offset)
+    await getMangaGroupChapters(pathWord, groupPathWord, pageSize.value, offset, request_id.value)
       .then(async (res) => {
         // 处理章节数据，转换为与旧API相同的格式
         const chapterList = res.results.list || []
@@ -211,7 +217,7 @@ export function useMangaDetail() {
 
     try {
       // 先获取第一页来确定总章节数
-      const firstPageRes = await getMangaGroupChapters(pathWord, 'default', pageSize.value, 0)
+      const firstPageRes = await getMangaGroupChapters(pathWord, 'default', pageSize.value, 0, request_id.value)
       const total = firstPageRes.results.total || 0
       const totalPages = Math.ceil(total / pageSize.value)
 
@@ -228,7 +234,7 @@ export function useMangaDetail() {
       // 逐页搜索目标章节（从第2页开始）
       for (let page = 2; page <= totalPages; page++) {
         const offset = (page - 1) * pageSize.value
-        const pageRes = await getMangaGroupChapters(pathWord, 'default', pageSize.value, offset)
+        const pageRes = await getMangaGroupChapters(pathWord, 'default', pageSize.value, offset, request_id.value)
 
         const pageChapters = pageRes.results.list || []
         const foundInPage = pageChapters.some((chapter) => chapter.uuid === targetChapterId)
