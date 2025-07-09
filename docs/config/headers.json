@@ -1,14 +1,14 @@
 {
   "user-agent": "COPY/2.3.2",
   "source": "copyApp",
-  "deviceinfo": "PGEM10-star2qltechn",
+  "deviceinfo": "ASUS_AI2401_A-marlin",
   "webp": "1",
   "platform": "3",
   "referer": "com.copymanga.app-2.3.2",
   "version": "2.3.2",
   "region": "1",
-  "device": "PQ3B.190801.05281406",
+  "device": "PQ3A.190605.06171036",
+  "pseudoid": "90U1xjy3fwgr44hS",
   "host": "api.copy2000.online",
-  "umstring": "b4c89ca4104ea9a97750314d791520ac",
-  "pseudoid": "eQcnVQUDUWD6t8iH"
+  "umstring": "b4c89ca4104ea9a97750314d791520ac"
 }
