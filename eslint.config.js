@@ -19,9 +19,6 @@ export default defineConfig([
   { files: ["**/*.{js,mjs,cjs}"], plugins: { js }, extends: ["js/recommended"] },
   { files: ["**/*.{js,mjs,cjs}"], languageOptions: { globals: globals.browser } },
 
-  // Vue 推荐规则（必须单独作为一个对象）
-  ...pluginVue.configs["flat/recommended"],
-
   // Vue 文件的 parser 配置，并关闭风格类规则
   {
     files: ["**/*.vue"],

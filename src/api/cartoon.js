@@ -1,5 +1,5 @@
 import request from '../utils/request'
-import { cartoonDownloadManager } from '../utils/cartoon-download-manager'
+import { cartoonDownloadManager } from '../utils/cartoon-downloader'
 
 /**
  * 获取动画首页数据

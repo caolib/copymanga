@@ -36,14 +36,8 @@
 
         <a-row :gutter="32">
           <a-col :xs="24" :sm="8">
-            <a-image
-              :src="manga.coverUrl || '/logo.png'"
-              :alt="manga.name"
-              width="100%"
-              height="350px"
-              style="border-radius: 8px; object-fit: cover"
-              :placeholder="true"
-            >
+            <a-image :src="manga.coverUrl || '/logo.png'" :alt="manga.name" width="100%" height="350px"
+              style="border-radius: 8px; object-fit: cover" :placeholder="true">
               <template #placeholder>
                 <div class="image-placeholder">
                   <a-spin size="large" />
@@ -59,14 +53,10 @@
             </a-image>
           </a-col>
           <a-col :xs="24" :sm="16">
-            <a-typography-title
-              :level="2"
-              :style="{
-                cursor: manga.path_word ? 'pointer' : 'default',
-                color: manga.path_word ? '#1890ff' : 'inherit',
-              }"
-              @click="goToOnlineDetail"
-            >
+            <a-typography-title :level="2" :style="{
+              cursor: manga.path_word ? 'pointer' : 'default',
+              color: manga.path_word ? '#1890ff' : 'inherit',
+            }" @click="goToOnlineDetail">
               {{ manga.name || '本地漫画' }}
             </a-typography-title>
             <a-descriptions :column="1" size="small" bordered>
@@ -110,12 +100,7 @@
             </a-button>
 
             <!-- 刷新按钮 -->
-            <a-button
-              @click="loadMangaData"
-              :loading="chaptersLoading"
-              :icon="h(ReloadOutlined)"
-              size="small"
-            >
+            <a-button @click="loadMangaData" :loading="chaptersLoading" :icon="h(ReloadOutlined)" size="small">
               刷新
             </a-button>
 
@@ -125,15 +110,8 @@
             </a-button>
 
             <!-- 批量删除按钮 -->
-            <a-popconfirm
-              title="批量删除确认"
-              :description="`此操作将删除所有章节，确定？`"
-              ok-text="确认删除"
-              cancel-text="取消"
-              ok-type="danger"
-              @confirm="deleteAllChapters"
-              v-if="chapters.length > 0"
-            >
+            <a-popconfirm title="批量删除确认" :description="`此操作将删除所有章节，确定？`" ok-text="确认删除" cancel-text="取消"
+              ok-type="danger" @confirm="deleteAllChapters" v-if="chapters.length > 0">
               <a-button danger size="small" :icon="h(DeleteOutlined)"> 批量删除 </a-button>
             </a-popconfirm>
           </a-space>
@@ -141,12 +119,8 @@
       </a-row>
 
       <!-- 分组 Tab 菜单 -->
-      <a-tabs
-        v-if="groupOptions.length > 1"
-        v-model:activeKey="selectedGroup"
-        @change="handleGroupChange"
-        style="margin-bottom: 16px"
-      >
+      <a-tabs v-if="groupOptions.length > 1" v-model:activeKey="selectedGroup" @change="handleGroupChange"
+        style="margin-bottom: 16px">
         <a-tab-pane v-for="group in groupOptions" :key="group.value" :tab="group.label">
         </a-tab-pane>
       </a-tabs>
@@ -161,35 +135,19 @@
           </a-empty>
         </div>
         <a-row v-else :gutter="[12, 12]">
-          <a-col
-            :xs="12"
-            :sm="8"
-            :md="6"
-            :lg="4"
-            :xl="3"
-            v-for="chapter in currentGroupChapters"
-            :key="chapter.chapter_uuid || chapter.uuid"
-          >
-            <a-card
-              :hoverable="true"
-              style="text-align: center; padding: 0"
-              size="small"
-              :body-style="{ padding: '12px 6px' }"
-              class="chapter-card"
-            >
+          <a-col :xs="12" :sm="8" :md="6" :lg="4" :xl="3" v-for="chapter in currentGroupChapters"
+            :key="chapter.chapter_uuid || chapter.uuid">
+            <a-card :hoverable="true" style="text-align: center; padding: 0" size="small"
+              :body-style="{ padding: '12px 6px' }" class="chapter-card">
               <!-- 章节名称 -->
               <div style="cursor: pointer; margin-bottom: 8px" @click="readChapter(chapter)">
                 <span style="font-size: 14px">{{
                   chapter.chapter_name || chapter.name || '未知章节'
-                }}</span>
+                  }}</span>
               </div>
 
               <!-- 章节信息 -->
-              <div
-                class="chapter-info"
-                @click="readChapter(chapter)"
-                style="cursor: pointer; margin-bottom: 8px"
-              >
+              <div class="chapter-info" @click="readChapter(chapter)" style="cursor: pointer; margin-bottom: 8px">
                 <p class="download-time" style="margin: 4px 0; font-size: 12px; color: #999">
                   {{ formatDate(chapter.download_time || chapter.downloadTime) }}
                 </p>
@@ -200,13 +158,8 @@
 
               <!-- 操作按钮 -->
               <div class="chapter-actions" style="display: flex; justify-content: center; gap: 4px">
-                <a-button
-                  size="small"
-                  danger
-                  @click.stop="deleteChapter(chapter)"
-                  :title="'删除章节'"
-                  :icon="h(DeleteOutlined)"
-                >
+                <a-button size="small" danger @click.stop="deleteChapter(chapter)" :title="'删除章节'"
+                  :icon="h(DeleteOutlined)">
                 </a-button>
               </div>
             </a-card>
@@ -225,7 +178,7 @@ import { ReloadOutlined, ArrowLeftOutlined, DeleteOutlined } from '@ant-design/i
 import { formatDate } from '../utils/date'
 import { formatNumber } from '../utils/number'
 import { getLocalMangaDetail, getLocalMangaChapters, deleteLocalManga } from '../api/manga'
-import { downloadManager } from '../utils/download-manager'
+import { downloadManager } from '../utils/manga-downloader'
 
 const router = useRouter()
 const route = useRoute()
@@ -266,15 +219,15 @@ const currentGroupChapters = computed(() => {
   const sorted = [...groupChapters]
   return isAscending.value
     ? sorted.sort((a, b) =>
-        (a.download_time || a.downloadTime || '').localeCompare(
-          b.download_time || b.downloadTime || '',
-        ),
-      )
+      (a.download_time || a.downloadTime || '').localeCompare(
+        b.download_time || b.downloadTime || '',
+      ),
+    )
     : sorted.sort((a, b) =>
-        (b.download_time || b.downloadTime || '').localeCompare(
-          a.download_time || a.downloadTime || '',
-        ),
-      )
+      (b.download_time || b.downloadTime || '').localeCompare(
+        a.download_time || a.downloadTime || '',
+      ),
+    )
 })
 
 // 分组选项

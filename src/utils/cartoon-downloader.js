@@ -49,7 +49,7 @@ export class CartoonDownloadManager {
           try {
             await this.removeTask(task.cartoon_uuid, task.chapter_uuid)
           } catch (error) {
-            // console.error('清理完成任务失败:', error)
+            console.error('清理完成任务失败:', error)
           }
           continue
         }
@@ -83,78 +83,12 @@ export class CartoonDownloadManager {
       this.initialized = true
       // console.log(`下载管理器初始化完成，恢复了 ${activeTasks.length} 个任务`)
     } catch (error) {
-      // console.error('初始化下载管理器失败:', error)
+      console.error('初始化下载管理器失败:', error)
       this.initialized = true // 即使失败也标记为已初始化，避免重复尝试
     }
   }
 
   /**
-   * 下载动画章节
-   * @param {Object} chapterInfo 章节信息
-   * @param {Function} onProgress 进度回调
-   * @param {boolean} resumeDownload 是否为断点续传
-   */ async downloadChapter(chapterInfo, onProgress, resumeDownload = false) {
-    const { cartoonUuid, cartoonName, chapterUuid, chapterName, videoUrl, cover, cartoonDetail } =
-      chapterInfo
-
-    const chapterKey = `${cartoonUuid}|${chapterUuid}`
-
-    // console.log('开始下载动画章节:', chapterName, '断点续传:', resumeDownload)
-
-    try {
-      // 检查是否暂停（只在非断点续传时检查）
-      if (!resumeDownload && this.pausedDownloads.has(chapterKey)) {
-        throw new Error('下载已暂停')
-      }
-
-      // 如果是断点续传，从暂停列表移到活跃列表
-      if (resumeDownload && this.pausedDownloads.has(chapterKey)) {
-        this.activeDownloads.set(chapterKey, this.pausedDownloads.get(chapterKey))
-        this.pausedDownloads.delete(chapterKey)
-      } else {
-        // 添加到活跃下载列表
-        this.activeDownloads.set(chapterKey, chapterInfo)
-      }
-
-      // 开始进度回调
-      if (onProgress) {
-        onProgress({
-          percent: 0,
-          currentFile: resumeDownload ? '继续下载...' : '准备下载...',
-          status: resumeDownload ? 'resuming' : 'starting',
-        })
-      } // 启动进度监控
-      let progressInterval = null
-      if (onProgress) {
-        progressInterval = this.startProgressMonitoring(cartoonUuid, chapterUuid, onProgress)
-      } // 调用后端下载API
-      const result = await invoke('download_cartoon_chapter', {
-        cartoonUuid,
-        cartoonName,
-        chapterUuid,
-        chapterName,
-        videoUrl,
-        videoFile: chapterInfo.videoFile || `${chapterName}.mp4`,
-        fileSize: chapterInfo.fileSize || 0,
-        cover: chapterInfo.cover,
-        cartoonDetail,
-      }) // 停止进度监控
-      this.stopProgressMonitoring(cartoonUuid, chapterUuid)
-
-      // 从活跃下载列表移除
-      this.activeDownloads.delete(chapterKey)
-
-      // console.log('动画下载完成:', chapterKey)
-      return result
-    } catch (error) {
-      // 停止进度监控
-      this.stopProgressMonitoring(cartoonUuid, chapterUuid)
-      // 从活跃下载列表移除
-      this.activeDownloads.delete(chapterKey)
-      // console.error('动画下载失败:', error)
-      throw error
-    }
-  } /**
    * 启动进度监控
    * @param {string} cartoonUuid 动画UUID
    * @param {string} chapterUuid 章节UUID
@@ -210,7 +144,7 @@ export class CartoonDownloadManager {
           this.stopProgressMonitoring(cartoonUuid, chapterUuid)
         }
       } catch (error) {
-        // console.error('检查动画下载进度失败:', error)
+        console.error('检查动画下载进度失败:', error)
         this.stopProgressMonitoring(cartoonUuid, chapterUuid)
       }
     }, 1000)
@@ -233,45 +167,39 @@ export class CartoonDownloadManager {
       clearInterval(intervalId)
       this.progressIntervals.delete(chapterKey)
     }
-  } /**
+  }
+
+  /**
    * 暂停下载
    * @param {string} cartoonUuid 动画UUID
    * @param {string} chapterUuid 章节UUID
    */
   async pauseDownload(cartoonUuid, chapterUuid) {
     const chapterKey = `${cartoonUuid}|${chapterUuid}`
+    // 先停止进度监控
+    this.stopProgressMonitoring(cartoonUuid, chapterUuid)
 
+    // 调用后端暂停命令
+    await invoke('pause_cartoon_download', {
+      cartoonUuid,
+      chapterUuid,
+    })
+
+    // 将下载信息移到暂停列表
+    if (this.activeDownloads.has(chapterKey)) {
+      this.pausedDownloads.set(chapterKey, this.activeDownloads.get(chapterKey))
+      this.activeDownloads.delete(chapterKey)
+    }
+
+    // 更新后端任务状态
     try {
-      // 先停止进度监控
-      this.stopProgressMonitoring(cartoonUuid, chapterUuid)
-
-      // 调用后端暂停命令
-      await invoke('pause_cartoon_download', {
+      await invoke('update_download_task_status', {
         cartoonUuid,
         chapterUuid,
+        status: 'paused',
       })
-
-      // 将下载信息移到暂停列表
-      if (this.activeDownloads.has(chapterKey)) {
-        this.pausedDownloads.set(chapterKey, this.activeDownloads.get(chapterKey))
-        this.activeDownloads.delete(chapterKey)
-      }
-
-      // 更新后端任务状态
-      try {
-        await invoke('update_download_task_status', {
-          cartoonUuid,
-          chapterUuid,
-          status: 'paused',
-        })
-      } catch (error) {
-        // console.error('更新任务状态失败:', error)
-      }
-
-      // console.log('暂停动画下载成功:', chapterKey)
     } catch (error) {
-      // console.error('暂停动画下载失败:', error)
-      throw error
+      console.error('更新任务状态失败:', error)
     }
   }
 
@@ -283,47 +211,40 @@ export class CartoonDownloadManager {
   async resumeDownload(cartoonUuid, chapterUuid) {
     const chapterKey = `${cartoonUuid}|${chapterUuid}`
 
+    await invoke('resume_cartoon_download', {
+      cartoonUuid,
+      chapterUuid,
+    })
+
+    // 将下载信息移回活跃列表
+    if (this.pausedDownloads.has(chapterKey)) {
+      this.activeDownloads.set(chapterKey, this.pausedDownloads.get(chapterKey))
+      this.pausedDownloads.delete(chapterKey)
+    }
+
+    // 更新后端任务状态
     try {
-      await invoke('resume_cartoon_download', {
+      await invoke('update_download_task_status', {
         cartoonUuid,
         chapterUuid,
+        status: 'downloading',
       })
-
-      // 将下载信息移回活跃列表
-      if (this.pausedDownloads.has(chapterKey)) {
-        this.activeDownloads.set(chapterKey, this.pausedDownloads.get(chapterKey))
-        this.pausedDownloads.delete(chapterKey)
-      }
-
-      // 更新后端任务状态
-      try {
-        await invoke('update_download_task_status', {
-          cartoonUuid,
-          chapterUuid,
-          status: 'downloading',
-        })
-      } catch (error) {
-        // console.error('更新任务状态失败:', error)
-      }
-
-      // 重新启动进度监控
-      this.startProgressMonitoring(cartoonUuid, chapterUuid, (progressInfo) => {
-        this.progressData.set(chapterKey, progressInfo.percent || 0)
-        this.progressTexts.set(
-          chapterKey,
-          progressInfo.current_file || progressInfo.currentFile || '下载中...',
-        )
-        this.downloadSizes.set(chapterKey, {
-          downloadedSize: progressInfo.downloadedSize || 0,
-          totalSize: progressInfo.totalSize || 0,
-        })
-      })
-
-      // console.log('继续动画下载成功:', chapterKey)
     } catch (error) {
-      // console.error('继续动画下载失败:', error)
-      throw error
+      console.error('更新任务状态失败:', error)
     }
+
+    // 重新启动进度监控
+    this.startProgressMonitoring(cartoonUuid, chapterUuid, (progressInfo) => {
+      this.progressData.set(chapterKey, progressInfo.percent || 0)
+      this.progressTexts.set(
+        chapterKey,
+        progressInfo.current_file || progressInfo.currentFile || '下载中...',
+      )
+      this.downloadSizes.set(chapterKey, {
+        downloadedSize: progressInfo.downloadedSize || 0,
+        totalSize: progressInfo.totalSize || 0,
+      })
+    })
   }
 
   /**
@@ -332,14 +253,9 @@ export class CartoonDownloadManager {
    * @returns {Promise<Array>}
    */
   async getLocalCartoonChapters(cartoonUuid) {
-    try {
-      return await invoke('get_local_cartoon_chapters', {
-        cartoonUuid,
-      })
-    } catch (error) {
-      // console.error('获取本地动画章节失败:', error)
-      throw error
-    }
+    return await invoke('get_local_cartoon_chapters', {
+      cartoonUuid,
+    })
   }
 
   /**
@@ -349,16 +265,11 @@ export class CartoonDownloadManager {
    * @returns {Promise<boolean>}
    */
   async deleteChapter(cartoonUuid, chapterUuid) {
-    try {
-      // console.log('删除动画章节成功:', `${cartoonUuid}|${chapterUuid}`)
-      return await invoke('delete_downloaded_cartoon_chapter', {
-        cartoonUuid,
-        chapterUuid,
-      })
-    } catch (error) {
-      // console.error('删除动画章节失败:', error)
-      throw error
-    }
+    // console.log('删除动画章节成功:', `${cartoonUuid}|${chapterUuid}`)
+    return await invoke('delete_downloaded_cartoon_chapter', {
+      cartoonUuid,
+      chapterUuid,
+    })
   }
 
   /**
@@ -383,14 +294,9 @@ export class CartoonDownloadManager {
    * @returns {Promise<Object>}
    */
   async getLocalCartoonDetail(cartoonUuid) {
-    try {
-      return await invoke('get_local_cartoon_detail', {
-        cartoonUuid,
-      })
-    } catch (error) {
-      // console.error('获取本地动画详情失败:', error)
-      throw error
-    }
+    return await invoke('get_local_cartoon_detail', {
+      cartoonUuid,
+    })
   }
 
   /**
@@ -399,32 +305,24 @@ export class CartoonDownloadManager {
    * @param {string} chapterUuid 章节UUID
    */
   async openLocalVideoDirectory(cartoonUuid, chapterUuid) {
-    try {
-      return await invoke('open_local_video_directory', {
-        cartoonUuid,
-        chapterUuid,
-      })
-    } catch (error) {
-      // console.error('打开本地视频目录失败:', error)
-      throw error
-    }
-  } /**
+    return await invoke('open_local_video_directory', {
+      cartoonUuid,
+      chapterUuid,
+    })
+  }
+
+  /**
    * 获取已下载的动画列表
    * @returns {Promise<Array>}
    */
   async getDownloadedCartoonList() {
-    try {
-      const cartoonList = await invoke('get_downloaded_cartoon_list')
+    const cartoonList = await invoke('get_downloaded_cartoon_list')
 
-      // 转换封面路径为可显示的URL
-      return cartoonList.map((cartoon) => ({
-        ...cartoon,
-        coverUrl: convertLocalFileToUrl(cartoon.coverPath),
-      }))
-    } catch (error) {
-      // console.error('获取已下载动画列表失败:', error)
-      throw error
-    }
+    // 转换封面路径为可显示的URL
+    return cartoonList.map((cartoon) => ({
+      ...cartoon,
+      coverUrl: convertLocalFileToUrl(cartoon.coverPath),
+    }))
   }
 
   /**
@@ -501,8 +399,7 @@ export class CartoonDownloadManager {
         chapterUuid,
       })
     } catch (error) {
-      // console.error('从后端删除任务失败:', error)
-      // 即使后端删除失败，也继续清理前端状态
+      console.error('从后端删除任务失败:', error)
     }
 
     // 从活跃和暂停任务中移除
@@ -585,7 +482,7 @@ export class CartoonDownloadManager {
         startTime: taskInfo.startTime,
       })
     } catch (error) {
-      // console.error('保存下载任务到后端失败:', error)
+      console.error('保存下载任务到后端失败:', error)
       // 如果保存失败，也继续执行，只是任务不会被持久化
     }
 

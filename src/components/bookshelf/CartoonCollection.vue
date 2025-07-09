@@ -1,17 +1,9 @@
 <template>
   <div class="cartoon-collection">
     <!-- 操作栏 -->
-    <div
-      class="collection-controls"
-      v-if="(!loading && !internalLoading) || cartoonList.length > 0"
-    >
+    <div class="collection-controls" v-if="(!loading && !internalLoading) || cartoonList.length > 0">
       <div class="controls-left">
-        <a-select
-          v-model:value="ordering"
-          @change="onOrderingChange"
-          style="width: 180px"
-          :disabled="internalLoading"
-        >
+        <a-select v-model:value="ordering" @change="onOrderingChange" style="width: 180px" :disabled="internalLoading">
           <a-select-option value="-datetime_updated">按动画更新时间排序</a-select-option>
           <a-select-option value="-datetime_modifier">按加入书架时间排序</a-select-option>
           <a-select-option value="-datetime_browse">按观看时间排序</a-select-option>
@@ -23,19 +15,9 @@
     </div>
 
     <!-- 错误信息 -->
-    <a-alert
-      v-if="error"
-      type="error"
-      :message="error"
-      show-icon
-      banner
-      style="margin-bottom: 20px"
-    />
+    <a-alert v-if="error" type="error" :message="error" show-icon banner style="margin-bottom: 20px" />
     <!-- 空状态 -->
-    <a-empty
-      v-if="!loading && !internalLoading && !error && cartoonList.length === 0"
-      description="您还没有收藏任何动画"
-    >
+    <a-empty v-if="!loading && !internalLoading && !error && cartoonList.length === 0" description="您还没有收藏任何动画">
       <a-button type="primary" @click="$router.push('/cartoons')">去动画首页看看</a-button>
     </a-empty>
 
@@ -53,24 +35,16 @@
     <!-- 实际内容 -->
     <div v-else-if="!error && cartoonList.length > 0">
       <div class="cartoon-grid">
-        <a-card
-          v-for="item in cartoonList"
-          :key="item.uuid || item.id"
-          hoverable
-          class="cartoon-card"
-          @click="goToCartoon(item)"
-        >
+        <a-card v-for="item in cartoonList" :key="item.uuid || item.id" hoverable class="cartoon-card"
+          @click="goToCartoon(item)">
           <div class="cartoon-cover">
             <img :src="item.cartoon.cover" :alt="item.cartoon.name" />
-            <a-badge
-              v-if="
-                item.last_browse &&
-                item.last_browse.last_browse_name &&
-                item.cartoon.last_chapter &&
-                item.last_browse.last_browse_name !== item.cartoon.last_chapter.name
-              "
-              count="有更新"
-              style="
+            <a-badge v-if="
+              item.last_browse &&
+              item.last_browse.last_browse_name &&
+              item.cartoon.last_chapter &&
+              item.last_browse.last_browse_name !== item.cartoon.last_chapter.name
+            " count="有更新" style="
                 position: absolute;
                 top: 8px;
                 right: 8px;
@@ -80,8 +54,7 @@
                 font-size: 12px;
                 border-radius: 8px;
                 padding: 0 8px;
-              "
-            />
+              " />
           </div>
           <a-card-meta :title="item.cartoon.name" style="margin-top: 5px">
             <template #description>
@@ -104,17 +77,10 @@
 
       <!-- 分页 -->
       <div class="pagination-container" v-if="totalCount > pageSize">
-        <a-pagination
-          v-model:current="currentPage"
-          v-model:page-size="pageSize"
-          :total="totalCount"
-          @change="onPageChange"
-          @show-size-change="onPageSizeChange"
-          :page-size-options="['12', '18', '24', '36']"
-          show-size-changer
-          show-quick-jumper
-          :show-total="(total, range) => `第 ${range[0]}-${range[1]} 项，共 ${total} 项`"
-        />
+        <a-pagination v-model:current="currentPage" v-model:page-size="pageSize" :total="totalCount"
+          @change="onPageChange" @show-size-change="onPageSizeChange" :page-size-options="['12', '18', '24', '36']"
+          show-size-changer show-quick-jumper
+          :show-total="(total, range) => `第 ${range[0]}-${range[1]} 项，共 ${total} 项`" />
       </div>
     </div>
   </div>

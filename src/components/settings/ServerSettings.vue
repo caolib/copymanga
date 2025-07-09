@@ -222,7 +222,6 @@ import {
 import {
   getAppConfig,
   getRequestHeaders,
-  getServerConfig,
   saveAppConfig,
   saveRequestHeaders,
   switchApiSource,
@@ -236,7 +235,7 @@ import {
 import { useAppStore } from '@/stores/app'
 import { invoke } from '@tauri-apps/api/core'
 import { appDataDir } from '@tauri-apps/api/path'
-import { restartApp } from '@/utils/restart-helper'
+import { relaunch } from '@tauri-apps/plugin-process'
 import {
   exportHeaders as exportHeadersConfig,
   importHeaders as importHeadersConfig,
@@ -382,7 +381,7 @@ const loadConfig = () => {
 const handleRestart = async () => {
   restarting.value = true
 
-  await restartApp().catch((error) => {
+  await relaunch().catch((error) => {
     console.error('重启应用失败:', error)
     message.error('重启应用失败')
     restarting.value = false

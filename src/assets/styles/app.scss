@@ -27,19 +27,6 @@ body {
     box-sizing: border-box;
 }
 
-.restart-banner {
-    padding: $spacing-sm $spacing-md;
-    background-color: #fff3cd;
-    border-bottom: 1px solid #ffeaa7;
-    z-index: 999;
-    margin-top: 50px; /* 为标题栏留出空间 */
-
-    @include dark-theme {
-        background-color: $dark-fill-tertiary;
-        border-bottom: 1px solid $dark-border-color;
-    }
-}
-
 .main-content {
     flex: 1;
     overflow-y: auto;

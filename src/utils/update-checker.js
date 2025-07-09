@@ -1,6 +1,7 @@
 import { checkForUpdates } from '@/api/github'
 import { getVersion } from '@tauri-apps/api/app'
 import { useAppStore } from '@/stores/app'
+
 /**
  * 启动时检查更新
  */

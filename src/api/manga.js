@@ -1,5 +1,5 @@
 import request from '../utils/request'
-import { downloadManager } from '../utils/download-manager'
+import { downloadManager } from '../utils/manga-downloader'
 
 /**
  * 查询个人书架

@@ -11,20 +11,12 @@
       <div class="filter-section">
         <div class="filter-group">
           <div class="filter-buttons">
-            <a-button
-              :type="currentOrdering === '-datetime_updated' ? 'primary' : 'default'"
-              size="small"
-              :icon="h(FieldTimeOutlined)"
-              @click="changeOrdering('-datetime_updated')"
-            >
+            <a-button :type="currentOrdering === '-datetime_updated' ? 'primary' : 'default'" size="small"
+              :icon="h(FieldTimeOutlined)" @click="changeOrdering('-datetime_updated')">
               最新
             </a-button>
-            <a-button
-              :type="currentOrdering === '-popular' ? 'primary' : 'default'"
-              size="small"
-              :icon="h(FireOutlined)"
-              @click="changeOrdering('-popular')"
-            >
+            <a-button :type="currentOrdering === '-popular' ? 'primary' : 'default'" size="small"
+              :icon="h(FireOutlined)" @click="changeOrdering('-popular')">
               热门
             </a-button>
           </div>
@@ -34,16 +26,7 @@
       <!-- 写真卡片列表 -->
       <div class="posts-grid">
         <a-row :gutter="[16, 16]">
-          <a-col
-            v-for="item in posts"
-            :key="item.uuid"
-            :xs="12"
-            :sm="8"
-            :md="6"
-            :lg="4"
-            :xl="4"
-            :xxl="4"
-          >
+          <a-col v-for="item in posts" :key="item.uuid" :xs="12" :sm="8" :md="6" :lg="4" :xl="4" :xxl="4">
             <a-card hoverable class="post-card" @click="goToPostDetail(item.uuid)">
               <template #cover>
                 <div class="post-cover">
@@ -80,15 +63,8 @@
 
       <!-- 分页 -->
       <div v-if="total > pageSize" class="pagination-container">
-        <a-pagination
-          v-model:current="currentPage"
-          :page-size="pageSize"
-          :total="total"
-          @change="handlePageChange"
-          :show-size-changer="true"
-          :page-size-options="['18', '36', '72']"
-          @showSizeChange="handlePageSizeChange"
-        />
+        <a-pagination v-model:current="currentPage" :page-size="pageSize" :total="total" @change="handlePageChange"
+          :show-size-changer="true" :page-size-options="['18', '36', '72']" @showSizeChange="handlePageSizeChange" />
       </div>
     </div>
   </div>

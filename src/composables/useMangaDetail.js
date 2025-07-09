@@ -8,7 +8,7 @@ import {
   getChapterImages,
 } from '../api/manga'
 import { getMangaComments, postMangaComment } from '../api/comment'
-import { downloadManager } from '../utils/download-manager'
+import { downloadManager } from '../utils/manga-downloader'
 import { useUserStore } from '../stores/user'
 import { message } from 'ant-design-vue'
 

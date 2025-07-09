@@ -70,7 +70,7 @@
                               <div class="progress-info">
                                 <span class="progress-text">{{
                                   item.progressText || '准备下载...'
-                                  }}</span>
+                                }}</span>
                                 <span class="download-size" v-if="item.downloadedSize">
                                   {{ formatFileSize(item.downloadedSize)
                                   }}{{
@@ -189,7 +189,7 @@ import { formatDate } from '../utils/date'
 import { formatFileSize } from '../utils/number'
 import { getDownloadedMangaList } from '../api/manga'
 import { getDownloadedCartoonList } from '../api/cartoon'
-import { cartoonDownloadManager } from '../utils/cartoon-download-manager'
+import { cartoonDownloadManager } from '../utils/cartoon-downloader'
 
 const router = useRouter()
 

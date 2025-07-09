@@ -76,8 +76,8 @@
 
                     .ticket-badge {
                         position: absolute;
-                        top: $spacing-sm;
-                        right: $spacing-sm;
+                        top: 0;
+                        right: 0;
                         background: $warning-color;
                         color: white;
                         padding: 4px 8px;

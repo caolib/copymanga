@@ -7,10 +7,10 @@
         <div class="reader-title">
           <a-typography-title :level="4" style="margin: 0">{{
             chapterInfo.comic_name || '漫画标题'
-            }}</a-typography-title>
+          }}</a-typography-title>
           <a-typography-text type="secondary">{{
             chapterInfo.name || '章节标题'
-            }}</a-typography-text>
+          }}</a-typography-text>
         </div>
         <div class="reader-controls">
           <a-space>
@@ -218,7 +218,7 @@ import {
 } from '@ant-design/icons-vue'
 import { getChapterImages } from '../api/manga'
 import { getChapterComments, postChapterComment } from '../api/comment'
-import { downloadManager } from '../utils/download-manager'
+import { downloadManager } from '../utils/manga-downloader'
 import { convertLocalFileToUrl } from '../utils/file-converter'
 import { useMangaStore } from '../stores/manga'
 import { useThemeStore } from '../stores/theme'

@@ -6,7 +6,7 @@ import { useThemeStore } from './stores/theme'
 import { useRouteHistory } from './composables/useRouteHistory'
 import TitleBar from './components/TitleBar.vue'
 import { theme } from 'ant-design-vue'
-import { checkUpdateOnStartup } from './utils/auto-update'
+import { checkUpdateOnStartup } from './utils/update-checker'
 
 const route = useRoute()
 const appStore = useAppStore()

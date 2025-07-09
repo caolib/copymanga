@@ -137,8 +137,8 @@ export const importJsonConfig = async (options = {}) => {
     let data
     try {
       data = JSON.parse(fileContent)
-    } catch (parseError) {
-      message.error('JSON 文件格式错误，请检查文件内容')
+    } catch (err) {
+      message.error('JSON 文件格式错误，请检查文件内容', err)
       return null
     }
 

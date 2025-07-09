@@ -151,7 +151,7 @@ import {
 import { getVersion } from '@tauri-apps/api/app'
 import { checkForUpdates } from '@/api/github'
 import { useAppStore } from '@/stores/app'
-import { openLink, openExternalUrl } from '@/utils/external-link'
+import { openLink, openExternalUrl } from '@/utils/link-opener'
 import { formatDate } from '@/utils/date'
 
 

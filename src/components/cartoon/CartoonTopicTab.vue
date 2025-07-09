@@ -2,7 +2,7 @@
   <div class="cartoon-topic-tab">
     <!-- 筛选和刷新区域 -->
     <div class="filter-section">
-      <a-row :gutter="16" align="middle">
+      <a-row :gutter="16">
         <a-col :span="24" style="text-align: right">
           <a-button @click="refreshTopics" :loading="loading" type="primary"> 刷新 </a-button>
         </a-col>

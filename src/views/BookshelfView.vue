@@ -1,7 +1,7 @@
 <template>
   <div class="bookshelf-container">
     <div class="bookshelf-content">
-      <a-tabs v-model:activeKey="activeTab" @change="handleTabChange" type="card" size="default">
+      <a-tabs v-model:activeKey="activeTab" @change="handleTabChange" type="card" >
         <template #rightExtra>
           <div class="tab-extra-actions">
             <a-button type="primary" size="small" @click="refreshCurrentTab" :loading="loading">

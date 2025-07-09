@@ -1,4 +1,4 @@
-import tauriRequest from './tauri-http-request'
+import tauriRequest from './tauri-request'
 import { message } from 'ant-design-vue'
 import router from '@/router'
 import { notification } from 'ant-design-vue'

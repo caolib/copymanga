@@ -170,4 +170,4 @@ const getAuthors = (authors) => {
 }
 </script>
 
-<style scoped src="../assets/styles/book-search-tab.scss" lang="scss"></style>
+<style scoped src="@/assets/styles/book-search-tab.scss" lang="scss"></style>

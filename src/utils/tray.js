@@ -3,7 +3,7 @@ import { Menu } from '@tauri-apps/api/menu'
 import { defaultWindowIcon } from '@tauri-apps/api/app'
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { exit } from '@tauri-apps/plugin-process'
-import { restartApp as restartApplication } from './restart-helper'
+import { relaunch } from '@tauri-apps/plugin-process'
 
 let trayInstance = null
 
@@ -91,8 +91,7 @@ async function toggleWindow() {
 
 async function restartApp() {
     try {
-        console.log('重启应用')
-        await restartApplication()
+        await relaunch()
     } catch (error) {
         console.error('重启应用失败:', error)
     }
