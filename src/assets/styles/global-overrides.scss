@@ -13,7 +13,6 @@
         .ant-dropdown-menu-item {
             border-radius: $border-radius-small;
             transition: $transition-fast;
-            margin-bottom: 2px;
 
             &:last-child {
                 margin-bottom: 0;
@@ -54,7 +53,7 @@
         max-width: 400px;
 
         .ant-dropdown-menu-item {
-            padding: $spacing-sm;
+            padding: 2px 0;
 
             &:hover {
                 background-color: transparent;

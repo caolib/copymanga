@@ -19,16 +19,8 @@
       <!-- 排行榜列表 -->
       <div v-if="data.length > 0" class="ranking-posts">
         <a-row :gutter="[16, 16]">
-          <a-col
-            v-for="(item, index) in data"
-            :key="item.post?.uuid || index"
-            :xs="12"
-            :sm="8"
-            :md="6"
-            :lg="4"
-            :xl="4"
-            :xxl="4"
-          >
+          <a-col v-for="(item, index) in data" :key="item.post?.uuid || index" :xs="12" :sm="8" :md="6" :lg="4" :xl="4"
+            :xxl="4">
             <a-card hoverable class="ranking-card" @click="goToPostDetail(item.post.uuid)">
               <template #cover>
                 <div class="ranking-cover">
@@ -38,13 +30,10 @@
                     {{ item.sort }}
                   </div>
                   <!-- 人气变化 -->
-                  <div
-                    v-if="item.rise_num !== undefined"
-                    class="popularity-change"
-                    :class="getPopularityChangeClass(item.rise_num)"
-                  >
-                    <span v-if="item.rise_num > 0">+{{ item.rise_num }}</span>
-                    <span v-else-if="item.rise_num < 0">{{ item.rise_num }}</span>
+                  <div v-if="item.rise_sort !== undefined" class="popularity-change"
+                    :class="getPopularityChangeClass(item.rise_sort)">
+                    <span v-if="item.rise_sort > 0">↑{{ item.rise_sort }}</span>
+                    <span v-else-if="item.rise_sort < 0">↓{{ Math.abs(item.rise_sort) }}</span>
                   </div>
                 </div>
               </template>
@@ -77,17 +66,11 @@
 
       <!-- 分页 -->
       <div v-if="total > pageSize" class="pagination-container">
-        <a-pagination
-          :current="currentPage"
-          :page-size="pageSize"
-          :total="total"
-          :show-size-changer="true"
-          :page-size-options="['18', '36', '54']"
-          :show-quick-jumper="true"
+        <a-pagination :current="currentPage" :page-size="pageSize" :total="total" :show-size-changer="true"
+          :page-size-options="['18', '36', '54']" :show-quick-jumper="true"
           :show-total="(total, range) => `第 ${range[0]}-${range[1]} 条，共 ${total} 条`"
           @change="(page, size) => $emit('page-change', page, size || pageSize)"
-          @showSizeChange="(current, size) => $emit('page-change', 1, size)"
-        />
+          @show-size-change="(current, size) => $emit('page-change', 1, size)" />
       </div>
     </div>
   </div>

@@ -15,7 +15,6 @@
             height: 100%;
             cursor: pointer;
             transition: $transition-normal;
-            border-radius: $border-radius-large;
             overflow: hidden;
 
             &:hover {
@@ -40,41 +39,36 @@
                 }
 
                 // 排名徽章
+                // 排名标签
                 .ranking-badge {
                     position: absolute;
-                    top: 8px;
-                    left: 8px;
-                    width: 32px;
-                    height: 32px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                    top: 0;
+                    left: 0;
+                    padding: 4px 8px;
+                    border-bottom-right-radius: 10px;
+                    font-size: 12px;
                     font-weight: bold;
-                    font-size: $font-sm;
-                    color: white;
-                    z-index: 2;
+                    z-index: 3;
 
+                    // 前三名特殊颜色
                     &.rank-1 {
                         background: linear-gradient(135deg, #ffd700, #ffed4e);
-                        color: #d68e00;
-                        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.5);
+                        color: #333;
                     }
 
                     &.rank-2 {
                         background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
-                        color: #666;
-                        box-shadow: 0 2px 8px rgba(192, 192, 192, 0.5);
+                        color: #333;
                     }
 
                     &.rank-3 {
-                        background: linear-gradient(135deg, #cd7f32, #daa555);
-                        color: #8b4513;
-                        box-shadow: 0 2px 8px rgba(205, 127, 50, 0.5);
+                        background: linear-gradient(135deg, #cd7f32, #daa520);
+                        color: white;
                     }
 
-                    &.rank-normal {
-                        background: rgba(0, 0, 0, 0.7);
+                    // 其他排名
+                    &:not(.rank-1):not(.rank-2):not(.rank-3) {
+                        background: rgba(0, 0, 0, 0.8);
                         color: white;
                     }
                 }
@@ -82,10 +76,10 @@
                 // 人气变化标识
                 .popularity-change {
                     position: absolute;
-                    top: 8px;
-                    right: 8px;
+                    top: 0;
+                    right: 0;
                     padding: 2px 6px;
-                    border-radius: $border-radius-small;
+                    border-bottom-left-radius: 10px;
                     font-size: $font-xs;
                     font-weight: 500;
                     z-index: 2;

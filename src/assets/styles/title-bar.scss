@@ -412,7 +412,6 @@
         justify-content: space-between;
         align-items: center;
         gap: $spacing-xs;
-        padding: 4px 0;
         width: fit-content;
         max-width: 700px;
 
@@ -438,6 +437,7 @@
             text-overflow: ellipsis;
             text-align: right;
             flex-shrink: 0;
+            max-width: 100%;
 
             @include dark-theme {
                 color: $dark-text-secondary;

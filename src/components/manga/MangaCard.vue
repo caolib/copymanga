@@ -28,7 +28,7 @@
 
         <!-- 趋势标签（排名变化） - 固定在右上角 -->
         <div v-if="trend && trend !== 'same'" class="trend-badge" :class="`trend-${trend}`">
-          <span v-if="trend === 'up'">↑{{ Math.abs(trendValue) }}</span>
+          <span v-if="trend === 'up'">↑{{ trendValue }}</span>
           <span v-else-if="trend === 'down'">↓{{ Math.abs(trendValue) }}</span>
         </div>
 

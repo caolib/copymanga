@@ -77,7 +77,7 @@
                   <template #cover>
                     <div class="post-cover">
                       <img :src="item.post.cover" :alt="item.post.name" @error="handleImageError" />
-                      <div class="ranking-badge">{{ item.sort }}</div>
+                      <div class="ranking-badge" :class="getRankingClass(item.sort)">{{ item.sort }}</div>
                     </div>
                   </template>
                   <a-card-meta>
@@ -111,7 +111,7 @@
                   <template #cover>
                     <div class="post-cover">
                       <img :src="item.post.cover" :alt="item.post.name" @error="handleImageError" />
-                      <div class="ranking-badge">{{ item.sort }}</div>
+                      <div class="ranking-badge" :class="getRankingClass(item.sort)">{{ item.sort }}</div>
                     </div>
                   </template>
                   <a-card-meta>
@@ -190,6 +190,14 @@ const refreshData = async () => {
 // 处理图片加载错误
 const handleImageError = (event) => {
   event.target.src = '/logo.png'
+}
+
+// 获取排名样式类
+const getRankingClass = (ranking) => {
+  if (ranking === 1) return 'rank-1'
+  if (ranking === 2) return 'rank-2'
+  if (ranking === 3) return 'rank-3'
+  return ''
 }
 
 // 组件挂载时获取数据
