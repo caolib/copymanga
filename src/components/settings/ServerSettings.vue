@@ -70,7 +70,7 @@
     <a-card title="请求头配置" class="setting-card" id="headers-config">
       <template #extra>
         <a-alert type="info" show-icon style="width: fit-content;">
-          <template #message> 出现破解警告时点击获取官方版本更新请求头 </template>
+          <template #message> 如果出现破解警告时请从github导入配置，并使用随机设备信息，若无效则点击获取官方版本更新请求头 </template>
         </a-alert>
       </template>
       <a-form layout="vertical">
@@ -118,26 +118,32 @@
           <a-space>
             <a-button @click="fetchRemoteHeaders" :loading="fetchingRemoteHeaders" type="primary"
               :icon="h(GithubOutlined)">
-              从github导入
+              导入
+            </a-button>
+
+            <a-button @click="generateRandomDevice" :loading="generatingDeviceInfo">
+              生成随机设备信息
+            </a-button>
+
+            <a-button @click="checkAppVersion" :loading="checkingAppVersion" type="primary">
+              获取官方APP版本
             </a-button>
 
             <a-button @click="saveAllHeaders" :loading="savingHeaders"> 保存 </a-button>
 
             <a-button @click="exportHeaders" :loading="exportingHeaders" :icon="h(DownloadOutlined)">
-              导出到文件
+              导出
             </a-button>
 
             <a-button @click="importHeaders" :loading="importingHeaders" :icon="h(UploadOutlined)">
-              从文件导入
+              导入
             </a-button>
 
             <a-popconfirm title="你确定?" ok-text="对的" cancel-text="不对" @confirm="resetHeaders">
               <a-button>恢复默认</a-button>
             </a-popconfirm>
 
-            <a-button @click="checkAppVersion" :loading="checkingAppVersion" type="primary">
-              获取官方APP版本
-            </a-button>
+
           </a-space>
         </a-form-item>
 
@@ -209,7 +215,7 @@
 
 <script setup>
 import { h, onBeforeUnmount, onMounted, ref } from 'vue'
-import { message } from 'ant-design-vue'
+import { Button, message, notification } from 'ant-design-vue'
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -243,6 +249,7 @@ import {
 import { getOfficialApiSources } from '@/api/api-source'
 import { getHeadersConfig } from '@/api/github'
 import { getAppVersion } from '@/api/system'
+import { generateRandomDeviceInfo } from '@/utils/device-generator'
 
 const appForm = ref({ apiDomain: '' })
 const currentApiDomain = ref('')
@@ -281,6 +288,14 @@ const fetchingRemoteHeaders = ref(false)
 // 版本检查相关状态
 const remoteAppVersion = ref('')
 const versionDiff = ref(false)
+
+// 随机生成设备信息相关状态
+const generatingDeviceInfo = ref(false)
+
+// 延时生成设备信息相关状态
+const countdownSeconds = ref(3)
+const countdownTimer = ref(null)
+const notificationKey = ref(null)
 
 // 处理API源搜索/输入
 const onApiSourceSearch = (value) => {
@@ -642,6 +657,9 @@ const fetchRemoteHeaders = async () => {
       if (headers && typeof headers === 'object' && Object.keys(headers).length > 0) {
         headersList.value = Object.entries(headers).map(([key, value]) => ({ key, value }))
         saveAllHeaders()
+
+        // 显示倒计时弹窗，准备生成随机设备信息
+        showCountdownForDeviceGeneration()
       } else {
         message.error('远程配置为空或格式不正确')
       }
@@ -713,6 +731,45 @@ const applyRemoteVersion = () => {
   }
 }
 
+// 随机生成设备信息
+const generateRandomDevice = async () => {
+  generatingDeviceInfo.value = true
+
+  try {
+    const { device, deviceinfo, pseudoid } = generateRandomDeviceInfo()
+
+    // 更新对应的请求头
+    const deviceHeader = headersList.value.find(h => h.key.toLowerCase() === 'device')
+    const deviceinfoHeader = headersList.value.find(h => h.key.toLowerCase() === 'deviceinfo')
+    const pseudoidHeader = headersList.value.find(h => h.key.toLowerCase() === 'pseudoid')
+
+    if (deviceHeader) {
+      deviceHeader.value = device
+    } else {
+      headersList.value.push({ key: 'device', value: device })
+    }
+
+    if (deviceinfoHeader) {
+      deviceinfoHeader.value = deviceinfo
+    } else {
+      headersList.value.push({ key: 'deviceinfo', value: deviceinfo })
+    }
+
+    if (pseudoidHeader) {
+      pseudoidHeader.value = pseudoid
+    } else {
+      headersList.value.push({ key: 'pseudoid', value: pseudoid })
+    }
+
+    saveAllHeaders() // 保存更新后的请求头
+  } catch (error) {
+    message.error('生成随机设备信息失败')
+    console.error('生成随机设备信息失败:', error)
+  } finally {
+    generatingDeviceInfo.value = false
+  }
+}
+
 //  折叠面板变化
 const onCollapseChange = async (keys) => {
   if (keys.includes('official-sources') && officialApiSources.value.length === 0) {
@@ -762,7 +819,72 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   // 清理资源，如果有的话
+  if (countdownTimer.value) {
+    clearInterval(countdownTimer.value)
+  }
 })
+
+// 显示倒计时通知，准备生成随机设备信息
+const showCountdownForDeviceGeneration = () => {
+  countdownSeconds.value = 3
+  notificationKey.value = `device-countdown-${Date.now()}`
+
+  const updateNotification = () => {
+    notification.info({
+      key: notificationKey.value,
+      message: `${countdownSeconds.value}秒后生成随机设备信息`,
+      duration: 0,
+      placement: 'topRight',
+      btn: h('div', { style: 'display: flex; gap: 8px; margin-top: 8px;' }, [
+        h(Button, {
+          onClick: cancelCountdown
+        }, '取消'),
+        h(Button, {
+          type: 'primary',
+          onClick: executeNow
+        }, '立即执行')
+      ])
+    })
+  }
+
+  updateNotification()
+
+  countdownTimer.value = setInterval(() => {
+    countdownSeconds.value--
+    if (countdownSeconds.value <= 0) {
+      clearInterval(countdownTimer.value)
+      notification.close(notificationKey.value)
+      generateRandomDevice()
+    } else {
+      updateNotification()
+    }
+  }, 1000)
+}
+
+// 取消倒计时
+const cancelCountdown = () => {
+  if (countdownTimer.value) {
+    clearInterval(countdownTimer.value)
+    countdownTimer.value = null
+  }
+  if (notificationKey.value) {
+    notification.close(notificationKey.value)
+  }
+  countdownSeconds.value = 3
+}
+
+// 立即执行生成设备信息
+const executeNow = () => {
+  if (countdownTimer.value) {
+    clearInterval(countdownTimer.value)
+    countdownTimer.value = null
+  }
+  if (notificationKey.value) {
+    notification.close(notificationKey.value)
+  }
+  countdownSeconds.value = 3
+  generateRandomDevice()
+}
 </script>
 
 <style src="../../assets/styles/server-settings.scss" lang="scss" scoped></style>
