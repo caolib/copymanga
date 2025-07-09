@@ -51,7 +51,9 @@
         <div v-if="notice">
           <a-typography-text strong>{{ notice }}</a-typography-text>
         </div>
-        <div v-else-if="!noticeLoading" class="empty-notice">暂无公告</div>
+        <div v-if="noticeLoading">
+          <a-typography-text strong>加载中...</a-typography-text>
+        </div>
       </a-collapse-panel>
       <!-- 轮播图 -->
       <a-collapse-panel key="banners" header="轮播图">
@@ -173,13 +175,17 @@ const activeKeys = ref([])
 
 // 公告数据
 const notice = ref('')
+const noticeLoading = ref(false)
 
 // 公告面板展开时触发
 const handleNoticePanelChange = async (keys) => {
   if (keys.includes('notices') && !notice.value.length) {
+    noticeLoading.value = true
     await getNotice().then(res => {
       console.log('获取公告数据:', JSON.stringify(res))
       notice.value = res.results.code
+    }).finally(() => {
+      noticeLoading.value = false
     })
   }
 }
