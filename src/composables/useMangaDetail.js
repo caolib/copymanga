@@ -6,6 +6,7 @@ import {
   getMangaGroupChapters,
   downloadChapter as downloadChapterAPI,
   getChapterImages,
+  afterChapters,
 } from '../api/manga'
 import { getMangaComments, postMangaComment } from '../api/comment'
 import { downloadManager } from '../utils/manga-downloader'
@@ -169,6 +170,7 @@ export function useMangaDetail() {
 
     await fetchMangaDetail(request_id.value).finally(() => (detailLoading.value = false))
     await fetchMangaChapter(request_id.value)
+    await afterChapters(route.params.pathWord)
   }
 
   // 加载指定分组的章节

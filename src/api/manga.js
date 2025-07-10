@@ -18,6 +18,23 @@ async function getRequestIdForAPI() {
 }
 
 /**
+ * 漫画章节查询完成后操作
+ * @param {string} pathWord 漫画路径标识
+ * @returns {Promise} 漫画信息查询响应
+ */
+function afterChapters(pathWord) {
+    // 直接使用完整URL，发送简单请求
+    const fullUrl = `https://api.copy2000.online/api/v3/comic2/${pathWord}/query?platform=3`;
+
+    request.get(fullUrl).then(response => {
+        console.log('漫画查询响应:', response);
+
+    }).catch(error => {
+        console.error('操作失败:', error);
+    });
+}
+
+/**
  * 查询个人书架
  * @param {Object} params 查询参数
  * @returns {Promise}
@@ -47,8 +64,7 @@ function getMangaChapters(pathWord) {
                 in_mainland: true,
                 request_id: 'bwygrcje81'
             }
-        }
-    )
+        })
 }
 
 
@@ -72,7 +88,7 @@ async function getMangaGroupChapters(pathWord, groupPathWord = 'default', limit 
             in_mainland: true,
             request_id
         }
-    });
+    })
 }
 
 
@@ -360,7 +376,6 @@ function getMangaRanking(type = 1, dateType = 'week', audienceType = '', limit =
  * @returns {Promise} 请求ID响应，包含request_id和广告列表
  */
 function getRequestId(userId) {
-    // 直接使用完整URL，避免baseURL被篡改
     const fullUrl = 'https://marketing.aiacgn.com/api/v2/adopr/query2/'
 
     return request.get(fullUrl, {
@@ -369,10 +384,13 @@ function getRequestId(userId) {
             channels: '2001,2007,2004,2005',
             user_id: userId,
             in_mainland: 'true',
-            platform: '3'
+            platform: '3',
+            host: 'marketing.aiacgn.com',
         }
     })
 }
+
+
 
 export {
     getMyCollectionRaw,
@@ -395,5 +413,6 @@ export {
     getMangaDiscover,
     getMangaFilterTags,
     getMangaRanking,
-    getRequestIdForAPI
+    getRequestIdForAPI,
+    afterChapters
 }

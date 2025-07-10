@@ -6,7 +6,7 @@ import { notification } from 'ant-design-vue'
 // 创建请求实例
 const request = tauriRequest.create({
     timeout: 30000,
-    withCredentials: true
+    withCredentials: false
 })
 
 // 前往登录
@@ -38,6 +38,7 @@ const handleResponse = (response) => {
                 placement: 'bottomRight',
                 duration: 5,
             })
+            router.push('/login')
             return Promise.reject()
         }
     }

@@ -436,7 +436,7 @@
             text-overflow: ellipsis;
             text-align: right;
             flex-shrink: 0;
-            max-width: 100%;
+            max-width: 200px;
 
             @include dark-theme {
                 color: $dark-text-secondary;
