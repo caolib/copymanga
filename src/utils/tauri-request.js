@@ -8,7 +8,7 @@ class TauriHttpClient {
         this.defaults = {
             baseURL: '',
             timeout: 30000,
-            withCredentials: true,
+            withCredentials: false,
             headers: {}
         }
 
@@ -104,6 +104,12 @@ class TauriHttpClient {
             // 添加时间戳
             mergedHeaders.dt = getCurrentDate()
 
+            // 不使用 cookie
+            if (this.defaults.withCredentials === false) {
+                delete mergedHeaders.Cookie
+                mergedHeaders['Cache-Control'] = 'no-cache'
+            }
+
             // 如果不是无token路径，则添加token
             if (!this.noTokenPaths.some(path => url.includes(path))) {
                 const token = getToken()
@@ -184,14 +190,16 @@ class TauriHttpClient {
             }
 
             // console.log(`[Tauri HTTP] ${method} ${finalUrl}`, bodyData)
+            // 调试：输出实际发送的头部
+            console.log(`[Tauri HTTP] ${method} ${finalUrl}`)
+            console.log('请求头:', mergedHeaders)
 
             // 发送请求
             const response = await fetch(finalUrl, {
                 method,
                 headers: mergedHeaders,
                 body: bodyData,
-                timeout,
-                unsafeSend: true
+                timeout
             })
 
             if (!response.ok) {

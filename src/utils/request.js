@@ -38,9 +38,12 @@ const handleResponse = (response) => {
                 placement: 'bottomRight',
                 duration: 5,
             })
-            router.push('/login')
-            return Promise.reject()
+        } else {
+            // 其他210错误，自动跳转到登录页面重新登录
+            message.warning('身份验证失败，请重新登录')
         }
+        router.push('/login')
+        return Promise.reject()
     }
 
     return response
